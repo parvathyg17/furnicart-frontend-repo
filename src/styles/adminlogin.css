@@ -1,0 +1,365 @@
+/* =========================================
+   src/styles/adminlogin.css
+========================================= */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap");
+
+:root {
+  --bg: #f5f3ee;
+  --brown: #4b2d1d;
+  --brown-dark: #2f1b10;
+  --text: #221814;
+  --muted: #766d66;
+  --border: #e5ddd5;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--bg);
+  font-family: "Inter", sans-serif;
+  color: var(--text);
+}
+
+/* =========================================
+   PAGE
+========================================= */
+
+.admin-login-page {
+  width: 100%;
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  background: var(--bg);
+}
+
+/* =========================================
+   LEFT
+========================================= */
+
+.admin-login-left {
+  position: relative;
+  overflow: hidden;
+}
+
+
+
+.admin-login-left > img {
+  width: 100%;
+  height: 100vh;
+  object-fit: cover;
+}
+
+.admin-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      rgba(20, 10, 5, 0.35),
+      rgba(20, 10, 5, 0.55)
+    );
+  z-index: 1;
+}
+
+.admin-left-content {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  padding: 58px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: white;
+}
+
+.admin-left-content h1 {
+  font-family: "Playfair Display", serif;
+  font-size: 58px;
+  line-height: 1;
+  letter-spacing: -2px;
+  margin-bottom: 14px;
+}
+
+.admin-left-content p {
+  font-size: 20px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.admin-quote h3 {
+  font-family: "Playfair Display", serif;
+  font-size: 52px;
+  line-height: 1.1;
+  font-style: italic;
+  margin-bottom: 16px;
+}
+
+.admin-quote span {
+  font-size: 14px;
+  letter-spacing: 2px;
+  font-weight: 600;
+}
+
+/* =========================================
+   RIGHT
+========================================= */
+
+.admin-login-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px;
+}
+
+.admin-login-card {
+  width: 100%;
+  max-width: 540px;
+}
+
+.back-home {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: #5e5550;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  margin-bottom: 48px;
+}
+
+.admin-badge {
+  display: inline-block;
+  padding: 10px 18px;
+  background: #ece3db;
+  border-radius: 999px;
+  color: var(--brown);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 28px;
+}
+
+.admin-login-card h2 {
+  font-family: "Playfair Display", serif;
+  font-size: 84px;
+  line-height: 0.95;
+  letter-spacing: -3px;
+  margin-bottom: 24px;
+}
+
+.admin-desc {
+  color: var(--muted);
+  font-size: 22px;
+  line-height: 1.7;
+  margin-bottom: 46px;
+}
+
+/* =========================================
+   FORM
+========================================= */
+
+.admin-form {
+  width: 100%;
+}
+
+.admin-field {
+  margin-bottom: 28px;
+}
+
+.admin-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.admin-label-row span {
+  font-size: 14px;
+  color: #6d645d;
+  cursor: pointer;
+}
+
+.admin-field label {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #3f3833;
+}
+
+.admin-input-wrapper {
+  height: 72px;
+  background: #f8f5f1;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 0 22px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.admin-input-wrapper svg {
+  color: #847973;
+}
+
+.admin-input-wrapper input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 18px;
+  color: var(--text);
+}
+
+.admin-input-wrapper input::placeholder {
+  color: #a59a93;
+}
+
+.admin-login-btn {
+  width: 100%;
+  height: 74px;
+  border: none;
+  border-radius: 18px;
+  background: var(--brown);
+  color: white;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.admin-login-btn:hover {
+  background: var(--brown-dark);
+}
+
+.admin-footer {
+  margin-top: 60px;
+  padding-top: 30px;
+  border-top: 1px solid #e3dad2;
+  color: #8b827b;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+.admin-error {
+  background: #fff1f1;
+  border: 1px solid #efc7c7;
+  color: #bb2c2c;
+  padding: 16px 18px;
+  border-radius: 16px;
+  margin-bottom: 24px;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 1100px) {
+
+  .admin-login-page {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-login-left {
+    display: none;
+  }
+
+  .admin-login-right {
+    padding: 40px 24px;
+  }
+
+  .admin-login-card h2 {
+    font-size: 58px;
+  }
+
+}
+
+@media (max-width: 768px) {
+
+  .admin-login-card h2 {
+    font-size: 46px;
+  }
+
+  .admin-desc {
+    font-size: 18px;
+  }
+
+  .admin-input-wrapper {
+    height: 64px;
+  }
+
+  .admin-login-btn {
+    height: 66px;
+    font-size: 17px;
+  }
+
+}
+
+/* =========================================
+   BRAND
+========================================= */
+
+.admin-brand {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  text-decoration: none;
+  width: fit-content;
+}
+
+.admin-brand-logo {
+  width: 74px;
+  height: 74px;
+  object-fit: contain;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 10px;
+  backdrop-filter: blur(4px);
+}
+
+.admin-brand h1 {
+  font-family: "Playfair Display", serif;
+  font-size: 58px;
+  line-height: 1;
+  letter-spacing: -2px;
+  margin-bottom: 12px;
+  color: white;
+}
+
+.admin-brand p {
+  font-size: 20px;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+@media (max-width: 768px) {
+
+  .admin-brand {
+    gap: 14px;
+  }
+
+  .admin-brand-logo {
+    width: 58px;
+    height: 58px;
+  }
+
+  .admin-brand h1 {
+    font-size: 40px;
+  }
+
+  .admin-brand p {
+    font-size: 15px;
+  }
+
+}

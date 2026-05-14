@@ -78,7 +78,7 @@ const initialState = {
   admin: null,
   isAuthenticated: false,
 
-  checkingAuth: true,
+  checkingAuth: false,
 
   users: [],
   totalPages: 1,
@@ -102,10 +102,14 @@ const adminSlice = createSlice({
 
     // ================= LOGIN =================
     builder
-      .addCase(adminLogin.fulfilled, (state) => {
-        
-        state.error = null;
-      })
+      .addCase(adminLogin.fulfilled, (state, action) => {
+
+  state.admin = action.payload.user;
+
+  state.isAuthenticated = true;
+
+  state.error = null;
+})
 
 
     

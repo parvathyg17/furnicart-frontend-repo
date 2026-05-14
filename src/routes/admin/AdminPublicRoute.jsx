@@ -1,8 +1,12 @@
+// routes/AdminPublicRoute.jsx
 
+import {
+  useSelector,
+} from "react-redux";
 
-import { useSelector } from "react-redux";
-
-import { Navigate } from "react-router-dom";
+import {
+  Navigate,
+} from "react-router-dom";
 
 export default function AdminPublicRoute({
   children,
@@ -15,15 +19,14 @@ export default function AdminPublicRoute({
     (state) => state.admin
   );
 
-  
-
   if (checkingAuth) {
+
     return <div>Loading...</div>;
+
   }
 
-  
-
   if (isAuthenticated) {
+
     return (
       <Navigate
         to="/admin/dashboard"

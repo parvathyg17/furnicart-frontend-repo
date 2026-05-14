@@ -1,10 +1,14 @@
+// routes/PublicRoute.jsx
 
+import {
+  useSelector,
+} from "react-redux";
 
-import { useSelector } from "react-redux";
+import {
+  Navigate,
+} from "react-router-dom";
 
-import { Navigate } from "react-router-dom";
-
-export default function PrivateRoute({
+export default function PublicRoute({
   children,
 }) {
 
@@ -15,18 +19,17 @@ export default function PrivateRoute({
     (state) => state.auth
   );
 
-
-
   if (checkingAuth) {
+
     return <div>Loading...</div>;
+
   }
 
-  
+  if (isAuthenticated) {
 
-  if (!isAuthenticated) {
     return (
       <Navigate
-        to="/login"
+        to="/profile"
         replace
       />
     );

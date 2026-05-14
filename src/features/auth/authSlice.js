@@ -14,11 +14,7 @@ import {
 } from "./authAPI";
 
 
-// =========================
-// 🔐 AUTH THUNKS
-// =========================
 
-// SIGNUP
 export const signupUser = createAsyncThunk(
   "auth/signupUser",
   async (data, { rejectWithValue }) => {
@@ -34,7 +30,7 @@ export const signupUser = createAsyncThunk(
   }
 );
 
-// VERIFY OTP
+
 export const verifyOTP = createAsyncThunk(
   "auth/verifyOTP",
   async (data, { rejectWithValue }) => {
@@ -50,7 +46,7 @@ export const verifyOTP = createAsyncThunk(
   }
 );
 
-// RESEND OTP
+
 export const resendOTP = createAsyncThunk(
   "auth/resendOTP",
   async (data, { rejectWithValue }) => {
@@ -66,7 +62,7 @@ export const resendOTP = createAsyncThunk(
   }
 );
 
-// LOGIN
+
 export const loginUser = createAsyncThunk(
   "auth/loginUser",
   async (data, { rejectWithValue }) => {
@@ -82,7 +78,6 @@ export const loginUser = createAsyncThunk(
   }
 );
 
-// LOAD USER
 export const loadUser = createAsyncThunk(
   "auth/loadUser",
   async (_, { rejectWithValue }) => {
@@ -94,7 +89,7 @@ export const loadUser = createAsyncThunk(
   }
 );
 
-// FORGOT PASSWORD
+
 export const forgotPassword = createAsyncThunk(
   "auth/forgotPassword",
   async (data, { rejectWithValue }) => {
@@ -110,7 +105,7 @@ export const forgotPassword = createAsyncThunk(
   }
 );
 
-// RESET PASSWORD
+
 export const resetPassword = createAsyncThunk(
   "auth/resetPassword",
   async (data, { rejectWithValue }) => {
@@ -126,7 +121,7 @@ export const resetPassword = createAsyncThunk(
   }
 );
 
-// GOOGLE LOGIN
+
 export const googleLogin = createAsyncThunk(
   "auth/googleLogin",
   async (token, { rejectWithValue }) => {
@@ -158,7 +153,7 @@ export const changePassword = createAsyncThunk(
   }
 );
 
-// LOGOUT
+
 export const logoutUser = createAsyncThunk(
   "auth/logoutUser",
   async (_, { rejectWithValue }) => {
@@ -175,9 +170,7 @@ export const logoutUser = createAsyncThunk(
 );
 
 
-// =========================
-// 🧠 INITIAL STATE
-// =========================
+
 
 const initialState = {
   user: null,
@@ -186,7 +179,7 @@ const initialState = {
   loading: false,
   resendLoading: false,
 
-  checkingAuth: true,
+  checkingAuth: false,
 
   success: null,
   resendSuccess: null,
@@ -195,9 +188,7 @@ const initialState = {
 };
 
 
-// =========================
-// 🧠 SLICE
-// =========================
+
 
 const authSlice = createSlice({
   name: "auth",
@@ -214,9 +205,7 @@ const authSlice = createSlice({
 
   extraReducers: (builder) => {
 
-    // =========================
-    // LOAD USER
-    // =========================
+   
 
     builder
       .addCase(loadUser.pending, (state) => {
@@ -242,9 +231,6 @@ const authSlice = createSlice({
       });
 
 
-    // =========================
-    // SIGNUP
-    // =========================
 
     builder
       .addCase(signupUser.pending, (state) => {
@@ -264,9 +250,7 @@ const authSlice = createSlice({
       });
 
 
-    // =========================
-    // VERIFY OTP
-    // =========================
+  
 
     builder
       .addCase(verifyOTP.pending, (state) => {
@@ -286,9 +270,7 @@ const authSlice = createSlice({
       });
 
 
-    // =========================
-    // RESEND OTP
-    // =========================
+  
 
     builder
       .addCase(resendOTP.pending, (state) => {
@@ -308,9 +290,7 @@ const authSlice = createSlice({
       });
 
 
-    // =========================
-    // LOGIN
-    // =========================
+  
 
     builder
       .addCase(loginUser.pending, (state) => {
@@ -335,9 +315,7 @@ const authSlice = createSlice({
       });
 
 
-    // =========================
-    // GOOGLE LOGIN
-    // =========================
+   
 
     builder
       .addCase(googleLogin.pending, (state) => {
@@ -361,9 +339,7 @@ const authSlice = createSlice({
       });
 
 
-    // =========================
-    // FORGOT PASSWORD
-    // =========================
+  
 
     builder
       .addCase(forgotPassword.pending, (state) => {
@@ -382,9 +358,7 @@ const authSlice = createSlice({
       });
 
 
-    // =========================
-    // RESET PASSWORD
-    // =========================
+    
 
     builder
       .addCase(resetPassword.pending, (state) => {
@@ -403,9 +377,7 @@ const authSlice = createSlice({
       });
 
 
-    // =========================
-    // CHANGE PASSWORD
-    // =========================
+    
 
     builder
       .addCase(changePassword.pending, (state) => {
@@ -424,9 +396,7 @@ const authSlice = createSlice({
       });
 
 
-    // =========================
-    // LOGOUT
-    // =========================
+   
 
     builder
       .addCase(logoutUser.pending, (state) => {

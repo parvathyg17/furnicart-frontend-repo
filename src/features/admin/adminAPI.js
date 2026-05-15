@@ -20,6 +20,17 @@ export const getUsersAPI = async (page = 1, search = "") => {
   return res.data;
 };
 
+// DASHBOARD STATS
+export const getDashboardStatsAPI =
+  async () => {
+
+    const res = await api.get(
+      "admin/dashboard-stats/"
+    );
+
+    return res.data;
+};
+
 // BLOCK / UNBLOCK USER
 export const toggleUserBlockAPI = async (userId) => {
   const res = await api.patch(

@@ -1,3 +1,7 @@
+// ==========================================
+// src/pages/user/EditProfilePage.jsx
+// ==========================================
+
 import "../../styles/account.css";
 
 import {
@@ -27,6 +31,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 
+
 export default function EditProfilePage() {
 
   const dispatch =
@@ -35,12 +40,18 @@ export default function EditProfilePage() {
   const navigate =
     useNavigate();
 
-  const {
-    profile,
-    loading,
-  } = useSelector(
-    (state) => state.profile
-  );
+  const { profile } =
+    useSelector(
+      (state) => state.profile
+    );
+
+
+  // ==========================================
+  // LOCAL STATES
+  // ==========================================
+
+  const [loadingLocal, setLoadingLocal] =
+    useState(false);
 
   const [form, setForm] =
     useState({
@@ -49,13 +60,30 @@ export default function EditProfilePage() {
       profile_image: null,
     });
 
+
+  // ==========================================
+  // FETCH PROFILE
+  // ==========================================
+
   useEffect(() => {
 
-    dispatch(
-      getProfile()
-    );
+    if (!profile) {
 
-  }, [dispatch]);
+      dispatch(
+        getProfile()
+      );
+
+    }
+
+  }, [
+    dispatch,
+    profile,
+  ]);
+
+
+  // ==========================================
+  // SET FORM DATA
+  // ==========================================
 
   useEffect(() => {
 
@@ -64,8 +92,10 @@ export default function EditProfilePage() {
       setForm({
         phone:
           profile.phone || "",
+
         date_of_birth:
           profile.date_of_birth || "",
+
         profile_image: null,
       });
 
@@ -73,16 +103,27 @@ export default function EditProfilePage() {
 
   }, [profile]);
 
+
+  // ==========================================
+  // INPUT CHANGE
+  // ==========================================
+
   const handleChange =
     (e) => {
 
       setForm({
         ...form,
+
         [e.target.name]:
           e.target.value,
       });
 
     };
+
+
+  // ==========================================
+  // FILE CHANGE
+  // ==========================================
 
   const handleFile =
     (e) => {
@@ -92,6 +133,7 @@ export default function EditProfilePage() {
 
       if (file) {
 
+        // IMAGE ONLY
         if (
           !file.type.startsWith(
             "image/"
@@ -105,6 +147,7 @@ export default function EditProfilePage() {
           return;
         }
 
+        // MAX 5MB
         if (
           file.size >
           5 * 1024 * 1024
@@ -116,7 +159,6 @@ export default function EditProfilePage() {
 
           return;
         }
-
       }
 
       setForm({
@@ -126,9 +168,15 @@ export default function EditProfilePage() {
 
     };
 
+
+  // ==========================================
+  // SAVE PROFILE
+  // ==========================================
+
   const saveProfile =
     async () => {
 
+      // PHONE VALIDATION
       if (
         form.phone &&
         !/^[0-9]{10}$/.test(
@@ -143,6 +191,7 @@ export default function EditProfilePage() {
         return;
       }
 
+      // DOB VALIDATION
       if (
         form.date_of_birth
       ) {
@@ -163,70 +212,73 @@ export default function EditProfilePage() {
 
           return;
         }
-
       }
 
-      const fd =
-        new FormData();
+      try {
 
-      fd.append(
-        "phone",
-        form.phone
-      );
+        setLoadingLocal(true);
 
-      fd.append(
-        "date_of_birth",
-        form.date_of_birth
-      );
-
-      if (
-        form.profile_image
-      ) {
+        const fd =
+          new FormData();
 
         fd.append(
-          "profile_image",
-          form.profile_image
+          "phone",
+          form.phone
         );
 
-      }
+        fd.append(
+          "date_of_birth",
+          form.date_of_birth
+        );
 
-      const res =
+        if (
+          form.profile_image
+        ) {
+
+          fd.append(
+            "profile_image",
+            form.profile_image
+          );
+        }
+
         await dispatch(
           updateProfile(fd)
+        ).unwrap();
+
+        toast.success(
+          "Profile updated successfully"
         );
 
-      if (res.error) {
+        navigate("/profile");
 
-        const backendError =
-
-          res.payload?.phone?.[0] ||
-
-          res.payload?.date_of_birth?.[0] ||
-
-          res.payload?.profile_image?.[0] ||
-
-          res.payload?.error ||
-
-          res.payload?.detail ||
-
-          "Failed to update profile";
+      } catch (err) {
 
         toast.error(
-          backendError
+
+          err?.phone?.[0] ||
+
+          err?.date_of_birth?.[0] ||
+
+          err?.profile_image?.[0] ||
+
+          err?.error ||
+
+          err?.detail ||
+
+          "Failed to update profile"
+
         );
 
-        return;
+      } finally {
+
+        setLoadingLocal(false);
+
       }
-
-      toast.success(
-        "Profile updated successfully"
-      );
-
-      navigate("/profile");
-
     };
 
+
   return (
+
     <AccountLayout>
 
       <div
@@ -250,6 +302,7 @@ export default function EditProfilePage() {
 
         <div className="settings-grid">
 
+          {/* PHONE */}
           <div className="settings-field">
 
             <label>
@@ -269,6 +322,7 @@ export default function EditProfilePage() {
 
           </div>
 
+          {/* DOB */}
           <div className="settings-field">
 
             <label>
@@ -289,6 +343,7 @@ export default function EditProfilePage() {
 
           </div>
 
+          {/* IMAGE */}
           <div className="settings-field full-width">
 
             <label>
@@ -307,6 +362,7 @@ export default function EditProfilePage() {
 
         </div>
 
+        {/* BUTTON */}
         <button
           className="primary-btn"
           onClick={
@@ -314,7 +370,7 @@ export default function EditProfilePage() {
           }
         >
 
-          {loading
+          {loadingLocal
             ? "Saving..."
             : "Save Changes"}
 

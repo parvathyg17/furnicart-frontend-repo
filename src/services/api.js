@@ -1,9 +1,17 @@
 import axios from "axios";
 
-import { getCookie } from "../utils/getCookie";
+import { forceLogout }
+from "../utils/logoutUser";
+
+import { getCookie }
+from "../utils/getCookie";
+
 
 const api = axios.create({
-  baseURL: "http://localhost:8000/api/",
+
+  baseURL:
+    "http://localhost:8000/api/",
+
   withCredentials: true,
 });
 
@@ -17,12 +25,15 @@ api.interceptors.request.use(
 
   (config) => {
 
-    const csrfToken = getCookie("csrftoken");
+    const csrfToken = getCookie(
+      "csrftoken"
+    );
 
     if (csrfToken) {
 
-      config.headers["X-CSRFToken"] = csrfToken;
-
+      config.headers[
+        "X-CSRFToken"
+      ] = csrfToken;
     }
 
     return config;
@@ -41,33 +52,112 @@ api.interceptors.response.use(
 
   async (error) => {
 
-    const originalRequest = error.config;
+    const originalRequest =
+      error.config;
 
-    // access token expired
+    const url =
+      originalRequest?.url || "";
+
+    // ==========================
+    // ACCOUNT BLOCKED
+    // ==========================
+
     if (
-      error.response?.status === 401 &&
-      !originalRequest._retry
+
+      error.response?.data?.detail ===
+        "Account blocked" ||
+
+      error.response?.data?.error ===
+        "User is blocked"
+
     ) {
 
-      originalRequest._retry = true;
+      await forceLogout();
+
+      return Promise.reject(error);
+    }
+
+    // ==========================
+    // PUBLIC ROUTES
+    // DO NOT REFRESH
+    // ==========================
+
+    const publicRoutes = [
+
+      "users/login/",
+
+      "users/signup/",
+
+      "users/verify-otp/",
+
+      "users/resend-otp/",
+
+      "users/forgot-password/",
+
+      "users/reset-password/",
+
+      "users/token/refresh/",
+
+      "users/csrf/",
+
+      "users/me/",
+
+      "users/google-login/",
+
+      "users/logout/",
+    ];
+
+    const isPublicRoute =
+      publicRoutes.some(
+        (route) =>
+          url.includes(route)
+      );
+
+    if (isPublicRoute) {
+
+      return Promise.reject(error);
+    }
+
+    // ==========================
+    // ACCESS TOKEN EXPIRED
+    // ==========================
+
+    if (
+
+      error.response?.status ===
+        401 &&
+
+      !originalRequest._retry
+
+    ) {
+
+      originalRequest._retry =
+        true;
 
       try {
 
-        // refresh access token
         await axios.post(
+
           "http://localhost:8000/api/users/token/refresh/",
+
           {},
+
           {
             withCredentials: true,
           }
         );
 
-        // retry original request
+        // retry request
+
         return api(originalRequest);
 
       } catch (refreshError) {
 
-        return Promise.reject(refreshError);
+        await forceLogout();
+
+        return Promise.reject(
+          refreshError
+        );
       }
     }
 
@@ -76,69 +166,3 @@ api.interceptors.response.use(
 );
 
 export default api;
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import axios from "axios";
-
-// const api = axios.create({
-//   baseURL: "http://localhost:8000/api/",
-//   withCredentials: true,
-// });
-
-
-// // ==========================
-// // AUTO REFRESH TOKEN LOGIC
-// // ==========================
-
-// api.interceptors.response.use(
-
-//   (response) => response,
-
-//   async (error) => {
-
-//     const originalRequest = error.config;
-
-//     // access token expired
-//     if (
-//       error.response?.status === 401 &&
-//       !originalRequest._retry
-//     ) {
-
-//       originalRequest._retry = true;
-
-//       try {
-
-       
-//         await axios.post(
-//           "http://localhost:8000/api/users/token/refresh/",
-//           {},
-//           {
-//             withCredentials: true,
-//           }
-//         );
-
-        
-//         return api(originalRequest);
-
-//       } catch (refreshError) {
-
-//         return Promise.reject(refreshError);
-//       }
-//     }
-
-//     return Promise.reject(error);
-//   }
-// );
-
-// export default api;

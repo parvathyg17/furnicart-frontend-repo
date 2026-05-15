@@ -1,3 +1,7 @@
+// ==========================================
+// src/pages/user/EditEmailPage.jsx
+// ==========================================
+
 import "../../styles/account.css";
 
 import {
@@ -28,6 +32,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 
+
 export default function EditEmailPage() {
 
   const dispatch =
@@ -36,12 +41,23 @@ export default function EditEmailPage() {
   const navigate =
     useNavigate();
 
-  const {
-    profile,
-    loading,
-  } = useSelector(
-    (state) => state.profile
-  );
+  const { profile } =
+    useSelector(
+      (state) => state.profile
+    );
+
+
+  // ==========================================
+  // LOCAL STATES
+  // ==========================================
+
+  const [loadingLocal, setLoadingLocal] =
+    useState(false);
+
+  const [
+    verifyLoadingLocal,
+    setVerifyLoadingLocal,
+  ] = useState(false);
 
   const [otpSent, setOtpSent] =
     useState(false);
@@ -55,13 +71,30 @@ export default function EditEmailPage() {
       otp: "",
     });
 
+
+  // ==========================================
+  // FETCH PROFILE
+  // ==========================================
+
   useEffect(() => {
 
-    dispatch(
-      getProfile()
-    );
+    if (!profile) {
 
-  }, [dispatch]);
+      dispatch(
+        getProfile()
+      );
+
+    }
+
+  }, [
+    dispatch,
+    profile,
+  ]);
+
+
+  // ==========================================
+  // TIMER
+  // ==========================================
 
   useEffect(() => {
 
@@ -88,9 +121,15 @@ export default function EditEmailPage() {
 
   }, [timer]);
 
+
+  // ==========================================
+  // SEND OTP
+  // ==========================================
+
   const sendOTP =
     async () => {
 
+      // EMAIL REQUIRED
       if (
         !email.new_email.trim()
       ) {
@@ -102,6 +141,7 @@ export default function EditEmailPage() {
         return;
       }
 
+      // EMAIL VALIDATION
       const emailRegex =
         /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -118,6 +158,7 @@ export default function EditEmailPage() {
         return;
       }
 
+      // SAME EMAIL
       if (
         email.new_email ===
         profile?.email
@@ -130,37 +171,50 @@ export default function EditEmailPage() {
         return;
       }
 
-      const res =
+      try {
+
+        setLoadingLocal(true);
+
         await dispatch(
           sendEmailOTP({
             new_email:
               email.new_email,
           })
+        ).unwrap();
+
+        toast.success(
+          "OTP sent successfully"
         );
 
-      if (res.error) {
+        setOtpSent(true);
+
+        setTimer(60);
+
+      } catch (err) {
 
         toast.error(
-          res.payload?.error ||
+
+          err?.error ||
           "Failed to send OTP"
+
         );
 
-        return;
+      } finally {
+
+        setLoadingLocal(false);
+
       }
-
-      toast.success(
-        "OTP sent successfully"
-      );
-
-      setOtpSent(true);
-
-      setTimer(60);
-
     };
+
+
+  // ==========================================
+  // VERIFY OTP
+  // ==========================================
 
   const verifyOTP =
     async () => {
 
+      // OTP REQUIRED
       if (
         !email.otp.trim()
       ) {
@@ -172,6 +226,7 @@ export default function EditEmailPage() {
         return;
       }
 
+      // OTP LENGTH
       if (
         email.otp.length !== 6
       ) {
@@ -183,34 +238,49 @@ export default function EditEmailPage() {
         return;
       }
 
-      const res =
+      try {
+
+        setVerifyLoadingLocal(
+          true
+        );
+
         await dispatch(
           verifyEmailOTP({
             new_email:
               email.new_email,
-            otp: email.otp,
+
+            otp:
+              email.otp,
           })
+        ).unwrap();
+
+        toast.success(
+          "Email updated successfully"
         );
 
-      if (res.error) {
+        navigate("/profile");
+
+      } catch (err) {
 
         toast.error(
-          res.payload?.error ||
+
+          err?.error ||
           "OTP verification failed"
+
         );
 
-        return;
+      } finally {
+
+        setVerifyLoadingLocal(
+          false
+        );
+
       }
-
-      toast.success(
-        "Email updated successfully"
-      );
-
-      navigate("/profile");
-
     };
 
+
   return (
+
     <AccountLayout>
 
       <div
@@ -232,6 +302,7 @@ export default function EditEmailPage() {
           Change Email
         </div>
 
+        {/* EMAIL */}
         <div className="settings-field">
 
           <label>
@@ -248,6 +319,7 @@ export default function EditEmailPage() {
             onChange={(e) =>
               setEmail({
                 ...email,
+
                 new_email:
                   e.target.value,
               })
@@ -256,18 +328,28 @@ export default function EditEmailPage() {
 
         </div>
 
+        {/* SEND OTP */}
         <button
           className="primary-btn"
           onClick={sendOTP}
-          disabled={timer > 0}
+          disabled={
+            timer > 0 ||
+            loadingLocal
+          }
         >
 
-          {timer > 0
+          {loadingLocal
+            ? "Sending..."
+
+            : timer > 0
+
             ? `Resend OTP ${timer}s`
+
             : "Send OTP"}
 
         </button>
 
+        {/* OTP SECTION */}
         {otpSent && (
 
           <div className="otp-wrapper">
@@ -280,6 +362,7 @@ export default function EditEmailPage() {
               onChange={(e) =>
                 setEmail({
                   ...email,
+
                   otp:
                     e.target.value,
                 })
@@ -291,8 +374,15 @@ export default function EditEmailPage() {
               onClick={
                 verifyOTP
               }
+              disabled={
+                verifyLoadingLocal
+              }
             >
-              Verify OTP
+
+              {verifyLoadingLocal
+                ? "Verifying..."
+                : "Verify OTP"}
+
             </button>
 
           </div>

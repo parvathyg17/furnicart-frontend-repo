@@ -1,31 +1,65 @@
-// App.jsx
+// ==========================================
+// src/App.jsx
+// ==========================================
 
-import { useEffect } from "react";
+import {
+  useEffect,
+} from "react";
+
+import {
+  useDispatch,
+} from "react-redux";
 
 import AppRoutes from "./routes/AppRoute";
 
 import api from "./services/api";
 
+import {
+  loadUser,
+} from "./features/auth/authSlice";
+
+
 function App() {
+
+  const dispatch =
+    useDispatch();
 
   useEffect(() => {
 
-    const initApp = async () => {
+    const initApp =
+      async () => {
 
-      try {
+        try {
 
-        await api.get("users/csrf/");
+          // ==========================================
+          // GET CSRF TOKEN
+          // ==========================================
 
-      } catch (err) {
+          await api.get(
+            "users/csrf/"
+          );
 
-        console.log("CSRF failed");
+          // ==========================================
+          // RESTORE USER SESSION
+          // ==========================================
 
-      }
-    };
+          await dispatch(
+            loadUser()
+          );
+
+        } catch (err) {
+
+          console.log(
+            "App initialization failed"
+          );
+
+        }
+      };
 
     initApp();
 
-  }, []);
+  }, [dispatch]);
+
 
   return <AppRoutes />;
 }

@@ -1,4 +1,11 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+// ==========================================
+// src/features/profile/profileSlice.js
+// ==========================================
+
+import {
+  createSlice,
+  createAsyncThunk,
+} from "@reduxjs/toolkit";
 
 import {
   getProfileAPI,
@@ -8,152 +15,160 @@ import {
 } from "./profileAPI";
 
 
-// ================= GET PROFILE =================
+// ==========================================
+// GET PROFILE
+// ==========================================
+
 export const getProfile = createAsyncThunk(
   "profile/get",
   async (_, { rejectWithValue }) => {
+
     try {
+
       return await getProfileAPI();
+
     } catch (err) {
+
       return rejectWithValue(
-        err.response?.data || { error: "Failed to load profile" }
+        err.response?.data || {
+          error: "Failed to load profile",
+        }
       );
+
     }
   }
 );
 
 
-// ================= UPDATE PROFILE =================
+// ==========================================
+// UPDATE PROFILE
+// ==========================================
+
 export const updateProfile = createAsyncThunk(
   "profile/update",
   async (data, { rejectWithValue }) => {
+
     try {
+
       return await updateProfileAPI(data);
+
     } catch (err) {
+
       return rejectWithValue(
-        err.response?.data || { error: "Profile update failed" }
+        err.response?.data || {
+          error: "Profile update failed",
+        }
       );
+
     }
   }
 );
 
 
-// ================= SEND EMAIL OTP =================
+// ==========================================
+// SEND EMAIL OTP
+// ==========================================
+
 export const sendEmailOTP = createAsyncThunk(
   "profile/emailRequest",
   async (data, { rejectWithValue }) => {
+
     try {
+
       return await emailRequestAPI(data);
+
     } catch (err) {
+
       return rejectWithValue(
-        err.response?.data || { error: "Failed to send OTP" }
+        err.response?.data || {
+          error: "Failed to send OTP",
+        }
       );
+
     }
   }
 );
 
 
-// ================= VERIFY EMAIL OTP =================
+// ==========================================
+// VERIFY EMAIL OTP
+// ==========================================
+
 export const verifyEmailOTP = createAsyncThunk(
   "profile/emailVerify",
   async (data, { rejectWithValue }) => {
+
     try {
+
       return await emailVerifyAPI(data);
+
     } catch (err) {
+
       return rejectWithValue(
-        err.response?.data || { error: "OTP verification failed" }
+        err.response?.data || {
+          error: "OTP verification failed",
+        }
       );
+
     }
   }
 );
 
 
+// ==========================================
+// INITIAL STATE
+// ==========================================
+
+const initialState = {
+  profile: null,
+};
+
+
+// ==========================================
+// SLICE
+// ==========================================
+
 const profileSlice = createSlice({
+
   name: "profile",
 
-  initialState: {
-    profile: null,
-    loading: false,
-    error: null,
-    success: null,
-  },
+  initialState,
 
-  reducers: {
-    clearProfileState: (state) => {
-      state.error = null;
-      state.success = null;
-    },
-  },
+  reducers: {},
 
   extraReducers: (builder) => {
+
     builder
 
-      // ================= GET PROFILE =================
-      .addCase(getProfile.pending, (state) => {
-        state.loading = true;
-      })
+      // ==========================================
+      // GET PROFILE
+      // ==========================================
 
-      .addCase(getProfile.fulfilled, (state, action) => {
-        state.loading = false;
-        state.profile = action.payload;
-      })
+      .addCase(
+        getProfile.fulfilled,
+        (state, action) => {
 
-      .addCase(getProfile.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
+          state.profile =
+            action.payload;
 
-
-      // ================= UPDATE PROFILE =================
-      .addCase(updateProfile.pending, (state) => {
-        state.loading = true;
-      })
-
-      .addCase(updateProfile.fulfilled, (state, action) => {
-        state.loading = false;
-        state.profile = action.payload;
-        state.success = "Profile updated successfully";
-      })
-
-      .addCase(updateProfile.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
+        }
+      )
 
 
-      // ================= SEND OTP =================
-      .addCase(sendEmailOTP.pending, (state) => {
-        state.loading = true;
-      })
+      // ==========================================
+      // UPDATE PROFILE
+      // ==========================================
 
-      .addCase(sendEmailOTP.fulfilled, (state, action) => {
-        state.loading = false;
-        state.success = action.payload.message;
-      })
+      .addCase(
+        updateProfile.fulfilled,
+        (state, action) => {
 
-      .addCase(sendEmailOTP.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
+          state.profile =
+            action.payload;
 
-
-      // ================= VERIFY OTP =================
-      .addCase(verifyEmailOTP.pending, (state) => {
-        state.loading = true;
-      })
-
-      .addCase(verifyEmailOTP.fulfilled, (state, action) => {
-        state.loading = false;
-        state.success = action.payload.message;
-      })
-
-      .addCase(verifyEmailOTP.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      });
+        }
+      );
   },
 });
-
-export const { clearProfileState } = profileSlice.actions;
 
 export default profileSlice.reducer;

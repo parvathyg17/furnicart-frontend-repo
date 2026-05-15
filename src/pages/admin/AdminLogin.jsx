@@ -1,7 +1,11 @@
-
+// ==========================================
+// src/pages/admin/AdminLogin.jsx
+// ==========================================
 
 import "../../styles/adminlogin.css";
+
 import logofc from "../../assets/images/logofc.png";
+
 import img1 from "../../assets/images/img1.png";
 
 import {
@@ -25,25 +29,40 @@ import {
 } from "react-router-dom";
 
 import {
-  
   ArrowRight,
   Mail,
   Lock,
 } from "lucide-react";
 
+
 export default function AdminLogin() {
 
-  const dispatch = useDispatch();
+  const dispatch =
+    useDispatch();
 
-  const navigate = useNavigate();
+  const navigate =
+    useNavigate();
 
   const {
     isAuthenticated,
-    loading,
-    error,
   } = useSelector(
     (state) => state.admin
   );
+
+
+  // ==========================================
+  // LOCAL STATES
+  // ==========================================
+
+  const [
+    loadingLocal,
+    setLoadingLocal,
+  ] = useState(false);
+
+  const [
+    errorLocal,
+    setErrorLocal,
+  ] = useState("");
 
   const [form, setForm] =
     useState({
@@ -51,12 +70,41 @@ export default function AdminLogin() {
       password: "",
     });
 
+
+  // ==========================================
+  // SUBMIT
+  // ==========================================
+
   const handleSubmit =
     async (e) => {
 
       e.preventDefault();
 
+      setErrorLocal("");
+
+      // EMAIL REQUIRED
+      if (!form.email.trim()) {
+
+        setErrorLocal(
+          "Email is required"
+        );
+
+        return;
+      }
+
+      // PASSWORD REQUIRED
+      if (!form.password.trim()) {
+
+        setErrorLocal(
+          "Password is required"
+        );
+
+        return;
+      }
+
       try {
+
+        setLoadingLocal(true);
 
         await dispatch(
           adminLogin(form)
@@ -72,11 +120,27 @@ export default function AdminLogin() {
 
       } catch (err) {
 
-        console.log(err);
+        setErrorLocal(
+
+          err?.error ||
+
+          err?.detail ||
+
+          "Login failed"
+
+        );
+
+      } finally {
+
+        setLoadingLocal(false);
 
       }
-
     };
+
+
+  // ==========================================
+  // REDIRECT
+  // ==========================================
 
   useEffect(() => {
 
@@ -93,45 +157,48 @@ export default function AdminLogin() {
     navigate,
   ]);
 
+
   return (
+
     <div className="admin-login-page">
 
-  
-
+      {/* LEFT */}
       <div className="admin-login-left">
 
         <div className="admin-overlay"></div>
 
-        <img src={img1} alt="furniture" />
-        
+        <img
+          src={img1}
+          alt="furniture"
+        />
 
         <div className="admin-left-content">
 
           <Link
-  to="/"
-  className="admin-brand"
->
+            to="/"
+            className="admin-brand"
+          >
 
-  <img
-    src={logofc}
-    alt="logo"
-    className="admin-brand-logo"
-  />
+            <img
+              src={logofc}
+              alt="logo"
+              className="admin-brand-logo"
+            />
 
-  <div>
+            <div>
 
-    <h1>
-      FURNICART
-    </h1>
+              <h1>
+                FURNICART
+              </h1>
 
-    <p>
-      Excellence in every
-      fiber.
-    </p>
+              <p>
+                Excellence in every
+                fiber.
+              </p>
 
-  </div>
+            </div>
 
-</Link>
+          </Link>
 
           <div className="admin-quote">
 
@@ -150,13 +217,11 @@ export default function AdminLogin() {
 
       </div>
 
- 
 
+      {/* RIGHT */}
       <div className="admin-login-right">
 
         <div className="admin-login-card">
-
-          
 
           <div className="admin-badge">
             ADMIN PORTAL
@@ -176,14 +241,11 @@ export default function AdminLogin() {
 
           </p>
 
-          {error && (
+          {/* ERROR */}
+          {errorLocal && (
 
             <div className="admin-error">
-              {typeof error ===
-              "string"
-                ? error
-                : error?.error ||
-                  "Login failed"}
+              {errorLocal}
             </div>
 
           )}
@@ -196,7 +258,6 @@ export default function AdminLogin() {
           >
 
             {/* EMAIL */}
-
             <div className="admin-field">
 
               <label>
@@ -214,6 +275,7 @@ export default function AdminLogin() {
                   onChange={(e) =>
                     setForm({
                       ...form,
+
                       email:
                         e.target
                           .value,
@@ -225,8 +287,8 @@ export default function AdminLogin() {
 
             </div>
 
-            
 
+            {/* PASSWORD */}
             <div className="admin-field">
 
               <div className="admin-label-row">
@@ -234,7 +296,6 @@ export default function AdminLogin() {
                 <label>
                   SECURE PASSWORD
                 </label>
-
 
               </div>
 
@@ -251,6 +312,7 @@ export default function AdminLogin() {
                   onChange={(e) =>
                     setForm({
                       ...form,
+
                       password:
                         e.target
                           .value,
@@ -262,15 +324,20 @@ export default function AdminLogin() {
 
             </div>
 
-            
 
+            {/* BUTTON */}
             <button
               type="submit"
               className="admin-login-btn"
+              disabled={
+                loadingLocal
+              }
             >
 
-              {loading
+              {loadingLocal
+
                 ? "Signing In..."
+
                 : (
                   <>
                     Sign In to Dashboard

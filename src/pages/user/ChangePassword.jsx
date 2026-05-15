@@ -1,11 +1,18 @@
-
+// ==========================================
+// src/pages/user/ChangePasswordPage.jsx
+// ==========================================
 
 import "../../styles/account.css";
 
-import { useState } from "react";
+import {
+  useState,
+} from "react";
 
-import { useDispatch, useSelector }
-from "react-redux";
+import {
+  useDispatch,
+} from "react-redux";
+
+import toast from "react-hot-toast";
 
 import {
   changePassword,
@@ -14,17 +21,17 @@ import {
 import AccountLayout
 from "../../components/user/AccountLayout";
 
+
 export default function ChangePasswordPage() {
 
   const dispatch = useDispatch();
 
-  const {
-    loading,
-    error,
-    success,
-  } = useSelector(
-    (state) => state.auth
-  );
+  // ==========================================
+  // LOCAL STATES
+  // ==========================================
+
+  const [loadingLocal, setLoadingLocal] =
+    useState(false);
 
   const [form, setForm] = useState({
     old_password: "",
@@ -32,56 +39,109 @@ export default function ChangePasswordPage() {
     confirm_password: "",
   });
 
+
+  // ==========================================
+  // SUBMIT
+  // ==========================================
+
   const handleSubmit = async () => {
 
+    // OLD PASSWORD REQUIRED
+    if (
+      !form.old_password.trim()
+    ) {
+
+      toast.error(
+        "Current password is required"
+      );
+
+      return;
+    }
+
+    // NEW PASSWORD REQUIRED
+    if (
+      !form.new_password.trim()
+    ) {
+
+      toast.error(
+        "New password is required"
+      );
+
+      return;
+    }
+
+    // PASSWORD LENGTH
+    if (
+      form.new_password.length < 6
+    ) {
+
+      toast.error(
+        "Password must be at least 6 characters"
+      );
+
+      return;
+    }
+
+    // PASSWORD MATCH
     if (
       form.new_password !==
       form.confirm_password
     ) {
 
-      return alert(
+      toast.error(
         "Passwords do not match"
       );
 
+      return;
     }
 
-    await dispatch(
-      changePassword({
-        old_password:
-          form.old_password,
+    try {
 
-        new_password:
-          form.new_password,
-      })
-    );
+      setLoadingLocal(true);
 
+      const result = await dispatch(
+        changePassword({
+          old_password:
+            form.old_password,
+
+          new_password:
+            form.new_password,
+        })
+      ).unwrap();
+
+      toast.success(
+        result.message ||
+        "Password updated successfully"
+      );
+
+      // CLEAR FORM
+      setForm({
+        old_password: "",
+        new_password: "",
+        confirm_password: "",
+      });
+
+    } catch (err) {
+
+      toast.error(
+
+        err?.error ||
+        err?.old_password?.[0] ||
+        err?.new_password?.[0] ||
+        "Password change failed"
+
+      );
+
+    } finally {
+
+      setLoadingLocal(false);
+
+    }
   };
 
-  const getErrorMessage = () => {
-
-    if (!error) return null;
-
-    if (typeof error === "string") {
-      return error;
-    }
-
-    if (error.error) {
-      return error.error;
-    }
-
-    const firstKey =
-      Object.keys(error)[0];
-
-    if (
-      Array.isArray(error[firstKey])
-    ) {
-      return error[firstKey][0];
-    }
-
-    return error[firstKey];
-  };
 
   return (
+
     <AccountLayout>
 
       <div className="settings-card">
@@ -96,18 +156,7 @@ export default function ChangePasswordPage() {
           remains secure.
         </div>
 
-        {success && (
-          <div className="success-message">
-            {success}
-          </div>
-        )}
-
-        {error && (
-          <div className="error-message">
-            {getErrorMessage()}
-          </div>
-        )}
-
+        {/* CURRENT PASSWORD */}
         <div className="settings-field">
 
           <label>
@@ -129,6 +178,7 @@ export default function ChangePasswordPage() {
 
         </div>
 
+        {/* NEW PASSWORD */}
         <div className="settings-field">
 
           <label>
@@ -150,6 +200,7 @@ export default function ChangePasswordPage() {
 
         </div>
 
+        {/* CONFIRM PASSWORD */}
         <div className="settings-field">
 
           <label>
@@ -171,13 +222,16 @@ export default function ChangePasswordPage() {
 
         </div>
 
+        {/* BUTTON */}
         <button
           className="primary-btn"
           onClick={handleSubmit}
         >
-          {loading
+
+          {loadingLocal
             ? "Updating..."
             : "Update Password"}
+
         </button>
 
       </div>
@@ -185,4 +239,3 @@ export default function ChangePasswordPage() {
     </AccountLayout>
   );
 }
-

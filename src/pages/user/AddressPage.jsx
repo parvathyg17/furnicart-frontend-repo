@@ -1,9 +1,15 @@
+// ==========================================
+// src/pages/user/AddressPage.jsx
+// ==========================================
+
 import "../../styles/account.css";
 
 import {
   useEffect,
   useState,
 } from "react";
+
+import toast from "react-hot-toast";
 
 import {
   useDispatch,
@@ -20,13 +26,25 @@ import {
 
 import AccountLayout from "../../components/user/AccountLayout";
 
+
 export default function AddressPage() {
 
   const dispatch = useDispatch();
 
-  const { addresses } = useSelector(
-    (state) => state.address
-  );
+  const { addresses } =
+    useSelector(
+      (state) => state.address
+    );
+
+
+  // ==========================================
+  // LOCAL STATES
+  // ==========================================
+
+  const [
+    loadingLocal,
+    setLoadingLocal,
+  ] = useState(false);
 
   const [
     editId,
@@ -38,50 +56,75 @@ export default function AddressPage() {
     setShowForm,
   ] = useState(false);
 
-  const [form, setForm] = useState({
-    name: "",
-    phone: "",
-    address_line: "",
-    city: "",
-    state: "",
-    pincode: "",
-  });
+  const [form, setForm] =
+    useState({
+      name: "",
+      phone: "",
+      address_line: "",
+      city: "",
+      state: "",
+      pincode: "",
+    });
 
-  // VALIDATION ERRORS
   const [errors, setErrors] =
     useState({});
 
+
+  // ==========================================
+  // FETCH ADDRESSES
+  // ==========================================
+
   useEffect(() => {
 
-    dispatch(getAddresses());
+    if (!addresses.length) {
 
-  }, [dispatch]);
+      dispatch(
+        getAddresses()
+      );
 
-  // HANDLE INPUT CHANGE
-  const handleChange = (e) => {
+    }
 
-    const { name, value } =
-      e.target;
+  }, [
+    dispatch,
+    addresses.length,
+  ]);
 
-    setForm({
-      ...form,
-      [name]: value,
-    });
 
-    // CLEAR ERROR WHILE TYPING
-    setErrors({
-      ...errors,
-      [name]: "",
-    });
+  // ==========================================
+  // INPUT CHANGE
+  // ==========================================
 
-  };
+  const handleChange =
+    (e) => {
 
+      const { name, value } =
+        e.target;
+
+      setForm({
+        ...form,
+
+        [name]: value,
+      });
+
+      // CLEAR FIELD ERROR
+      setErrors({
+        ...errors,
+
+        [name]: "",
+      });
+
+    };
+
+
+  // ==========================================
   // VALIDATE FORM
+  // ==========================================
+
   const validateForm = () => {
 
     const newErrors = {};
 
-    // FULL NAME
+    // NAME
     if (!form.name.trim()) {
 
       newErrors.name =
@@ -163,10 +206,13 @@ export default function AddressPage() {
       Object.keys(newErrors)
         .length === 0
     );
-
   };
 
+
+  // ==========================================
   // ADD / UPDATE ADDRESS
+  // ==========================================
+
   const handleSubmit =
     async () => {
 
@@ -177,6 +223,8 @@ export default function AddressPage() {
 
       try {
 
+        setLoadingLocal(true);
+
         if (editId) {
 
           await dispatch(
@@ -184,15 +232,23 @@ export default function AddressPage() {
               id: editId,
               data: form,
             })
-          );
+          ).unwrap();
 
         } else {
 
           await dispatch(
             addAddress(form)
-          );
+          ).unwrap();
 
         }
+
+        toast.success(
+
+          editId
+            ? "Address updated"
+            : "Address added"
+
+        );
 
         resetForm();
 
@@ -200,37 +256,57 @@ export default function AddressPage() {
 
       } catch (err) {
 
-        console.log(err);
+        toast.error(
+
+          err?.error ||
+          "Something went wrong"
+
+        );
+
+      } finally {
+
+        setLoadingLocal(false);
 
       }
+    };
+
+
+  // ==========================================
+  // EDIT ADDRESS
+  // ==========================================
+
+  const handleEdit =
+    (address) => {
+
+      setEditId(address.id);
+
+      setShowForm(true);
+
+      setForm({
+        name: address.name,
+
+        phone: address.phone,
+
+        address_line:
+          address.address_line,
+
+        city: address.city,
+
+        state: address.state,
+
+        pincode:
+          address.pincode,
+      });
+
+      setErrors({});
 
     };
 
-  // EDIT ADDRESS
-  const handleEdit = (
-    address
-  ) => {
 
-    setEditId(address.id);
-
-    setShowForm(true);
-
-    setForm({
-      name: address.name,
-      phone: address.phone,
-      address_line:
-        address.address_line,
-      city: address.city,
-      state: address.state,
-      pincode:
-        address.pincode,
-    });
-
-    setErrors({});
-
-  };
-
+  // ==========================================
   // RESET FORM
+  // ==========================================
+
   const resetForm = () => {
 
     setEditId(null);
@@ -248,20 +324,40 @@ export default function AddressPage() {
 
   };
 
+
+  // ==========================================
   // CANCEL FORM
-  const handleCancel = () => {
+  // ==========================================
 
-    resetForm();
+  const handleCancel =
+    () => {
 
-    setShowForm(false);
+      resetForm();
 
-  };
+      setShowForm(false);
+
+    };
+
+
+  // ==========================================
+  // ADD NEW ADDRESS
+  // ==========================================
+
+  const handleAddNew =
+    () => {
+
+      resetForm();
+
+      setShowForm(true);
+
+    };
+
 
   return (
+
     <AccountLayout>
 
       {/* HEADER */}
-
       <div className="address-top">
 
         <div>
@@ -288,8 +384,8 @@ export default function AddressPage() {
 
       </div>
 
-      {/* FORM */}
 
+      {/* FORM */}
       {showForm && (
 
         <div className="address-form-wrapper">
@@ -297,9 +393,11 @@ export default function AddressPage() {
           <div className="address-form-header">
 
             <h3>
+
               {editId
                 ? "Edit Address"
                 : "Add New Address"}
+
             </h3>
 
             <button
@@ -316,8 +414,8 @@ export default function AddressPage() {
           <div className="address-form">
 
             {/* NAME */}
-
             <div>
+
               <input
                 name="name"
                 placeholder="Full Name"
@@ -339,11 +437,13 @@ export default function AddressPage() {
                 </p>
 
               )}
+
             </div>
 
-            {/* PHONE */}
 
+            {/* PHONE */}
             <div>
+
               <input
                 name="phone"
                 placeholder="Phone Number"
@@ -365,10 +465,11 @@ export default function AddressPage() {
                 </p>
 
               )}
+
             </div>
 
-            {/* ADDRESS */}
 
+            {/* ADDRESS */}
             <div className="full-address">
 
               <textarea
@@ -399,9 +500,10 @@ export default function AddressPage() {
 
             </div>
 
-            {/* CITY */}
 
+            {/* CITY */}
             <div>
+
               <input
                 name="city"
                 placeholder="City"
@@ -423,11 +525,13 @@ export default function AddressPage() {
                 </p>
 
               )}
+
             </div>
 
-            {/* STATE */}
 
+            {/* STATE */}
             <div>
+
               <input
                 name="state"
                 placeholder="State"
@@ -449,11 +553,13 @@ export default function AddressPage() {
                 </p>
 
               )}
+
             </div>
 
-            {/* PINCODE */}
 
+            {/* PINCODE */}
             <div>
+
               <input
                 name="pincode"
                 placeholder="Pincode"
@@ -475,12 +581,13 @@ export default function AddressPage() {
                 </p>
 
               )}
+
             </div>
 
           </div>
 
-          {/* ACTIONS */}
 
+          {/* ACTIONS */}
           <div className="address-form-actions">
 
             <button
@@ -497,10 +604,21 @@ export default function AddressPage() {
               onClick={
                 handleSubmit
               }
+              disabled={
+                loadingLocal
+              }
             >
-              {editId
+
+              {loadingLocal
+
+                ? "Saving..."
+
+                : editId
+
                 ? "Update Address"
+
                 : "Save Address"}
+
             </button>
 
           </div>
@@ -509,8 +627,8 @@ export default function AddressPage() {
 
       )}
 
-      {/* ADDRESS LIST */}
 
+      {/* ADDRESS LIST */}
       <div className="address-grid">
 
         {addresses.map(
@@ -546,8 +664,7 @@ export default function AddressPage() {
               </p>
 
               <p>
-                {address.city},
-                {" "}
+                {address.city},{" "}
                 {address.state}
               </p>
 
@@ -557,6 +674,7 @@ export default function AddressPage() {
 
               <div className="address-actions">
 
+                {/* EDIT */}
                 <button
                   onClick={() =>
                     handleEdit(
@@ -567,29 +685,69 @@ export default function AddressPage() {
                   Edit
                 </button>
 
+
+                {/* DELETE */}
                 <button
                   className="danger-btn"
-                  onClick={() =>
-                    dispatch(
-                      deleteAddress(
-                        address.id
-                      )
-                    )
-                  }
+                  onClick={async () => {
+
+                    try {
+
+                      await dispatch(
+                        deleteAddress(
+                          address.id
+                        )
+                      ).unwrap();
+
+                      toast.success(
+                        "Address removed"
+                      );
+
+                    } catch (err) {
+
+                      toast.error(
+
+                        err?.error ||
+                        "Failed to remove address"
+
+                      );
+
+                    }
+                  }}
                 >
                   Remove
                 </button>
 
+
+                {/* DEFAULT */}
                 {!address.is_default && (
 
                   <button
-                    onClick={() =>
-                      dispatch(
-                        setDefaultAddress(
-                          address.id
-                        )
-                      )
-                    }
+                    onClick={async () => {
+
+                      try {
+
+                        await dispatch(
+                          setDefaultAddress(
+                            address.id
+                          )
+                        ).unwrap();
+
+                        toast.success(
+                          "Default address updated"
+                        );
+
+                      } catch (err) {
+
+                        toast.error(
+
+                          err?.error ||
+                          "Failed to update default address"
+
+                        );
+
+                      }
+                    }}
                   >
                     Set Default
                   </button>
@@ -607,14 +765,4 @@ export default function AddressPage() {
 
     </AccountLayout>
   );
-
-  // ADD NEW ADDRESS
-  function handleAddNew() {
-
-    resetForm();
-
-    setShowForm(true);
-
-  }
-
 }

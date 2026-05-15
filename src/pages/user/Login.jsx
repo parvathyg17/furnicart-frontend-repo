@@ -1,3 +1,7 @@
+// ==========================================
+// src/pages/auth/Login.jsx
+// ==========================================
+
 import {
   useEffect,
   useState,
@@ -13,16 +17,18 @@ import {
   useSelector,
 } from "react-redux";
 
+import toast from "react-hot-toast";
+
 import { GoogleLogin } from "@react-oauth/google";
 
 import {
   loginUser,
   loadUser,
-  clearMessages,
   googleLogin,
 } from "../../features/auth/authSlice";
 
 import AuthLayout from "../../components/auth/AuthLayout";
+
 
 export default function Login() {
 
@@ -30,11 +36,14 @@ export default function Login() {
 
   const navigate = useNavigate();
 
-  const { loading, isAuthenticated } = useSelector(
+  const { isAuthenticated } = useSelector(
     (state) => state.auth
   );
 
   const [showPassword, setShowPassword] =
+    useState(false);
+
+  const [loadingLocal, setLoadingLocal] =
     useState(false);
 
   const [form, setForm] = useState({
@@ -42,16 +51,13 @@ export default function Login() {
     password: "",
   });
 
-  // FIELD ERRORS
   const [fieldErrors, setFieldErrors] =
     useState({});
 
-  // Clear old redux messages on page load
-  useEffect(() => {
 
-    dispatch(clearMessages());
-
-  }, [dispatch]);
+  // ==========================================
+  // LOGIN SUBMIT
+  // ==========================================
 
   const handleSubmit = async (e) => {
 
@@ -79,6 +85,8 @@ export default function Login() {
 
     try {
 
+      setLoadingLocal(true);
+
       await dispatch(
         loginUser(form)
       ).unwrap();
@@ -87,43 +95,54 @@ export default function Login() {
         loadUser()
       ).unwrap();
 
+      toast.success("Login successful");
+
       navigate("/");
 
     } catch (err) {
-
-      console.log(
-        "Login failed:",
-        err
-      );
 
       setFieldErrors({
         password:
           err?.error ||
           "Invalid credentials",
       });
+
+    } finally {
+
+      setLoadingLocal(false);
+
     }
   };
 
+
+  // ==========================================
   // AUTO REDIRECT
+  // ==========================================
+
   useEffect(() => {
 
-    if (
-      isAuthenticated &&
-      !loading
-    ) {
+    if (isAuthenticated) {
+
       navigate("/");
+
     }
 
   }, [
     isAuthenticated,
-    loading,
     navigate,
   ]);
+
+
+  // ==========================================
+  // GOOGLE LOGIN
+  // ==========================================
 
   const handleGoogleSuccess =
     async (credentialResponse) => {
 
       try {
+
+        setLoadingLocal(true);
 
         await dispatch(
           googleLogin(
@@ -135,16 +154,26 @@ export default function Login() {
           loadUser()
         ).unwrap();
 
+        toast.success(
+          "Google login successful"
+        );
+
         navigate("/");
 
       } catch (err) {
 
-        console.log(
-          "Google login failed:",
-          err
+        toast.error(
+          err?.error ||
+          "Google login failed"
         );
+
+      } finally {
+
+        setLoadingLocal(false);
+
       }
     };
+
 
   return (
 
@@ -224,29 +253,18 @@ export default function Login() {
 
         <div className="auth-options">
 
-  <Link
-    to="/forgot-password"
-    onClick={() => {
+          <Link to="/forgot-password">
+            Forgot Password?
+          </Link>
 
-      // Clear old redux messages
-      dispatch(clearMessages());
-
-      // Clear local form errors
-      setFieldErrors({});
-
-    }}
-  >
-    Forgot Password?
-  </Link>
-
-</div>
+        </div>
 
         <button
           className="auth-btn"
           type="submit"
         >
 
-          {loading
+          {loadingLocal
             ? "Loading..."
             : "Login"}
 
@@ -263,9 +281,11 @@ export default function Login() {
               handleGoogleSuccess
             }
             onError={() => {
-              console.log(
+
+              toast.error(
                 "Google Login Failed"
               );
+
             }}
           />
 

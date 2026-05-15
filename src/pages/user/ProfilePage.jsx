@@ -33,8 +33,17 @@ export default function ProfilePage() {
   const IMAGE_URL = "http://127.0.0.1:8000";
 
   useEffect(() => {
+
+  if (!profile) {
+
     dispatch(getProfile());
-  }, [dispatch]);
+
+  }
+
+}, [
+  dispatch,
+  profile,
+]);
 
   if (!profile) {
     return (

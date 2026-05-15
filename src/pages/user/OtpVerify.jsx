@@ -1,3 +1,7 @@
+// ==========================================
+// src/pages/auth/OtpVerify.jsx
+// ==========================================
+
 import toast from "react-hot-toast";
 
 import {
@@ -7,13 +11,11 @@ import {
 
 import {
   useDispatch,
-  useSelector,
 } from "react-redux";
 
 import {
   verifyOTP,
   resendOTP,
-  clearMessages,
 } from "../../features/auth/authSlice";
 
 import {
@@ -23,16 +25,14 @@ import {
 
 import AuthLayout from "../../components/auth/AuthLayout";
 
+
 export default function OtpVerify() {
 
-  const dispatch =
-    useDispatch();
+  const dispatch = useDispatch();
 
-  const navigate =
-    useNavigate();
+  const navigate = useNavigate();
 
-  const location =
-    useLocation();
+  const location = useLocation();
 
   const email =
     location.state?.email;
@@ -40,15 +40,10 @@ export default function OtpVerify() {
   const purpose =
     location.state?.purpose;
 
-  const {
-    loading,
-    resendLoading,
-    error,
-    success,
-    resendSuccess,
-  } = useSelector(
-    (state) => state.auth
-  );
+
+  // ==========================================
+  // LOCAL STATES
+  // ==========================================
 
   const [otp, setOtp] =
     useState("");
@@ -56,9 +51,18 @@ export default function OtpVerify() {
   const [timer, setTimer] =
     useState(60);
 
-  // =========================
+  const [loadingLocal, setLoadingLocal] =
+    useState(false);
+
+  const [
+    resendLoadingLocal,
+    setResendLoadingLocal,
+  ] = useState(false);
+
+
+  // ==========================================
   // INVALID ACCESS
-  // =========================
+  // ==========================================
 
   useEffect(() => {
 
@@ -70,6 +74,7 @@ export default function OtpVerify() {
       navigate(
         "/forgot-password"
       );
+
     }
 
   }, [
@@ -78,9 +83,10 @@ export default function OtpVerify() {
     navigate,
   ]);
 
-  // =========================
+
+  // ==========================================
   // TIMER
-  // =========================
+  // ==========================================
 
   useEffect(() => {
 
@@ -99,6 +105,7 @@ export default function OtpVerify() {
           }
 
           return prev - 1;
+
         });
 
       }, 1000);
@@ -110,115 +117,19 @@ export default function OtpVerify() {
 
   }, []);
 
-  // =========================
-  // VERIFY SUCCESS
-  // =========================
 
-  useEffect(() => {
-
-  if (
-    success === "OTP verified successfully" ||
-    success === "Email verified successfully"
-  ) {
-
-    toast.success(success);
-
-    // SIGNUP FLOW
-    if (purpose === "signup") {
-
-      navigate("/login");
-
-    }
-
-    // FORGOT PASSWORD FLOW
-    else {
-
-      navigate(
-        "/reset-password",
-        {
-          state: {
-            email,
-            otp,
-          },
-        }
-      );
-
-    }
-
-    dispatch(clearMessages());
-  }
-
-}, [
-  success,
-  navigate,
-  dispatch,
-  email,
-  otp,
-  purpose,
-]);
-
-  // =========================
-  // RESEND SUCCESS
-  // =========================
-
-  useEffect(() => {
-
-    if (
-      resendSuccess
-    ) {
-
-      toast.success(
-        resendSuccess
-      );
-
-      setTimer(60);
-
-      dispatch(
-        clearMessages()
-      );
-    }
-
-  }, [
-    resendSuccess,
-    dispatch,
-  ]);
-
-  // =========================
-  // ERROR
-  // =========================
-
-  useEffect(() => {
-
-    if (error) {
-
-      toast.error(
-        error.error ||
-        "Something went wrong"
-      );
-
-      dispatch(
-        clearMessages()
-      );
-    }
-
-  }, [
-    error,
-    dispatch,
-  ]);
-
-  // =========================
+  // ==========================================
   // VERIFY OTP
-  // =========================
+  // ==========================================
 
-  const handleVerify = (
+  const handleVerify = async (
     e
   ) => {
 
     e.preventDefault();
 
-    if (
-      !otp.trim()
-    ) {
+    // OTP REQUIRED
+    if (!otp.trim()) {
 
       toast.error(
         "Please enter OTP"
@@ -227,9 +138,8 @@ export default function OtpVerify() {
       return;
     }
 
-    if (
-      otp.length !== 6
-    ) {
+    // OTP LENGTH
+    if (otp.length !== 6) {
 
       toast.error(
         "OTP must be 6 digits"
@@ -238,35 +148,119 @@ export default function OtpVerify() {
       return;
     }
 
-    dispatch(
-      verifyOTP({
-        email,
-        otp,
-        purpose,
-      })
-    );
-  };
+    try {
 
-  // =========================
-  // RESEND OTP
-  // =========================
+      setLoadingLocal(true);
 
-  const handleResend =
-    () => {
-
-      if (
-        resendLoading
-      ) return;
-
-      dispatch(
-        resendOTP({
+      const result = await dispatch(
+        verifyOTP({
           email,
+          otp,
           purpose,
         })
+      ).unwrap();
+
+      toast.success(
+        result.message
       );
+
+      // ==========================================
+      // SIGNUP FLOW
+      // ==========================================
+
+      if (
+        purpose === "signup"
+      ) {
+
+        navigate("/login");
+
+      }
+
+      // ==========================================
+      // FORGOT PASSWORD FLOW
+      // ==========================================
+
+      else {
+
+        navigate(
+          "/reset-password",
+          {
+            state: {
+              email,
+              otp,
+            },
+          }
+        );
+      }
+
+    } catch (err) {
+
+      toast.error(
+
+        err?.error ||
+        err?.otp?.[0] ||
+        "OTP verification failed"
+
+      );
+
+    } finally {
+
+      setLoadingLocal(false);
+
+    }
+  };
+
+
+  // ==========================================
+  // RESEND OTP
+  // ==========================================
+
+  const handleResend =
+    async () => {
+
+      try {
+
+        setResendLoadingLocal(
+          true
+        );
+
+        const result =
+          await dispatch(
+            resendOTP({
+              email,
+              purpose,
+            })
+          ).unwrap();
+
+        toast.success(
+          result.message ||
+          "OTP resent successfully"
+        );
+
+        // RESET TIMER
+        setTimer(60);
+
+      } catch (err) {
+
+        toast.error(
+
+          err?.error ||
+          "Failed to resend OTP"
+
+        );
+
+      } finally {
+
+        setResendLoadingLocal(
+          false
+        );
+
+      }
     };
 
+
   return (
+
     <AuthLayout>
 
       <form
@@ -286,6 +280,7 @@ export default function OtpVerify() {
           email.
         </p>
 
+        {/* OTP INPUT */}
         <div className="auth-group">
 
           <label>
@@ -309,25 +304,29 @@ export default function OtpVerify() {
 
         </div>
 
+        {/* VERIFY BUTTON */}
         <button
           className="auth-btn"
           type="submit"
           disabled={
-            loading
+            loadingLocal
           }
         >
 
-          {loading
+          {loadingLocal
             ? "Verifying..."
             : "Verify OTP"}
 
         </button>
 
+        {/* TIMER */}
         {timer > 0 ? (
 
           <p className="timer-text">
+
             Resend OTP
             in {timer}s
+
           </p>
 
         ) : (
@@ -339,11 +338,11 @@ export default function OtpVerify() {
               handleResend
             }
             disabled={
-              resendLoading
+              resendLoadingLocal
             }
           >
 
-            {resendLoading
+            {resendLoadingLocal
               ? "Sending..."
               : "Resend OTP"}
 

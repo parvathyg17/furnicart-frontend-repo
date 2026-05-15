@@ -1,16 +1,17 @@
+// ==========================================
+// src/pages/auth/ResetPassword.jsx
+// ==========================================
+
 import {
   useState,
-  useEffect,
 } from "react";
 
 import {
   useDispatch,
-  useSelector,
 } from "react-redux";
 
 import {
   resetPassword,
-  clearMessages,
 } from "../../features/auth/authSlice";
 
 import {
@@ -22,16 +23,14 @@ import toast from "react-hot-toast";
 
 import AuthLayout from "../../components/auth/AuthLayout";
 
+
 export default function ResetPassword() {
 
-  const dispatch =
-    useDispatch();
+  const dispatch = useDispatch();
 
-  const navigate =
-    useNavigate();
+  const navigate = useNavigate();
 
-  const location =
-    useLocation();
+  const location = useLocation();
 
   const email =
     location.state?.email;
@@ -39,13 +38,13 @@ export default function ResetPassword() {
   const otp =
     location.state?.otp;
 
-  const {
-    loading,
-    error,
-    success,
-  } = useSelector(
-    (state) => state.auth
-  );
+
+  // ==========================================
+  // LOCAL STATES
+  // ==========================================
+
+  const [loadingLocal, setLoadingLocal] =
+    useState(false);
 
   const [
     showPassword,
@@ -60,60 +59,21 @@ export default function ResetPassword() {
   const [form, setForm] =
     useState({
       new_password: "",
-      confirm_password:
-        "",
+      confirm_password: "",
     });
 
-  // SUCCESS
 
-  useEffect(() => {
-
-    if (
-      success ===
-      "Password reset successful"
-    ) {
-
-      toast.success(
-        "Password reset successful"
-      );
-
-      navigate("/login");
-
-      dispatch(
-        clearMessages()
-      );
-
-    }
-
-  }, [success]);
-
-  // ERROR
-
-  useEffect(() => {
-
-    if (error) {
-
-      toast.error(
-        error.error ||
-          "Something went wrong"
-      );
-
-      dispatch(
-        clearMessages()
-      );
-
-    }
-
-  }, [error]);
-
+  // ==========================================
   // SUBMIT
+  // ==========================================
 
-  const handleSubmit = (
+  const handleSubmit = async (
     e
   ) => {
 
     e.preventDefault();
 
+    // PASSWORD REQUIRED
     if (
       !form.new_password.trim()
     ) {
@@ -125,9 +85,9 @@ export default function ResetPassword() {
       return;
     }
 
+    // PASSWORD LENGTH
     if (
-      form.new_password
-        .length < 6
+      form.new_password.length < 6
     ) {
 
       toast.error(
@@ -137,6 +97,7 @@ export default function ResetPassword() {
       return;
     }
 
+    // PASSWORD MATCH
     if (
       form.new_password !==
       form.confirm_password
@@ -149,18 +110,46 @@ export default function ResetPassword() {
       return;
     }
 
-    dispatch(
-      resetPassword({
-        email,
-        otp,
-        new_password:
-          form.new_password,
-      })
-    );
+    try {
 
+      setLoadingLocal(true);
+
+      const result = await dispatch(
+        resetPassword({
+          email,
+          otp,
+          new_password:
+            form.new_password,
+        })
+      ).unwrap();
+
+      toast.success(
+        result.message ||
+        "Password reset successful"
+      );
+
+      navigate("/login");
+
+    } catch (err) {
+
+      toast.error(
+
+        err?.error ||
+        err?.new_password?.[0] ||
+        "Something went wrong"
+
+      );
+
+    } finally {
+
+      setLoadingLocal(false);
+
+    }
   };
 
+
   return (
+
     <AuthLayout>
 
       <form
@@ -179,6 +168,7 @@ export default function ResetPassword() {
           new password.
         </p>
 
+        {/* NEW PASSWORD */}
         <div className="auth-group">
 
           <label>
@@ -201,8 +191,7 @@ export default function ResetPassword() {
                 setForm({
                   ...form,
                   new_password:
-                    e.target
-                      .value,
+                    e.target.value,
                 })
               }
             />
@@ -226,6 +215,7 @@ export default function ResetPassword() {
 
         </div>
 
+        {/* CONFIRM PASSWORD */}
         <div className="auth-group">
 
           <label>
@@ -248,8 +238,7 @@ export default function ResetPassword() {
                 setForm({
                   ...form,
                   confirm_password:
-                    e.target
-                      .value,
+                    e.target.value,
                 })
               }
             />
@@ -273,15 +262,16 @@ export default function ResetPassword() {
 
         </div>
 
+        {/* SUBMIT BUTTON */}
         <button
           className="auth-btn"
           type="submit"
           disabled={
-            loading
+            loadingLocal
           }
         >
 
-          {loading
+          {loadingLocal
             ? "Resetting..."
             : "Reset Password"}
 

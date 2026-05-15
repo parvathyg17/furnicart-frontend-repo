@@ -1,45 +1,44 @@
-// routes/PrivateRoute.jsx
-
-import { useEffect } from "react";
+// ==========================================
+// src/routes/PrivateRoute.jsx
+// ==========================================
 
 import {
-  useDispatch,
   useSelector,
 } from "react-redux";
 
-import { Navigate } from "react-router-dom";
+import {
+  Navigate,
+} from "react-router-dom";
 
-import { loadUser } from "../../features/auth/authSlice";
 
 export default function PrivateRoute({
   children,
 }) {
 
-  const dispatch = useDispatch();
-
   const {
-    user,
     isAuthenticated,
     checkingAuth,
   } = useSelector(
     (state) => state.auth
   );
 
-  useEffect(() => {
-
-    if (!user && !isAuthenticated) {
-
-      dispatch(loadUser());
-
-    }
-
-  }, [dispatch, user, isAuthenticated]);
+  // ==========================================
+  // WAIT FOR AUTH CHECK
+  // ==========================================
 
   if (checkingAuth) {
 
-    return <div>Loading...</div>;
+    return (
+      <div>
+        Loading...
+      </div>
+    );
 
   }
+
+  // ==========================================
+  // NOT LOGGED IN
+  // ==========================================
 
   if (!isAuthenticated) {
 
@@ -49,7 +48,12 @@ export default function PrivateRoute({
         replace
       />
     );
+
   }
+
+  // ==========================================
+  // ALLOWED
+  // ==========================================
 
   return children;
 }

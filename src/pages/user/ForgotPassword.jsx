@@ -1,9 +1,11 @@
+// ==========================================
+// src/pages/auth/ForgotPassword.jsx
+// ==========================================
+
 import toast from "react-hot-toast";
 
 import {
-  useEffect,
   useState,
-  useRef,
 } from "react";
 
 import {
@@ -13,15 +15,14 @@ import {
 
 import {
   useDispatch,
-  useSelector,
 } from "react-redux";
 
 import {
   forgotPassword,
-  clearMessages,
 } from "../../features/auth/authSlice";
 
 import AuthLayout from "../../components/auth/AuthLayout";
+
 
 export default function ForgotPassword() {
 
@@ -29,51 +30,52 @@ export default function ForgotPassword() {
 
   const navigate = useNavigate();
 
-  const { loading, error, success } = useSelector(
-    (state) => state.auth
-  );
+  // ==========================================
+  // LOCAL STATES
+  // ==========================================
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail] =
+    useState("");
 
-  // Prevent duplicate toasts
-  const successShown = useRef(false);
-  const errorShown = useRef(false);
+  const [loadingLocal, setLoadingLocal] =
+    useState(false);
 
-  // // Clear old redux messages when page opens
-  // useEffect(() => {
+  const [error, setError] =
+    useState("");
 
-  //   dispatch(clearMessages());
 
-  // }, [dispatch]);
+  // ==========================================
+  // SUBMIT
+  // ==========================================
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
 
     e.preventDefault();
 
-    // Reset refs before new request
-    successShown.current = false;
-    errorShown.current = false;
+    setError("");
 
-    dispatch(
-      forgotPassword({ email })
-    );
-  };
+    // EMAIL VALIDATION
+    if (!email.trim()) {
 
-  // SUCCESS
-  useEffect(() => {
-
-    if (
-      success &&
-      !successShown.current
-    ) {
-
-      successShown.current = true;
-
-      toast.success(
-        "OTP sent successfully"
+      setError(
+        "Email is required"
       );
 
-      dispatch(clearMessages());
+      return;
+    }
+
+    try {
+
+      setLoadingLocal(true);
+
+      const result = await dispatch(
+        forgotPassword({ email })
+      ).unwrap();
+
+      toast.success(
+        result.message ||
+        "OTP sent successfully"
+      );
 
       navigate("/verify-otp", {
         state: {
@@ -81,37 +83,24 @@ export default function ForgotPassword() {
           purpose: "forgot_password",
         },
       });
-    }
 
-  }, [
-    success,
-    email,
-    navigate,
-    dispatch,
-  ]);
+    } catch (err) {
 
-  // ERROR
-  useEffect(() => {
+      setError(
 
-    if (
-      error &&
-      !errorShown.current
-    ) {
-
-      errorShown.current = true;
-
-      toast.error(
-        error.error ||
+        err?.error ||
+        err?.email?.[0] ||
         "Something went wrong"
+
       );
 
-      dispatch(clearMessages());
-    }
+    } finally {
 
-  }, [
-    error,
-    dispatch,
-  ]);
+      setLoadingLocal(false);
+
+    }
+  };
+
 
   return (
 
@@ -131,6 +120,7 @@ export default function ForgotPassword() {
           to reset your password.
         </p>
 
+        {/* EMAIL */}
         <div className="auth-group">
 
           <label>Email Address</label>
@@ -140,23 +130,34 @@ export default function ForgotPassword() {
             placeholder="Enter email"
             value={email}
             onChange={(e) =>
-              setEmail(e.target.value)
+              setEmail(
+                e.target.value
+              )
             }
           />
 
         </div>
 
+        {/* ERROR */}
+        {error && (
+          <p className="error-text">
+            {error}
+          </p>
+        )}
+
+        {/* SUBMIT */}
         <button
           className="auth-btn"
           type="submit"
         >
 
-          {loading
+          {loadingLocal
             ? "Loading..."
             : "Send OTP"}
 
         </button>
 
+        {/* LOGIN LINK */}
         <div className="auth-bottom-text">
 
           <Link to="/login">

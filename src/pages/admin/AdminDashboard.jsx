@@ -1,5 +1,3 @@
-
-
 import "../../styles/adminpanel.css";
 
 import {
@@ -10,51 +8,93 @@ import {
 
 import {
   useEffect,
+  useState,
 } from "react";
 
-import {
-  useDispatch,
-  useSelector,
-} from "react-redux";
+import toast from "react-hot-toast";
 
 import {
-  getUsers,
-} from "../../features/admin/adminSlice";
+  getDashboardStatsAPI,
+} from "../../features/admin/adminAPI";
+
 
 export default function AdminDashboard() {
 
-  const dispatch = useDispatch();
+  // ==========================================
+  // LOCAL STATE
+  // ==========================================
 
-  const { users } =
-    useSelector(
-      (state) => state.admin
-    );
+  const [
+    loadingLocal,
+    setLoadingLocal,
+  ] = useState(false);
+
+  const [stats, setStats] =
+    useState({
+
+      total_users: 0,
+
+      active_users: 0,
+
+      blocked_users: 0,
+    });
+
+
+  // ==========================================
+  // FETCH DASHBOARD STATS
+  // ==========================================
 
   useEffect(() => {
 
-    dispatch(
-      getUsers({
-        page: 1,
-        search: "",
-      })
+    const fetchStats =
+      async () => {
+
+        try {
+
+          setLoadingLocal(true);
+
+          const data =
+            await getDashboardStatsAPI();
+
+          setStats(data);
+
+        } catch (err) {
+
+          toast.error(
+            "Failed to load dashboard"
+          );
+
+        } finally {
+
+          setLoadingLocal(false);
+
+        }
+      };
+
+    fetchStats();
+
+  }, []);
+
+
+  // ==========================================
+  // LOADING
+  // ==========================================
+
+  if (loadingLocal) {
+
+    return (
+      <div className="loading-cell">
+        Loading dashboard...
+      </div>
     );
+  }
 
-  }, [dispatch]);
-
-  const totalUsers =
-    users?.length || 0;
-
-  const activeUsers =
-    users?.filter(
-      (u) => u.is_active
-    ).length || 0;
-
-  const blockedUsers =
-    totalUsers - activeUsers;
 
   return (
+
     <div>
 
+      {/* HEADER */}
       <div className="dashboard-header">
 
         <div>
@@ -71,14 +111,17 @@ export default function AdminDashboard() {
 
       </div>
 
-     
 
+      {/* CARDS */}
       <div className="dashboard-cards">
 
+        {/* TOTAL USERS */}
         <div className="dashboard-card">
 
           <div className="dashboard-icon">
+
             <Users size={28} />
+
           </div>
 
           <div>
@@ -88,17 +131,21 @@ export default function AdminDashboard() {
             </h4>
 
             <h2>
-              {totalUsers}
+              {stats.total_users}
             </h2>
 
           </div>
 
         </div>
 
+
+        {/* ACTIVE USERS */}
         <div className="dashboard-card">
 
           <div className="dashboard-icon green">
+
             <UserCheck size={28} />
+
           </div>
 
           <div>
@@ -108,17 +155,21 @@ export default function AdminDashboard() {
             </h4>
 
             <h2>
-              {activeUsers}
+              {stats.active_users}
             </h2>
 
           </div>
 
         </div>
 
+
+        {/* BLOCKED USERS */}
         <div className="dashboard-card">
 
           <div className="dashboard-icon red">
+
             <UserX size={28} />
+
           </div>
 
           <div>
@@ -128,7 +179,7 @@ export default function AdminDashboard() {
             </h4>
 
             <h2>
-              {blockedUsers}
+              {stats.blocked_users}
             </h2>
 
           </div>

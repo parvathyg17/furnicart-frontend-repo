@@ -14,17 +14,18 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// ==========================
+// ==========================================
 // REQUEST INTERCEPTOR
-// ADD CSRF TOKEN
-// ==========================
+// ==========================================
 
 api.interceptors.request.use(
 
   (config) => {
 
     const csrfToken =
-      getCookie("csrftoken");
+      getCookie(
+        "csrftoken"
+      );
 
     if (csrfToken) {
 
@@ -37,9 +38,9 @@ api.interceptors.request.use(
   }
 );
 
-// ==========================
+// ==========================================
 // RESPONSE INTERCEPTOR
-// ==========================
+// ==========================================
 
 api.interceptors.response.use(
 
@@ -53,9 +54,9 @@ api.interceptors.response.use(
     const url =
       originalRequest?.url || "";
 
-    // ==========================
+    // ==========================================
     // ACCOUNT BLOCKED
-    // ==========================
+    // ==========================================
 
     if (
 
@@ -72,10 +73,10 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // ==========================
+    // ==========================================
     // PUBLIC ROUTES
     // DO NOT REFRESH
-    // ==========================
+    // ==========================================
 
     const publicRoutes = [
 
@@ -113,10 +114,10 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // ==========================
+    // ==========================================
     // ADMIN ROUTES
     // DO NOT USE USER REFRESH
-    // ==========================
+    // ==========================================
 
     if (
       url.startsWith("admin/")
@@ -125,9 +126,9 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // ==========================
+    // ==========================================
     // ACCESS TOKEN EXPIRED
-    // ==========================
+    // ==========================================
 
     if (
 

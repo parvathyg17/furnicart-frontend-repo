@@ -71,6 +71,7 @@ export const googleLoginAPI = async (token) => {
 
 
 export const changePasswordAPI = async (data) => {
+  console.log("CHANGE PASSWORD API CALLED");
 
   const response = await api.post(
     "users/change-password/",

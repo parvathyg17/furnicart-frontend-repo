@@ -1,7 +1,3 @@
-// ==========================================
-// src/pages/admin/AdminUsers.jsx
-// ==========================================
-
 import "../../styles/adminpanel.css";
 
 import {
@@ -26,7 +22,6 @@ import {
   toggleUserBlock,
 } from "../../features/admin/adminSlice";
 
-
 export default function AdminUsers() {
 
   const dispatch =
@@ -38,7 +33,6 @@ export default function AdminUsers() {
   } = useSelector(
     (state) => state.admin
   );
-
 
   // ==========================================
   // LOCAL STATES
@@ -67,7 +61,6 @@ export default function AdminUsers() {
     actionLoading,
     setActionLoading,
   ] = useState(false);
-
 
   // ==========================================
   // LOAD USERS
@@ -110,45 +103,19 @@ export default function AdminUsers() {
   }, [
     dispatch,
     page,
+    search,
   ]);
-
 
   // ==========================================
   // SEARCH
   // ==========================================
 
   const handleSearch =
-    async () => {
+    () => {
 
-      try {
+      setPage(1);
 
-        setLoadingLocal(true);
-
-        setPage(1);
-
-        await dispatch(
-          getUsers({
-            page: 1,
-            search,
-          })
-        ).unwrap();
-
-      } catch (err) {
-
-        toast.error(
-
-          err?.error ||
-          "Search failed"
-
-        );
-
-      } finally {
-
-        setLoadingLocal(false);
-
-      }
     };
-
 
   // ==========================================
   // MODAL
@@ -171,7 +138,6 @@ export default function AdminUsers() {
       setSelectedUser(null);
 
     };
-
 
   // ==========================================
   // BLOCK / UNBLOCK
@@ -224,7 +190,6 @@ export default function AdminUsers() {
       }
     };
 
-
   // ==========================================
   // STATUS LABEL
   // ==========================================
@@ -246,7 +211,6 @@ export default function AdminUsers() {
 
       return "Unknown";
     };
-
 
   return (
 
@@ -294,7 +258,6 @@ export default function AdminUsers() {
 
       </div>
 
-
       {/* TABLE */}
       <div className="table-wrapper">
 
@@ -329,6 +292,19 @@ export default function AdminUsers() {
                   className="loading-cell"
                 >
                   Loading...
+                </td>
+
+              </tr>
+
+            ) : users?.length === 0 ? (
+
+              <tr>
+
+                <td
+                  colSpan="5"
+                  className="loading-cell"
+                >
+                  No users found
                 </td>
 
               </tr>
@@ -403,7 +379,6 @@ export default function AdminUsers() {
 
       </div>
 
-
       {/* PAGINATION */}
       <div className="pagination">
 
@@ -434,7 +409,6 @@ export default function AdminUsers() {
         </button>
 
       </div>
-
 
       {/* MODAL */}
       {showModal && (

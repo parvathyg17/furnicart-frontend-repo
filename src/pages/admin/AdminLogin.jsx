@@ -1,7 +1,3 @@
-// ==========================================
-// src/pages/admin/AdminLogin.jsx
-// ==========================================
-
 import "../../styles/adminlogin.css";
 
 import logofc from "../../assets/images/logofc.png";
@@ -34,7 +30,6 @@ import {
   Lock,
 } from "lucide-react";
 
-
 export default function AdminLogin() {
 
   const dispatch =
@@ -48,7 +43,6 @@ export default function AdminLogin() {
   } = useSelector(
     (state) => state.admin
   );
-
 
   // ==========================================
   // LOCAL STATES
@@ -69,7 +63,6 @@ export default function AdminLogin() {
       email: "",
       password: "",
     });
-
 
   // ==========================================
   // SUBMIT
@@ -114,10 +107,6 @@ export default function AdminLogin() {
           adminMe()
         ).unwrap();
 
-        navigate(
-          "/admin/dashboard"
-        );
-
       } catch (err) {
 
         setErrorLocal(
@@ -137,7 +126,6 @@ export default function AdminLogin() {
       }
     };
 
-
   // ==========================================
   // REDIRECT
   // ==========================================
@@ -156,7 +144,6 @@ export default function AdminLogin() {
     isAuthenticated,
     navigate,
   ]);
-
 
   return (
 
@@ -216,7 +203,6 @@ export default function AdminLogin() {
         </div>
 
       </div>
-
 
       {/* RIGHT */}
       <div className="admin-login-right">
@@ -287,7 +273,6 @@ export default function AdminLogin() {
 
             </div>
 
-
             {/* PASSWORD */}
             <div className="admin-field">
 
@@ -323,7 +308,6 @@ export default function AdminLogin() {
               </div>
 
             </div>
-
 
             {/* BUTTON */}
             <button

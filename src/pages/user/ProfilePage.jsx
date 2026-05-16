@@ -30,7 +30,7 @@ export default function ProfilePage() {
     (state) => state.profile
   );
 
-  const IMAGE_URL = "http://127.0.0.1:8000";
+  const IMAGE_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
 

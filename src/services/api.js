@@ -6,15 +6,13 @@ from "../utils/logoutUser";
 import { getCookie }
 from "../utils/getCookie";
 
-
 const api = axios.create({
 
   baseURL:
-    "http://localhost:8000/api/",
+    `${import.meta.env.VITE_API_URL}/api/`,
 
   withCredentials: true,
 });
-
 
 // ==========================
 // REQUEST INTERCEPTOR
@@ -25,9 +23,8 @@ api.interceptors.request.use(
 
   (config) => {
 
-    const csrfToken = getCookie(
-      "csrftoken"
-    );
+    const csrfToken =
+      getCookie("csrftoken");
 
     if (csrfToken) {
 
@@ -40,10 +37,8 @@ api.interceptors.request.use(
   }
 );
 
-
 // ==========================
 // RESPONSE INTERCEPTOR
-// AUTO REFRESH TOKEN
 // ==========================
 
 api.interceptors.response.use(
@@ -119,6 +114,18 @@ api.interceptors.response.use(
     }
 
     // ==========================
+    // ADMIN ROUTES
+    // DO NOT USE USER REFRESH
+    // ==========================
+
+    if (
+      url.startsWith("admin/")
+    ) {
+
+      return Promise.reject(error);
+    }
+
+    // ==========================
     // ACCESS TOKEN EXPIRED
     // ==========================
 
@@ -138,7 +145,7 @@ api.interceptors.response.use(
 
         await axios.post(
 
-          "http://localhost:8000/api/users/token/refresh/",
+          `${import.meta.env.VITE_API_URL}/api/users/token/refresh/`,
 
           {},
 
@@ -147,9 +154,11 @@ api.interceptors.response.use(
           }
         );
 
-        // retry request
+        // RETRY REQUEST
 
-        return api(originalRequest);
+        return api(
+          originalRequest
+        );
 
       } catch (refreshError) {
 

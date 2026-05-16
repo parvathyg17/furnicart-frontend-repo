@@ -22,6 +22,10 @@ import {
   verifyEmailOTP,
 } from "../../features/profile/profileSlice";
 
+import {
+  loadUser,
+} from "../../features/auth/authSlice";
+
 import AccountLayout from "../../components/user/AccountLayout";
 
 import {
@@ -245,20 +249,24 @@ export default function EditEmailPage() {
         );
 
         await dispatch(
-          verifyEmailOTP({
-            new_email:
-              email.new_email,
+  verifyEmailOTP({
+    new_email:
+      email.new_email,
 
-            otp:
-              email.otp,
-          })
-        ).unwrap();
+    otp:
+      email.otp,
+  })
+).unwrap();
 
-        toast.success(
-          "Email updated successfully"
-        );
+await dispatch(
+  loadUser()
+).unwrap();
 
-        navigate("/profile");
+toast.success(
+  "Email updated successfully"
+);
+
+navigate("/profile");
 
       } catch (err) {
 

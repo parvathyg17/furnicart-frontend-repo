@@ -1,5 +1,3 @@
-// routes/AdminPublicRoute.jsx
-
 import {
   useSelector,
 } from "react-redux";
@@ -19,11 +17,22 @@ export default function AdminPublicRoute({
     (state) => state.admin
   );
 
+  // ==========================================
+  // LOADING
+  // ==========================================
+
   if (checkingAuth) {
 
-    return <div>Loading...</div>;
-
+    return (
+      <div>
+        Loading...
+      </div>
+    );
   }
+
+  // ==========================================
+  // ALREADY LOGGED IN
+  // ==========================================
 
   if (isAuthenticated) {
 
@@ -34,6 +43,10 @@ export default function AdminPublicRoute({
       />
     );
   }
+
+  // ==========================================
+  // ALLOW ACCESS
+  // ==========================================
 
   return children;
 }

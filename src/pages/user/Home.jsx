@@ -5,7 +5,6 @@ import logofc from "../../assets/images/logofc.png";
 
 import {
   ArrowRight,
-  Search,
   ShoppingCart,
   User,
   Star,
@@ -90,14 +89,44 @@ export default function Home() {
             </button>
 
             <Link
-              to={
-                user
-                  ? "/profile"
-                  : "/login"
-              }
-            >
-              <User size={20} />
-            </Link>
+  to={
+    user
+      ? "/profile"
+      : "/login"
+  }
+  className="profile-nav-link"
+>
+
+  {user ? (
+
+    user.profile_image ? (
+
+      <img
+        src={`http://127.0.0.1:8000${user.profile_image}`}
+        alt="profile"
+        className="nav-profile-image"
+      />
+
+    ) : (
+
+      <div className="nav-profile-avatar">
+
+        {user.username?.charAt(0).toUpperCase()}
+
+      </div>
+    )
+
+  ) : (
+
+    <button className="login-nav-btn">
+
+      Login
+
+    </button>
+
+  )}
+
+</Link>
 
           </div>
 

@@ -29,7 +29,7 @@ export default function PublicRoute({
 
     return (
       <Navigate
-        to="/profile"
+        to="/"
         replace
       />
     );

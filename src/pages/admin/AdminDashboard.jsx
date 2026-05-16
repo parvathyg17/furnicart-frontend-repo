@@ -17,7 +17,6 @@ import {
   getDashboardStatsAPI,
 } from "../../features/admin/adminAPI";
 
-
 export default function AdminDashboard() {
 
   // ==========================================
@@ -38,7 +37,6 @@ export default function AdminDashboard() {
 
       blocked_users: 0,
     });
-
 
   // ==========================================
   // FETCH DASHBOARD STATS
@@ -75,7 +73,6 @@ export default function AdminDashboard() {
 
   }, []);
 
-
   // ==========================================
   // LOADING
   // ==========================================
@@ -88,7 +85,6 @@ export default function AdminDashboard() {
       </div>
     );
   }
-
 
   return (
 
@@ -110,7 +106,6 @@ export default function AdminDashboard() {
         </div>
 
       </div>
-
 
       {/* CARDS */}
       <div className="dashboard-cards">
@@ -138,7 +133,6 @@ export default function AdminDashboard() {
 
         </div>
 
-
         {/* ACTIVE USERS */}
         <div className="dashboard-card">
 
@@ -161,7 +155,6 @@ export default function AdminDashboard() {
           </div>
 
         </div>
-
 
         {/* BLOCKED USERS */}
         <div className="dashboard-card">

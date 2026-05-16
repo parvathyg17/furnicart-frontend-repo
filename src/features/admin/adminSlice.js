@@ -1,7 +1,3 @@
-// ==========================================
-// src/features/admin/adminSlice.js
-// ==========================================
-
 import {
   createSlice,
   createAsyncThunk,
@@ -14,7 +10,6 @@ import {
   toggleUserBlockAPI,
   adminLogoutAPI,
 } from "./adminAPI";
-
 
 // ==========================================
 // ADMIN LOGIN
@@ -38,7 +33,6 @@ export const adminLogin = createAsyncThunk(
   }
 );
 
-
 // ==========================================
 // ADMIN ME
 // ==========================================
@@ -58,7 +52,6 @@ export const adminMe = createAsyncThunk(
     }
   }
 );
-
 
 // ==========================================
 // GET USERS
@@ -85,7 +78,6 @@ export const getUsers = createAsyncThunk(
   }
 );
 
-
 // ==========================================
 // BLOCK / UNBLOCK USER
 // ==========================================
@@ -110,7 +102,6 @@ export const toggleUserBlock = createAsyncThunk(
   }
 );
 
-
 // ==========================================
 // ADMIN LOGOUT
 // ==========================================
@@ -133,7 +124,6 @@ export const adminLogout = createAsyncThunk(
   }
 );
 
-
 // ==========================================
 // INITIAL STATE
 // ==========================================
@@ -153,7 +143,6 @@ const initialState = {
   currentPage: 1,
 };
 
-
 // ==========================================
 // SLICE
 // ==========================================
@@ -171,8 +160,17 @@ const adminSlice = createSlice({
     builder
 
       // ==========================================
-      // LOGIN
+      // ADMIN LOGIN
       // ==========================================
+
+      .addCase(
+        adminLogin.pending,
+        (state) => {
+
+          state.checkingAuth = true;
+
+        }
+      )
 
       .addCase(
         adminLogin.fulfilled,
@@ -184,9 +182,26 @@ const adminSlice = createSlice({
           state.isAuthenticated =
             true;
 
+          state.checkingAuth =
+            false;
+
         }
       )
 
+      .addCase(
+        adminLogin.rejected,
+        (state) => {
+
+          state.admin = null;
+
+          state.isAuthenticated =
+            false;
+
+          state.checkingAuth =
+            false;
+
+        }
+      )
 
       // ==========================================
       // ADMIN ME
@@ -233,7 +248,6 @@ const adminSlice = createSlice({
         }
       )
 
-
       // ==========================================
       // GET USERS
       // ==========================================
@@ -253,7 +267,6 @@ const adminSlice = createSlice({
 
         }
       )
-
 
       // ==========================================
       // BLOCK / UNBLOCK USER
@@ -287,9 +300,8 @@ const adminSlice = createSlice({
         }
       )
 
-
       // ==========================================
-      // LOGOUT
+      // ADMIN LOGOUT
       // ==========================================
 
       .addCase(
@@ -299,6 +311,9 @@ const adminSlice = createSlice({
           state.admin = null;
 
           state.isAuthenticated =
+            false;
+
+          state.checkingAuth =
             false;
 
           state.users = [];

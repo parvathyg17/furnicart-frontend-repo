@@ -21,6 +21,10 @@ import {
   updateProfile,
 } from "../../features/profile/profileSlice";
 
+import {
+  loadUser,
+} from "../../features/auth/authSlice";
+
 import AccountLayout from "../../components/user/AccountLayout";
 
 import {
@@ -242,14 +246,18 @@ export default function EditProfilePage() {
         }
 
         await dispatch(
-          updateProfile(fd)
-        ).unwrap();
+  updateProfile(fd)
+).unwrap();
 
-        toast.success(
-          "Profile updated successfully"
-        );
+    await dispatch(
+      loadUser()
+    ).unwrap();
 
-        navigate("/profile");
+    toast.success(
+      "Profile updated successfully"
+    );
+
+    navigate("/profile");
 
       } catch (err) {
 

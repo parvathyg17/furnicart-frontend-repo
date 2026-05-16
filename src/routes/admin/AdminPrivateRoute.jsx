@@ -1,5 +1,3 @@
-
-
 import { useEffect } from "react";
 
 import {
@@ -15,7 +13,7 @@ import {
   adminMe,
 } from "../../features/admin/adminSlice";
 
-export default function AdminRoute({
+export default function AdminPrivateRoute({
   children,
 }) {
 

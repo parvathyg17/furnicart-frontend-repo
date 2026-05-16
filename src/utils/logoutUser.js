@@ -1,14 +1,19 @@
 import axios from "axios";
 
+let isLoggingOut = false;
 
 export const forceLogout =
   async () => {
+
+    if (isLoggingOut) return;
+
+    isLoggingOut = true;
 
     try {
 
       await axios.post(
 
-        "http://localhost:8000/api/users/logout/",
+        `${import.meta.env.VITE_API_URL}/api/users/logout/`,
 
         {},
 
@@ -26,6 +31,16 @@ export const forceLogout =
 
     sessionStorage.clear();
 
-    window.location.href =
-      "/login";
+    if (
+      window.location.pathname.startsWith("/admin")
+    ) {
+
+      window.location.href =
+        "/admin/login";
+
+    } else {
+
+      window.location.href =
+        "/login";
+    }
 };

@@ -1,0 +1,36 @@
+/* ==========================================
+   GLOBAL NAVBAR
+========================================== */
+
+.main-navbar {
+  width: 100%;
+  border-bottom: 1px solid #e5e5e5;
+  background: #fff;
+}
+
+.main-nav-inner {
+  max-width: 1400px;
+  margin: auto;
+  padding: 18px 40px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.main-nav-links {
+  display: flex;
+  gap: 30px;
+}
+
+.main-nav-links a {
+  text-decoration: none;
+  color: #111;
+  font-weight: 500;
+}
+
+.main-nav-icons {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}

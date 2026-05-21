@@ -1,0 +1,30 @@
+import api from "../../services/api";
+
+
+// ==========================================
+// GET PRODUCTS
+// ==========================================
+
+export const getProductsAPI = async (params) => {
+
+  const response = await api.get(
+    "products/",
+    {
+      params,
+    }
+  );
+
+  return response.data;
+};
+
+
+
+
+export const getProductDetailsAPI = async (id) => {
+
+  const response = await api.get(
+    `products/${id}/`
+  );
+
+  return response.data;
+};

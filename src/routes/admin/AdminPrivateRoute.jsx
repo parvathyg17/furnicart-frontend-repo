@@ -47,9 +47,7 @@ export default function AdminPrivateRoute({
 
   }, [dispatch, admin]);
 
-  // ==========================================
-  // WAIT UNTIL AUTH CHECK FINISHES
-  // ==========================================
+
 
   if (
     checkingAuth ||
@@ -63,9 +61,7 @@ export default function AdminPrivateRoute({
     );
   }
 
-  // ==========================================
-  // NOT AUTHORIZED
-  // ==========================================
+
 
   if (!isAuthenticated) {
 
@@ -77,9 +73,7 @@ export default function AdminPrivateRoute({
     );
   }
 
-  // ==========================================
-  // ALLOW ACCESS
-  // ==========================================
+  
 
   return children;
 }

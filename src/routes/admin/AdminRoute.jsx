@@ -17,6 +17,11 @@ import AdminPrivateRoute from "./AdminPrivateRoute";
 import AdminPublicRoute from "./AdminPublicRoute";
 
 import AdminLayout from "../../components/AdminLayout";
+import AdminCategories
+from "../../pages/admin/categories/AdminCategories";
+
+import AdminRoomType
+from "../../pages/admin/roomtype/AdminRoomTypes";
 
 export default function AdminRoutes() {
 
@@ -63,6 +68,16 @@ export default function AdminRoutes() {
         />
 
       </Route>
+
+      <Route
+      path="categories"
+      element={<AdminCategories />}
+    />
+
+    <Route
+      path="room-types"
+      element={<AdminRoomType />}
+    />
 
       <Route
         path="*"

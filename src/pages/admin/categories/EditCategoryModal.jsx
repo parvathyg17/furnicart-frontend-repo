@@ -13,7 +13,7 @@ import {
   updateCategory,
   getAdminCategories,
 
-} from "../../../features/catalog/catalogSlice";
+} from "../../../features/catalog/category/categorySlice";
 
 export default function EditCategoryModal({
 
@@ -31,7 +31,7 @@ export default function EditCategoryModal({
     categoryLoading,
 
   } = useSelector(
-    (state) => state.catalog
+    (state) => state.category
   );
 
   const [formData, setFormData] =

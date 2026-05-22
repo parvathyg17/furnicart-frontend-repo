@@ -11,7 +11,7 @@ import {
 
   updateRoomType,
 
-} from "../../../features/catalog/catalogSlice";
+} from "../../../features/catalog/roomType/roomTypeSlice";
 
 export default function EditRoomTypeModal({
 

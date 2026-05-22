@@ -17,6 +17,22 @@ import {
   updateRoomTypeAPI,
   deleteRoomTypeAPI,
 
+  // PRODUCTS
+  getAdminProductsAPI,
+  getAdminProductDetailAPI,
+  createProductAPI,
+  updateProductAPI,
+  deleteProductAPI,
+  toggleProductStatusAPI,
+
+  // VARIANTS
+  updateVariantAPI,
+  toggleVariantStatusAPI,
+
+  // IMAGES
+  uploadVariantImageAPI,
+  deleteVariantImageAPI,
+
 } from "./catalogAPI";
 
 // ==========================================
@@ -280,6 +296,330 @@ export const deleteRoomType =
   );
 
 // ==========================================
+// PRODUCT THUNKS
+// ==========================================
+
+export const getAdminProducts =
+  createAsyncThunk(
+
+    "catalog/getAdminProducts",
+
+    async (
+      params,
+      { rejectWithValue }
+    ) => {
+
+      try {
+
+        return await getAdminProductsAPI(
+          params
+        );
+
+      } catch (err) {
+
+        return rejectWithValue(
+
+          err.response?.data || {
+
+            error:
+              "Failed to fetch products",
+          }
+        );
+      }
+    }
+  );
+
+export const getAdminProductDetail =
+  createAsyncThunk(
+
+    "catalog/getAdminProductDetail",
+
+    async (
+      productId,
+      { rejectWithValue }
+    ) => {
+
+      try {
+
+        return await getAdminProductDetailAPI(
+          productId
+        );
+
+      } catch (err) {
+
+        return rejectWithValue(
+
+          err.response?.data || {
+
+            error:
+              "Failed to fetch product",
+          }
+        );
+      }
+    }
+  );
+
+export const createProduct =
+  createAsyncThunk(
+
+    "catalog/createProduct",
+
+    async (
+      data,
+      { rejectWithValue }
+    ) => {
+
+      try {
+
+        return await createProductAPI(
+          data
+        );
+
+      } catch (err) {
+
+        return rejectWithValue(
+
+          err.response?.data || {
+
+            error:
+              "Failed to create product",
+          }
+        );
+      }
+    }
+  );
+
+export const updateProduct =
+  createAsyncThunk(
+
+    "catalog/updateProduct",
+
+    async (
+      {
+        productId,
+        data,
+      },
+      { rejectWithValue }
+    ) => {
+
+      try {
+
+        return await updateProductAPI(
+          productId,
+          data
+        );
+
+      } catch (err) {
+
+        return rejectWithValue(
+
+          err.response?.data || {
+
+            error:
+              "Failed to update product",
+          }
+        );
+      }
+    }
+  );
+
+export const deleteProduct =
+  createAsyncThunk(
+
+    "catalog/deleteProduct",
+
+    async (
+      productId,
+      { rejectWithValue }
+    ) => {
+
+      try {
+
+        await deleteProductAPI(
+          productId
+        );
+
+        return productId;
+
+      } catch (err) {
+
+        return rejectWithValue(
+
+          err.response?.data || {
+
+            error:
+              "Failed to delete product",
+          }
+        );
+      }
+    }
+  );
+
+export const toggleProductStatus =
+  createAsyncThunk(
+
+    "catalog/toggleProductStatus",
+
+    async (
+      productId,
+      { rejectWithValue }
+    ) => {
+
+      try {
+
+        return await toggleProductStatusAPI(
+          productId
+        );
+
+      } catch (err) {
+
+        return rejectWithValue(
+
+          err.response?.data || {
+
+            error:
+              "Failed to toggle product status",
+          }
+        );
+      }
+    }
+  );
+
+// ==========================================
+// VARIANT THUNKS
+// ==========================================
+
+export const updateVariant =
+  createAsyncThunk(
+
+    "catalog/updateVariant",
+
+    async (
+      {
+        variantId,
+        data,
+      },
+      { rejectWithValue }
+    ) => {
+
+      try {
+
+        return await updateVariantAPI(
+          variantId,
+          data
+        );
+
+      } catch (err) {
+
+        return rejectWithValue(
+
+          err.response?.data || {
+
+            error:
+              "Failed to update variant",
+          }
+        );
+      }
+    }
+  );
+
+export const toggleVariantStatus =
+  createAsyncThunk(
+
+    "catalog/toggleVariantStatus",
+
+    async (
+      variantId,
+      { rejectWithValue }
+    ) => {
+
+      try {
+
+        return await toggleVariantStatusAPI(
+          variantId
+        );
+
+      } catch (err) {
+
+        return rejectWithValue(
+
+          err.response?.data || {
+
+            error:
+              "Failed to toggle variant status",
+          }
+        );
+      }
+    }
+  );
+
+// ==========================================
+// IMAGE THUNKS
+// ==========================================
+
+export const uploadVariantImage =
+  createAsyncThunk(
+
+    "catalog/uploadVariantImage",
+
+    async (
+      data,
+      { rejectWithValue }
+    ) => {
+
+      try {
+
+        return await uploadVariantImageAPI(
+          data
+        );
+
+      } catch (err) {
+
+        return rejectWithValue(
+
+          err.response?.data || {
+
+            error:
+              "Failed to upload image",
+          }
+        );
+      }
+    }
+  );
+
+export const deleteVariantImage =
+  createAsyncThunk(
+
+    "catalog/deleteVariantImage",
+
+    async (
+      imageId,
+      { rejectWithValue }
+    ) => {
+
+      try {
+
+        await deleteVariantImageAPI(
+          imageId
+        );
+
+        return imageId;
+
+      } catch (err) {
+
+        return rejectWithValue(
+
+          err.response?.data || {
+
+            error:
+              "Failed to delete image",
+          }
+        );
+      }
+    }
+  );
+
+// ==========================================
 // INITIAL STATE
 // ==========================================
 
@@ -308,8 +648,25 @@ const initialState = {
   roomTypeError: null,
 
   roomTypeSuccess: null,
+
+  // PRODUCTS
+
+  products: [],
+
+  productDetail: null,
+
+  productPagination: null,
+
+  productLoading: false,
+
+  productError: null,
+
+  productSuccess: null,
 };
 
+// ==========================================
+// SLICE
+// ==========================================
 // ==========================================
 // SLICE
 // ==========================================
@@ -333,6 +690,10 @@ const catalogSlice = createSlice({
       state.roomTypeError = null;
 
       state.roomTypeSuccess = null;
+
+      state.productError = null;
+
+      state.productSuccess = null;
     },
   },
 
@@ -759,6 +1120,302 @@ const catalogSlice = createSlice({
           state.roomTypeError =
             action.payload?.error ||
             "Failed to delete room type";
+        }
+      );
+
+    // ==========================================
+    // GET PRODUCTS
+    // ==========================================
+
+    builder
+
+      .addCase(
+        getAdminProducts.pending,
+
+        (state) => {
+
+          state.productLoading = true;
+
+          state.productError = null;
+        }
+      )
+
+      .addCase(
+        getAdminProducts.fulfilled,
+
+        (state, action) => {
+
+          state.productLoading = false;
+
+          state.products =
+            action.payload.results;
+
+          state.productPagination = {
+
+            count:
+              action.payload.count,
+
+            totalPages:
+              action.payload.total_pages,
+
+            currentPage:
+              action.payload.current_page,
+
+            next:
+              action.payload.next,
+
+            previous:
+              action.payload.previous,
+          };
+        }
+      )
+
+      .addCase(
+        getAdminProducts.rejected,
+
+        (state, action) => {
+
+          state.productLoading = false;
+
+          state.productError =
+            action.payload?.error ||
+            "Failed to fetch products";
+        }
+      );
+
+    // ==========================================
+    // GET PRODUCT DETAIL
+    // ==========================================
+
+    builder
+
+      .addCase(
+        getAdminProductDetail.pending,
+
+        (state) => {
+
+          state.productLoading = true;
+
+          state.productError = null;
+        }
+      )
+
+      .addCase(
+        getAdminProductDetail.fulfilled,
+
+        (state, action) => {
+
+          state.productLoading = false;
+
+          state.productDetail =
+            action.payload;
+        }
+      )
+
+      .addCase(
+        getAdminProductDetail.rejected,
+
+        (state, action) => {
+
+          state.productLoading = false;
+
+          state.productError =
+            action.payload?.error ||
+            "Failed to fetch product";
+        }
+      );
+
+    // ==========================================
+    // CREATE PRODUCT
+    // ==========================================
+
+    builder
+
+      .addCase(
+        createProduct.pending,
+
+        (state) => {
+
+          state.productLoading = true;
+
+          state.productError = null;
+        }
+      )
+
+      .addCase(
+        createProduct.fulfilled,
+
+        (state) => {
+
+          state.productLoading = false;
+
+          state.productSuccess =
+            "Product created successfully";
+        }
+      )
+
+      .addCase(
+        createProduct.rejected,
+
+        (state, action) => {
+
+          state.productLoading = false;
+
+          state.productError =
+            action.payload?.error ||
+            "Failed to create product";
+        }
+      );
+
+    // ==========================================
+    // UPDATE PRODUCT
+    // ==========================================
+
+    builder
+
+      .addCase(
+        updateProduct.pending,
+
+        (state) => {
+
+          state.productLoading = true;
+
+          state.productError = null;
+        }
+      )
+
+      .addCase(
+        updateProduct.fulfilled,
+
+        (state, action) => {
+
+          state.productLoading = false;
+
+          state.productSuccess =
+            "Product updated successfully";
+
+          state.productDetail =
+            action.payload;
+
+          state.products =
+            state.products.map(
+              (product) =>
+
+                product.id ===
+                action.payload.id
+
+                  ? action.payload
+
+                  : product
+            );
+        }
+      )
+
+      .addCase(
+        updateProduct.rejected,
+
+        (state, action) => {
+
+          state.productLoading = false;
+
+          state.productError =
+            action.payload?.error ||
+            "Failed to update product";
+        }
+      );
+
+    // ==========================================
+    // DELETE PRODUCT
+    // ==========================================
+
+    builder
+
+      .addCase(
+        deleteProduct.pending,
+
+        (state) => {
+
+          state.productLoading = true;
+
+          state.productError = null;
+        }
+      )
+
+      .addCase(
+        deleteProduct.fulfilled,
+
+        (state, action) => {
+
+          state.productLoading = false;
+
+          state.productSuccess =
+            "Product deleted successfully";
+
+          state.products =
+            state.products.map(
+              (product) =>
+
+                product.id === action.payload
+
+                  ? {
+                      ...product,
+                      is_active: false,
+                    }
+
+                  : product
+            );
+        }
+      )
+
+      .addCase(
+        deleteProduct.rejected,
+
+        (state, action) => {
+
+          state.productLoading = false;
+
+          state.productError =
+            action.payload?.error ||
+            "Failed to delete product";
+        }
+      );
+
+    // ==========================================
+    // TOGGLE PRODUCT STATUS
+    // ==========================================
+
+    builder
+
+      .addCase(
+        toggleProductStatus.fulfilled,
+
+        (state, action) => {
+
+          state.products =
+            state.products.map(
+              (product) =>
+
+                product.id ===
+                action.payload.id
+
+                  ? {
+                      ...product,
+                      is_active:
+                        action.payload.is_active,
+                    }
+
+                  : product
+            );
+
+          if (
+            state.productDetail &&
+            state.productDetail.id ===
+              action.payload.id
+          ) {
+
+            state.productDetail.is_active =
+              action.payload.is_active;
+          }
         }
       );
   },

@@ -1,0 +1,77 @@
+import api from "../../../services/api";
+
+// ==========================================
+// GET CATEGORIES
+// ==========================================
+
+export const getAdminCategoriesAPI =
+  async (params) => {
+
+    const response = await api.get(
+      "admin/categories/",
+      {
+        params,
+      }
+    );
+
+    return response.data;
+  };
+
+// ==========================================
+// CREATE CATEGORY
+// ==========================================
+
+export const createCategoryAPI =
+  async (data) => {
+
+    const response = await api.post(
+      "admin/categories/",
+      data,
+      {
+        headers: {
+          "Content-Type":
+            "multipart/form-data",
+        },
+      }
+    );
+
+    return response.data;
+  };
+
+// ==========================================
+// UPDATE CATEGORY
+// ==========================================
+
+export const updateCategoryAPI =
+  async (
+    categoryId,
+    data
+  ) => {
+
+    const response = await api.put(
+      `admin/categories/${categoryId}/`,
+      data,
+      {
+        headers: {
+          "Content-Type":
+            "multipart/form-data",
+        },
+      }
+    );
+
+    return response.data;
+  };
+
+// ==========================================
+// DELETE CATEGORY
+// ==========================================
+
+export const deleteCategoryAPI =
+  async (categoryId) => {
+
+    const response = await api.patch(
+      `admin/categories/${categoryId}/delete/`
+    );
+
+    return response.data;
+  };

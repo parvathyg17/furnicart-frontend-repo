@@ -18,7 +18,7 @@ import {
   getAdminCategories,
   deleteCategory,
 
-} from "../../../features/catalog/catalogSlice";
+} from "../../../features/catalog/category/categorySlice";
 
 export default function AdminCategories() {
 
@@ -31,7 +31,7 @@ export default function AdminCategories() {
     categoryLoading,
 
   } = useSelector(
-    (state) => state.catalog
+    (state) => state.category
   );
 
   const [search, setSearch] =

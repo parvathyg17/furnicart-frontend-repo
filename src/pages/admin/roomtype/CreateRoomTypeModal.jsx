@@ -10,7 +10,7 @@ import {
 
   createRoomType,
 
-} from "../../../features/catalog/catalogSlice";
+} from "../../../features/catalog/roomType/roomTypeSlice";
 
 export default function CreateRoomTypeModal({
 

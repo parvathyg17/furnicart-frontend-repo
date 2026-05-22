@@ -3,7 +3,12 @@ import authReducer from "../features/auth/authSlice";
 import profileReducer from "../features/profile/profileSlice";
 import addressReducer from "../features/address/addressSlice";
 import adminReducer from "../features/admin/adminSlice";
-import catalogReducer from "../features/catalog/catalogSlice";
+import categoryReducer
+from "../features/catalog/category/categorySlice";
+import roomTypeReducer
+from "../features/catalog/roomType/roomTypeSlice";
+import productReducer
+from "../features/catalog/product/productSlice";
 
 export const store = configureStore({
   reducer: {
@@ -11,7 +16,9 @@ export const store = configureStore({
     profile: profileReducer,
     address: addressReducer,
     admin: adminReducer,
-    catalog:catalogReducer,
+    category: categoryReducer,
+    roomType: roomTypeReducer,
+    product: productReducer,
     
   },
 });

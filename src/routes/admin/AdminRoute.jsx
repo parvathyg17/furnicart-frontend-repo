@@ -23,6 +23,9 @@ from "../../pages/admin/categories/AdminCategories";
 import AdminRoomType
 from "../../pages/admin/roomtype/AdminRoomTypes";
 
+import AdminProducts
+from "../../pages/admin/products/AdminProducts";
+
 export default function AdminRoutes() {
 
   return (
@@ -78,6 +81,11 @@ export default function AdminRoutes() {
       path="room-types"
       element={<AdminRoomType />}
     />
+
+    <Route
+    path="products"
+    element={<AdminProducts />}
+  />
 
       <Route
         path="*"

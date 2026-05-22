@@ -12,7 +12,7 @@ import {
   createCategory,
   getAdminCategories,
 
-} from "../../../features/catalog/catalogSlice";
+} from "../../../features/catalog/category/categorySlice";
 
 export default function CreateCategoryModal({
 
@@ -29,7 +29,7 @@ export default function CreateCategoryModal({
     categoryLoading,
 
   } = useSelector(
-    (state) => state.catalog
+    (state) => state.category
   );
 
   const [formData, setFormData] =

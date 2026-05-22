@@ -17,7 +17,7 @@ import {
   getAdminRoomTypes,
   deleteRoomType,
 
-} from "../../../features/catalog/catalogSlice";
+} from "../../../features/catalog/roomType/roomTypeSlice";
 
 export default function AdminRoomTypes() {
 
@@ -30,7 +30,7 @@ export default function AdminRoomTypes() {
     roomTypeLoading,
 
   } = useSelector(
-    (state) => state.catalog
+    (state) => state.roomType
   );
 
   const [search, setSearch] =

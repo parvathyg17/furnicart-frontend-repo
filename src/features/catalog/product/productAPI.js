@@ -77,27 +77,53 @@ export const toggleProductStatusAPI =
 // ==========================================
 
 export const updateVariantAPI =
-  async (
-    variantId,
-    data
-  ) => {
-
-    const response = await api.put(
-      `admin/products/variants/${variantId}/`,
+    async (
+      variantId,
       data
-    );
+    ) => {
 
-    return response.data;
-  };
+      const response = await api.put(
+        `admin/products/variants/${variantId}/`,
+        data
+      );
+
+      return response.data;
+    };
+
+  export const createVariantAPI =
+    async (
+      productId,
+      data
+    ) => {
+
+      const response = await api.post(
+        `admin/products/${productId}/variants/`,
+        data
+      );
+
+      return response.data;
+    };
 
 export const toggleVariantStatusAPI =
   async (variantId) => {
 
-    const response = await api.patch(
-      `admin/products/variants/${variantId}/toggle-status/`
-    );
+    try {
 
-    return response.data;
+      const response = await api.patch(
+        `admin/products/variants/${variantId}/toggle-status/`
+      );
+
+      return response.data;
+
+    } catch (error) {
+
+      throw (
+        error.response?.data || {
+          error:
+            "Failed to toggle variant status",
+        }
+      );
+    }
   };
 
 // ==========================================
@@ -105,21 +131,34 @@ export const toggleVariantStatusAPI =
 // ==========================================
 
 export const uploadVariantImageAPI =
-  async (data) => {
+    async ({
+      variant,
+      images,
+    }) => {
 
-    const response = await api.post(
-      "admin/product-images/",
-      data,
-      {
-        headers: {
-          "Content-Type":
-            "multipart/form-data",
-        },
-      }
-    );
+      const formData =
+        new FormData();
 
-    return response.data;
-  };
+      formData.append(
+        "variant",
+        variant
+      );
+
+      images.forEach((image) => {
+
+        formData.append(
+          "images",
+          image
+        );
+      });
+
+      const response = await api.post(
+        "admin/product-images/",
+        formData
+      );
+
+      return response.data;
+    };
 
 export const deleteVariantImageAPI =
   async (imageId) => {

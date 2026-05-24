@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 
 import {
-  createProduct,
+  updateProduct,
 } from "../../../features/catalog/product/productSlice";
 
 import {
@@ -27,10 +27,11 @@ import {
   getAdminRoomTypes,
 } from "../../../features/catalog/roomType/roomTypeSlice";
 
-export default function CreateProductModal({
+export default function EditProductModal({
 
   isOpen,
   onClose,
+  product,
 
 }) {
 
@@ -89,6 +90,38 @@ export default function CreateProductModal({
   }, [dispatch]);
 
   // ==========================================
+  // PREFILL FORM
+  // ==========================================
+
+  useEffect(() => {
+
+    if (product) {
+
+      setFormData({
+
+        name:
+          product.name || "",
+
+        description:
+          product.description || "",
+
+        category:
+          product.category?.id || "",
+
+        room_type:
+          product.room_type?.id || "",
+
+        is_featured:
+          product.is_featured || false,
+
+        is_active:
+          product.is_active ?? true,
+      });
+    }
+
+  }, [product]);
+
+  // ==========================================
   // HANDLE CHANGE
   // ==========================================
 
@@ -126,31 +159,23 @@ export default function CreateProductModal({
 
       const result =
         await dispatch(
-          createProduct(formData)
+
+          updateProduct({
+
+            productId:
+              product.id,
+
+            data: formData,
+          })
         );
 
       if (
-        createProduct.fulfilled.match(
+        updateProduct.fulfilled.match(
           result
         )
       ) {
 
         onClose();
-
-        setFormData({
-
-          name: "",
-
-          description: "",
-
-          category: "",
-
-          room_type: "",
-
-          is_featured: false,
-
-          is_active: true,
-        });
       }
     };
 
@@ -158,8 +183,13 @@ export default function CreateProductModal({
   // CLOSE
   // ==========================================
 
-  if (!isOpen)
+  if (
+    !isOpen ||
+    !product
+  ) {
+
     return null;
+  }
 
   return (
 
@@ -174,11 +204,11 @@ export default function CreateProductModal({
           <div>
 
             <h2>
-              New Product
+              Edit Product
             </h2>
 
             <p>
-              Add a new piece to your digital craftsmanship collection.
+              Refine and update your furniture collection details.
             </p>
 
           </div>
@@ -213,7 +243,7 @@ export default function CreateProductModal({
               <input
                 type="text"
                 name="name"
-                placeholder="e.g. Walnut Hand-Carved Lounge Chair"
+                placeholder="Product name"
                 value={
                   formData.name
                 }
@@ -353,7 +383,7 @@ export default function CreateProductModal({
 
               <textarea
                 name="description"
-                placeholder="Describe the materials, craftsmanship process, and unique design features..."
+                placeholder="Product description..."
                 value={
                   formData.description
                 }
@@ -379,7 +409,7 @@ export default function CreateProductModal({
                   </h4>
 
                   <p>
-                    Show on the homepage gallery
+                    Highlight on storefront
                   </p>
 
                 </div>
@@ -414,7 +444,7 @@ export default function CreateProductModal({
                   </h4>
 
                   <p>
-                    Visible to customers in catalog
+                    Product visibility status
                   </p>
 
                 </div>
@@ -440,18 +470,23 @@ export default function CreateProductModal({
 
             </div>
 
-           <div className="variant-note">
+            {/* NOTE */}
 
-            <p>
+            <div className="variant-note">
 
-              Product imagery can be added later
-              while creating variants.
+              <p>
 
-            </p>
+                Variant pricing, stock,
+                and product imagery can
+                be managed separately
+                within variants.
+
+              </p>
+
+            </div>
 
           </div>
 
-          </div>
           {/* FOOTER */}
 
           <div className="create-product-footer">
@@ -477,9 +512,9 @@ export default function CreateProductModal({
               {
                 productLoading
 
-                  ? "Creating..."
+                  ? "Updating..."
 
-                  : "Create Product"
+                  : "Save Changes"
               }
 
             </button>

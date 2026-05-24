@@ -1,6 +1,7 @@
 import {
   createSlice,
   createAsyncThunk,
+  
 } from "@reduxjs/toolkit";
 
 import {
@@ -14,6 +15,7 @@ import {
   toggleProductStatusAPI,
 
   // VARIANTS
+  createVariantAPI,
   updateVariantAPI,
   toggleVariantStatusAPI,
 
@@ -182,7 +184,39 @@ export const deleteProduct =
       }
     }
   );
+export const createVariant =
+  createAsyncThunk(
 
+    "product/createVariant",
+
+    async (
+      {
+        productId,
+        data,
+      },
+      { rejectWithValue }
+    ) => {
+
+      try {
+
+        return await createVariantAPI(
+          productId,
+          data
+        );
+
+      } catch (err) {
+
+        return rejectWithValue(
+
+          err.response?.data || {
+
+            error:
+              "Failed to create variant",
+          }
+        );
+      }
+    }
+  );
 export const toggleProductStatus =
   createAsyncThunk(
 
@@ -686,6 +720,51 @@ builder
     }
   );
 
+builder
+
+  .addCase(
+    createVariant.pending,
+
+    (state) => {
+
+      state.productLoading = true;
+
+      state.productError = null;
+    }
+  )
+
+  .addCase(
+    createVariant.fulfilled,
+
+    (state, action) => {
+
+      state.productLoading = false;
+
+      state.productSuccess =
+        "Variant created successfully";
+
+      if (state.productDetail) {
+
+        state.productDetail.variants.push(
+          action.payload
+        );
+      }
+    }
+  )
+
+  .addCase(
+    createVariant.rejected,
+
+    (state, action) => {
+
+      state.productLoading = false;
+
+      state.productError =
+        action.payload?.error ||
+        "Failed to create variant";
+    }
+  );
+
   // ==========================================
 // UPDATE VARIANT
 // ==========================================
@@ -713,7 +792,6 @@ builder
         );
     }
   );
-
 // ==========================================
 // TOGGLE VARIANT STATUS
 // ==========================================
@@ -721,60 +799,89 @@ builder
 builder
 
   .addCase(
+    toggleVariantStatus.pending,
+
+    (state) => {
+
+      state.productLoading = true;
+
+      state.productError = null;
+    }
+  )
+
+  .addCase(
     toggleVariantStatus.fulfilled,
 
     (state, action) => {
 
-      if (!state.productDetail)
-        return;
+      state.productLoading = false;
 
-      state.productDetail.variants =
-        state.productDetail.variants.map(
-          (variant) =>
+      if (state.productDetail) {
 
-            variant.id ===
-            action.payload.id
+        state.productDetail.variants =
+          state.productDetail.variants.map(
+            (variant) =>
 
-              ? {
-                  ...variant,
-                  is_active:
-                    action.payload.is_active,
-                }
+              variant.id === action.payload.id
 
-              : variant
-        );
+                ? {
+                    ...variant,
+                    is_active:
+                      action.payload.is_active,
+                  }
+
+                : variant
+          );
+      }
+
+      state.productSuccess =
+        action.payload.message;
+    }
+  )
+
+  .addCase(
+    toggleVariantStatus.rejected,
+
+    (state, action) => {
+
+      state.productLoading = false;
+
+      state.productError =
+        action.payload?.error ||
+        "Failed to toggle variant status";
     }
   );
 
   // ==========================================
-// UPLOAD VARIANT IMAGE
-// ==========================================
+  // UPLOAD VARIANT IMAGE
+  // ==========================================
 
-builder
+  builder
 
-  .addCase(
-    uploadVariantImage.fulfilled,
+    .addCase(
+      uploadVariantImage.fulfilled,
 
-    (state, action) => {
+      (state, action) => {
 
-      if (!state.productDetail)
-        return;
+        if (!state.productDetail)
+          return;
 
-      const variant =
-        state.productDetail.variants.find(
-          (item) =>
-            item.id ===
-            action.payload.variant
-        );
+        const variant =
+          state.productDetail.variants.find(
+            (item) =>
+              item.id ===
+              action.payload[0]?.variant
+          );
 
-      if (variant) {
+        if (variant) {
 
-        variant.images.push(
-          action.payload
-        );
+          variant.images = [
+          ...variant.images,
+          ...action.payload,
+        ];
+        }
       }
-    }
-  );
+    );
 
 // ==========================================
 // DELETE VARIANT IMAGE

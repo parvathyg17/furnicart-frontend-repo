@@ -1,0 +1,566 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap');
+
+.create-product-overlay {
+
+  position: fixed;
+
+  inset: 0;
+
+  background:
+    rgba(0,0,0,0.18);
+
+  backdrop-filter:
+    blur(8px);
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  padding: 20px;
+
+  overflow-y: auto;
+
+  z-index: 999;
+}
+
+/* MODAL */
+
+.create-product-modal {
+
+  width: 720px;
+
+  max-width: 100%;
+
+  max-height: 95vh;
+
+  overflow-y: auto;
+
+  background: #fff;
+
+  border-radius: 28px;
+
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.12);
+
+  font-family: "Inter", sans-serif;
+
+  scrollbar-width: none;
+}
+
+.create-product-modal::-webkit-scrollbar {
+
+  display: none;
+}
+
+/* HEADER */
+
+.create-product-header {
+
+  padding: 34px 36px;
+
+  border-bottom:
+    1px solid #ece7e2;
+
+  display: flex;
+
+  align-items: flex-start;
+
+  justify-content: space-between;
+}
+
+.create-product-header h2 {
+
+  font-size: 48px;
+
+  color: #2f1d14;
+
+  font-family:
+    "Playfair Display",
+    serif;
+
+  margin-bottom: 10px;
+}
+
+.create-product-header p {
+
+  color: #6d6d6d;
+
+  font-size: 17px;
+
+  line-height: 1.5;
+}
+
+.close-btn {
+
+  border: none;
+
+  background: transparent;
+
+  cursor: pointer;
+
+  color: #7b6b63;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+}
+
+/* BODY */
+
+.create-product-body {
+
+  padding: 34px 36px;
+}
+
+/* FORM */
+
+.form-group {
+
+  margin-bottom: 30px;
+}
+
+.form-group label {
+
+  display: block;
+
+  margin-bottom: 12px;
+
+  font-size: 13px;
+
+  font-weight: 700;
+
+  letter-spacing: 1.5px;
+
+  color: #7d6d65;
+}
+
+.form-group input,
+.form-group textarea,
+.select-wrapper {
+
+  width: 100%;
+
+  background: #f8f6f3;
+
+  border:
+    1px solid #e6dfd9;
+
+  border-radius: 16px;
+
+  transition: 0.2s;
+}
+
+.form-group input,
+.select-wrapper select {
+
+  height: 60px;
+
+  padding: 0 18px;
+
+  font-size: 16px;
+
+  outline: none;
+}
+
+.form-group textarea {
+
+  height: 140px;
+
+  padding: 18px;
+
+  resize: none;
+
+  outline: none;
+
+  font-size: 16px;
+
+  font-family: "Inter", sans-serif;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.select-wrapper:focus-within {
+
+  border-color: #4d2d1d;
+}
+
+/* DOUBLE FIELDS */
+
+.double-fields {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, 1fr);
+
+  gap: 24px;
+}
+
+/* SELECT */
+
+.select-wrapper {
+
+  position: relative;
+
+  display: flex;
+
+  align-items: center;
+}
+
+.select-wrapper select {
+
+  width: 100%;
+
+  border: none;
+
+  background: transparent;
+
+  appearance: none;
+
+  cursor: pointer;
+}
+
+.select-wrapper svg {
+
+  position: absolute;
+
+  right: 18px;
+
+  color: #6d6d6d;
+
+  pointer-events: none;
+}
+
+/* TOGGLES */
+
+.toggle-section {
+
+  border-top:
+    1px solid #ece7e2;
+
+  border-bottom:
+    1px solid #ece7e2;
+
+  padding: 26px 0;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, 1fr);
+
+  gap: 24px;
+
+  margin-bottom: 34px;
+}
+
+.toggle-card {
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+}
+
+.toggle-card h4 {
+
+  font-size: 18px;
+
+  margin-bottom: 6px;
+
+  color: #2f1d14;
+}
+
+.toggle-card p {
+
+  color: #6d6d6d;
+
+  font-size: 15px;
+
+  line-height: 1.5;
+}
+
+/* SWITCH */
+
+.switch {
+
+  position: relative;
+
+  width: 54px;
+
+  height: 30px;
+
+  flex-shrink: 0;
+}
+
+.switch input {
+
+  display: none;
+}
+
+.slider {
+
+  position: absolute;
+
+  inset: 0;
+
+  background: #ddd;
+
+  border-radius: 999px;
+
+  cursor: pointer;
+
+  transition: 0.3s;
+}
+
+.slider::before {
+
+  content: "";
+
+  position: absolute;
+
+  width: 24px;
+
+  height: 24px;
+
+  left: 3px;
+
+  top: 3px;
+
+  background: white;
+
+  border-radius: 50%;
+
+  transition: 0.3s;
+}
+
+.switch input:checked + .slider {
+
+  background: #8fa38d;
+}
+
+.switch input:checked + .slider::before {
+
+  transform:
+    translateX(24px);
+}
+
+/* MEDIA */
+
+.media-upload-box {
+
+  background: #f8f6f3;
+
+  border:
+    1px solid #e6dfd9;
+
+  border-radius: 20px;
+
+  padding: 18px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 18px;
+}
+
+.upload-icon {
+
+  width: 84px;
+
+  height: 84px;
+
+  background: white;
+
+  border:
+    1px solid #e8dfd9;
+
+  border-radius: 14px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  color: #c2b0a4;
+
+  flex-shrink: 0;
+}
+
+.media-upload-box small {
+
+  color: #9b8d85;
+
+  font-size: 13px;
+
+  letter-spacing: 1px;
+}
+
+.media-upload-box h5 {
+
+  margin-top: 6px;
+
+  font-size: 26px;
+
+  color: #2f1d14;
+
+  font-family:
+    "Playfair Display",
+    serif;
+}
+
+/* FOOTER */
+
+.create-product-footer {
+
+  padding: 24px 36px;
+
+  border-top:
+    1px solid #ece7e2;
+
+  display: flex;
+
+  justify-content: flex-end;
+
+  gap: 16px;
+
+  background: white;
+
+  position: sticky;
+
+  bottom: 0;
+}
+
+.cancel-btn,
+.submit-btn {
+
+  height: 56px;
+
+  padding: 0 28px;
+
+  border-radius: 14px;
+
+  font-size: 16px;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+
+  white-space: nowrap;
+}
+
+.cancel-btn {
+
+  border:
+    1px solid #b9aaa1;
+
+  background: white;
+
+  color: #4b3529;
+}
+
+.submit-btn {
+
+  border: none;
+
+  background: #3a2217;
+
+  color: white;
+}
+
+.submit-btn:hover {
+
+  opacity: 0.92;
+}
+
+.cancel-btn:hover {
+
+  background: #f7f4f1;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 768px) {
+
+  .create-product-overlay {
+
+    padding: 12px;
+  }
+
+  .create-product-modal {
+
+    width: 100%;
+
+    border-radius: 22px;
+  }
+
+  .create-product-header {
+
+    padding: 26px 22px;
+  }
+
+  .create-product-header h2 {
+
+    font-size: 36px;
+  }
+
+  .create-product-header p {
+
+    font-size: 15px;
+  }
+
+  .create-product-body {
+
+    padding: 24px 22px;
+  }
+
+  .double-fields,
+  .toggle-section {
+
+    grid-template-columns: 1fr;
+  }
+
+  .media-upload-box {
+
+    flex-direction: column;
+
+    align-items: flex-start;
+  }
+
+  .create-product-footer {
+
+    padding: 20px 22px;
+
+    flex-direction: column;
+  }
+
+  .cancel-btn,
+  .submit-btn {
+
+    width: 100%;
+  }
+}
+
+.variant-note {
+
+  background: #f8f6f3;
+
+  border:
+    1px solid #e6dfd9;
+
+  border-radius: 18px;
+
+  padding: 20px;
+
+  color: #7b6b63;
+
+  font-size: 15px;
+
+  line-height: 1.6;
+}

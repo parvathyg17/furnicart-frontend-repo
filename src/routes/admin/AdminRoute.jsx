@@ -1,22 +1,27 @@
-// routes/AdminRoutes.jsx
-
 import {
   Routes,
   Route,
   Navigate,
 } from "react-router-dom";
 
-import AdminLogin from "../../pages/admin/AdminLogin";
+import AdminLogin
+from "../../pages/admin/AdminLogin";
 
-import AdminDashboard from "../../pages/admin/AdminDashboard";
+import AdminDashboard
+from "../../pages/admin/AdminDashboard";
 
-import AdminUsers from "../../pages/admin/AdminUsers";
+import AdminUsers
+from "../../pages/admin/AdminUsers";
 
-import AdminPrivateRoute from "./AdminPrivateRoute";
+import AdminPrivateRoute
+from "./AdminPrivateRoute";
 
-import AdminPublicRoute from "./AdminPublicRoute";
+import AdminPublicRoute
+from "./AdminPublicRoute";
 
-import AdminLayout from "../../components/AdminLayout";
+import AdminLayout
+from "../../components/AdminLayout";
+
 import AdminCategories
 from "../../pages/admin/categories/AdminCategories";
 
@@ -26,29 +31,45 @@ from "../../pages/admin/roomtype/AdminRoomTypes";
 import AdminProducts
 from "../../pages/admin/products/AdminProducts";
 
+import AdminProductDetail
+from "../../pages/admin/products/AdminProductDetail";
+import AdminVariantMediaLibrary from "../../pages/admin/products/AdminVariantMediaLibrary";
+
 export default function AdminRoutes() {
 
   return (
 
     <Routes>
 
+      {/* LOGIN */}
+
       <Route
         path="/login"
         element={
+
           <AdminPublicRoute>
+
             <AdminLogin />
+
           </AdminPublicRoute>
         }
       />
 
+      {/* ADMIN LAYOUT */}
+
       <Route
         path="/"
         element={
+
           <AdminPrivateRoute>
+
             <AdminLayout />
+
           </AdminPrivateRoute>
         }
       >
+
+        {/* REDIRECT */}
 
         <Route
           index
@@ -60,36 +81,78 @@ export default function AdminRoutes() {
           }
         />
 
+        {/* DASHBOARD */}
+
         <Route
           path="dashboard"
-          element={<AdminDashboard />}
+          element={
+            <AdminDashboard />
+          }
         />
+
+        {/* USERS */}
 
         <Route
           path="users"
-          element={<AdminUsers />}
+          element={
+            <AdminUsers />
+          }
+        />
+
+        {/* CATEGORIES */}
+
+        <Route
+          path="categories"
+          element={
+            <AdminCategories />
+          }
+        />
+
+        {/* ROOM TYPES */}
+
+        <Route
+          path="room-types"
+          element={
+            <AdminRoomType />
+          }
+        />
+
+        {/* PRODUCTS */}
+
+        <Route
+          path="products"
+          element={
+            <AdminProducts />
+          }
+        />
+
+        {/* PRODUCT DETAIL */}
+
+        <Route
+          path="products/:id"
+          element={
+            <AdminProductDetail />
+          }
+        />
+
+       <Route
+          path="products/:productId/variants/:variantId/media"
+          element={
+            <AdminVariantMediaLibrary />
+          }
         />
 
       </Route>
 
-      <Route
-      path="categories"
-      element={<AdminCategories />}
-    />
-
-    <Route
-      path="room-types"
-      element={<AdminRoomType />}
-    />
-
-    <Route
-    path="products"
-    element={<AdminProducts />}
-  />
+      {/* 404 */}
 
       <Route
         path="*"
-        element={<h1>404 Not Found</h1>}
+        element={
+          <h1>
+            404 Not Found
+          </h1>
+        }
       />
 
     </Routes>

@@ -9,11 +9,12 @@ import {
   createCategoryAPI,
   updateCategoryAPI,
   deleteCategoryAPI,
+  restoreCategoryAPI,
 
 } from "./categoryAPI";
 
 // ==========================================
-// THUNKS
+// GET CATEGORIES
 // ==========================================
 
 export const getAdminCategories =
@@ -46,6 +47,10 @@ export const getAdminCategories =
     }
   );
 
+// ==========================================
+// CREATE CATEGORY
+// ==========================================
+
 export const createCategory =
   createAsyncThunk(
 
@@ -75,6 +80,10 @@ export const createCategory =
       }
     }
   );
+
+// ==========================================
+// UPDATE CATEGORY
+// ==========================================
 
 export const updateCategory =
   createAsyncThunk(
@@ -110,6 +119,10 @@ export const updateCategory =
     }
   );
 
+// ==========================================
+// DELETE CATEGORY
+// ==========================================
+
 export const deleteCategory =
   createAsyncThunk(
 
@@ -136,6 +149,42 @@ export const deleteCategory =
 
             error:
               "Failed to delete category",
+          }
+        );
+      }
+    }
+  );
+
+// ==========================================
+// RESTORE CATEGORY
+// ==========================================
+
+export const restoreCategory =
+  createAsyncThunk(
+
+    "category/restoreCategory",
+
+    async (
+      categoryId,
+      { rejectWithValue }
+    ) => {
+
+      try {
+
+        await restoreCategoryAPI(
+          categoryId
+        );
+
+        return categoryId;
+
+      } catch (err) {
+
+        return rejectWithValue(
+
+          err.response?.data || {
+
+            error:
+              "Failed to restore category",
           }
         );
       }
@@ -262,12 +311,16 @@ const categorySlice = createSlice({
       .addCase(
         createCategory.fulfilled,
 
-        (state) => {
+        (state, action) => {
 
           state.categoryLoading = false;
 
           state.categorySuccess =
             "Category created successfully";
+
+          state.categories.unshift(
+            action.payload
+          );
         }
       )
 
@@ -391,6 +444,62 @@ const categorySlice = createSlice({
           state.categoryError =
             action.payload?.error ||
             "Failed to delete category";
+        }
+      );
+
+    // ==========================================
+    // RESTORE CATEGORY
+    // ==========================================
+
+    builder
+
+      .addCase(
+        restoreCategory.pending,
+
+        (state) => {
+
+          state.categoryLoading = true;
+
+          state.categoryError = null;
+        }
+      )
+
+      .addCase(
+        restoreCategory.fulfilled,
+
+        (state, action) => {
+
+          state.categoryLoading = false;
+
+          state.categorySuccess =
+            "Category restored successfully";
+
+          state.categories =
+            state.categories.map(
+              (category) =>
+
+                category.id === action.payload
+
+                  ? {
+                      ...category,
+                      is_active: true,
+                    }
+
+                  : category
+            );
+        }
+      )
+
+      .addCase(
+        restoreCategory.rejected,
+
+        (state, action) => {
+
+          state.categoryLoading = false;
+
+          state.categoryError =
+            action.payload?.error ||
+            "Failed to restore category";
         }
       );
   },

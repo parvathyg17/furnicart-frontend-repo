@@ -1,7 +1,4 @@
-import CreateCategoryModal
-from "./CreateCategoryModal";
-import EditCategoryModal
-from "./EditCategoryModal";
+import "../../../styles/admincategories.css";
 
 import {
   useEffect,
@@ -14,11 +11,25 @@ import {
 } from "react-redux";
 
 import {
+  Plus,
+  Pencil,
+  Trash2,
+  RotateCcw,
+  ChevronLeft,
+  ChevronRight,
+  SlidersHorizontal,
+  ArrowUpDown,
+} from "lucide-react";
+
+import {
 
   getAdminCategories,
   deleteCategory,
+  restoreCategory,
 
 } from "../../../features/catalog/category/categorySlice";
+import CreateCategoryModal from "./CreateCategoryModal";
+import EditCategoryModal from "./EditCategoryModal";
 
 export default function AdminCategories() {
 
@@ -34,45 +45,52 @@ export default function AdminCategories() {
     (state) => state.category
   );
 
-  const [search, setSearch] =
-    useState("");
+  const [
+    activeTab,
+    setActiveTab,
+  ] = useState("all");
 
-  const [page, setPage] =
-    useState(1);
+  const [
+    currentPage,
+    setCurrentPage,
+  ] = useState(1);
 
-  const [statusFilter,
-    setStatusFilter] =
-    useState("all");
 
-  const [openCreateModal,
-    setOpenCreateModal] =
-    useState(false);
+  const [
+    showCreateModal,
+    setShowCreateModal,
+  ] = useState(false);
 
-  const [openEditModal,
-  setOpenEditModal] =
-  useState(false);
 
-  const [selectedCategory,
-  setSelectedCategory] =
-  useState(null);
+  const [
+  showEditModal,
+  setShowEditModal,
+] = useState(false);
+
+const [
+    selectedCategory,
+    setSelectedCategory,
+  ] = useState(null);
 
   // ==========================================
-  // FETCH CATEGORIES
+  // FETCH
   // ==========================================
 
   useEffect(() => {
 
-    const params = {
-      search,
-      page,
+    let params = {
+
+      page: currentPage,
     };
 
-    // ONLY ADD FILTER WHEN NEEDED
+    if (activeTab === "active") {
 
-    if (statusFilter !== "all") {
+      params.is_active = true;
+    }
 
-      params.is_active =
-        statusFilter;
+    if (activeTab === "deleted") {
+
+      params.is_active = false;
     }
 
     dispatch(
@@ -80,400 +98,489 @@ export default function AdminCategories() {
     );
 
   }, [
+
     dispatch,
-    search,
-    page,
-    statusFilter,
+    currentPage,
+    activeTab,
   ]);
+
   // ==========================================
-  // DELETE CATEGORY
+  // DELETE
   // ==========================================
 
   const handleDelete =
-    async (categoryId) => {
-
-      const confirmDelete =
-        window.confirm(
-          "Delete this category?"
-        );
-
-      if (!confirmDelete) return;
+    (categoryId) => {
 
       dispatch(
         deleteCategory(categoryId)
       );
     };
 
+
+    const handleEdit =
+      (category) => {
+
+        setSelectedCategory(
+          category
+        );
+
+        setShowEditModal(true);
+      };
+
+  // ==========================================
+  // RESTORE
+  // ==========================================
+
+  const handleRestore =
+    (categoryId) => {
+
+      dispatch(
+        restoreCategory(categoryId)
+      );
+    };
+
   return (
 
-    <div className="p-6">
+    <div className="admin-categories-page">
 
       {/* HEADER */}
 
-      <div className="flex items-center justify-between mb-6">
+      <div className="categories-topbar">
 
-        <h1 className="text-2xl font-bold">
+        <div>
 
-          Categories
+          <div className="breadcrumb">
 
-        </h1>
+            Catalog
+
+            <span>/</span>
+
+            Categories
+
+          </div>
+
+          <h1>
+
+            Category Management
+
+          </h1>
+
+        </div>
 
         <button
 
-          onClick={() =>
-            setOpenCreateModal(true)
-          }
+            className="create-category-btn"
 
-          className="bg-black text-white px-4 py-2 rounded-lg"
-        >
-          Create Category
-        </button>
+            onClick={() =>
+              setShowCreateModal(true)
+            }
+          >
+
+            <Plus size={18} />
+
+            Create Category
+
+          </button>
 
       </div>
 
-      {/* SEARCH */}
+      {/* CARD */}
 
-      <div className="mb-6">
+      <div className="categories-card">
 
-        <input
-          type="text"
-          placeholder="Search categories..."
-          value={search}
-          onChange={(e) =>
-            setSearch(e.target.value)
-          }
-          className="border w-full p-3 rounded-lg"
-        />
+        {/* FILTERS */}
 
-      </div>
+        <div className="categories-toolbar">
 
-      {/* STATUS FILTER */}
+          <div className="category-tabs">
 
-      <div className="flex gap-3 mb-6">
+            <button
 
-        <button
+              className={
+                activeTab === "all"
 
-          onClick={() =>
-            setStatusFilter("all")
-          }
+                  ? "tab-btn active"
 
-          className={`px-4 py-2 rounded-lg border ${
-            statusFilter === "all"
-              ? "bg-black text-white"
-              : "bg-white"
-          }`}
-        >
-          All
-        </button>
+                  : "tab-btn"
+              }
 
-        <button
+              onClick={() =>
+                setActiveTab("all")
+              }
+            >
 
-          onClick={() =>
-            setStatusFilter("true")
-          }
+              All
 
-          className={`px-4 py-2 rounded-lg border ${
-            statusFilter === "true"
-              ? "bg-black text-white"
-              : "bg-white"
-          }`}
-        >
-          Active
-        </button>
+            </button>
 
-        <button
+            <button
 
-          onClick={() =>
-            setStatusFilter("false")
-          }
+              className={
+                activeTab === "active"
 
-          className={`px-4 py-2 rounded-lg border ${
-            statusFilter === "false"
-              ? "bg-black text-white"
-              : "bg-white"
-          }`}
-        >
-          Deleted
-        </button>
+                  ? "tab-btn active"
 
-      </div>
+                  : "tab-btn"
+              }
 
-      {/* TABLE */}
+              onClick={() =>
+                setActiveTab("active")
+              }
+            >
 
-      <div className="bg-white rounded-xl shadow overflow-hidden">
+              Active
 
-        <table className="w-full">
+            </button>
 
-          <thead className="bg-gray-100">
+            <button
 
-            <tr>
+              className={
+                activeTab === "deleted"
 
-              <th className="text-left p-4">
-                Image
-              </th>
+                  ? "tab-btn active"
 
-              <th className="text-left p-4">
-                Name
-              </th>
+                  : "tab-btn"
+              }
 
-              <th className="text-left p-4">
-                Parent
-              </th>
+              onClick={() =>
+                setActiveTab("deleted")
+              }
+            >
 
-              <th className="text-left p-4">
-                Children
-              </th>
+              Deleted
 
-              <th className="text-left p-4">
-                Status
-              </th>
+            </button>
 
-              <th className="text-left p-4">
-                Actions
-              </th>
+          </div>
 
-            </tr>
+          <div className="toolbar-actions">
 
-          </thead>
+            <button className="toolbar-btn">
 
-          <tbody>
+              <SlidersHorizontal size={18} />
 
-            {categoryLoading ? (
+              Advanced Filter
 
-              <tr>
+            </button>
 
-                <td
-                  colSpan="6"
-                  className="p-6 text-center"
-                >
-                  Loading...
-                </td>
+            <button className="toolbar-btn">
 
-              </tr>
+              <ArrowUpDown size={18} />
 
-            ) : categories.length === 0 ? (
+              Sort: A-Z
 
-              <tr>
+            </button>
 
-                <td
-                  colSpan="6"
-                  className="p-6 text-center"
-                >
-                  No categories found
-                </td>
+          </div>
 
-              </tr>
+        </div>
+
+        {/* TABLE */}
+
+        <div className="category-table">
+
+          {/* HEADER */}
+
+          <div className="category-table-header">
+
+            <div>Image</div>
+
+            <div>Name</div>
+
+            <div>Parent</div>
+
+            <div>Children</div>
+
+            <div>Status</div>
+
+            <div>Actions</div>
+
+          </div>
+
+          {/* ROWS */}
+
+          {
+            categoryLoading ? (
+
+              <div className="empty-state">
+
+                Loading categories...
+
+              </div>
 
             ) : (
 
               categories.map(
                 (category) => (
 
-                  <tr
+                  <div
                     key={category.id}
-                    className={`border-t ${
-                      !category.is_active
-                        ? "opacity-50"
-                        : ""
-                    }`}
+                    className="category-row"
                   >
 
                     {/* IMAGE */}
 
-                    <td className="p-4">
+                    <div className="category-image-cell">
 
-                      {category.image ? (
+                      <img
+                        src={
+                          category.image_url ||
 
-                        <img
-                          src={category.image}
-                          alt={category.name}
-                          className="w-14 h-14 rounded object-cover"
-                        />
+                          "https://placehold.co/80x80"
+                        }
+                        alt=""
+                      />
 
-                      ) : (
-
-                        <div className="w-14 h-14 bg-gray-200 rounded" />
-
-                      )}
-
-                    </td>
+                    </div>
 
                     {/* NAME */}
 
-                    <td className="p-4 font-medium">
+                    <div className="category-name-cell">
 
                       {category.name}
 
-                    </td>
+                    </div>
 
                     {/* PARENT */}
 
-                    <td className="p-4">
+                    <div className="category-parent-cell">
 
-                      {category.parent_name || "-"}
+                      {
+                        category.parent_name ||
 
-                    </td>
+                        "-"
+                      }
+
+                    </div>
 
                     {/* CHILDREN */}
 
-                    <td className="p-4">
+                    <div className="category-count-cell">
 
-                      {category.children.length}
+                      {
+                        category.children_count
+                      }
 
-                    </td>
+                    </div>
 
                     {/* STATUS */}
 
-                    <td className="p-4">
+                    <div>
 
-                      {category.is_active ? (
+                      {
+                        category.is_active ? (
 
-                        <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">
+                          <span className="status-pill active">
 
-                          Active
+                            Active
 
-                        </span>
+                          </span>
 
-                      ) : (
+                        ) : (
 
-                        <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm">
+                          <span className="status-pill deleted">
 
-                          Deleted
+                            Deleted
 
-                        </span>
+                          </span>
+                        )
+                      }
 
-                      )}
-
-                    </td>
+                    </div>
 
                     {/* ACTIONS */}
 
-                    <td className="p-4">
+                    <div className="category-actions">
 
-                      <div className="flex gap-2">
+                      <button
+                        className="icon-btn"
+                        onClick={() =>
+                          handleEdit(category)
+                        }
+                      >
 
-                        <button
+                        <Pencil size={18} />
 
-                              onClick={() => {
+                      </button>
 
-                                setSelectedCategory(
-                                  category
-                                );
-
-                                setOpenEditModal(true);
-                              }}
-
-                              className="px-3 py-1 bg-blue-500 text-white rounded"
-                            >
-                              Edit
-                        </button>
-
-                        {category.is_active && (
+                      {
+                        category.is_active ? (
 
                           <button
-
+                            className="icon-btn delete-btn"
                             onClick={() =>
                               handleDelete(
                                 category.id
                               )
                             }
-
-                            className="px-3 py-1 bg-red-500 text-white rounded"
                           >
-                            Delete
+
+                            <Trash2 size={18} />
+
                           </button>
 
-                        )}
+                        ) : (
 
-                      </div>
+                          <button
+                            className="restore-btn"
+                            onClick={() =>
+                              handleRestore(
+                                category.id
+                              )
+                            }
+                          >
 
-                    </td>
+                            <RotateCcw size={16} />
 
-                  </tr>
+                            Restore
+
+                          </button>
+                        )
+                      }
+
+                    </div>
+
+                  </div>
                 )
               )
-            )}
+            )
+          }
 
-          </tbody>
+        </div>
 
-        </table>
+        {/* FOOTER */}
+
+        <div className="category-footer">
+
+          <p>
+
+            Showing
+
+            {" "}
+
+            {
+              categories.length
+            }
+
+            {" "}
+
+            of
+
+            {" "}
+
+            {
+              categoryPagination?.count || 0
+            }
+
+            {" "}
+
+            categories
+
+          </p>
+
+          <div className="pagination">
+
+            <button
+
+              disabled={
+                !categoryPagination?.previous
+              }
+
+              onClick={() =>
+                setCurrentPage(
+                  (prev) =>
+                    Math.max(
+                      prev - 1,
+                      1
+                    )
+                )
+              }
+            >
+
+              <ChevronLeft size={18} />
+
+              Prev
+
+            </button>
+
+            <div className="page-indicator">
+
+              Page
+
+              {" "}
+
+              {
+                categoryPagination?.currentPage
+              }
+
+              {" "}
+
+              of
+
+              {" "}
+
+              {
+                categoryPagination?.totalPages
+              }
+
+            </div>
+
+            <button
+
+              disabled={
+                !categoryPagination?.next
+              }
+
+              onClick={() =>
+                setCurrentPage(
+                  (prev) =>
+                    prev + 1
+                )
+              }
+            >
+
+              Next
+
+              <ChevronRight size={18} />
+
+            </button>
+
+          </div>
+
+        </div>
+        
 
       </div>
 
-      {/* PAGINATION */}
+      {/* CREATE CATEGORY MODAL */}
 
-      {categoryPagination && (
+        <CreateCategoryModal
 
-        <div className="flex items-center justify-center gap-3 mt-6">
-
-          <button
-
-            disabled={
-              !categoryPagination.previous
-            }
-
-            onClick={() =>
-              setPage((prev) =>
-                prev - 1
-              )
-            }
-
-            className="px-4 py-2 border rounded disabled:opacity-50"
-          >
-            Prev
-          </button>
-
-          <span>
-
-            Page {
-              categoryPagination.currentPage
-            } of {
-              categoryPagination.totalPages
-            }
-
-          </span>
-
-          <button
-
-            disabled={
-              !categoryPagination.next
-            }
-
-            onClick={() =>
-              setPage((prev) =>
-                prev + 1
-              )
-            }
-
-            className="px-4 py-2 border rounded disabled:opacity-50"
-          >
-            Next
-          </button>
-
-        </div>
-      )}
-
-      <CreateCategoryModal
-
-        isOpen={openCreateModal}
-
-        onClose={() =>
-          setOpenCreateModal(false)
-        }
-
-        
-      />
-
-      <EditCategoryModal
-
-          isOpen={openEditModal}
+          isOpen={showCreateModal}
 
           onClose={() =>
-            setOpenEditModal(false)
+            setShowCreateModal(false)
           }
 
-          category={selectedCategory}
         />
+
+        {/* EDIT CATEGORY MODAL */}
+
+        <EditCategoryModal
+
+          isOpen={showEditModal}
+
+          onClose={() => {
+
+            setShowEditModal(false);
+
+            setSelectedCategory(null);
+          }}
+
+          category={selectedCategory}
+
+        />
+              
 
     </div>
   );

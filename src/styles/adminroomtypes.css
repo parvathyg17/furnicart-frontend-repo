@@ -1,0 +1,415 @@
+.admin-room-types-page {
+
+  padding: 42px;
+
+  background: #f6f3ee;
+
+  min-height: 100vh;
+}
+
+/* ==========================================
+HEADER
+========================================== */
+
+.room-types-header {
+
+  display: flex;
+
+  align-items: flex-start;
+
+  justify-content: space-between;
+
+  margin-bottom: 38px;
+}
+
+.room-types-header-left p {
+
+  font-size: 13px;
+
+  letter-spacing: 0.18em;
+
+  text-transform: uppercase;
+
+  color: #9b9188;
+
+  margin-bottom: 14px;
+
+  font-weight: 600;
+}
+
+.room-types-header-left h1 {
+
+  font-size: 68px;
+
+  line-height: 1;
+
+  color: #24150f;
+
+  font-family: "DM Serif Display", serif;
+
+  font-weight: 500;
+}
+
+.create-room-type-btn {
+
+  height: 58px;
+
+  padding: 0 28px;
+
+  border: none;
+
+  border-radius: 16px;
+
+  background: #432819;
+
+  color: white;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  font-size: 15px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 10px 24px rgba(67, 40, 25, 0.18);
+
+  transition: 0.2s;
+}
+
+.create-room-type-btn:hover {
+
+  transform: translateY(-2px);
+}
+
+/* ==========================================
+CARD
+========================================== */
+
+.room-types-card {
+
+  background: #fbfaf8;
+
+  border-radius: 34px;
+
+  padding: 28px;
+
+  box-shadow:
+    0 10px 30px rgba(0,0,0,0.04);
+}
+
+/* ==========================================
+FILTERS
+========================================== */
+
+.room-types-toolbar {
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 20px;
+
+  margin-bottom: 28px;
+}
+
+.room-type-tabs {
+
+  background: #f2efea;
+
+  padding: 6px;
+
+  border-radius: 16px;
+
+  display: flex;
+
+  gap: 6px;
+}
+
+.room-type-tab {
+
+  height: 44px;
+
+  padding: 0 24px;
+
+  border: none;
+
+  border-radius: 12px;
+
+  background: transparent;
+
+  color: #4e4138;
+
+  font-size: 15px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.room-type-tab.active {
+
+  background: white;
+
+  box-shadow:
+    0 4px 10px rgba(0,0,0,0.05);
+}
+
+.sort-box {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 16px;
+
+  color: #5d5048;
+
+  font-size: 14px;
+}
+
+.sort-box span {
+
+  font-size: 12px;
+
+  letter-spacing: 0.1em;
+
+  text-transform: uppercase;
+
+  color: #9c9188;
+}
+
+/* ==========================================
+TABLE
+========================================== */
+
+.room-type-table {
+
+  overflow: hidden;
+
+  border-radius: 28px;
+
+  border: 1px solid #eee7df;
+}
+
+.room-type-table-header,
+.room-type-row {
+
+  display: grid;
+
+  grid-template-columns:
+    140px
+    1.5fr
+    1fr
+    140px;
+
+  align-items: center;
+}
+
+.room-type-table-header {
+
+  height: 64px;
+
+  background: #f7f3ef;
+
+  border-bottom: 1px solid #ece5de;
+
+  padding: 0 34px;
+
+  font-size: 13px;
+
+  font-weight: 700;
+
+  letter-spacing: 0.12em;
+
+  text-transform: uppercase;
+
+  color: #67574d;
+}
+
+.room-type-row {
+
+  min-height: 108px;
+
+  padding: 0 34px;
+
+  background: white;
+
+  border-bottom: 1px solid #f1ece7;
+}
+
+.room-type-row:last-child {
+
+  border-bottom: none;
+}
+
+/* ==========================================
+IMAGE
+========================================== */
+
+.room-type-image {
+
+  width: 64px;
+
+  height: 64px;
+
+  border-radius: 18px;
+
+  object-fit: cover;
+
+  background: #ece7e2;
+}
+
+/* ==========================================
+NAME
+========================================== */
+
+.room-type-name {
+
+  font-size: 18px;
+
+  font-weight: 600;
+
+  color: #24150f;
+}
+
+/* ==========================================
+STATUS
+========================================== */
+
+.room-type-status {
+
+  width: fit-content;
+
+  height: 32px;
+
+  padding: 0 14px;
+
+  border-radius: 999px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  font-size: 13px;
+
+  font-weight: 600;
+}
+
+.room-type-status.active {
+
+  background: #dfeedd;
+
+  color: #36553b;
+}
+
+.room-type-status.deleted {
+
+  background: #f9dddd;
+
+  color: #b14040;
+}
+
+.status-dot {
+
+  width: 7px;
+
+  height: 7px;
+
+  border-radius: 50%;
+}
+
+.room-type-status.active .status-dot {
+
+  background: #36553b;
+}
+
+.room-type-status.deleted .status-dot {
+
+  background: #d13c3c;
+}
+
+/* ==========================================
+ACTIONS
+========================================== */
+
+.room-type-actions {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 18px;
+}
+
+.action-btn {
+
+  border: none;
+
+  background: transparent;
+
+  color: #37241a;
+
+  cursor: pointer;
+}
+
+/* ==========================================
+FOOTER
+========================================== */
+
+.room-types-footer {
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  padding: 28px 12px 0;
+}
+
+.pagination-btn {
+
+  height: 46px;
+
+  padding: 0 22px;
+
+  border-radius: 14px;
+
+  border: 1px solid #e6ddd6;
+
+  background: white;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  cursor: pointer;
+}
+
+.pagination-btn:disabled {
+
+  opacity: 0.5;
+
+  cursor: not-allowed;
+}
+
+.page-text {
+
+  font-size: 15px;
+
+  color: #4e4138;
+
+  font-weight: 500;
+}

@@ -75,3 +75,13 @@ export const deleteCategoryAPI =
 
     return response.data;
   };
+
+export const restoreCategoryAPI =
+  async (categoryId) => {
+
+    const response = await api.patch(
+      `admin/categories/${categoryId}/restore/`
+    );
+
+    return response.data;
+  };

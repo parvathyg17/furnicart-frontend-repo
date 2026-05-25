@@ -1,4 +1,3 @@
-
 import "../styles/adminpanel.css";
 
 import {
@@ -6,6 +5,9 @@ import {
   Users,
   LogOut,
   ShieldAlert,
+  FolderKanban,
+  Sofa,
+  Package2,
 } from "lucide-react";
 
 import {
@@ -40,8 +42,6 @@ export default function AdminLayout() {
     (state) => state.admin
   );
 
-  
-
   const [
     showLogoutModal,
     setShowLogoutModal,
@@ -52,25 +52,9 @@ export default function AdminLayout() {
     setLogoutLoading,
   ] = useState(false);
 
-
-
-  const openLogoutModal =
-    () => {
-
-      setShowLogoutModal(true);
-
-    };
-
- 
-
-  const closeLogoutModal =
-    () => {
-
-      setShowLogoutModal(false);
-
-    };
-
- 
+  // ==========================================
+  // LOGOUT
+  // ==========================================
 
   const handleLogout =
     async () => {
@@ -86,16 +70,19 @@ export default function AdminLayout() {
       navigate(
         "/admin/login"
       );
-
     };
 
   return (
+
     <div className="admin-layout">
 
-      
+      {/* SIDEBAR */}
+
       <aside className="admin-sidebar">
 
         <div>
+
+          {/* LOGO */}
 
           <div className="admin-sidebar-logo">
 
@@ -109,29 +96,32 @@ export default function AdminLayout() {
 
           </div>
 
+          {/* NAVIGATION */}
+
           <nav className="admin-nav">
 
-            
+            {/* DASHBOARD */}
 
             <Link
               to="/admin/dashboard"
               className={
-                location.pathname ===
-                "/admin/dashboard"
+                location.pathname.includes(
+                  "/admin/dashboard"
+                )
+
                   ? "admin-nav-link active"
+
                   : "admin-nav-link"
               }
             >
 
-              <LayoutDashboard
-                size={20}
-              />
+              <LayoutDashboard size={20} />
 
               Dashboard
 
             </Link>
 
-            
+            {/* USERS */}
 
             <Link
               to="/admin/users"
@@ -139,7 +129,9 @@ export default function AdminLayout() {
                 location.pathname.includes(
                   "/admin/users"
                 )
+
                   ? "admin-nav-link active"
+
                   : "admin-nav-link"
               }
             >
@@ -150,16 +142,79 @@ export default function AdminLayout() {
 
             </Link>
 
+            {/* CATEGORIES */}
+
+            <Link
+              to="/admin/categories"
+              className={
+                location.pathname.includes(
+                  "/admin/categories"
+                )
+
+                  ? "admin-nav-link active"
+
+                  : "admin-nav-link"
+              }
+            >
+
+              <FolderKanban size={20} />
+
+              Categories
+
+            </Link>
+
+            {/* ROOM TYPES */}
+
+            <Link
+              to="/admin/room-types"
+              className={
+                location.pathname.includes(
+                  "/admin/room-types"
+                )
+
+                  ? "admin-nav-link active"
+
+                  : "admin-nav-link"
+              }
+            >
+
+              <Sofa size={20} />
+
+              Room Types
+
+            </Link>
+
+            {/* PRODUCTS */}
+
+            <Link
+              to="/admin/products"
+              className={
+                location.pathname.includes(
+                  "/admin/products"
+                )
+
+                  ? "admin-nav-link active"
+
+                  : "admin-nav-link"
+              }
+            >
+
+              <Package2 size={20} />
+
+              Products
+
+            </Link>
+
           </nav>
 
         </div>
 
-       
+        {/* LOGOUT */}
 
         <button
           className="admin-logout-btn"
-          onClick={
-            openLogoutModal
+          onClick={() =>
+            setShowLogoutModal(true)
           }
         >
 
@@ -171,10 +226,11 @@ export default function AdminLayout() {
 
       </aside>
 
+      {/* MAIN */}
 
       <div className="admin-main">
 
-        
+        {/* TOPBAR */}
 
         <header className="admin-topbar">
 
@@ -190,36 +246,40 @@ export default function AdminLayout() {
 
             <p>
 
-              Manage your store
+              Manage products,
+              categories,
+              room types,
               and customers.
 
             </p>
 
           </div>
 
-          <div className="admin-top-actions">
+          {/* PROFILE */}
 
-            <div className="admin-profile">
+          <div className="admin-profile">
 
-              <div className="admin-avatar">
+            <div className="admin-avatar">
 
-                {admin?.email?.charAt(
-                  0
-                )}
+              {
+                admin?.email?.charAt(0)
+              }
 
-              </div>
+            </div>
 
-              <div>
+            <div>
 
-                <h4>
-                  {admin?.email}
-                </h4>
+              <h4>
 
-                <span>
-                  Administrator
-                </span>
+                {admin?.email}
 
-              </div>
+              </h4>
+
+              <span>
+
+                Administrator
+
+              </span>
 
             </div>
 
@@ -227,7 +287,7 @@ export default function AdminLayout() {
 
         </header>
 
-        
+        {/* PAGE CONTENT */}
 
         <div className="admin-content">
 
@@ -237,7 +297,7 @@ export default function AdminLayout() {
 
       </div>
 
-      
+      {/* LOGOUT MODAL */}
 
       {showLogoutModal && (
 
@@ -245,41 +305,31 @@ export default function AdminLayout() {
 
           <div className="admin-modal">
 
-
             <div className="admin-modal-icon">
 
-              <ShieldAlert
-                size={30}
-              />
+              <ShieldAlert size={30} />
 
             </div>
 
-           
-
             <h3>
-              Logout
-            </h3>
 
-           
+              Logout
+
+            </h3>
 
             <p>
 
               Are you sure you want
-              to logout from admin
-              panel?
+              to logout from admin panel?
 
             </p>
 
-            
-
             <div className="admin-modal-actions">
-
-              
 
               <button
                 className="modal-cancel-btn"
-                onClick={
-                  closeLogoutModal
+                onClick={() =>
+                  setShowLogoutModal(false)
                 }
               >
 
@@ -287,18 +337,18 @@ export default function AdminLayout() {
 
               </button>
 
-             
-
               <button
                 className="modal-block-btn"
-                onClick={
-                  handleLogout
-                }
+                onClick={handleLogout}
               >
 
-                {logoutLoading
-                  ? "Logging out..."
-                  : "Logout"}
+                {
+                  logoutLoading
+
+                    ? "Logging out..."
+
+                    : "Logout"
+                }
 
               </button>
 
@@ -307,7 +357,6 @@ export default function AdminLayout() {
           </div>
 
         </div>
-
       )}
 
     </div>

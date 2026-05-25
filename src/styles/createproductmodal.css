@@ -564,3 +564,47 @@
 
   line-height: 1.6;
 }
+
+.multi-room-grid{
+
+  display:flex;
+
+  flex-wrap:wrap;
+
+  gap:12px;
+
+  margin-top:12px;
+}
+
+.room-type-chip{
+
+  border:1px solid #ddd;
+
+  border-radius:999px;
+
+  padding:10px 16px;
+
+  cursor:pointer;
+
+  transition:0.2s ease;
+
+  background:#fff;
+
+  font-size:14px;
+
+  font-weight:500;
+}
+
+.room-type-chip input{
+
+  display:none;
+}
+
+.room-type-chip.active{
+
+  background:#111;
+
+  color:#fff;
+
+  border-color:#111;
+}

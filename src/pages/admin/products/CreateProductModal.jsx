@@ -1,5 +1,10 @@
 import "../../../styles/createproductmodal.css";
 
+import CreateCategoryModal
+from "../categories/CreateCategoryModal";
+
+import CreateRoomTypeModal
+from "../roomType/CreateRoomTypeModal";
 import {
   useEffect,
   useState,
@@ -65,13 +70,23 @@ export default function CreateProductModal({
 
     category: "",
 
-    room_type: "",
+    room_type_ids: [],
 
     is_featured: false,
 
     is_active: true,
   });
 
+
+    const [
+    showCreateCategoryModal,
+    setShowCreateCategoryModal,
+  ] = useState(false);
+
+  const [
+    showCreateRoomTypeModal,
+    setShowCreateRoomTypeModal,
+  ] = useState(false);
   // ==========================================
   // FETCH DATA
   // ==========================================
@@ -145,7 +160,7 @@ export default function CreateProductModal({
 
           category: "",
 
-          room_type: "",
+          room_type_ids: [],
 
           is_featured: false,
 
@@ -227,15 +242,33 @@ export default function CreateProductModal({
 
             {/* CATEGORY + ROOM TYPE */}
 
+          
+
             <div className="double-fields">
 
               {/* CATEGORY */}
 
               <div className="form-group">
 
-                <label>
-                  CATEGORY
-                </label>
+                <div className="field-label-row">
+
+                  <label>
+                    CATEGORY
+                  </label>
+
+                  <button
+                    type="button"
+                    className="inline-create-link"
+                    onClick={() =>
+                      setShowCreateCategoryModal(true)
+                    }
+                  >
+
+                    + Create Category
+
+                  </button>
+
+                </div>
 
                 <div className="select-wrapper">
 
@@ -285,62 +318,101 @@ export default function CreateProductModal({
 
               </div>
 
-              {/* ROOM TYPE */}
+             {/* ROOM TYPES */}
 
               <div className="form-group">
 
-                <label>
-                  ROOM TYPE
-                </label>
+                <div className="field-label-row">
 
-                <div className="select-wrapper">
+                  <label>
+                    ROOM TYPES
+                  </label>
 
-                  <select
-                    name="room_type"
-                    value={
-                      formData.room_type
+                  <button
+                    type="button"
+                    className="inline-create-link"
+                    onClick={() =>
+                      setShowCreateRoomTypeModal(true)
                     }
-                    onChange={
-                      handleChange
-                    }
-                    required
                   >
 
-                    <option value="">
-                      Select room type
-                    </option>
+                    + Create Room Type
 
-                    {
-                      roomTypes
-                        ?.filter(
-                          (item) =>
-                            item.is_active
-                        )
-                        ?.map(
-                          (item) => (
+                  </button>
 
-                            <option
-                              key={item.id}
-                              value={item.id}
-                            >
+                </div>
 
-                              {item.name}
+                <div className="multi-room-grid">
 
-                            </option>
-                          )
-                        )
-                    }
+                  {
+                    roomTypes
+                      ?.filter(
+                        (item) => item.is_active
+                      )
+                      ?.map((item) => (
 
-                  </select>
+                        <label
+                          key={item.id}
+                          className={`room-type-chip ${
+                            formData.room_type_ids.includes(
+                              item.id
+                            )
+                              ? "active"
+                              : ""
+                          }`}
+                        >
 
-                  <ChevronDown
-                    size={18}
-                  />
+                          <input
+                            type="checkbox"
+                            checked={
+                              formData.room_type_ids.includes(
+                                item.id
+                              )
+                            }
+                            onChange={(e) => {
+
+                              if (e.target.checked) {
+
+                                setFormData((prev) => ({
+
+                                  ...prev,
+
+                                  room_type_ids: [
+
+                                    ...prev.room_type_ids,
+
+                                    item.id,
+                                  ],
+                                }));
+
+                              } else {
+
+                                setFormData((prev) => ({
+
+                                  ...prev,
+
+                                  room_type_ids:
+
+                                    prev.room_type_ids.filter(
+                                      (id) =>
+                                        id !== item.id
+                                    ),
+                                }));
+                              }
+                            }}
+                          />
+
+                          <span>
+                            {item.name}
+                          </span>
+
+                        </label>
+                      ))
+                  }
 
                 </div>
 
               </div>
-
             </div>
 
             {/* DESCRIPTION */}
@@ -489,6 +561,28 @@ export default function CreateProductModal({
         </form>
 
       </div>
+
+      {/* CREATE CATEGORY MODAL */}
+
+      <CreateCategoryModal
+
+        isOpen={showCreateCategoryModal}
+
+        onClose={() =>
+          setShowCreateCategoryModal(false)
+        }
+      />
+
+      {/* CREATE ROOM TYPE MODAL */}
+
+      <CreateRoomTypeModal
+
+        isOpen={showCreateRoomTypeModal}
+
+        onClose={() =>
+          setShowCreateRoomTypeModal(false)
+        }
+      />
 
     </div>
   );

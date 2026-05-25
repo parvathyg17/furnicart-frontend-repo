@@ -581,3 +581,23 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+.product-breadcrumbs {
+
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+
+  margin-bottom: 24px;
+
+  font-size: 14px;
+  color: #7a7a7a;
+}
+
+.product-breadcrumbs span {
+
+  display: flex;
+  align-items: center;
+}

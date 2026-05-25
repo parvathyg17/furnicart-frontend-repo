@@ -10,18 +10,22 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
     "@react-oauth/google": "^0.13.5",
     "@reduxjs/toolkit": "^2.11.2",
     "axios": "^1.16.0",
     "browser-image-compression": "^2.0.2",
     "lucide-react": "^1.14.0",
     "react": "^19.2.5",
+    "react-avatar-editor": "^15.1.0",
     "react-dom": "^19.2.5",
     "react-easy-crop": "^5.5.7",
     "react-hot-toast": "^2.6.0",
     "react-icons": "^5.6.0",
     "react-redux": "^9.2.0",
-    "react-router-dom": "^7.15.0"
+    "react-router-dom": "^7.15.0",
+    "yet-another-react-lightbox": "^3.32.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

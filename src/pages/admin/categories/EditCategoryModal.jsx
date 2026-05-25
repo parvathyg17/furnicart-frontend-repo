@@ -1,3 +1,5 @@
+import "../../../styles/createcategorymodal.css";
+
 import {
   useEffect,
   useState,
@@ -7,6 +9,14 @@ import {
   useDispatch,
   useSelector,
 } from "react-redux";
+
+import {
+  X,
+  ImagePlus,
+  ChevronDown,
+  Check,
+  Pencil,
+} from "lucide-react";
 
 import {
 
@@ -50,7 +60,7 @@ export default function EditCategoryModal({
     useState(null);
 
   // ==========================================
-  // LOAD CATEGORY DATA
+  // LOAD CATEGORY
   // ==========================================
 
   useEffect(() => {
@@ -72,7 +82,12 @@ export default function EditCategoryModal({
       });
 
       setPreview(
-        category.image || null
+
+        category.image_url ||
+
+        category.image ||
+
+        null
       );
     }
 
@@ -103,26 +118,50 @@ export default function EditCategoryModal({
   // HANDLE IMAGE
   // ==========================================
 
-  const handleImageChange = (
-    e
-  ) => {
+  const handleImageChange =
+    (e) => {
 
-    const file =
-      e.target.files[0];
+      const file =
+        e.target.files[0];
 
-    if (!file) return;
+      if (!file) return;
 
-    setFormData((prev) => ({
+      if (
+        file.size >
+        5 * 1024 * 1024
+      ) {
 
-      ...prev,
+        alert(
+          "Image must be below 5MB"
+        );
 
-      image: file,
-    }));
+        return;
+      }
 
-    setPreview(
-      URL.createObjectURL(file)
-    );
-  };
+      if (
+        !file.type.startsWith(
+          "image/"
+        )
+      ) {
+
+        alert(
+          "Only image files allowed"
+        );
+
+        return;
+      }
+
+      setFormData((prev) => ({
+
+        ...prev,
+
+        image: file,
+      }));
+
+      setPreview(
+        URL.createObjectURL(file)
+      );
+    };
 
   // ==========================================
   // SUBMIT
@@ -146,15 +185,22 @@ export default function EditCategoryModal({
         formData.description
       );
 
-      if (formData.parent) {
+      if (
+        formData.parent &&
+        formData.parent !== ""
+      ) {
 
         submitData.append(
           "parent",
-          formData.parent
+          parseInt(
+            formData.parent
+          )
         );
       }
 
-      if (formData.image) {
+      if (
+        formData.image instanceof File
+      ) {
 
         submitData.append(
           "image",
@@ -162,29 +208,40 @@ export default function EditCategoryModal({
         );
       }
 
-      const result =
-        await dispatch(
-          updateCategory({
+      try {
 
-            categoryId:
-              category.id,
+        const result =
+          await dispatch(
+            updateCategory({
 
-            data:
-              submitData,
-          })
-        );
+              categoryId:
+                category.id,
 
-      if (
-        updateCategory.fulfilled.match(
-          result
-        )
-      ) {
+              data:
+                submitData,
+            })
+          ).unwrap();
+
+        console.log(result);
 
         dispatch(
           getAdminCategories()
         );
 
         onClose();
+
+      } catch (error) {
+
+        console.log(error);
+
+        alert(
+
+          JSON.stringify(
+            error,
+            null,
+            2
+          )
+        );
       }
     };
 
@@ -193,25 +250,38 @@ export default function EditCategoryModal({
 
   return (
 
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div className="category-modal-overlay">
 
-      <div className="bg-white w-full max-w-lg rounded-2xl p-6">
+      <div className="category-modal">
 
         {/* HEADER */}
 
-        <div className="flex items-center justify-between mb-6">
+        <div className="category-modal-header">
 
-          <h2 className="text-xl font-bold">
+          <div>
 
-            Edit Category
+            <h2>
 
-          </h2>
+              Edit Category
+
+            </h2>
+
+            <p>
+
+              Update category information,
+              hierarchy and visual identity.
+
+            </p>
+
+          </div>
 
           <button
             onClick={onClose}
-            className="text-gray-500"
+            className="close-btn"
           >
-            ✕
+
+            <X size={28} />
+
           </button>
 
         </div>
@@ -220,77 +290,95 @@ export default function EditCategoryModal({
 
         <form
           onSubmit={handleSubmit}
-          className="space-y-4"
+          className="category-form"
+          encType="multipart/form-data"
         >
 
-          {/* NAME */}
+          {/* GRID */}
 
-          <div>
+          <div className="category-grid">
 
-            <label className="block mb-1 font-medium">
+            {/* NAME */}
 
-              Name
+            <div className="form-group">
 
-            </label>
+              <label>
 
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-              className="w-full border rounded-lg p-3"
-            />
+                Category Name
 
-          </div>
+              </label>
 
-          {/* PARENT */}
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="e.g. Scandinavian Lounge"
+                required
+              />
 
-          <div>
+            </div>
 
-            <label className="block mb-1 font-medium">
+            {/* PARENT */}
 
-              Parent Category
+            <div className="form-group">
 
-            </label>
+              <label>
 
-            <select
-              name="parent"
-              value={formData.parent}
-              onChange={handleChange}
-              className="w-full border rounded-lg p-3"
-            >
+                Parent Category
 
-              <option value="">
-                No Parent
-              </option>
+              </label>
 
-              {categories
+              <div className="select-wrapper">
 
-                .filter(
-                  (item) =>
-                    item.id !== category.id
-                )
+                <select
+                  name="parent"
+                  value={formData.parent}
+                  onChange={handleChange}
+                >
 
-                .map((item) => (
-
-                  <option
-                    key={item.id}
-                    value={item.id}
-                  >
-                    {item.name}
+                  <option value="">
+                    None
                   </option>
-                ))}
 
-            </select>
+                  {
+                    categories
+
+                      .filter(
+                        (item) =>
+                          item.id !==
+                          category.id
+                      )
+
+                      .map((item) => (
+
+                        <option
+                          key={item.id}
+                          value={item.id}
+                        >
+                          {item.name}
+                        </option>
+                      ))
+                  }
+
+                </select>
+
+                <ChevronDown
+                  size={18}
+                  className="select-icon"
+                />
+
+              </div>
+
+            </div>
 
           </div>
 
           {/* DESCRIPTION */}
 
-          <div>
+          <div className="form-group">
 
-            <label className="block mb-1 font-medium">
+            <label>
 
               Description
 
@@ -300,65 +388,111 @@ export default function EditCategoryModal({
               name="description"
               value={formData.description}
               onChange={handleChange}
-              rows="4"
-              className="w-full border rounded-lg p-3"
+              placeholder="Describe this category and its furniture style..."
             />
 
           </div>
 
           {/* IMAGE */}
 
-          <div>
+          <div className="form-group">
 
-            <label className="block mb-1 font-medium">
+            <label>
 
               Category Image
 
             </label>
 
-            <input
-              type="file"
-              accept="image/*"
-              onChange={
-                handleImageChange
+            <div
+              className="image-upload-box"
+              onClick={() =>
+                document
+                  .getElementById(
+                    "edit-category-image-input"
+                  )
+                  ?.click()
               }
-            />
+            >
+
+              <input
+                id="edit-category-image-input"
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={
+                  handleImageChange
+                }
+              />
+
+              {
+                preview ? (
+
+                  <img
+                    src={preview}
+                    alt="Preview"
+                    className="preview-image"
+                  />
+
+                ) : (
+
+                  <div className="upload-content">
+
+                    <div className="upload-icon-box">
+
+                      <ImagePlus size={46} />
+
+                    </div>
+
+                    <div className="upload-btn">
+
+                      Upload Image
+
+                    </div>
+
+                    <p>
+
+                      High-resolution JPEG or PNG.
+                      Max 5MB.
+
+                    </p>
+
+                  </div>
+                )
+              }
+
+            </div>
 
           </div>
 
-          {/* PREVIEW */}
+          {/* FOOTER */}
 
-          {preview && (
-
-            <img
-              src={preview}
-              alt="Preview"
-              className="w-32 h-32 rounded-lg object-cover"
-            />
-
-          )}
-
-          {/* ACTIONS */}
-
-          <div className="flex justify-end gap-3 pt-4">
+          <div className="category-modal-footer">
 
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border rounded-lg"
+              className="cancel-button"
             >
+
               Cancel
+
             </button>
 
             <button
               type="submit"
               disabled={categoryLoading}
-              className="px-4 py-2 bg-black text-white rounded-lg"
+              className="submit-button"
             >
 
-              {categoryLoading
-                ? "Updating..."
-                : "Update"}
+              <Pencil size={18} />
+
+              {
+                categoryLoading
+
+                  ? "Updating..."
+
+                  : "Update Category"
+              }
 
             </button>
 

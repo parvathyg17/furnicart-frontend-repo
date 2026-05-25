@@ -75,3 +75,18 @@ export const deleteRoomTypeAPI =
 
     return response.data;
   };
+
+
+// ==========================================
+// RESTORE ROOM TYPE
+// ==========================================
+
+export const restoreRoomTypeAPI =
+  async (roomTypeId) => {
+
+    const response = await api.patch(
+      `admin/room-types/${roomTypeId}/restore/`
+    );
+
+    return response.data;
+  };

@@ -66,7 +66,7 @@ export default function EditProductModal({
 
     category: "",
 
-    room_type: "",
+    room_type_ids: [],
 
     is_featured: false,
 
@@ -106,10 +106,12 @@ export default function EditProductModal({
           product.description || "",
 
         category:
-          product.category?.id || "",
+          product.category || "",
 
-        room_type:
-          product.room_type?.id || "",
+        room_type_ids:
+          product.room_types?.map(
+            (item) => item.id
+          ) || [],
 
         is_featured:
           product.is_featured || false,
@@ -317,61 +319,86 @@ export default function EditProductModal({
 
               {/* ROOM TYPE */}
 
-              <div className="form-group">
 
-                <label>
-                  ROOM TYPE
-                </label>
 
-                <div className="select-wrapper">
+                <div className="form-group">
 
-                  <select
-                    name="room_type"
-                    value={
-                      formData.room_type
-                    }
-                    onChange={
-                      handleChange
-                    }
-                    required
-                  >
+                  <label>
+                    ROOM TYPES
+                  </label>
 
-                    <option value="">
-                      Select room type
-                    </option>
+                  <div className="multi-room-grid">
 
                     {
                       roomTypes
                         ?.filter(
-                          (item) =>
-                            item.is_active
+                          (item) => item.is_active
                         )
-                        ?.map(
-                          (item) => (
+                        ?.map((item) => (
 
-                            <option
-                              key={item.id}
-                              value={item.id}
-                            >
+                          <label
+                            key={item.id}
+                            className={`room-type-chip ${
+                              formData.room_type_ids.includes(
+                                item.id
+                              )
+                                ? "active"
+                                : ""
+                            }`}
+                          >
 
+                            <input
+                              type="checkbox"
+                              checked={
+                                formData.room_type_ids.includes(
+                                  item.id
+                                )
+                              }
+                              onChange={(e) => {
+
+                                if (e.target.checked) {
+
+                                  setFormData((prev) => ({
+
+                                    ...prev,
+
+                                    room_type_ids: [
+
+                                      ...prev.room_type_ids,
+
+                                      item.id,
+                                    ],
+                                  }));
+
+                                } else {
+
+                                  setFormData((prev) => ({
+
+                                    ...prev,
+
+                                    room_type_ids:
+
+                                      prev.room_type_ids.filter(
+                                        (id) =>
+                                          id !== item.id
+                                      ),
+                                  }));
+                                }
+                              }}
+                            />
+
+                            <span>
                               {item.name}
+                            </span>
 
-                            </option>
-                          )
-                        )
+                          </label>
+                        ))
                     }
 
-                  </select>
-
-                  <ChevronDown
-                    size={18}
-                  />
+                  </div>
 
                 </div>
-
               </div>
-
-            </div>
 
             {/* DESCRIPTION */}
 

@@ -1,3 +1,5 @@
+import "../../../styles/createcategorymodal.css";
+
 import {
   useEffect,
   useState,
@@ -5,11 +7,19 @@ import {
 
 import {
   useDispatch,
+  useSelector,
 } from "react-redux";
+
+import {
+  X,
+  ImagePlus,
+  Check,
+} from "lucide-react";
 
 import {
 
   updateRoomType,
+  getAdminRoomTypes,
 
 } from "../../../features/catalog/roomType/roomTypeSlice";
 
@@ -22,6 +32,14 @@ export default function EditRoomTypeModal({
 }) {
 
   const dispatch = useDispatch();
+
+  const {
+
+    roomTypeLoading,
+
+  } = useSelector(
+    (state) => state.roomType
+  );
 
   const [name, setName] =
     useState("");
@@ -47,6 +65,8 @@ export default function EditRoomTypeModal({
       setPreview(
         roomType.image || null
       );
+
+      setImage(null);
     }
 
   }, [roomType]);
@@ -55,21 +75,20 @@ export default function EditRoomTypeModal({
   // HANDLE IMAGE
   // ==========================================
 
-  const handleImageChange = (
-    e
-  ) => {
+  const handleImageChange =
+    (e) => {
 
-    const file =
-      e.target.files[0];
+      const file =
+        e.target.files[0];
 
-    if (!file) return;
+      if (!file) return;
 
-    setImage(file);
+      setImage(file);
 
-    setPreview(
-      URL.createObjectURL(file)
-    );
-  };
+      setPreview(
+        URL.createObjectURL(file)
+      );
+    };
 
   // ==========================================
   // SUBMIT
@@ -116,6 +135,10 @@ export default function EditRoomTypeModal({
         )
       ) {
 
+        dispatch(
+          getAdminRoomTypes()
+        );
+
         onClose();
       }
     };
@@ -127,25 +150,38 @@ export default function EditRoomTypeModal({
 
   return (
 
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div className="category-modal-overlay">
 
-      <div className="bg-white w-full max-w-lg rounded-2xl p-6">
+      <div className="category-modal">
 
         {/* HEADER */}
 
-        <div className="flex items-center justify-between mb-6">
+        <div className="category-modal-header">
 
-          <h2 className="text-xl font-bold">
+          <div>
 
-            Edit Room Type
+            <h2>
 
-          </h2>
+              Edit Room Type
+
+            </h2>
+
+            <p>
+
+              Update your room type details
+              and image.
+
+            </p>
+
+          </div>
 
           <button
             onClick={onClose}
-            className="text-gray-500"
+            className="close-btn"
           >
-            ✕
+
+            <X size={28} />
+
           </button>
 
         </div>
@@ -154,16 +190,16 @@ export default function EditRoomTypeModal({
 
         <form
           onSubmit={handleSubmit}
-          className="space-y-4"
+          className="category-form"
         >
 
           {/* NAME */}
 
-          <div>
+          <div className="form-group">
 
-            <label className="block mb-1 font-medium">
+            <label>
 
-              Name
+              Room Type Name
 
             </label>
 
@@ -171,63 +207,117 @@ export default function EditRoomTypeModal({
               type="text"
               value={name}
               onChange={(e) =>
-                setName(e.target.value)
+                setName(
+                  e.target.value
+                )
               }
+              placeholder="e.g. Living Room"
               required
-              className="w-full border rounded-lg p-3"
             />
 
           </div>
 
           {/* IMAGE */}
 
-          <div>
+          <div className="form-group">
 
-            <label className="block mb-1 font-medium">
+            <label>
 
-              Image
+              Room Type Image
 
             </label>
 
-            <input
-              type="file"
-              accept="image/*"
-              onChange={
-                handleImageChange
+            <div
+              className="image-upload-box"
+              onClick={() =>
+                document
+                  .getElementById(
+                    "edit-roomtype-image-input"
+                  )
+                  ?.click()
               }
-            />
+            >
+
+              <input
+                id="edit-roomtype-image-input"
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={
+                  handleImageChange
+                }
+              />
+
+              {
+                preview ? (
+
+                  <img
+                    src={preview}
+                    alt="Preview"
+                    className="preview-image"
+                  />
+
+                ) : (
+
+                  <div className="upload-content">
+
+                    <div className="upload-icon-box">
+
+                      <ImagePlus size={46} />
+
+                    </div>
+
+                    <div className="upload-btn">
+
+                      Upload Image
+
+                    </div>
+
+                    <p>
+
+                      High-resolution JPEG or PNG.
+                      Max 5MB.
+
+                    </p>
+
+                  </div>
+                )
+              }
+
+            </div>
 
           </div>
 
-          {/* PREVIEW */}
+          {/* FOOTER */}
 
-          {preview && (
-
-            <img
-              src={preview}
-              alt="Preview"
-              className="w-32 h-32 rounded-lg object-cover"
-            />
-
-          )}
-
-          {/* ACTIONS */}
-
-          <div className="flex justify-end gap-3 pt-4">
+          <div className="category-modal-footer">
 
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border rounded-lg"
+              className="cancel-button"
             >
+
               Cancel
+
             </button>
 
             <button
               type="submit"
-              className="px-4 py-2 bg-black text-white rounded-lg"
+              disabled={roomTypeLoading}
+              className="submit-button"
             >
-              Update
+
+              <Check size={18} />
+
+              {
+                roomTypeLoading
+
+                  ? "Updating..."
+
+                  : "Update Room Type"
+              }
+
             </button>
 
           </div>

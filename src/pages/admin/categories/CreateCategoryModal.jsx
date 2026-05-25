@@ -1,3 +1,5 @@
+import "../../../styles/createcategorymodal.css";
+
 import {
   useState,
 } from "react";
@@ -8,10 +10,15 @@ import {
 } from "react-redux";
 
 import {
+  X,
+  ImagePlus,
+  ChevronDown,
+  Check,
+} from "lucide-react";
 
+import {
   createCategory,
   getAdminCategories,
-
 } from "../../../features/catalog/category/categorySlice";
 
 export default function CreateCategoryModal({
@@ -72,26 +79,25 @@ export default function CreateCategoryModal({
   // HANDLE IMAGE
   // ==========================================
 
-  const handleImageChange = (
-    e
-  ) => {
+  const handleImageChange =
+    (e) => {
 
-    const file =
-      e.target.files[0];
+      const file =
+        e.target.files[0];
 
-    if (!file) return;
+      if (!file) return;
 
-    setFormData((prev) => ({
+      setFormData((prev) => ({
 
-      ...prev,
+        ...prev,
 
-      image: file,
-    }));
+        image: file,
+      }));
 
-    setPreview(
-      URL.createObjectURL(file)
-    );
-  };
+      setPreview(
+        URL.createObjectURL(file)
+      );
+    };
 
   // ==========================================
   // SUBMIT
@@ -133,9 +139,11 @@ export default function CreateCategoryModal({
 
       const result =
         await dispatch(
+
           createCategory(
             submitData
           )
+
         );
 
       if (
@@ -147,8 +155,6 @@ export default function CreateCategoryModal({
         dispatch(
           getAdminCategories()
         );
-
-        onClose();
 
         setFormData({
 
@@ -162,6 +168,8 @@ export default function CreateCategoryModal({
         });
 
         setPreview(null);
+
+        onClose();
       }
     };
 
@@ -169,25 +177,38 @@ export default function CreateCategoryModal({
 
   return (
 
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div className="category-modal-overlay">
 
-      <div className="bg-white w-full max-w-lg rounded-2xl p-6">
+      <div className="category-modal">
 
         {/* HEADER */}
 
-        <div className="flex items-center justify-between mb-6">
+        <div className="category-modal-header">
 
-          <h2 className="text-xl font-bold">
+          <div>
 
-            Create Category
+            <h2>
 
-          </h2>
+              New Category
+
+            </h2>
+
+            <p>
+
+              Define a new category for your
+              furniture collection.
+
+            </p>
+
+          </div>
 
           <button
             onClick={onClose}
-            className="text-gray-500"
+            className="close-btn"
           >
-            ✕
+
+            <X size={28} />
+
           </button>
 
         </div>
@@ -196,72 +217,88 @@ export default function CreateCategoryModal({
 
         <form
           onSubmit={handleSubmit}
-          className="space-y-4"
+          className="category-form"
         >
 
-          {/* NAME */}
+          {/* GRID */}
 
-          <div>
+          <div className="category-grid">
 
-            <label className="block mb-1 font-medium">
+            {/* NAME */}
 
-              Name
+            <div className="form-group">
 
-            </label>
+              <label>
 
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-              className="w-full border rounded-lg p-3"
-            />
+                Category Name
 
-          </div>
+              </label>
 
-          {/* PARENT */}
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="e.g. Minimalist Desks"
+                required
+              />
 
-          <div>
+            </div>
 
-            <label className="block mb-1 font-medium">
+            {/* PARENT */}
 
-              Parent Category
+            <div className="form-group">
 
-            </label>
+              <label>
 
-            <select
-              name="parent"
-              value={formData.parent}
-              onChange={handleChange}
-              className="w-full border rounded-lg p-3"
-            >
+                Parent Category
 
-              <option value="">
-                No Parent
-              </option>
+              </label>
 
-              {categories.map(
-                (category) => (
+              <div className="select-wrapper">
 
-                  <option
-                    key={category.id}
-                    value={category.id}
-                  >
-                    {category.name}
+                <select
+                  name="parent"
+                  value={formData.parent}
+                  onChange={handleChange}
+                >
+
+                  <option value="">
+                    None
                   </option>
-                )
-              )}
 
-            </select>
+                  {
+                    categories.map(
+                      (category) => (
+
+                        <option
+                          key={category.id}
+                          value={category.id}
+                        >
+                          {category.name}
+                        </option>
+                      )
+                    )
+                  }
+
+                </select>
+
+                <ChevronDown
+                  size={18}
+                  className="select-icon"
+                />
+
+              </div>
+
+            </div>
 
           </div>
 
           {/* DESCRIPTION */}
 
-          <div>
+          <div className="form-group">
 
-            <label className="block mb-1 font-medium">
+            <label>
 
               Description
 
@@ -271,65 +308,111 @@ export default function CreateCategoryModal({
               name="description"
               value={formData.description}
               onChange={handleChange}
-              rows="4"
-              className="w-full border rounded-lg p-3"
+              placeholder="Briefly describe the design philosophy and materials of this category..."
             />
 
           </div>
 
           {/* IMAGE */}
 
-          <div>
+          <div className="form-group">
 
-            <label className="block mb-1 font-medium">
+            <label>
 
               Category Image
 
             </label>
 
-            <input
-              type="file"
-              accept="image/*"
-              onChange={
-                handleImageChange
+            <div
+              className="image-upload-box"
+              onClick={() =>
+                document
+                  .getElementById(
+                    "category-image-input"
+                  )
+                  ?.click()
               }
-            />
+            >
+
+              <input
+                id="category-image-input"
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={
+                  handleImageChange
+                }
+              />
+
+              {
+                preview ? (
+
+                  <img
+                    src={preview}
+                    alt="Preview"
+                    className="preview-image"
+                  />
+
+                ) : (
+
+                  <div className="upload-content">
+
+                    <div className="upload-icon-box">
+
+                      <ImagePlus size={46} />
+
+                    </div>
+
+                    <div className="upload-btn">
+
+                      Upload Image
+
+                    </div>
+
+                    <p>
+
+                      High-resolution JPEG or PNG.
+                      Max 5MB.
+
+                    </p>
+
+                  </div>
+                )
+              }
+
+            </div>
 
           </div>
 
-          {/* PREVIEW */}
+          {/* FOOTER */}
 
-          {preview && (
-
-            <img
-              src={preview}
-              alt="Preview"
-              className="w-32 h-32 rounded-lg object-cover"
-            />
-
-          )}
-
-          {/* ACTIONS */}
-
-          <div className="flex justify-end gap-3 pt-4">
+          <div className="category-modal-footer">
 
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border rounded-lg"
+              className="cancel-button"
             >
+
               Cancel
+
             </button>
 
             <button
               type="submit"
               disabled={categoryLoading}
-              className="px-4 py-2 bg-black text-white rounded-lg"
+              className="submit-button"
             >
 
-              {categoryLoading
-                ? "Creating..."
-                : "Create"}
+              <Check size={18} />
+
+              {
+                categoryLoading
+
+                  ? "Creating..."
+
+                  : "Create Category"
+              }
 
             </button>
 

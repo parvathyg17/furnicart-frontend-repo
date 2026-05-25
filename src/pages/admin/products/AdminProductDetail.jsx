@@ -153,15 +153,17 @@ const handleToggleVariant =
 
   const productImage =
 
-    productDetail.thumbnail ||
+      productDetail.thumbnail ||
 
-    productDetail.image ||
+      variants?.[0]
+        ?.images?.[0]
+        ?.image_url ||
 
-    variants?.[0]
-      ?.images?.[0]
-      ?.image ||
+      variants?.[0]
+        ?.images?.[0]
+        ?.image ||
 
-    "";
+      "";
 
   // ==========================================
   // JSX
@@ -170,6 +172,50 @@ const handleToggleVariant =
   return (
 
     <div className="admin-product-detail-page">
+
+      {/* BREADCRUMBS */}
+
+      <div className="product-breadcrumbs">
+
+      <Link to="/admin/products">
+
+        Products
+
+      </Link>
+
+      <span>
+        {" / "}
+      </span>
+
+      {
+        productDetail.breadcrumbs?.map(
+          (item, index) => (
+
+            <span key={item.id}>
+
+              <Link
+                to={`/admin/categories/${item.slug}`}
+              >
+
+                {item.name}
+
+              </Link>
+
+              {
+                index !==
+                productDetail.breadcrumbs.length - 1 && (
+                  <span>
+                    {" / "}
+                  </span>
+                )
+              }
+
+            </span>
+          )
+        )
+      }
+
+    </div>
 
       {/* HERO */}
 
@@ -229,31 +275,32 @@ const handleToggleVariant =
 
           <div className="product-detail-tags">
 
-            {
-              productDetail.category?.name && (
+           {/* {
+              productDetail.category_name && (
 
                 <span>
 
                   {
-                    productDetail.category.name
+                    productDetail.category_name
                   }
 
                 </span>
               )
-            }
+            } */}
 
-            {
-              productDetail.room_type?.name && (
+                    {
+                productDetail.room_types?.map(
+                  (room) => (
 
-                <span>
+                    <span key={room.id}>
 
-                  {
-                    productDetail.room_type.name
-                  }
+                      {room.name}
 
-                </span>
-              )
-            }
+                    </span>
+                  )
+                )
+                
+              }
 
           </div>
 
@@ -280,91 +327,77 @@ const handleToggleVariant =
 
           {/* META */}
 
-          <div className="product-meta-grid">
+         <div className="product-meta-grid">
 
-            <div>
+              <div>
 
-              <small>
-                CREATED
-              </small>
+                <small>
+                  CREATED
+                </small>
 
-              <strong>
+                <strong>
 
-                {
-                  productDetail.created_at
+                  {
+                    productDetail.created_at
 
-                    ? new Date(
-                        productDetail.created_at
-                      ).toLocaleDateString(
-                        "en-US",
-                        {
+                      ? new Date(
+                          productDetail.created_at
+                        ).toLocaleDateString(
+                          "en-US",
+                          {
 
-                          month:
-                            "short",
+                            month:
+                              "short",
 
-                          day:
-                            "2-digit",
+                            day:
+                              "2-digit",
 
-                          year:
-                            "numeric",
-                        }
-                      )
+                            year:
+                              "numeric",
+                          }
+                        )
 
-                    : "-"
-                }
+                      : "-"
+                  }
 
-              </strong>
+                </strong>
 
-            </div>
+              </div>
 
-            <div>
+              <div>
 
-              <small>
-                BASE SKU
-              </small>
+                <small>
+                  INVENTORY
+                </small>
 
-              <strong>
+                <strong>
 
-                {
-                  productDetail.base_sku ||
-                  "-"
-                }
+                  {
+                    totalInventory
+                  } Total Units
 
-              </strong>
+                </strong>
 
-            </div>
+              </div>
 
-            <div>
+              <div>
 
-              <small>
-                INVENTORY
-              </small>
+                <small>
+                  CATEGORY
+                </small>
 
-              <strong>
+                <strong>
 
-                {
-                  totalInventory
-                } Total Units
+                  {
+                    productDetail.category_name ||
+                    "-"
+                  }
 
-              </strong>
+                </strong>
 
-            </div>
-
-            <div>
-
-              <small>
-                DESIGNER
-              </small>
-
-              <strong>
-
-                Elias Thorne
-
-              </strong>
+              </div>
 
             </div>
-
-          </div>
 
           {/* ACTIONS */}
 
@@ -485,7 +518,7 @@ const handleToggleVariant =
                               <h3>
 
                                 {
-                                  variant.name
+                                  variant.variant_name
                                 }
 
                               </h3>

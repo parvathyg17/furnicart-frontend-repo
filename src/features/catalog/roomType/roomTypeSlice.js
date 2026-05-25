@@ -9,6 +9,7 @@ import {
   createRoomTypeAPI,
   updateRoomTypeAPI,
   deleteRoomTypeAPI,
+  restoreRoomTypeAPI,
 
 } from "./roomTypeAPI";
 
@@ -136,6 +137,42 @@ export const deleteRoomType =
 
             error:
               "Failed to delete room type",
+          }
+        );
+      }
+    }
+  );
+
+  // ==========================================
+// RESTORE ROOM TYPE
+// ==========================================
+
+export const restoreRoomType =
+  createAsyncThunk(
+
+    "roomType/restoreRoomType",
+
+    async (
+      roomTypeId,
+      { rejectWithValue }
+    ) => {
+
+      try {
+
+        await restoreRoomTypeAPI(
+          roomTypeId
+        );
+
+        return roomTypeId;
+
+      } catch (err) {
+
+        return rejectWithValue(
+
+          err.response?.data || {
+
+            error:
+              "Failed to restore room type",
           }
         );
       }
@@ -391,6 +428,64 @@ const roomTypeSlice = createSlice({
           state.roomTypeError =
             action.payload?.error ||
             "Failed to delete room type";
+        }
+      );
+
+
+    // ==========================================
+    // RESTORE ROOM TYPE
+    // ==========================================
+
+    builder
+
+      .addCase(
+        restoreRoomType.pending,
+
+        (state) => {
+
+          state.roomTypeLoading = true;
+
+          state.roomTypeError = null;
+        }
+      )
+
+      .addCase(
+        restoreRoomType.fulfilled,
+
+        (state, action) => {
+
+          state.roomTypeLoading = false;
+
+          state.roomTypeSuccess =
+            "Room type restored successfully";
+
+          state.roomTypes =
+            state.roomTypes.map(
+              (roomType) =>
+
+                roomType.id === action.payload
+
+                  ? {
+                      ...roomType,
+                      is_active: true,
+                    }
+
+                  : roomType
+            );
+        }
+      )
+
+      .addCase(
+        restoreRoomType.rejected,
+
+        (state, action) => {
+
+          state.roomTypeLoading = false;
+
+          state.roomTypeError =
+            action.payload?.error ||
+
+            "Failed to restore room type";
         }
       );
   },

@@ -1,7 +1,11 @@
+import "../../../styles/adminroomtypes.css";
+
 import CreateRoomTypeModal
 from "./CreateRoomTypeModal";
+
 import EditRoomTypeModal
 from "./EditRoomTypeModal";
+
 import {
   useEffect,
   useState,
@@ -16,8 +20,19 @@ import {
 
   getAdminRoomTypes,
   deleteRoomType,
+  restoreRoomType
 
 } from "../../../features/catalog/roomType/roomTypeSlice";
+
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  RotateCcw,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+} from "lucide-react";
 
 export default function AdminRoomTypes() {
 
@@ -32,9 +47,6 @@ export default function AdminRoomTypes() {
   } = useSelector(
     (state) => state.roomType
   );
-
-  const [search, setSearch] =
-    useState("");
 
   const [page, setPage] =
     useState(1);
@@ -51,23 +63,23 @@ export default function AdminRoomTypes() {
     setOpenEditModal] =
     useState(false);
 
-    const [selectedRoomType,
+  const [selectedRoomType,
     setSelectedRoomType] =
     useState(null);
 
-  
   // ==========================================
-  // FETCH ROOM TYPES
+  // FETCH
   // ==========================================
 
   useEffect(() => {
 
     const params = {
-      search,
       page,
     };
 
-    if (statusFilter !== "all") {
+    if (
+      statusFilter !== "all"
+    ) {
 
       params.is_active =
         statusFilter;
@@ -79,381 +91,406 @@ export default function AdminRoomTypes() {
 
   }, [
     dispatch,
-    search,
     page,
     statusFilter,
   ]);
 
   // ==========================================
-  // DELETE ROOM TYPE
+  // DELETE
   // ==========================================
 
   const handleDelete =
-    async (roomTypeId) => {
-
-      const confirmDelete =
-        window.confirm(
-          "Delete this room type?"
-        );
-
-      if (!confirmDelete) return;
+    (roomTypeId) => {
 
       dispatch(
         deleteRoomType(roomTypeId)
       );
     };
 
-    const handleEdit = (
+
+  const handleRestore =
+    (roomTypeId) => {
+
+      dispatch(
+        restoreRoomType(roomTypeId)
+      );
+    };
+
+  // ==========================================
+  // EDIT
+  // ==========================================
+
+  const handleEdit =
+    (roomType) => {
+
+      setSelectedRoomType(
         roomType
-        ) => {
+      );
 
-        setSelectedRoomType(
-            roomType
-        );
-
-        setOpenEditModal(true);
-        };
+      setOpenEditModal(true);
+    };
 
   return (
 
-    <div className="p-6">
+    <div className="admin-room-types-page">
 
       {/* HEADER */}
 
-      <div className="flex items-center justify-between mb-6">
+      <div className="room-types-header">
 
-        <h1 className="text-2xl font-bold">
+        <div className="room-types-header-left">
 
-          Room Types
+          <p>
 
-        </h1>
+            Dashboard / Inventory
+
+          </p>
+
+          <h1>
+
+            Room Types
+
+          </h1>
+
+        </div>
 
         <button
+
+          className="create-room-type-btn"
 
           onClick={() =>
             setOpenCreateModal(true)
           }
-
-          className="bg-black text-white px-4 py-2 rounded-lg"
         >
+
+          <Plus size={18} />
+
           Create Room Type
+
         </button>
 
       </div>
 
-      {/* SEARCH */}
+      {/* CARD */}
 
-      <div className="mb-6">
+      <div className="room-types-card">
 
-        <input
-          type="text"
-          placeholder="Search room types..."
-          value={search}
+        {/* TOOLBAR */}
 
-          onChange={(e) => {
+        <div className="room-types-toolbar">
 
-            setSearch(
-              e.target.value
-            );
+          {/* TABS */}
 
-            setPage(1);
-          }}
+          <div className="room-type-tabs">
 
-          className="border w-full p-3 rounded-lg"
-        />
+            <button
 
-      </div>
+              className={
+                statusFilter === "all"
 
-      {/* STATUS FILTER */}
+                  ? "room-type-tab active"
 
-      <div className="flex gap-3 mb-6">
+                  : "room-type-tab"
+              }
 
-        <button
+              onClick={() =>
+                setStatusFilter("all")
+              }
+            >
 
-          onClick={() => {
+              All
 
-            setStatusFilter("all");
+            </button>
 
-            setPage(1);
-          }}
+            <button
 
-          className={`px-4 py-2 rounded-lg border ${
-            statusFilter === "all"
-              ? "bg-black text-white"
-              : "bg-white"
-          }`}
-        >
-          All
-        </button>
+              className={
+                statusFilter === "true"
 
-        <button
+                  ? "room-type-tab active"
 
-          onClick={() => {
+                  : "room-type-tab"
+              }
 
-            setStatusFilter("true");
+              onClick={() =>
+                setStatusFilter("true")
+              }
+            >
 
-            setPage(1);
-          }}
+              Active
 
-          className={`px-4 py-2 rounded-lg border ${
-            statusFilter === "true"
-              ? "bg-black text-white"
-              : "bg-white"
-          }`}
-        >
-          Active
-        </button>
+            </button>
 
-        <button
+            <button
 
-          onClick={() => {
+              className={
+                statusFilter === "false"
 
-            setStatusFilter("false");
+                  ? "room-type-tab active"
 
-            setPage(1);
-          }}
+                  : "room-type-tab"
+              }
 
-          className={`px-4 py-2 rounded-lg border ${
-            statusFilter === "false"
-              ? "bg-black text-white"
-              : "bg-white"
-          }`}
-        >
-          Deleted
-        </button>
+              onClick={() =>
+                setStatusFilter("false")
+              }
+            >
 
-      </div>
+              Deleted
 
-      {/* TABLE */}
+            </button>
 
-      <div className="bg-white rounded-xl shadow overflow-hidden">
+          </div>
 
-        <table className="w-full">
+          {/* SORT */}
 
-          <thead className="bg-gray-100">
+          <div className="sort-box">
 
-            <tr>
+            <span>
 
-              <th className="text-left p-4">
-                Image
-              </th>
+              Sort By:
 
-              <th className="text-left p-4">
-                Name
-              </th>
+            </span>
 
-              <th className="text-left p-4">
-                Status
-              </th>
+            Most Recent
 
-              <th className="text-left p-4">
-                Actions
-              </th>
+            <ChevronDown size={16} />
 
-            </tr>
+          </div>
 
-          </thead>
+        </div>
 
-          <tbody>
+        {/* TABLE */}
 
-            {roomTypeLoading ? (
+        <div className="room-type-table">
 
-              <tr>
+          {/* HEADER */}
 
-                <td
-                  colSpan="4"
-                  className="p-6 text-center"
-                >
-                  Loading...
-                </td>
+          <div className="room-type-table-header">
 
-              </tr>
+            <div>Image</div>
 
-            ) : roomTypes.length === 0 ? (
+            <div>Name</div>
 
-              <tr>
+            <div>Status</div>
 
-                <td
-                  colSpan="4"
-                  className="p-6 text-center"
-                >
-                  No room types found
-                </td>
+            <div>Actions</div>
 
-              </tr>
+          </div>
+
+          {/* ROWS */}
+
+          {
+            roomTypeLoading ? (
+
+              <div className="room-type-row">
+
+                Loading...
+
+              </div>
 
             ) : (
 
               roomTypes.map(
                 (roomType) => (
 
-                  <tr
+                  <div
                     key={roomType.id}
-
-                    className={`border-t ${
-                      !roomType.is_active
-                        ? "opacity-50"
-                        : ""
-                    }`}
+                    className="room-type-row"
                   >
 
                     {/* IMAGE */}
 
-                    <td className="p-4">
+                    <div>
 
-                      {roomType.image ? (
+                      <img
+                        src={
+                          roomType.image ||
 
-                        <img
-                          src={roomType.image}
-                          alt={roomType.name}
-                          className="w-14 h-14 rounded object-cover"
-                        />
+                          "https://placehold.co/80x80"
+                        }
 
-                      ) : (
+                        alt={roomType.name}
 
-                        <div className="w-14 h-14 bg-gray-200 rounded" />
+                        className="room-type-image"
+                      />
 
-                      )}
-
-                    </td>
+                    </div>
 
                     {/* NAME */}
 
-                    <td className="p-4 font-medium">
+                    <div className="room-type-name">
 
                       {roomType.name}
 
-                    </td>
+                    </div>
 
                     {/* STATUS */}
 
-                    <td className="p-4">
+                    <div>
 
-                      {roomType.is_active ? (
+                      {
+                        roomType.is_active ? (
 
-                        <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">
+                          <div className="room-type-status active">
 
-                          Active
+                            <div className="status-dot" />
 
-                        </span>
+                            Active
 
-                      ) : (
+                          </div>
 
-                        <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm">
+                        ) : (
 
-                          Deleted
+                          <div className="room-type-status deleted">
 
-                        </span>
+                            <div className="status-dot" />
 
-                      )}
+                            Deleted
 
-                    </td>
+                          </div>
+                        )
+                      }
+
+                    </div>
 
                     {/* ACTIONS */}
 
-                    <td className="p-4">
+                    <div className="room-type-actions">
 
-                      <div className="flex gap-2">
+                      <button
 
-                        <button
+                        className="action-btn"
 
-                            onClick={() =>
-                                handleEdit(roomType)
-                            }
+                        onClick={() =>
+                          handleEdit(roomType)
+                        }
+                      >
 
-                            className="px-3 py-1 bg-blue-500 text-white rounded"
-                            >
-                            Edit
-                        </button>
+                        <Pencil size={18} />
 
-                        {roomType.is_active && (
+                      </button>
+
+                      {
+                        roomType.is_active ? (
 
                           <button
+
+                            className="action-btn"
 
                             onClick={() =>
                               handleDelete(
                                 roomType.id
                               )
                             }
-
-                            className="px-3 py-1 bg-red-500 text-white rounded"
                           >
-                            Delete
+
+                            <Trash2 size={18} />
+
                           </button>
 
-                        )}
+                        ) : (
 
-                        
+                          <button
 
-                      </div>
+                          className="action-btn"
 
-                    </td>
+                          onClick={() =>
+                            handleRestore(roomType.id)
+                          }
+                        >
 
-                  </tr>
+                          <RotateCcw size={18} />
+
+                        </button>
+                        )
+                      }
+
+                    </div>
+
+                  </div>
                 )
               )
-            )}
+            )
+          }
 
-          </tbody>
+        </div>
 
-        </table>
+        {/* FOOTER */}
 
-      </div>
-
-      {/* PAGINATION */}
-
-      {roomTypePagination && (
-
-        <div className="flex items-center justify-center gap-3 mt-6">
+        <div className="room-types-footer">
 
           <button
 
+            className="pagination-btn"
+
             disabled={
-              !roomTypePagination.previous
+              !roomTypePagination?.previous
             }
 
             onClick={() =>
-              setPage((prev) =>
-                prev - 1
+              setPage(
+                (prev) =>
+                  prev - 1
               )
             }
-
-            className="px-4 py-2 border rounded disabled:opacity-50"
           >
+
+            <ChevronLeft size={16} />
+
             Prev
+
           </button>
 
-          <span>
+          <div className="page-text">
 
-            Page {
-              roomTypePagination.currentPage
-            } of {
-              roomTypePagination.totalPages
+            Page
+
+            {" "}
+
+            {
+              roomTypePagination?.currentPage
             }
 
-          </span>
+            {" "}
+
+            of
+
+            {" "}
+
+            {
+              roomTypePagination?.totalPages
+            }
+
+          </div>
 
           <button
 
+            className="pagination-btn"
+
             disabled={
-              !roomTypePagination.next
+              !roomTypePagination?.next
             }
 
             onClick={() =>
-              setPage((prev) =>
-                prev + 1
+              setPage(
+                (prev) =>
+                  prev + 1
               )
             }
-
-            className="px-4 py-2 border rounded disabled:opacity-50"
           >
+
             Next
+
+            <ChevronRight size={16} />
+
           </button>
 
         </div>
-      )}
 
-      {/* CREATE MODAL */}
+      </div>
+
+      {/* CREATE */}
 
       <CreateRoomTypeModal
 
@@ -463,16 +500,19 @@ export default function AdminRoomTypes() {
           setOpenCreateModal(false)
         }
       />
+
+      {/* EDIT */}
+
       <EditRoomTypeModal
 
         isOpen={openEditModal}
 
         onClose={() =>
-            setOpenEditModal(false)
+          setOpenEditModal(false)
         }
 
         roomType={selectedRoomType}
-        />
+      />
 
     </div>
   );

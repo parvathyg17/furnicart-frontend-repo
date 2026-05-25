@@ -1,5 +1,5 @@
-import "../../../styles/adminproducts.css";
 
+import "../../../styles/adminproducts.css";
 
 import {
   useEffect,
@@ -110,9 +110,16 @@ export default function AdminProducts() {
   ] = useState(1);
 
   const [
+    sort,
+    setSort,
+  ] = useState("latest");
+
+  const [
     openCreateModal,
     setOpenCreateModal,
   ] = useState(false);
+
+
 
   // ==========================================
   // FETCH CATEGORY + ROOM TYPES
@@ -144,6 +151,7 @@ export default function AdminProducts() {
     category,
     roomType,
     status,
+    sort,
 
   ]);
 
@@ -159,6 +167,8 @@ export default function AdminProducts() {
 
       search,
 
+      sort,
+
       category,
 
       room_type: roomType,
@@ -169,23 +179,28 @@ export default function AdminProducts() {
 
           ? ""
 
-          : status === "active",
+          : status === "active"
+
+            ? "true"
+
+            : "false",
     };
 
     dispatch(
       getAdminProducts(params)
     );
 
-  }, [
+    }, [
 
-    dispatch,
-    currentPage,
-    search,
-    category,
-    roomType,
-    status,
+      dispatch,
+      currentPage,
+      search,
+      category,
+      roomType,
+      sort,
+      status,
 
-  ]);
+    ]);
 
   const handleDeleteProduct =
   async (productId) => {
@@ -203,17 +218,31 @@ export default function AdminProducts() {
     );
 
     dispatch(
-      getAdminProducts({
-        page: currentPage,
-        search,
-        category,
-        room_type: roomType,
-        is_active:
-          status === "all"
-            ? ""
-            : status === "active",
-      })
-    );
+        getAdminProducts({
+
+          page: currentPage,
+
+          search,
+
+          category,
+
+          room_type: roomType,
+
+          sort,
+
+          is_active:
+
+            status === "all"
+
+              ? ""
+
+              : status === "active"
+
+                ? "true"
+
+                : "false",
+        })
+      );
   };
 
   // ==========================================
@@ -329,7 +358,7 @@ export default function AdminProducts() {
 
                   <option
                     key={item.id}
-                    value={item.id}
+                    value={item.slug}
                   >
 
                     {item.name}
@@ -367,7 +396,7 @@ export default function AdminProducts() {
 
                   <option
                     key={item.id}
-                    value={item.id}
+                    value={item.slug}
                   >
 
                     {item.name}
@@ -382,6 +411,43 @@ export default function AdminProducts() {
         {/* STATUS */}
 
         <div className="status-tabs">
+
+          {/* SORT */}
+
+          <select
+            value={sort}
+            onChange={(e) =>
+              setSort(
+                e.target.value
+              )
+            }
+          >
+
+            <option value="latest">
+              Latest
+            </option>
+
+            <option value="oldest">
+              Oldest
+            </option>
+
+            <option value="a_z">
+              A-Z
+            </option>
+
+            <option value="z_a">
+              Z-A
+            </option>
+
+            <option value="price_low">
+              Price Low to High
+            </option>
+
+            <option value="price_high">
+              Price High to Low
+            </option>
+
+          </select>
 
           <button
             type="button"
@@ -539,32 +605,31 @@ export default function AdminProducts() {
 
                         <div className="product-tags">
 
-                          {
-                            product.category?.name && (
+                         {
+                              product.category_name && (
 
-                              <span>
+                                <span>
 
-                                {
-                                  product.category.name
-                                }
+                                  {
+                                    product.category_name
+                                  }
 
-                              </span>
-                            )
-                          }
+                                </span>
+                              )
+                            }
 
-                          {
-                            product.room_type?.name && (
+                            {
+                              product.room_types?.map(
+                                (room) => (
 
-                              <span>
+                                  <span key={room.id}>
 
-                                {
-                                  product.room_type.name
-                                }
+                                    {room.name}
 
-                              </span>
-                            )
-                          }
-
+                                  </span>
+                                )
+                              )
+                            }
                         </div>
 
                         <div className="product-meta">

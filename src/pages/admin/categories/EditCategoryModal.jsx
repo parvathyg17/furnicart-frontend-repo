@@ -14,7 +14,6 @@ import {
   X,
   ImagePlus,
   ChevronDown,
-  Check,
   Pencil,
 } from "lucide-react";
 
@@ -59,6 +58,9 @@ export default function EditCategoryModal({
   const [preview, setPreview] =
     useState(null);
 
+  const [formErrors, setFormErrors] =
+    useState({});
+
   // ==========================================
   // LOAD CATEGORY
   // ==========================================
@@ -89,6 +91,8 @@ export default function EditCategoryModal({
 
         null
       );
+
+      setFormErrors({});
     }
 
   }, [category]);
@@ -105,6 +109,13 @@ export default function EditCategoryModal({
       value,
 
     } = e.target;
+
+    setFormErrors((prev) => ({
+
+      ...prev,
+
+      [name]: "",
+    }));
 
     setFormData((prev) => ({
 
@@ -126,14 +137,25 @@ export default function EditCategoryModal({
 
       if (!file) return;
 
+      setFormErrors((prev) => ({
+
+        ...prev,
+
+        image: "",
+      }));
+
       if (
         file.size >
         5 * 1024 * 1024
       ) {
 
-        alert(
-          "Image must be below 5MB"
-        );
+        setFormErrors((prev) => ({
+
+          ...prev,
+
+          image:
+            "Image must be below 5MB",
+        }));
 
         return;
       }
@@ -144,9 +166,13 @@ export default function EditCategoryModal({
         )
       ) {
 
-        alert(
-          "Only image files allowed"
-        );
+        setFormErrors((prev) => ({
+
+          ...prev,
+
+          image:
+            "Only image files allowed",
+        }));
 
         return;
       }
@@ -171,6 +197,8 @@ export default function EditCategoryModal({
     async (e) => {
 
       e.preventDefault();
+
+      setFormErrors({});
 
       const submitData =
         new FormData();
@@ -210,19 +238,16 @@ export default function EditCategoryModal({
 
       try {
 
-        const result =
-          await dispatch(
-            updateCategory({
+        await dispatch(
+          updateCategory({
 
-              categoryId:
-                category.id,
+            categoryId:
+              category.id,
 
-              data:
-                submitData,
-            })
-          ).unwrap();
-
-        console.log(result);
+            data:
+              submitData,
+          })
+        ).unwrap();
 
         dispatch(
           getAdminCategories()
@@ -232,16 +257,7 @@ export default function EditCategoryModal({
 
       } catch (error) {
 
-        console.log(error);
-
-        alert(
-
-          JSON.stringify(
-            error,
-            null,
-            2
-          )
-        );
+        setFormErrors(error);
       }
     };
 
@@ -315,7 +331,23 @@ export default function EditCategoryModal({
                 onChange={handleChange}
                 placeholder="e.g. Scandinavian Lounge"
                 required
+                className={
+                  formErrors.name
+                    ? "input-error"
+                    : ""
+                }
               />
+
+              {
+                formErrors.name && (
+
+                  <p className="field-error">
+
+                    {formErrors.name}
+
+                  </p>
+                )
+              }
 
             </div>
 
@@ -335,6 +367,11 @@ export default function EditCategoryModal({
                   name="parent"
                   value={formData.parent}
                   onChange={handleChange}
+                  className={
+                    formErrors.parent
+                      ? "input-error"
+                      : ""
+                  }
                 >
 
                   <option value="">
@@ -370,6 +407,17 @@ export default function EditCategoryModal({
 
               </div>
 
+              {
+                formErrors.parent && (
+
+                  <p className="field-error">
+
+                    {formErrors.parent}
+
+                  </p>
+                )
+              }
+
             </div>
 
           </div>
@@ -389,7 +437,23 @@ export default function EditCategoryModal({
               value={formData.description}
               onChange={handleChange}
               placeholder="Describe this category and its furniture style..."
+              className={
+                formErrors.description
+                  ? "input-error"
+                  : ""
+              }
             />
+
+            {
+              formErrors.description && (
+
+                <p className="field-error">
+
+                  {formErrors.description}
+
+                </p>
+              )
+            }
 
           </div>
 
@@ -404,7 +468,11 @@ export default function EditCategoryModal({
             </label>
 
             <div
-              className="image-upload-box"
+              className={`image-upload-box ${
+                formErrors.image
+                  ? "input-error"
+                  : ""
+              }`}
               onClick={() =>
                 document
                   .getElementById(
@@ -461,6 +529,17 @@ export default function EditCategoryModal({
               }
 
             </div>
+
+            {
+              formErrors.image && (
+
+                <p className="field-error">
+
+                  {formErrors.image}
+
+                </p>
+              )
+            }
 
           </div>
 

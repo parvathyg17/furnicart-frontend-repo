@@ -54,6 +54,9 @@ export default function CreateCategoryModal({
   const [preview, setPreview] =
     useState(null);
 
+  const [formErrors, setFormErrors] =
+    useState({});
+
   // ==========================================
   // HANDLE CHANGE
   // ==========================================
@@ -66,6 +69,13 @@ export default function CreateCategoryModal({
       value,
 
     } = e.target;
+
+    setFormErrors((prev) => ({
+
+      ...prev,
+
+      [name]: "",
+    }));
 
     setFormData((prev) => ({
 
@@ -87,6 +97,46 @@ export default function CreateCategoryModal({
 
       if (!file) return;
 
+      setFormErrors((prev) => ({
+
+        ...prev,
+
+        image: "",
+      }));
+
+      if (
+        file.size >
+        5 * 1024 * 1024
+      ) {
+
+        setFormErrors((prev) => ({
+
+          ...prev,
+
+          image:
+            "Image must be below 5MB",
+        }));
+
+        return;
+      }
+
+      if (
+        !file.type.startsWith(
+          "image/"
+        )
+      ) {
+
+        setFormErrors((prev) => ({
+
+          ...prev,
+
+          image:
+            "Only image files allowed",
+        }));
+
+        return;
+      }
+
       setFormData((prev) => ({
 
         ...prev,
@@ -107,6 +157,8 @@ export default function CreateCategoryModal({
     async (e) => {
 
       e.preventDefault();
+
+      setFormErrors({});
 
       const submitData =
         new FormData();
@@ -137,20 +189,15 @@ export default function CreateCategoryModal({
         );
       }
 
-      const result =
+      try {
+
         await dispatch(
 
           createCategory(
             submitData
           )
 
-        );
-
-      if (
-        createCategory.fulfilled.match(
-          result
-        )
-      ) {
+        ).unwrap();
 
         dispatch(
           getAdminCategories()
@@ -169,7 +216,13 @@ export default function CreateCategoryModal({
 
         setPreview(null);
 
+        setFormErrors({});
+
         onClose();
+
+      } catch (error) {
+
+        setFormErrors(error);
       }
     };
 
@@ -241,7 +294,23 @@ export default function CreateCategoryModal({
                 onChange={handleChange}
                 placeholder="e.g. Minimalist Desks"
                 required
+                className={
+                  formErrors.name
+                    ? "input-error"
+                    : ""
+                }
               />
+
+              {
+                formErrors.name && (
+
+                  <p className="field-error">
+
+                    {formErrors.name}
+
+                  </p>
+                )
+              }
 
             </div>
 
@@ -309,7 +378,23 @@ export default function CreateCategoryModal({
               value={formData.description}
               onChange={handleChange}
               placeholder="Briefly describe the design philosophy and materials of this category..."
+              className={
+                formErrors.description
+                  ? "input-error"
+                  : ""
+              }
             />
+
+            {
+              formErrors.description && (
+
+                <p className="field-error">
+
+                  {formErrors.description}
+
+                </p>
+              )
+            }
 
           </div>
 
@@ -324,7 +409,11 @@ export default function CreateCategoryModal({
             </label>
 
             <div
-              className="image-upload-box"
+              className={`image-upload-box ${
+                formErrors.image
+                  ? "input-error"
+                  : ""
+              }`}
               onClick={() =>
                 document
                   .getElementById(
@@ -381,6 +470,17 @@ export default function CreateCategoryModal({
               }
 
             </div>
+
+            {
+              formErrors.image && (
+
+                <p className="field-error">
+
+                  {formErrors.image}
+
+                </p>
+              )
+            }
 
           </div>
 

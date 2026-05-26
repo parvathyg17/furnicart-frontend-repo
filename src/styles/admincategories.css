@@ -19,6 +19,8 @@ HEADER
 
   align-items: flex-start;
 
+  gap: 20px;
+
   margin-bottom: 32px;
 }
 
@@ -82,6 +84,8 @@ HEADER
 .create-category-btn:hover {
 
   opacity: 0.92;
+
+  transform: translateY(-2px);
 }
 
 /* ==========================================
@@ -95,6 +99,9 @@ CARD
   border-radius: 32px;
 
   padding: 32px;
+
+  box-shadow:
+    0 10px 30px rgba(0,0,0,0.04);
 }
 
 /* ==========================================
@@ -105,12 +112,74 @@ TOOLBAR
 
   display: flex;
 
+  align-items: center;
+
   justify-content: space-between;
 
-  align-items: center;
+  gap: 18px;
+
+  flex-wrap: wrap;
 
   margin-bottom: 32px;
 }
+
+/* ==========================================
+SEARCH
+========================================== */
+
+.category-search {
+
+  flex: 1;
+
+  max-width: 360px;
+
+  height: 54px;
+
+  padding: 0 18px;
+
+  border-radius: 16px;
+
+  background: #f7f4f0;
+
+  border: 1px solid #ece6e0;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+}
+
+.category-search svg {
+
+  color: #7b6d64;
+
+  flex-shrink: 0;
+}
+
+.category-search input {
+
+  width: 100%;
+
+  border: none;
+
+  background: transparent;
+
+  outline: none;
+
+  font-size: 16px;
+
+  color: #241711;
+}
+
+.category-search input::placeholder {
+
+  color: #9b9188;
+}
+
+/* ==========================================
+TABS
+========================================== */
 
 .category-tabs {
 
@@ -137,13 +206,15 @@ TOOLBAR
 
   border-radius: 12px;
 
-  font-size: 18px;
+  font-size: 16px;
 
   font-weight: 600;
 
   color: #3b2a20;
 
   cursor: pointer;
+
+  transition: 0.2s;
 }
 
 .tab-btn.active {
@@ -154,36 +225,33 @@ TOOLBAR
     0 2px 8px rgba(0,0,0,0.06);
 }
 
-.toolbar-actions {
+/* ==========================================
+SORT
+========================================== */
 
-  display: flex;
-
-  gap: 16px;
-}
-
-.toolbar-btn {
+.category-sort {
 
   height: 54px;
 
-  padding: 0 22px;
-
-  border: 1px solid #ece6e0;
+  padding: 0 18px;
 
   border-radius: 16px;
 
+  border: 1px solid #ece6e0;
+
   background: white;
 
-  font-size: 16px;
+  font-size: 15px;
 
-  font-weight: 500;
+  font-weight: 600;
 
-  display: flex;
+  color: #3b2a20;
 
-  align-items: center;
-
-  gap: 10px;
+  outline: none;
 
   cursor: pointer;
+
+  min-width: 170px;
 }
 
 /* ==========================================
@@ -271,6 +339,8 @@ IMAGE
   border-radius: 16px;
 
   object-fit: cover;
+
+  background: #f3efea;
 }
 
 /* ==========================================
@@ -365,6 +435,15 @@ ACTIONS
   cursor: pointer;
 
   color: #2b1c15;
+
+  border-radius: 10px;
+
+  transition: 0.2s;
+}
+
+.icon-btn:hover {
+
+  background: #f5f2ee;
 }
 
 .delete-btn {
@@ -397,6 +476,13 @@ ACTIONS
   color: #3b2a20;
 
   cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.restore-btn:hover {
+
+  background: #efe8e1;
 }
 
 /* ==========================================
@@ -410,6 +496,10 @@ FOOTER
   justify-content: space-between;
 
   align-items: center;
+
+  gap: 20px;
+
+  flex-wrap: wrap;
 
   padding-top: 28px;
 }
@@ -434,11 +524,13 @@ FOOTER
 
   height: 48px;
 
-  padding: 0 16px;
+  padding: 0 18px;
 
-  border: none;
+  border-radius: 12px;
 
-  background: transparent;
+  border: 1px solid #ece6e0;
+
+  background: white;
 
   display: flex;
 
@@ -453,6 +545,13 @@ FOOTER
   cursor: pointer;
 
   color: #37261d;
+
+  transition: 0.2s;
+}
+
+.pagination button:hover:not(:disabled) {
+
+  background: #f7f4f0;
 }
 
 .pagination button:disabled {
@@ -489,6 +588,8 @@ EMPTY
 
 .empty-state {
 
+  width: 100%;
+
   height: 240px;
 
   display: flex;
@@ -500,4 +601,237 @@ EMPTY
   font-size: 18px;
 
   color: #7b6d64;
+
+  background: white;
+}
+
+/* ==========================================
+RESPONSIVE
+========================================== */
+
+@media (max-width: 1200px) {
+
+  .category-table-header,
+  .category-row {
+
+    grid-template-columns:
+      100px
+      1.5fr
+      1fr
+      1fr
+      1fr
+      1fr;
+  }
+}
+
+@media (max-width: 992px) {
+
+  .admin-categories-page {
+
+    padding: 24px;
+  }
+
+  .categories-topbar {
+
+    flex-direction: column;
+
+    align-items: flex-start;
+  }
+
+  .categories-topbar h1 {
+
+    font-size: 42px;
+  }
+
+  .categories-toolbar {
+
+    flex-direction: column;
+
+    align-items: stretch;
+  }
+
+  .category-search {
+
+    max-width: 100%;
+  }
+
+  .category-tabs {
+
+    width: fit-content;
+  }
+
+  .category-sort {
+
+    width: 100%;
+  }
+
+  .category-table {
+
+    overflow-x: auto;
+  }
+
+  .category-table-header,
+  .category-row {
+
+    min-width: 900px;
+  }
+}
+
+@media (max-width: 640px) {
+
+  .categories-card {
+
+    padding: 20px;
+  }
+
+  .categories-topbar h1 {
+
+    font-size: 34px;
+  }
+
+  .create-category-btn {
+
+    width: 100%;
+
+    justify-content: center;
+  }
+
+  .category-footer {
+
+    flex-direction: column;
+
+    align-items: flex-start;
+  }
+
+  .pagination {
+
+    width: 100%;
+
+    justify-content: space-between;
+  }
+}
+
+/* ==========================================
+CONFIRM MODAL
+========================================== */
+
+.confirm-modal-overlay {
+
+  position: fixed;
+
+  inset: 0;
+
+  background: rgba(0,0,0,0.4);
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  z-index: 99999;
+
+  padding: 20px;
+}
+
+.confirm-modal {
+
+  width: 100%;
+
+  max-width: 420px;
+
+  background: white;
+
+  border-radius: 20px;
+
+  padding: 32px;
+
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.15);
+
+  animation: confirmFade 0.2s ease;
+}
+
+.confirm-modal h3 {
+
+  font-size: 24px;
+
+  margin-bottom: 12px;
+
+  color: #24150f;
+}
+
+.confirm-modal p {
+
+  font-size: 16px;
+
+  line-height: 1.6;
+
+  color: #5f534d;
+
+  margin-bottom: 28px;
+}
+
+.confirm-modal-actions {
+
+  display: flex;
+
+  justify-content: flex-end;
+
+  gap: 14px;
+}
+
+.confirm-cancel-btn {
+
+  height: 46px;
+
+  padding: 0 18px;
+
+  border: none;
+
+  border-radius: 12px;
+
+  background: #ece7e2;
+
+  color: #2f2119;
+
+  cursor: pointer;
+
+  font-weight: 600;
+}
+
+.confirm-submit-btn {
+
+  height: 46px;
+
+  padding: 0 18px;
+
+  border: none;
+
+  border-radius: 12px;
+
+  background: #432819;
+
+  color: white;
+
+  cursor: pointer;
+
+  font-weight: 600;
+}
+
+@keyframes confirmFade {
+
+  from {
+
+    opacity: 0;
+
+    transform: translateY(10px);
+  }
+
+  to {
+
+    opacity: 1;
+
+    transform: translateY(0);
+  }
 }

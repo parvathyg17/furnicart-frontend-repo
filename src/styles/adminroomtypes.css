@@ -164,15 +164,58 @@ FILTERS
 
 .sort-box {
 
-  display: flex;
+  height: 48px;
 
-  align-items: center;
+  padding: 0 18px;
 
-  gap: 16px;
+  border-radius: 14px;
 
-  color: #5d5048;
+  border: 1px solid #e6ddd6;
+
+  background: white;
+
+  color: #37241a;
 
   font-size: 14px;
+
+  font-weight: 500;
+
+  cursor: pointer;
+
+  outline: none;
+
+  min-width: 180px;
+}
+
+.room-type-search {
+
+  height: 50px;
+
+  width: 280px;
+
+  padding: 0 18px;
+
+  border-radius: 14px;
+
+  border: 1px solid #e6ddd6;
+
+  background: white;
+
+  font-size: 14px;
+
+  color: #24150f;
+
+  outline: none;
+
+  transition: 0.2s;
+}
+
+.room-type-search:focus {
+
+  border-color: #432819;
+
+  box-shadow:
+    0 0 0 4px rgba(67, 40, 25, 0.08);
 }
 
 .sort-box span {

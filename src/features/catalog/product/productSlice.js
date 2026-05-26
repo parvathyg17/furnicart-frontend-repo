@@ -1,7 +1,7 @@
 import {
   createSlice,
   createAsyncThunk,
-  
+
 } from "@reduxjs/toolkit";
 
 import {
@@ -184,6 +184,7 @@ export const deleteProduct =
       }
     }
   );
+
 export const createVariant =
   createAsyncThunk(
 
@@ -217,6 +218,7 @@ export const createVariant =
       }
     }
   );
+
 export const toggleProductStatus =
   createAsyncThunk(
 
@@ -423,494 +425,535 @@ const productSlice = createSlice({
 
   extraReducers: (builder) => {
 
-    // reducers here
     // ==========================================
-// GET PRODUCTS
-// ==========================================
+    // GET PRODUCTS
+    // ==========================================
 
-builder
+    builder
 
-  .addCase(
-    getAdminProducts.pending,
+      .addCase(
+        getAdminProducts.pending,
 
-    (state) => {
+        (state) => {
 
-      state.productLoading = true;
+          state.productLoading = true;
 
-      state.productError = null;
-    }
-  )
-
-  .addCase(
-    getAdminProducts.fulfilled,
-
-    (state, action) => {
-
-      state.productLoading = false;
-
-      state.products =
-        action.payload.results;
-
-      state.productPagination = {
-
-        count:
-          action.payload.count,
-
-        totalPages:
-          action.payload.total_pages,
-
-        currentPage:
-          action.payload.current_page,
-
-        next:
-          action.payload.next,
-
-        previous:
-          action.payload.previous,
-      };
-    }
-  )
-
-  .addCase(
-    getAdminProducts.rejected,
-
-    (state, action) => {
-
-      state.productLoading = false;
-
-      state.productError =
-        action.payload?.error ||
-        "Failed to fetch products";
-    }
-  );
-
-// ==========================================
-// GET PRODUCT DETAIL
-// ==========================================
-
-builder
-
-  .addCase(
-    getAdminProductDetail.pending,
-
-    (state) => {
-
-      state.productLoading = true;
-
-      state.productError = null;
-    }
-  )
-
-  .addCase(
-    getAdminProductDetail.fulfilled,
-
-    (state, action) => {
-
-      state.productLoading = false;
-
-      state.productDetail =
-        action.payload;
-    }
-  )
-
-  .addCase(
-    getAdminProductDetail.rejected,
-
-    (state, action) => {
-
-      state.productLoading = false;
-
-      state.productError =
-        action.payload?.error ||
-        "Failed to fetch product";
-    }
-  );
-
-// ==========================================
-// CREATE PRODUCT
-// ==========================================
-
-builder
-
-  .addCase(
-    createProduct.pending,
-
-    (state) => {
-
-      state.productLoading = true;
-
-      state.productError = null;
-    }
-  )
-
-  .addCase(
-    createProduct.fulfilled,
-
-    (state) => {
-
-      state.productLoading = false;
-
-      state.productSuccess =
-        "Product created successfully";
-    }
-  )
-
-  .addCase(
-    createProduct.rejected,
-
-    (state, action) => {
-
-      state.productLoading = false;
-
-      state.productError =
-        action.payload?.error ||
-        "Failed to create product";
-    }
-  );
-
-// ==========================================
-// UPDATE PRODUCT
-// ==========================================
-
-builder
-
-  .addCase(
-    updateProduct.pending,
-
-    (state) => {
-
-      state.productLoading = true;
-
-      state.productError = null;
-    }
-  )
-
-  .addCase(
-    updateProduct.fulfilled,
-
-    (state, action) => {
-
-      state.productLoading = false;
-
-      state.productSuccess =
-        "Product updated successfully";
-
-      state.productDetail =
-        action.payload;
-
-      state.products =
-        state.products.map(
-          (product) =>
-
-            product.id ===
-            action.payload.id
-
-              ? action.payload
-
-              : product
-        );
-    }
-  )
-
-  .addCase(
-    updateProduct.rejected,
-
-    (state, action) => {
-
-      state.productLoading = false;
-
-      state.productError =
-        action.payload?.error ||
-        "Failed to update product";
-    }
-  );
-
-// ==========================================
-// DELETE PRODUCT
-// ==========================================
-
-builder
-
-  .addCase(
-    deleteProduct.pending,
-
-    (state) => {
-
-      state.productLoading = true;
-
-      state.productError = null;
-    }
-  )
-
-  .addCase(
-    deleteProduct.fulfilled,
-
-    (state, action) => {
-
-      state.productLoading = false;
-
-      state.productSuccess =
-        "Product deleted successfully";
-
-      state.products =
-        state.products.map(
-          (product) =>
-
-            product.id === action.payload
-
-              ? {
-                  ...product,
-                  is_active: false,
-                }
-
-              : product
-        );
-    }
-  )
-
-  .addCase(
-    deleteProduct.rejected,
-
-    (state, action) => {
-
-      state.productLoading = false;
-
-      state.productError =
-        action.payload?.error ||
-        "Failed to delete product";
-    }
-  );
-
-// ==========================================
-// TOGGLE PRODUCT STATUS
-// ==========================================
-
-builder
-
-  .addCase(
-    toggleProductStatus.fulfilled,
-
-    (state, action) => {
-
-      state.products =
-        state.products.map(
-          (product) =>
-
-            product.id ===
-            action.payload.id
-
-              ? {
-                  ...product,
-                  is_active:
-                    action.payload.is_active,
-                }
-
-              : product
-        );
-
-      if (
-        state.productDetail &&
-        state.productDetail.id ===
-          action.payload.id
-      ) {
-
-        state.productDetail.is_active =
-          action.payload.is_active;
-      }
-    }
-  );
-
-builder
-
-  .addCase(
-    createVariant.pending,
-
-    (state) => {
-
-      state.productLoading = true;
-
-      state.productError = null;
-    }
-  )
-
-  .addCase(
-    createVariant.fulfilled,
-
-    (state, action) => {
-
-      state.productLoading = false;
-
-      state.productSuccess =
-        "Variant created successfully";
-
-      if (state.productDetail) {
-
-        state.productDetail.variants.push(
-          action.payload
-        );
-      }
-    }
-  )
-
-  .addCase(
-    createVariant.rejected,
-
-    (state, action) => {
-
-      state.productLoading = false;
-
-      state.productError =
-        action.payload?.error ||
-        "Failed to create variant";
-    }
-  );
-
-  // ==========================================
-// UPDATE VARIANT
-// ==========================================
-
-builder
-
-  .addCase(
-    updateVariant.fulfilled,
-
-    (state, action) => {
-
-      if (!state.productDetail)
-        return;
-
-      state.productDetail.variants =
-        state.productDetail.variants.map(
-          (variant) =>
-
-            variant.id ===
-            action.payload.id
-
-              ? action.payload
-
-              : variant
-        );
-    }
-  );
-// ==========================================
-// TOGGLE VARIANT STATUS
-// ==========================================
-
-builder
-
-  .addCase(
-    toggleVariantStatus.pending,
-
-    (state) => {
-
-      state.productLoading = true;
-
-      state.productError = null;
-    }
-  )
-
-  .addCase(
-    toggleVariantStatus.fulfilled,
-
-    (state, action) => {
-
-      state.productLoading = false;
-
-      if (state.productDetail) {
-
-        state.productDetail.variants =
-          state.productDetail.variants.map(
-            (variant) =>
-
-              variant.id === action.payload.id
-
-                ? {
-                    ...variant,
-                    is_active:
-                      action.payload.is_active,
-                  }
-
-                : variant
-          );
-      }
-
-      state.productSuccess =
-        action.payload.message;
-    }
-  )
-
-  .addCase(
-    toggleVariantStatus.rejected,
-
-    (state, action) => {
-
-      state.productLoading = false;
-
-      state.productError =
-        action.payload?.error ||
-        "Failed to toggle variant status";
-    }
-  );
-
-  // ==========================================
-  // UPLOAD VARIANT IMAGE
-  // ==========================================
-
-  builder
-
-    .addCase(
-      uploadVariantImage.fulfilled,
-
-      (state, action) => {
-
-        if (!state.productDetail)
-          return;
-
-        const variant =
-          state.productDetail.variants.find(
-            (item) =>
-              item.id ===
-              action.payload[0]?.variant
-          );
-
-        if (variant) {
-
-          variant.images = [
-          ...variant.images,
-          ...action.payload,
-        ];
+          state.productError = null;
         }
-      }
-    );
+      )
 
-// ==========================================
-// DELETE VARIANT IMAGE
-// ==========================================
+      .addCase(
+        getAdminProducts.fulfilled,
 
-builder
+        (state, action) => {
 
-  .addCase(
-    deleteVariantImage.fulfilled,
+          state.productLoading = false;
 
-    (state, action) => {
+          state.products =
+            action.payload.results || [];
 
-      if (!state.productDetail)
-        return;
+          state.productPagination = {
 
-      state.productDetail.variants.forEach(
-        (variant) => {
+            count:
+              action.payload.count || 0,
 
-          variant.images =
-            variant.images.filter(
-              (image) =>
-                image.id !==
-                action.payload
+            totalPages:
+              action.payload.total_pages || 0,
+
+            currentPage:
+              action.payload.current_page || 1,
+
+            next:
+              action.payload.next,
+
+            previous:
+              action.payload.previous,
+          };
+        }
+      )
+
+      .addCase(
+        getAdminProducts.rejected,
+
+        (state, action) => {
+
+          state.productLoading = false;
+
+          state.productError =
+            action.payload?.error ||
+            "Failed to fetch products";
+        }
+      );
+
+    // ==========================================
+    // GET PRODUCT DETAIL
+    // ==========================================
+
+    builder
+
+      .addCase(
+        getAdminProductDetail.pending,
+
+        (state) => {
+
+          state.productLoading = true;
+
+          state.productError = null;
+        }
+      )
+
+      .addCase(
+        getAdminProductDetail.fulfilled,
+
+        (state, action) => {
+
+          state.productLoading = false;
+
+          state.productDetail =
+            action.payload;
+        }
+      )
+
+      .addCase(
+        getAdminProductDetail.rejected,
+
+        (state, action) => {
+
+          state.productLoading = false;
+
+          state.productError =
+            action.payload?.error ||
+            "Failed to fetch product";
+        }
+      );
+
+    // ==========================================
+    // CREATE PRODUCT
+    // ==========================================
+
+    builder
+
+      .addCase(
+        createProduct.pending,
+
+        (state) => {
+
+          state.productLoading = true;
+
+          state.productError = null;
+        }
+      )
+
+      .addCase(
+        createProduct.fulfilled,
+
+        (state, action) => {
+
+          state.productLoading = false;
+
+          state.productSuccess =
+            "Product created successfully";
+
+          const alreadyExists =
+            state.products.some(
+              (product) =>
+                product.id === action.payload.id
+            );
+
+          if (!alreadyExists) {
+
+            state.products = [
+
+              action.payload,
+
+              ...state.products,
+            ];
+          }
+
+          if (state.productPagination) {
+
+            state.productPagination.count += 1;
+          }
+        }
+      )
+
+      .addCase(
+        createProduct.rejected,
+
+        (state, action) => {
+
+          state.productLoading = false;
+
+          state.productError =
+            action.payload?.error ||
+            "Failed to create product";
+        }
+      );
+
+    // ==========================================
+    // UPDATE PRODUCT
+    // ==========================================
+
+    builder
+
+      .addCase(
+        updateProduct.pending,
+
+        (state) => {
+
+          state.productLoading = true;
+
+          state.productError = null;
+        }
+      )
+
+      .addCase(
+        updateProduct.fulfilled,
+
+        (state, action) => {
+
+          state.productLoading = false;
+
+          state.productSuccess =
+            "Product updated successfully";
+
+          state.productDetail =
+            action.payload;
+
+          state.products =
+            state.products.map(
+              (product) =>
+
+                product.id ===
+                action.payload.id
+
+                  ? {
+
+                      ...product,
+
+                      ...action.payload,
+                    }
+
+                  : product
+            );
+        }
+      )
+
+      .addCase(
+        updateProduct.rejected,
+
+        (state, action) => {
+
+          state.productLoading = false;
+
+          state.productError =
+            action.payload?.error ||
+            "Failed to update product";
+        }
+      );
+
+    // ==========================================
+    // DELETE PRODUCT
+    // ==========================================
+
+    builder
+
+      .addCase(
+        deleteProduct.pending,
+
+        (state) => {
+
+          state.productLoading = true;
+
+          state.productError = null;
+        }
+      )
+
+      .addCase(
+        deleteProduct.fulfilled,
+
+        (state, action) => {
+
+          state.productLoading = false;
+
+          state.productSuccess =
+            "Product deleted successfully";
+
+          state.products =
+            state.products.filter(
+              (product) =>
+                product.id !== action.payload
+            );
+
+          if (state.productPagination) {
+
+            state.productPagination.count -= 1;
+          }
+
+          if (
+            state.productDetail &&
+            state.productDetail.id === action.payload
+          ) {
+
+            state.productDetail = null;
+          }
+        }
+      )
+
+      .addCase(
+        deleteProduct.rejected,
+
+        (state, action) => {
+
+          state.productLoading = false;
+
+          state.productError =
+            action.payload?.error ||
+            "Failed to delete product";
+        }
+      );
+
+    // ==========================================
+    // TOGGLE PRODUCT STATUS
+    // ==========================================
+
+    builder
+
+      .addCase(
+        toggleProductStatus.fulfilled,
+
+        (state, action) => {
+
+          state.products =
+            state.products.map(
+              (product) =>
+
+                product.id ===
+                action.payload.id
+
+                  ? {
+                      ...product,
+                      is_active:
+                        action.payload.is_active,
+                    }
+
+                  : product
+            );
+
+          if (
+            state.productDetail &&
+            state.productDetail.id ===
+              action.payload.id
+          ) {
+
+            state.productDetail.is_active =
+              action.payload.is_active;
+          }
+        }
+      );
+
+    // ==========================================
+    // CREATE VARIANT
+    // ==========================================
+
+    builder
+
+      .addCase(
+        createVariant.pending,
+
+        (state) => {
+
+          state.productLoading = true;
+
+          state.productError = null;
+        }
+      )
+
+      .addCase(
+        createVariant.fulfilled,
+
+        (state, action) => {
+
+          state.productLoading = false;
+
+          state.productSuccess =
+            "Variant created successfully";
+
+          if (state.productDetail) {
+
+            state.productDetail.variants.push(
+              action.payload
+            );
+          }
+        }
+      )
+
+      .addCase(
+        createVariant.rejected,
+
+        (state, action) => {
+
+          state.productLoading = false;
+
+          state.productError =
+            action.payload?.error ||
+            "Failed to create variant";
+        }
+      );
+
+    // ==========================================
+    // UPDATE VARIANT
+    // ==========================================
+
+    builder
+
+      .addCase(
+        updateVariant.fulfilled,
+
+        (state, action) => {
+
+          if (!state.productDetail)
+            return;
+
+          state.productDetail.variants =
+            state.productDetail.variants.map(
+              (variant) =>
+
+                variant.id ===
+                action.payload.id
+
+                  ? {
+
+                      ...variant,
+
+                      ...action.payload,
+                    }
+
+                  : variant
             );
         }
       );
-    }
-  );
-  
+
+    // ==========================================
+    // TOGGLE VARIANT STATUS
+    // ==========================================
+
+    builder
+
+      .addCase(
+        toggleVariantStatus.pending,
+
+        (state) => {
+
+          state.productLoading = true;
+
+          state.productError = null;
+        }
+      )
+
+      .addCase(
+        toggleVariantStatus.fulfilled,
+
+        (state, action) => {
+
+          state.productLoading = false;
+
+          state.productSuccess =
+            action.payload.message;
+
+          if (state.productDetail) {
+
+            state.productDetail.variants =
+              state.productDetail.variants.map(
+                (variant) =>
+
+                  variant.id === action.payload.id
+
+                    ? {
+                        ...variant,
+                        is_active:
+                          action.payload.is_active,
+                      }
+
+                    : variant
+              );
+          }
+        }
+      )
+
+      .addCase(
+        toggleVariantStatus.rejected,
+
+        (state, action) => {
+
+          state.productLoading = false;
+
+          state.productError =
+            action.payload?.error ||
+            "Failed to toggle variant status";
+        }
+      );
+
+    // ==========================================
+    // UPLOAD VARIANT IMAGE
+    // ==========================================
+
+    builder
+
+      .addCase(
+        uploadVariantImage.fulfilled,
+
+        (state, action) => {
+
+          if (!state.productDetail)
+            return;
+
+          const variant =
+            state.productDetail.variants.find(
+              (item) =>
+                item.id ===
+                action.payload[0]?.variant
+            );
+
+          if (variant) {
+
+            variant.images = [
+
+              ...variant.images,
+
+              ...action.payload,
+            ];
+          }
+        }
+      );
+
+    // ==========================================
+    // DELETE VARIANT IMAGE
+    // ==========================================
+
+    builder
+
+      .addCase(
+        deleteVariantImage.fulfilled,
+
+        (state, action) => {
+
+          if (!state.productDetail)
+            return;
+
+          state.productDetail.variants.forEach(
+            (variant) => {
+
+              variant.images =
+                variant.images.filter(
+                  (image) =>
+                    image.id !==
+                    action.payload
+                );
+            }
+          );
+        }
+      );
   },
 });
 

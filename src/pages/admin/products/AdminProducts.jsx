@@ -1,4 +1,3 @@
-
 import "../../../styles/adminproducts.css";
 
 import {
@@ -102,7 +101,7 @@ export default function AdminProducts() {
   const [
     status,
     setStatus,
-  ] = useState("all");
+  ] = useState("active");
 
   const [
     currentPage,
@@ -119,8 +118,6 @@ export default function AdminProducts() {
     setOpenCreateModal,
   ] = useState(false);
 
-
-
   // ==========================================
   // FETCH CATEGORY + ROOM TYPES
   // ==========================================
@@ -128,32 +125,20 @@ export default function AdminProducts() {
   useEffect(() => {
 
     dispatch(
-      getAdminCategories()
+      getAdminCategories({
+
+        is_active: true,
+      })
     );
 
     dispatch(
-      getAdminRoomTypes()
+      getAdminRoomTypes({
+
+        is_active: true,
+      })
     );
 
   }, [dispatch]);
-
-  // ==========================================
-  // RESET PAGE
-  // ==========================================
-
-  useEffect(() => {
-
-    setCurrentPage(1);
-
-  }, [
-
-    search,
-    category,
-    roomType,
-    status,
-    sort,
-
-  ]);
 
   // ==========================================
   // FETCH PRODUCTS
@@ -161,96 +146,116 @@ export default function AdminProducts() {
 
   useEffect(() => {
 
-    const params = {
-
-      page: currentPage,
-
-      search,
-
-      sort,
-
-      category,
-
-      room_type: roomType,
-
-      is_active:
-
-        status === "all"
-
-          ? ""
-
-          : status === "active"
-
-            ? "true"
-
-            : "false",
-    };
-
     dispatch(
-      getAdminProducts(params)
+      getAdminProducts({
+
+        page: currentPage,
+
+        search,
+
+        sort,
+
+        category,
+
+        room_type: roomType,
+
+        is_active:
+
+          status === "all"
+
+            ? ""
+
+            : status === "active"
+
+              ? "true"
+
+              : "false",
+      })
     );
 
-    }, [
+  }, [
 
-      dispatch,
-      currentPage,
-      search,
-      category,
-      roomType,
-      sort,
-      status,
+    dispatch,
+    currentPage,
+    search,
+    category,
+    roomType,
+    sort,
+    status,
 
-    ]);
+  ]);
+
+  // ==========================================
+  // DELETE PRODUCT
+  // ==========================================
 
   const handleDeleteProduct =
-  async (productId) => {
+    async (productId) => {
 
-    const confirmDelete =
-      window.confirm(
-        "Are you sure you want to delete this product?"
+      const confirmDelete =
+        window.confirm(
+          "Are you sure you want to delete this product?"
+        );
+
+      if (!confirmDelete)
+        return;
+
+      await dispatch(
+        deleteProduct(productId)
       );
 
-    if (!confirmDelete)
-      return;
+      const updatedCount =
+        (productPagination?.count || 1) - 1;
 
-    await dispatch(
-      deleteProduct(productId)
-    );
+      const updatedPages =
+        Math.ceil(updatedCount / 10);
 
-    dispatch(
-        getAdminProducts({
+      if (
+        currentPage > updatedPages &&
+        currentPage > 1
+      ) {
 
-          page: currentPage,
+        setCurrentPage(
+          currentPage - 1
+        );
 
-          search,
+      } else {
 
-          category,
+        dispatch(
+          getAdminProducts({
 
-          room_type: roomType,
+            page: currentPage,
 
-          sort,
+            search,
 
-          is_active:
+            category,
 
-            status === "all"
+            room_type: roomType,
 
-              ? ""
+            sort,
 
-              : status === "active"
+            is_active:
 
-                ? "true"
+              status === "all"
 
-                : "false",
-        })
-      );
-  };
+                ? ""
+
+                : status === "active"
+
+                  ? "true"
+
+                  : "false",
+          })
+        );
+      }
+    };
 
   // ==========================================
   // PAGINATION
   // ==========================================
 
   const totalPages =
-    productPagination?.totalPages || 1;
+    productPagination?.totalPages ?? 0;
 
   const pages = useMemo(() => {
 
@@ -323,11 +328,14 @@ export default function AdminProducts() {
             type="text"
             placeholder="Search products..."
             value={search}
-            onChange={(e) =>
+            onChange={(e) => {
+
               setSearch(
                 e.target.value
-              )
-            }
+              );
+
+              setCurrentPage(1);
+            }}
           />
 
         </div>
@@ -336,11 +344,14 @@ export default function AdminProducts() {
 
         <select
           value={category}
-          onChange={(e) =>
+          onChange={(e) => {
+
             setCategory(
               e.target.value
-            )
-          }
+            );
+
+            setCurrentPage(1);
+          }}
         >
 
           <option value="">
@@ -374,11 +385,14 @@ export default function AdminProducts() {
 
         <select
           value={roomType}
-          onChange={(e) =>
+          onChange={(e) => {
+
             setRoomType(
               e.target.value
-            )
-          }
+            );
+
+            setCurrentPage(1);
+          }}
         >
 
           <option value="">
@@ -416,11 +430,14 @@ export default function AdminProducts() {
 
           <select
             value={sort}
-            onChange={(e) =>
+            onChange={(e) => {
+
               setSort(
                 e.target.value
-              )
-            }
+              );
+
+              setCurrentPage(1);
+            }}
           >
 
             <option value="latest">
@@ -458,9 +475,12 @@ export default function AdminProducts() {
 
                 : ""
             }
-            onClick={() =>
-              setStatus("all")
-            }
+            onClick={() => {
+
+              setStatus("all");
+
+              setCurrentPage(1);
+            }}
           >
             All
           </button>
@@ -474,9 +494,12 @@ export default function AdminProducts() {
 
                 : ""
             }
-            onClick={() =>
-              setStatus("active")
-            }
+            onClick={() => {
+
+              setStatus("active");
+
+              setCurrentPage(1);
+            }}
           >
             Active
           </button>
@@ -490,9 +513,12 @@ export default function AdminProducts() {
 
                 : ""
             }
-            onClick={() =>
-              setStatus("inactive")
-            }
+            onClick={() => {
+
+              setStatus("inactive");
+
+              setCurrentPage(1);
+            }}
           >
             Inactive
           </button>
@@ -605,31 +631,32 @@ export default function AdminProducts() {
 
                         <div className="product-tags">
 
-                         {
-                              product.category_name && (
+                          {
+                            product.category_name && (
 
-                                <span>
+                              <span>
 
-                                  {
-                                    product.category_name
-                                  }
+                                {
+                                  product.category_name
+                                }
+
+                              </span>
+                            )
+                          }
+
+                          {
+                            product.room_types?.map(
+                              (room) => (
+
+                                <span key={room.id}>
+
+                                  {room.name}
 
                                 </span>
                               )
-                            }
+                            )
+                          }
 
-                            {
-                              product.room_types?.map(
-                                (room) => (
-
-                                  <span key={room.id}>
-
-                                    {room.name}
-
-                                  </span>
-                                )
-                              )
-                            }
                         </div>
 
                         <div className="product-meta">
@@ -860,6 +887,36 @@ export default function AdminProducts() {
         onClose={() =>
           setOpenCreateModal(false)
         }
+
+        onSuccess={() => {
+
+          dispatch(
+            getAdminProducts({
+
+              page: currentPage,
+
+              search,
+
+              sort,
+
+              category,
+
+              room_type: roomType,
+
+              is_active:
+
+                status === "all"
+
+                  ? ""
+
+                  : status === "active"
+
+                    ? "true"
+
+                    : "false",
+            })
+          );
+        }}
 
       />
 

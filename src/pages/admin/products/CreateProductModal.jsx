@@ -5,6 +5,7 @@ from "../categories/CreateCategoryModal";
 
 import CreateRoomTypeModal
 from "../roomType/CreateRoomTypeModal";
+
 import {
   useEffect,
   useState,
@@ -36,6 +37,7 @@ export default function CreateProductModal({
 
   isOpen,
   onClose,
+  onSuccess,
 
 }) {
 
@@ -77,8 +79,7 @@ export default function CreateProductModal({
     is_active: true,
   });
 
-
-    const [
+  const [
     showCreateCategoryModal,
     setShowCreateCategoryModal,
   ] = useState(false);
@@ -87,21 +88,44 @@ export default function CreateProductModal({
     showCreateRoomTypeModal,
     setShowCreateRoomTypeModal,
   ] = useState(false);
+
   // ==========================================
-  // FETCH DATA
+  // FETCH ACTIVE DATA
   // ==========================================
 
   useEffect(() => {
 
+    if (!isOpen)
+      return;
+
     dispatch(
-      getAdminCategories()
+      getAdminCategories({
+
+        page: 1,
+
+        page_size: 1000,
+
+        is_active: true,
+      })
     );
 
     dispatch(
-      getAdminRoomTypes()
+      getAdminRoomTypes({
+
+        page: 1,
+
+        page_size: 1000,
+
+        is_active: true,
+      })
     );
 
-  }, [dispatch]);
+  }, [
+
+    dispatch,
+    isOpen,
+
+  ]);
 
   // ==========================================
   // HANDLE CHANGE
@@ -131,6 +155,79 @@ export default function CreateProductModal({
   };
 
   // ==========================================
+  // HANDLE ROOM TYPE
+  // ==========================================
+
+  const handleRoomTypeToggle =
+    (roomTypeId, checked) => {
+
+      if (checked) {
+
+        setFormData((prev) => ({
+
+          ...prev,
+
+          room_type_ids: [
+
+            ...new Set([
+
+              ...prev.room_type_ids,
+
+              roomTypeId,
+            ]),
+          ],
+        }));
+
+      } else {
+
+        setFormData((prev) => ({
+
+          ...prev,
+
+          room_type_ids:
+
+            prev.room_type_ids.filter(
+              (id) =>
+                id !== roomTypeId
+            ),
+        }));
+      }
+    };
+
+  // ==========================================
+  // RESET FORM
+  // ==========================================
+
+  const resetForm = () => {
+
+    setFormData({
+
+      name: "",
+
+      description: "",
+
+      category: "",
+
+      room_type_ids: [],
+
+      is_featured: false,
+
+      is_active: true,
+    });
+  };
+
+  // ==========================================
+  // CLOSE MODAL
+  // ==========================================
+
+  const handleClose = () => {
+
+    resetForm();
+
+    onClose();
+  };
+
+  // ==========================================
   // SUBMIT
   // ==========================================
 
@@ -150,22 +247,17 @@ export default function CreateProductModal({
         )
       ) {
 
+        // refresh products
+        if (onSuccess) {
+
+          onSuccess();
+        }
+
+        // reset form
+        resetForm();
+
+        // close modal
         onClose();
-
-        setFormData({
-
-          name: "",
-
-          description: "",
-
-          category: "",
-
-          room_type_ids: [],
-
-          is_featured: false,
-
-          is_active: true,
-        });
       }
     };
 
@@ -199,8 +291,9 @@ export default function CreateProductModal({
           </div>
 
           <button
+            type="button"
             className="close-btn"
-            onClick={onClose}
+            onClick={handleClose}
           >
 
             <X size={26} />
@@ -241,8 +334,6 @@ export default function CreateProductModal({
             </div>
 
             {/* CATEGORY + ROOM TYPE */}
-
-          
 
             <div className="double-fields">
 
@@ -318,7 +409,7 @@ export default function CreateProductModal({
 
               </div>
 
-             {/* ROOM TYPES */}
+              {/* ROOM TYPES */}
 
               <div className="form-group">
 
@@ -347,72 +438,54 @@ export default function CreateProductModal({
                   {
                     roomTypes
                       ?.filter(
-                        (item) => item.is_active
+                        (item) =>
+                          item.is_active
                       )
-                      ?.map((item) => (
+                      ?.map(
+                        (item) => (
 
-                        <label
-                          key={item.id}
-                          className={`room-type-chip ${
-                            formData.room_type_ids.includes(
-                              item.id
-                            )
-                              ? "active"
-                              : ""
-                          }`}
-                        >
-
-                          <input
-                            type="checkbox"
-                            checked={
+                          <label
+                            key={item.id}
+                            className={`room-type-chip ${
                               formData.room_type_ids.includes(
                                 item.id
                               )
-                            }
-                            onChange={(e) => {
+                                ? "active"
+                                : ""
+                            }`}
+                          >
 
-                              if (e.target.checked) {
-
-                                setFormData((prev) => ({
-
-                                  ...prev,
-
-                                  room_type_ids: [
-
-                                    ...prev.room_type_ids,
-
-                                    item.id,
-                                  ],
-                                }));
-
-                              } else {
-
-                                setFormData((prev) => ({
-
-                                  ...prev,
-
-                                  room_type_ids:
-
-                                    prev.room_type_ids.filter(
-                                      (id) =>
-                                        id !== item.id
-                                    ),
-                                }));
+                            <input
+                              type="checkbox"
+                              checked={
+                                formData.room_type_ids.includes(
+                                  item.id
+                                )
                               }
-                            }}
-                          />
+                              onChange={(e) =>
 
-                          <span>
-                            {item.name}
-                          </span>
+                                handleRoomTypeToggle(
 
-                        </label>
-                      ))
+                                  item.id,
+
+                                  e.target.checked
+                                )
+                              }
+                            />
+
+                            <span>
+                              {item.name}
+                            </span>
+
+                          </label>
+                        )
+                      )
                   }
 
                 </div>
 
               </div>
+
             </div>
 
             {/* DESCRIPTION */}
@@ -512,18 +585,21 @@ export default function CreateProductModal({
 
             </div>
 
-           <div className="variant-note">
+            {/* NOTE */}
 
-            <p>
+            <div className="variant-note">
 
-              Product imagery can be added later
-              while creating variants.
+              <p>
 
-            </p>
+                Product imagery can be added later
+                while creating variants.
+
+              </p>
+
+            </div>
 
           </div>
 
-          </div>
           {/* FOOTER */}
 
           <div className="create-product-footer">
@@ -531,7 +607,7 @@ export default function CreateProductModal({
             <button
               type="button"
               className="cancel-btn"
-              onClick={onClose}
+              onClick={handleClose}
             >
 
               Cancel

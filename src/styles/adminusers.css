@@ -1,0 +1,473 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Serif+Display&display=swap");
+
+.admin-users-page {
+
+  padding: 40px;
+
+  min-height: 100vh;
+
+  background: #f6f3ef;
+
+  font-family: "Inter", sans-serif;
+}
+
+/* ==========================================
+HEADER
+========================================== */
+
+.users-header {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: flex-start;
+
+  margin-bottom: 32px;
+}
+
+.users-breadcrumb {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  color: #7c6f67;
+
+  font-size: 14px;
+
+  margin-bottom: 12px;
+}
+
+.users-header h1 {
+
+  font-size: 56px;
+
+  line-height: 1;
+
+  color: #241711;
+
+  font-family: "DM Serif Display", serif;
+
+  font-weight: 500;
+}
+
+/* ==========================================
+CARD
+========================================== */
+
+.users-card {
+
+  background: white;
+
+  border-radius: 32px;
+
+  padding: 32px;
+
+  box-shadow:
+    0 10px 30px rgba(0,0,0,0.04);
+}
+
+/* ==========================================
+TOOLBAR
+========================================== */
+
+.users-toolbar {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  margin-bottom: 30px;
+}
+
+.users-search-box {
+
+  width: 360px;
+
+  height: 56px;
+
+  border-radius: 18px;
+
+  background: #f7f4f0;
+
+  border: 1px solid #ece6e0;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 0 18px;
+
+  color: #7c6f67;
+}
+
+.users-search-box input {
+
+  width: 100%;
+
+  border: none;
+
+  background: transparent;
+
+  outline: none;
+
+  font-size: 15px;
+
+  color: #241711;
+}
+
+.users-search-box input::placeholder {
+
+  color: #9b9188;
+}
+
+/* ==========================================
+TABLE
+========================================== */
+
+.users-table-wrapper {
+
+  border-radius: 24px;
+
+  overflow: hidden;
+
+  border: 1px solid #f0ebe6;
+}
+
+.users-table-header {
+
+  height: 64px;
+
+  padding: 0 28px;
+
+  background: #f7f4f0;
+
+  display: grid;
+
+  grid-template-columns:
+    100px
+    2fr
+    1.5fr
+    1.2fr
+    1.2fr;
+
+  align-items: center;
+
+  font-size: 14px;
+
+  font-weight: 700;
+
+  color: #6f6259;
+
+  letter-spacing: 0.03em;
+}
+
+.users-row {
+
+  min-height: 96px;
+
+  padding: 0 28px;
+
+  display: grid;
+
+  grid-template-columns:
+    100px
+    2fr
+    1.5fr
+    1.2fr
+    1.2fr;
+
+  align-items: center;
+
+  border-top: 1px solid #f3efea;
+
+  background: white;
+
+  transition: 0.2s;
+}
+
+.users-row:hover {
+
+  background: #fcfaf8;
+}
+
+.user-email {
+
+  font-weight: 600;
+
+  color: #241711;
+}
+
+/* ==========================================
+STATUS
+========================================== */
+
+.user-status {
+
+  height: 38px;
+
+  padding: 0 18px;
+
+  border-radius: 999px;
+
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  font-size: 14px;
+
+  font-weight: 700;
+}
+
+.user-status.active {
+
+  background: #d8ead8;
+
+  color: #295c30;
+}
+
+.user-status.blocked {
+
+  background: #f8d8d5;
+
+  color: #b13f3f;
+}
+
+.user-status.unverified {
+
+  background: #ececec;
+
+  color: #666;
+}
+
+/* ==========================================
+BUTTONS
+========================================== */
+
+.user-action-btn {
+
+  height: 44px;
+
+  padding: 0 18px;
+
+  border: none;
+
+  border-radius: 14px;
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.user-action-btn.block {
+
+  background: #fbe4e4;
+
+  color: #b13f3f;
+}
+
+.user-action-btn.block:hover {
+
+  background: #f7d4d4;
+}
+
+.user-action-btn.unblock {
+
+  background: #dff1e1;
+
+  color: #2f6d39;
+}
+
+.user-action-btn.unblock:hover {
+
+  background: #d2e8d5;
+}
+
+/* ==========================================
+EMPTY
+========================================== */
+
+.users-empty {
+
+  height: 220px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  font-size: 17px;
+
+  color: #7b6d64;
+
+  background: white;
+}
+
+/* ==========================================
+FOOTER
+========================================== */
+
+.users-footer {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  padding-top: 28px;
+
+  gap: 20px;
+}
+
+.users-footer p {
+
+  font-size: 15px;
+
+  color: #6b5d55;
+}
+
+.users-pagination {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 14px;
+}
+
+.users-pagination button {
+
+  height: 48px;
+
+  padding: 0 18px;
+
+  border-radius: 14px;
+
+  border: 1px solid #ece6e0;
+
+  background: white;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  font-size: 15px;
+
+  font-weight: 600;
+
+  color: #37261d;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.users-pagination button:hover:not(:disabled) {
+
+  background: #f7f4f0;
+}
+
+.users-pagination button:disabled {
+
+  opacity: 0.4;
+
+  cursor: not-allowed;
+}
+
+.page-indicator {
+
+  height: 48px;
+
+  padding: 0 20px;
+
+  border-radius: 14px;
+
+  background: #f7f4f0;
+
+  display: flex;
+
+  align-items: center;
+
+  font-size: 15px;
+
+  font-weight: 700;
+
+  color: #2a1c14;
+}
+
+/* ==========================================
+RESPONSIVE
+========================================== */
+
+@media (max-width: 992px) {
+
+  .admin-users-page {
+
+    padding: 24px;
+  }
+
+  .users-header h1 {
+
+    font-size: 42px;
+  }
+
+  .users-search-box {
+
+    width: 100%;
+  }
+
+  .users-table-wrapper {
+
+    overflow-x: auto;
+  }
+
+  .users-table-header,
+  .users-row {
+
+    min-width: 850px;
+  }
+
+  .users-footer {
+
+    flex-direction: column;
+
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+
+  .users-card {
+
+    padding: 20px;
+  }
+
+  .users-header h1 {
+
+    font-size: 34px;
+  }
+
+  .users-pagination {
+
+    width: 100%;
+
+    justify-content: space-between;
+  }
+}

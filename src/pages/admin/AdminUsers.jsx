@@ -1,4 +1,4 @@
-import "../../styles/adminpanel.css";
+import "../../styles/adminusers.css";
 
 import {
   useEffect,
@@ -15,6 +15,8 @@ import toast from "react-hot-toast";
 import {
   Search,
   ShieldAlert,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 import {
@@ -24,8 +26,7 @@ import {
 
 export default function AdminUsers() {
 
-  const dispatch =
-    useDispatch();
+  const dispatch = useDispatch();
 
   const {
     users,
@@ -35,7 +36,7 @@ export default function AdminUsers() {
   );
 
   // ==========================================
-  // LOCAL STATES
+  // STATES
   // ==========================================
 
   const [
@@ -43,14 +44,20 @@ export default function AdminUsers() {
     setLoadingLocal,
   ] = useState(false);
 
-  const [page, setPage] =
-    useState(1);
+  const [
+    page,
+    setPage,
+  ] = useState(1);
 
-  const [search, setSearch] =
-    useState("");
+  const [
+    search,
+    setSearch,
+  ] = useState("");
 
-  const [showModal, setShowModal] =
-    useState(false);
+  const [
+    showModal,
+    setShowModal,
+  ] = useState(false);
 
   const [
     selectedUser,
@@ -63,7 +70,7 @@ export default function AdminUsers() {
   ] = useState(false);
 
   // ==========================================
-  // LOAD USERS
+  // FETCH USERS
   // ==========================================
 
   useEffect(() => {
@@ -85,16 +92,13 @@ export default function AdminUsers() {
         } catch (err) {
 
           toast.error(
-
             err?.error ||
             "Failed to load users"
-
           );
 
         } finally {
 
           setLoadingLocal(false);
-
         }
       };
 
@@ -107,17 +111,6 @@ export default function AdminUsers() {
   ]);
 
   // ==========================================
-  // SEARCH
-  // ==========================================
-
-  const handleSearch =
-    () => {
-
-      setPage(1);
-
-    };
-
-  // ==========================================
   // MODAL
   // ==========================================
 
@@ -127,16 +120,14 @@ export default function AdminUsers() {
       setSelectedUser(user);
 
       setShowModal(true);
-
     };
 
   const closeModal =
     () => {
 
-      setShowModal(false);
-
       setSelectedUser(null);
 
+      setShowModal(false);
     };
 
   // ==========================================
@@ -146,7 +137,8 @@ export default function AdminUsers() {
   const confirmAction =
     async () => {
 
-      if (!selectedUser) return;
+      if (!selectedUser)
+        return;
 
       try {
 
@@ -163,10 +155,9 @@ export default function AdminUsers() {
           selectedUser.status ===
           "blocked"
 
-            ? "User unblocked successfully"
+            ? "User unblocked"
 
-            : "User blocked successfully"
-
+            : "User blocked"
         );
 
         closeModal();
@@ -177,16 +168,12 @@ export default function AdminUsers() {
 
           err?.error ||
 
-          err?.detail ||
-
           "Something went wrong"
-
         );
 
       } finally {
 
         setActionLoading(false);
-
       }
     };
 
@@ -205,302 +192,349 @@ export default function AdminUsers() {
         return "Blocked";
       }
 
-      if (status === "unverified") {
-        return "Unverified";
-      }
-
-      return "Unknown";
+      return "Unverified";
     };
 
   return (
 
-    <div className="users-page">
+    <div className="admin-users-page">
 
       {/* HEADER */}
-      <div className="users-top">
+
+      <div className="users-header">
 
         <div>
 
-          <span>
-            USER MANAGEMENT
-          </span>
+          <div className="users-breadcrumb">
 
-          <h2>
-            Manage Users
-          </h2>
+            Administration
 
-        </div>
+            <span>/</span>
 
-        <div className="users-search">
+            Users
 
-          <Search size={18} />
+          </div>
 
-          <input
-            type="text"
-            placeholder="Search users..."
-            value={search}
-            onChange={(e) =>
-              setSearch(
-                e.target.value
-              )
-            }
-          />
+          <h1>
 
-          <button
-            onClick={
-              handleSearch
-            }
-          >
-            Search
-          </button>
+            User Management
+
+          </h1>
 
         </div>
 
       </div>
 
-      {/* TABLE */}
-      <div className="table-wrapper">
+      {/* CARD */}
 
-        <table className="users-table">
+      <div className="users-card">
 
-          <thead>
+        {/* TOOLBAR */}
 
-            <tr>
+        <div className="users-toolbar">
 
-              <th>ID</th>
+          <div className="users-search-box">
 
-              <th>Email</th>
+            <Search size={18} />
 
-              <th>Username</th>
+            <input
+              type="text"
+              placeholder="Search users..."
+              value={search}
+              onChange={(e) =>
+                setSearch(
+                  e.target.value
+                )
+              }
+            />
 
-              <th>Status</th>
+          </div>
 
-              <th>Action</th>
+        </div>
 
-            </tr>
+        {/* TABLE */}
 
-          </thead>
+        <div className="users-table-wrapper">
 
-          <tbody>
+          <div className="users-table-header">
 
-            {loadingLocal ? (
+            <div>ID</div>
 
-              <tr>
+            <div>Email</div>
 
-                <td
-                  colSpan="5"
-                  className="loading-cell"
+            <div>Username</div>
+
+            <div>Status</div>
+
+            <div>Actions</div>
+
+          </div>
+
+          {
+            loadingLocal ? (
+
+              <div className="users-empty">
+
+                Loading users...
+
+              </div>
+
+            ) : users?.length > 0 ? (
+
+              users.map((user) => (
+
+                <div
+                  key={user.id}
+                  className="users-row"
                 >
-                  Loading...
-                </td>
 
-              </tr>
+                  <div>
 
-            ) : users?.length === 0 ? (
-
-              <tr>
-
-                <td
-                  colSpan="5"
-                  className="loading-cell"
-                >
-                  No users found
-                </td>
-
-              </tr>
-
-            ) : (
-
-              users?.map((user) => (
-
-                <tr key={user.id}>
-
-                  <td>
                     #{user.id}
-                  </td>
 
-                  <td>
+                  </div>
+
+                  <div className="user-email">
+
                     {user.email}
-                  </td>
 
-                  <td>
+                  </div>
+
+                  <div>
+
                     {user.username}
-                  </td>
 
-                  <td>
+                  </div>
+
+                  <div>
 
                     <span
-                      className={`status ${user.status}`}
+                      className={
+                        user.status ===
+                        "active"
+
+                          ? "user-status active"
+
+                          : user.status ===
+                            "blocked"
+
+                          ? "user-status blocked"
+
+                          : "user-status unverified"
+                      }
                     >
 
-                      {getStatusLabel(
-                        user.status
-                      )}
+                      {
+                        getStatusLabel(
+                          user.status
+                        )
+                      }
 
                     </span>
 
-                  </td>
+                  </div>
 
-                  <td>
+                  <div>
 
                     <button
                       className={
                         user.status ===
                         "blocked"
 
-                          ? "unblock-btn"
+                          ? "user-action-btn unblock"
 
-                          : "block-btn"
+                          : "user-action-btn block"
                       }
                       onClick={() =>
                         openModal(user)
                       }
                     >
 
-                      {user.status ===
-                      "blocked"
+                      {
+                        user.status ===
+                        "blocked"
 
-                        ? "Unblock"
+                          ? "Unblock"
 
-                        : "Block"}
+                          : "Block"
+                      }
 
                     </button>
 
-                  </td>
+                  </div>
 
-                </tr>
-
+                </div>
               ))
-            )}
 
-          </tbody>
+            ) : (
 
-        </table>
+              <div className="users-empty">
 
-      </div>
+                No users found
 
-      {/* PAGINATION */}
-      <div className="pagination">
+              </div>
 
-        <button
-          disabled={page <= 1}
-          onClick={() =>
-            setPage(page - 1)
+            )
           }
-        >
-          Prev
-        </button>
 
-        <span>
+        </div>
 
-          Page {page} / {totalPages}
+        {/* FOOTER */}
 
-        </span>
+        <div className="users-footer">
 
-        <button
-          disabled={
-            page >= totalPages
-          }
-          onClick={() =>
-            setPage(page + 1)
-          }
-        >
-          Next
-        </button>
+          <p>
 
-      </div>
+            Showing{" "}
 
-      {/* MODAL */}
-      {showModal && (
+            {users?.length || 0}
 
-        <div className="admin-modal-overlay">
+            {" "}users
 
-          <div className="admin-modal">
+          </p>
 
-            <div className="admin-modal-icon">
+          <div className="users-pagination">
 
-              <ShieldAlert size={30} />
+            <button
+              disabled={page <= 1}
+              onClick={() =>
+                setPage(
+                  (prev) =>
+                    prev - 1
+                )
+              }
+            >
+
+              <ChevronLeft size={18} />
+
+              Prev
+
+            </button>
+
+            <div className="page-indicator">
+
+              Page {page} of {totalPages}
 
             </div>
 
-            <h3>
+            <button
+              disabled={
+                page >= totalPages
+              }
+              onClick={() =>
+                setPage(
+                  (prev) =>
+                    prev + 1
+                )
+              }
+            >
 
-              {selectedUser?.status ===
-              "blocked"
+              Next
 
-                ? "Unblock User"
+              <ChevronRight size={18} />
 
-                : "Block User"}
-
-            </h3>
-
-            <p>
-
-              Are you sure you want to{" "}
-
-              <strong>
-
-                {selectedUser?.status ===
-                "blocked"
-
-                  ? "unblock"
-
-                  : "block"}
-
-              </strong>{" "}
-
-              {selectedUser?.email}?
-
-            </p>
-
-            <div className="admin-modal-actions">
-
-              <button
-                className="modal-cancel-btn"
-                onClick={
-                  closeModal
-                }
-              >
-                Cancel
-              </button>
-
-              <button
-                className={
-                  selectedUser?.status ===
-                  "blocked"
-
-                    ? "modal-unblock-btn"
-
-                    : "modal-block-btn"
-                }
-                onClick={
-                  confirmAction
-                }
-                disabled={
-                  actionLoading
-                }
-              >
-
-                {actionLoading
-
-                  ? "Please wait..."
-
-                  : selectedUser?.status ===
-                    "blocked"
-
-                  ? "Unblock User"
-
-                  : "Block User"}
-
-              </button>
-
-            </div>
+            </button>
 
           </div>
 
         </div>
 
-      )}
+      </div>
+
+      {/* MODAL */}
+
+      {
+        showModal && (
+
+          <div className="admin-modal-overlay">
+
+            <div className="admin-modal">
+
+              <div className="admin-modal-icon">
+
+                <ShieldAlert size={30} />
+
+              </div>
+
+              <h3>
+
+                {
+                  selectedUser?.status ===
+                  "blocked"
+
+                    ? "Unblock User"
+
+                    : "Block User"
+                }
+
+              </h3>
+
+              <p>
+
+                Are you sure you want to{" "}
+
+                <strong>
+
+                  {
+                    selectedUser?.status ===
+                    "blocked"
+
+                      ? "unblock"
+
+                      : "block"
+                  }
+
+                </strong>{" "}
+
+                {selectedUser?.email}?
+
+              </p>
+
+              <div className="admin-modal-actions">
+
+                <button
+                  className="modal-cancel-btn"
+                  onClick={closeModal}
+                >
+
+                  Cancel
+
+                </button>
+
+                <button
+                  className={
+                    selectedUser?.status ===
+                    "blocked"
+
+                      ? "modal-unblock-btn"
+
+                      : "modal-block-btn"
+                  }
+                  onClick={confirmAction}
+                >
+
+                  {
+                    actionLoading
+
+                      ? "Please wait..."
+
+                      : selectedUser?.status ===
+                        "blocked"
+
+                      ? "Unblock User"
+
+                      : "Block User"
+                  }
+
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+        )
+      }
 
     </div>
   );

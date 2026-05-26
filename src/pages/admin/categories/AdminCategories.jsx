@@ -10,6 +10,8 @@ import {
   useSelector,
 } from "react-redux";
 
+import toast from "react-hot-toast";
+
 import {
   Plus,
   Pencil,
@@ -17,8 +19,7 @@ import {
   RotateCcw,
   ChevronLeft,
   ChevronRight,
-  SlidersHorizontal,
-  ArrowUpDown,
+  Search,
 } from "lucide-react";
 
 import {
@@ -26,10 +27,15 @@ import {
   getAdminCategories,
   deleteCategory,
   restoreCategory,
+  clearCategoryMessages,
 
 } from "../../../features/catalog/category/categorySlice";
-import CreateCategoryModal from "./CreateCategoryModal";
-import EditCategoryModal from "./EditCategoryModal";
+
+import CreateCategoryModal
+from "./CreateCategoryModal";
+
+import EditCategoryModal
+from "./EditCategoryModal";
 
 export default function AdminCategories() {
 
@@ -40,37 +46,107 @@ export default function AdminCategories() {
     categories,
     categoryPagination,
     categoryLoading,
+    categorySuccess,
 
   } = useSelector(
     (state) => state.category
   );
 
+  // ==========================================
+  // STATES
+  // ==========================================
+
   const [
     activeTab,
     setActiveTab,
-  ] = useState("all");
+  ] = useState("active");
 
   const [
     currentPage,
     setCurrentPage,
   ] = useState(1);
 
+  const [
+    search,
+    setSearch,
+  ] = useState("");
+
+  const [
+    sort,
+    setSort,
+  ] = useState("latest");
 
   const [
     showCreateModal,
     setShowCreateModal,
   ] = useState(false);
 
+  const [
+    showEditModal,
+    setShowEditModal,
+  ] = useState(false);
 
   const [
-  showEditModal,
-  setShowEditModal,
-] = useState(false);
-
-const [
     selectedCategory,
     setSelectedCategory,
   ] = useState(null);
+
+  // ==========================================
+  // CONFIRM MODAL STATES
+  // ==========================================
+
+  const [
+    showConfirmModal,
+    setShowConfirmModal,
+  ] = useState(false);
+
+  const [
+    confirmAction,
+    setConfirmAction,
+  ] = useState(null);
+
+  const [
+    confirmText,
+    setConfirmText,
+  ] = useState("");
+
+  // ==========================================
+  // TOASTS
+  // ==========================================
+
+  useEffect(() => {
+
+    if (categorySuccess) {
+
+      toast.success(categorySuccess);
+
+      dispatch(
+        clearCategoryMessages()
+      );
+    }
+
+  }, [
+
+    categorySuccess,
+    dispatch,
+
+  ]);
+
+  // ==========================================
+  // RESET PAGE
+  // ==========================================
+
+  useEffect(() => {
+
+    setCurrentPage(1);
+
+  }, [
+
+    activeTab,
+    search,
+    sort,
+
+  ]);
 
   // ==========================================
   // FETCH
@@ -78,19 +154,23 @@ const [
 
   useEffect(() => {
 
-    let params = {
+    const params = {
 
       page: currentPage,
+
+      search,
+
+      sort,
     };
 
     if (activeTab === "active") {
 
-      params.is_active = true;
+      params.is_active = "true";
     }
 
     if (activeTab === "deleted") {
 
-      params.is_active = false;
+      params.is_active = "false";
     }
 
     dispatch(
@@ -102,6 +182,9 @@ const [
     dispatch,
     currentPage,
     activeTab,
+    search,
+    sort,
+
   ]);
 
   // ==========================================
@@ -111,21 +194,66 @@ const [
   const handleDelete =
     (categoryId) => {
 
-      dispatch(
-        deleteCategory(categoryId)
+      setConfirmText(
+        "Are you sure you want to delete this category?"
       );
+
+      setConfirmAction(() =>
+        async () => {
+
+          const result =
+            await dispatch(
+              deleteCategory(categoryId)
+            );
+
+          if (
+            deleteCategory.rejected.match(
+              result
+            )
+          ) {
+
+            return;
+          }
+
+          if (
+            categories.length === 1 &&
+            currentPage > 1
+          ) {
+
+            setCurrentPage(
+              (prev) => prev - 1
+            );
+
+            return;
+          }
+
+          const params = {
+
+            page: currentPage,
+
+            search,
+
+            sort,
+          };
+
+          if (activeTab === "active") {
+
+            params.is_active = "true";
+          }
+
+          if (activeTab === "deleted") {
+
+            params.is_active = "false";
+          }
+
+          dispatch(
+            getAdminCategories(params)
+          );
+        }
+      );
+
+      setShowConfirmModal(true);
     };
-
-
-    const handleEdit =
-      (category) => {
-
-        setSelectedCategory(
-          category
-        );
-
-        setShowEditModal(true);
-      };
 
   // ==========================================
   // RESTORE
@@ -134,9 +262,79 @@ const [
   const handleRestore =
     (categoryId) => {
 
-      dispatch(
-        restoreCategory(categoryId)
+      setConfirmText(
+        "Are you sure you want to restore this category?"
       );
+
+      setConfirmAction(() =>
+        async () => {
+
+          const result =
+            await dispatch(
+              restoreCategory(categoryId)
+            );
+
+          if (
+            restoreCategory.rejected.match(
+              result
+            )
+          ) {
+
+            return;
+          }
+
+          if (
+            categories.length === 1 &&
+            currentPage > 1
+          ) {
+
+            setCurrentPage(
+              (prev) => prev - 1
+            );
+
+            return;
+          }
+
+          const params = {
+
+            page: currentPage,
+
+            search,
+
+            sort,
+          };
+
+          if (activeTab === "active") {
+
+            params.is_active = "true";
+          }
+
+          if (activeTab === "deleted") {
+
+            params.is_active = "false";
+          }
+
+          dispatch(
+            getAdminCategories(params)
+          );
+        }
+      );
+
+      setShowConfirmModal(true);
+    };
+
+  // ==========================================
+  // EDIT
+  // ==========================================
+
+  const handleEdit =
+    (category) => {
+
+      setSelectedCategory(
+        category
+      );
+
+      setShowEditModal(true);
     };
 
   return (
@@ -168,19 +366,17 @@ const [
         </div>
 
         <button
+          className="create-category-btn"
+          onClick={() =>
+            setShowCreateModal(true)
+          }
+        >
 
-            className="create-category-btn"
+          <Plus size={18} />
 
-            onClick={() =>
-              setShowCreateModal(true)
-            }
-          >
+          Create Category
 
-            <Plus size={18} />
-
-            Create Category
-
-          </button>
+        </button>
 
       </div>
 
@@ -188,22 +384,39 @@ const [
 
       <div className="categories-card">
 
-        {/* FILTERS */}
+        {/* TOOLBAR */}
 
         <div className="categories-toolbar">
+
+          {/* SEARCH */}
+
+          <div className="category-search">
+
+            <Search size={18} />
+
+            <input
+              type="text"
+              placeholder="Search categories..."
+              value={search}
+              onChange={(e) =>
+                setSearch(
+                  e.target.value
+                )
+              }
+            />
+
+          </div>
+
+          {/* TABS */}
 
           <div className="category-tabs">
 
             <button
-
               className={
                 activeTab === "all"
-
                   ? "tab-btn active"
-
                   : "tab-btn"
               }
-
               onClick={() =>
                 setActiveTab("all")
               }
@@ -214,15 +427,11 @@ const [
             </button>
 
             <button
-
               className={
                 activeTab === "active"
-
                   ? "tab-btn active"
-
                   : "tab-btn"
               }
-
               onClick={() =>
                 setActiveTab("active")
               }
@@ -233,15 +442,11 @@ const [
             </button>
 
             <button
-
               className={
                 activeTab === "deleted"
-
                   ? "tab-btn active"
-
                   : "tab-btn"
               }
-
               onClick={() =>
                 setActiveTab("deleted")
               }
@@ -253,25 +458,35 @@ const [
 
           </div>
 
-          <div className="toolbar-actions">
+          {/* SORT */}
 
-            <button className="toolbar-btn">
+          <select
+            value={sort}
+            onChange={(e) =>
+              setSort(
+                e.target.value
+              )
+            }
+            className="category-sort"
+          >
 
-              <SlidersHorizontal size={18} />
+            <option value="latest">
+              Most Recent
+            </option>
 
-              Advanced Filter
+            <option value="oldest">
+              Oldest
+            </option>
 
-            </button>
+            <option value="a_z">
+              A-Z
+            </option>
 
-            <button className="toolbar-btn">
+            <option value="z_a">
+              Z-A
+            </option>
 
-              <ArrowUpDown size={18} />
-
-              Sort: A-Z
-
-            </button>
-
-          </div>
+          </select>
 
         </div>
 
@@ -308,7 +523,7 @@ const [
 
               </div>
 
-            ) : (
+            ) : categories?.length > 0 ? (
 
               categories.map(
                 (category) => (
@@ -325,10 +540,9 @@ const [
                       <img
                         src={
                           category.image_url ||
-
                           "https://placehold.co/80x80"
                         }
-                        alt=""
+                        alt={category.name}
                       />
 
                     </div>
@@ -346,9 +560,7 @@ const [
                     <div className="category-parent-cell">
 
                       {
-                        category.parent_name ||
-
-                        "-"
+                        category.parent_name || "-"
                       }
 
                     </div>
@@ -383,6 +595,7 @@ const [
                             Deleted
 
                           </span>
+
                         )
                       }
 
@@ -435,6 +648,7 @@ const [
                             Restore
 
                           </button>
+
                         )
                       }
 
@@ -443,6 +657,15 @@ const [
                   </div>
                 )
               )
+
+            ) : (
+
+              <div className="empty-state">
+
+                No categories found
+
+              </div>
+
             )
           }
 
@@ -454,38 +677,28 @@ const [
 
           <p>
 
-            Showing
-
-            {" "}
+            Showing{" "}
 
             {
               categories.length
             }
 
-            {" "}
-
-            of
-
-            {" "}
+            {" "}of{" "}
 
             {
               categoryPagination?.count || 0
             }
 
-            {" "}
-
-            categories
+            {" "}categories
 
           </p>
 
           <div className="pagination">
 
             <button
-
               disabled={
                 !categoryPagination?.previous
               }
-
               onClick={() =>
                 setCurrentPage(
                   (prev) =>
@@ -505,36 +718,27 @@ const [
 
             <div className="page-indicator">
 
-              Page
-
-              {" "}
+              Page{" "}
 
               {
-                categoryPagination?.currentPage
+                categoryPagination?.currentPage || 1
               }
 
-              {" "}
-
-              of
-
-              {" "}
+              {" "}of{" "}
 
               {
-                categoryPagination?.totalPages
+                categoryPagination?.totalPages || 1
               }
 
             </div>
 
             <button
-
               disabled={
                 !categoryPagination?.next
               }
-
               onClick={() =>
                 setCurrentPage(
-                  (prev) =>
-                    prev + 1
+                  (prev) => prev + 1
                 )
               }
             >
@@ -548,39 +752,94 @@ const [
           </div>
 
         </div>
-        
 
       </div>
 
-      {/* CREATE CATEGORY MODAL */}
+      {/* CREATE MODAL */}
 
-        <CreateCategoryModal
+      <CreateCategoryModal
+        isOpen={showCreateModal}
+        onClose={() =>
+          setShowCreateModal(false)
+        }
+      />
 
-          isOpen={showCreateModal}
+      {/* EDIT MODAL */}
 
-          onClose={() =>
-            setShowCreateModal(false)
-          }
+      <EditCategoryModal
+        isOpen={showEditModal}
+        onClose={() => {
 
-        />
+          setShowEditModal(false);
 
-        {/* EDIT CATEGORY MODAL */}
+          setSelectedCategory(null);
+        }}
+        category={selectedCategory}
+      />
 
-        <EditCategoryModal
+      {/* CONFIRM MODAL */}
 
-          isOpen={showEditModal}
+      {
+        showConfirmModal && (
 
-          onClose={() => {
+          <div className="confirm-modal-overlay">
 
-            setShowEditModal(false);
+            <div className="confirm-modal">
 
-            setSelectedCategory(null);
-          }}
+              <h3>
 
-          category={selectedCategory}
+                Confirm Action
 
-        />
-              
+              </h3>
+
+              <p>
+
+                {confirmText}
+
+              </p>
+
+              <div className="confirm-modal-actions">
+
+                <button
+                  className="confirm-cancel-btn"
+                  onClick={() => {
+
+                    setShowConfirmModal(false);
+
+                    setConfirmAction(null);
+                  }}
+                >
+
+                  Cancel
+
+                </button>
+
+                <button
+                  className="confirm-submit-btn"
+                  onClick={async () => {
+
+                    if (confirmAction) {
+
+                      await confirmAction();
+                    }
+
+                    setShowConfirmModal(false);
+
+                    setConfirmAction(null);
+                  }}
+                >
+
+                  Confirm
+
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+        )
+      }
 
     </div>
   );

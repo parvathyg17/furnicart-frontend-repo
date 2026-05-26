@@ -3,6 +3,8 @@ import {
   createAsyncThunk,
 } from "@reduxjs/toolkit";
 
+import getErrorMessage from "../../../utils/getErrorMessage";
+
 import {
 
   getAdminCategoriesAPI,
@@ -286,8 +288,9 @@ const categorySlice = createSlice({
           state.categoryLoading = false;
 
           state.categoryError =
-            action.payload?.error ||
-            "Failed to fetch categories";
+            getErrorMessage(
+              action.payload
+            );
         }
       );
 
@@ -332,8 +335,9 @@ const categorySlice = createSlice({
           state.categoryLoading = false;
 
           state.categoryError =
-            action.payload?.error ||
-            "Failed to create category";
+            getErrorMessage(
+              action.payload
+            );
         }
       );
 
@@ -386,8 +390,9 @@ const categorySlice = createSlice({
           state.categoryLoading = false;
 
           state.categoryError =
-            action.payload?.error ||
-            "Failed to update category";
+            getErrorMessage(
+              action.payload
+            );
         }
       );
 
@@ -442,8 +447,9 @@ const categorySlice = createSlice({
           state.categoryLoading = false;
 
           state.categoryError =
-            action.payload?.error ||
-            "Failed to delete category";
+            getErrorMessage(
+              action.payload
+            );
         }
       );
 
@@ -498,8 +504,9 @@ const categorySlice = createSlice({
           state.categoryLoading = false;
 
           state.categoryError =
-            action.payload?.error ||
-            "Failed to restore category";
+            getErrorMessage(
+              action.payload
+            );
         }
       );
   },

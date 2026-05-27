@@ -189,7 +189,7 @@ const authSlice = createSlice({
 
   extraReducers: (builder) => {
 
-  // LOAD USER
+  
   builder
     .addCase(loadUser.pending, (state) => {
       state.checkingAuth = true;
@@ -213,21 +213,21 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
     });
 
-  // LOGIN
+  
   builder
     .addCase(loginUser.fulfilled, (state, action) => {
       state.user = action.payload.user;
       state.isAuthenticated = true;
     });
 
-  // GOOGLE LOGIN
+  
   builder
     .addCase(googleLogin.fulfilled, (state, action) => {
       state.user = action.payload.user;
       state.isAuthenticated = true;
     });
 
-  // LOGOUT
+  
   builder
     .addCase(logoutUser.fulfilled, (state) => {
       state.user = null;

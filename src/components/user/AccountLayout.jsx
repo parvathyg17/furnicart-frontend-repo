@@ -1,7 +1,3 @@
-// ==========================================
-// src/components/user/AccountLayout.jsx
-// ==========================================
-
 import "../../styles/account.css";
 import logofc from "../../assets/images/logofc.png";
 
@@ -10,7 +6,6 @@ import {
   MapPin,
   Lock,
   LogOut,
-  Search,
   ShoppingCart,
 } from "lucide-react";
 
@@ -121,7 +116,7 @@ export default function AccountLayout({
 
       <div className="account-page">
 
-        {/* SIDEBAR */}
+        
 
         <aside className="account-sidebar">
 

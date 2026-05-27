@@ -52,9 +52,7 @@ export default function AdminLayout() {
     setLogoutLoading,
   ] = useState(false);
 
-  // ==========================================
-  // LOGOUT
-  // ==========================================
+ 
 
   const handleLogout =
     async () => {
@@ -76,13 +74,12 @@ export default function AdminLayout() {
 
     <div className="admin-layout">
 
-      {/* SIDEBAR */}
-
+      
       <aside className="admin-sidebar">
 
         <div>
 
-          {/* LOGO */}
+          
 
           <div className="admin-sidebar-logo">
 
@@ -96,11 +93,11 @@ export default function AdminLayout() {
 
           </div>
 
-          {/* NAVIGATION */}
+          
 
           <nav className="admin-nav">
 
-            {/* DASHBOARD */}
+            
 
             <Link
               to="/admin/dashboard"
@@ -121,7 +118,7 @@ export default function AdminLayout() {
 
             </Link>
 
-            {/* USERS */}
+            
 
             <Link
               to="/admin/users"
@@ -142,7 +139,7 @@ export default function AdminLayout() {
 
             </Link>
 
-            {/* CATEGORIES */}
+            
 
             <Link
               to="/admin/categories"
@@ -163,7 +160,7 @@ export default function AdminLayout() {
 
             </Link>
 
-            {/* ROOM TYPES */}
+            
 
             <Link
               to="/admin/room-types"
@@ -184,7 +181,7 @@ export default function AdminLayout() {
 
             </Link>
 
-            {/* PRODUCTS */}
+            
 
             <Link
               to="/admin/products"
@@ -209,7 +206,7 @@ export default function AdminLayout() {
 
         </div>
 
-        {/* LOGOUT */}
+        
 
         <button
           className="admin-logout-btn"
@@ -226,11 +223,11 @@ export default function AdminLayout() {
 
       </aside>
 
-      {/* MAIN */}
+      
 
       <div className="admin-main">
 
-        {/* TOPBAR */}
+        
 
         <header className="admin-topbar">
 
@@ -255,7 +252,7 @@ export default function AdminLayout() {
 
           </div>
 
-          {/* PROFILE */}
+         
 
           <div className="admin-profile">
 
@@ -287,7 +284,7 @@ export default function AdminLayout() {
 
         </header>
 
-        {/* PAGE CONTENT */}
+       
 
         <div className="admin-content">
 
@@ -297,7 +294,7 @@ export default function AdminLayout() {
 
       </div>
 
-      {/* LOGOUT MODAL */}
+      
 
       {showLogoutModal && (
 

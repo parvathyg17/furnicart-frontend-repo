@@ -1,6 +1,3 @@
-// ==========================================
-// src/features/profile/profileSlice.js
-// ==========================================
 
 import {
   createSlice,
@@ -15,9 +12,7 @@ import {
 } from "./profileAPI";
 
 
-// ==========================================
-// GET PROFILE
-// ==========================================
+
 
 export const getProfile = createAsyncThunk(
   "profile/get",
@@ -40,9 +35,6 @@ export const getProfile = createAsyncThunk(
 );
 
 
-// ==========================================
-// UPDATE PROFILE
-// ==========================================
 
 export const updateProfile = createAsyncThunk(
   "profile/update",
@@ -65,9 +57,6 @@ export const updateProfile = createAsyncThunk(
 );
 
 
-// ==========================================
-// SEND EMAIL OTP
-// ==========================================
 
 export const sendEmailOTP = createAsyncThunk(
   "profile/emailRequest",
@@ -90,9 +79,7 @@ export const sendEmailOTP = createAsyncThunk(
 );
 
 
-// ==========================================
-// VERIFY EMAIL OTP
-// ==========================================
+
 
 export const verifyEmailOTP = createAsyncThunk(
   "profile/emailVerify",
@@ -115,18 +102,12 @@ export const verifyEmailOTP = createAsyncThunk(
 );
 
 
-// ==========================================
-// INITIAL STATE
-// ==========================================
+
 
 const initialState = {
   profile: null,
 };
 
-
-// ==========================================
-// SLICE
-// ==========================================
 
 const profileSlice = createSlice({
 
@@ -140,9 +121,7 @@ const profileSlice = createSlice({
 
     builder
 
-      // ==========================================
-      // GET PROFILE
-      // ==========================================
+      
 
       .addCase(
         getProfile.fulfilled,
@@ -155,9 +134,7 @@ const profileSlice = createSlice({
       )
 
 
-      // ==========================================
-      // UPDATE PROFILE
-      // ==========================================
+      
 
       .addCase(
         updateProfile.fulfilled,

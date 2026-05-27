@@ -1,6 +1,4 @@
-// ==========================================
-// src/features/address/addressSlice.js
-// ==========================================
+
 
 import {
   createSlice,
@@ -16,9 +14,7 @@ import {
 } from "./addressAPI";
 
 
-// ==========================================
-// GET ADDRESSES
-// ==========================================
+
 
 export const getAddresses = createAsyncThunk(
   "address/get",
@@ -39,9 +35,7 @@ export const getAddresses = createAsyncThunk(
 );
 
 
-// ==========================================
-// ADD ADDRESS
-// ==========================================
+
 
 export const addAddress = createAsyncThunk(
   "address/add",
@@ -62,9 +56,6 @@ export const addAddress = createAsyncThunk(
 );
 
 
-// ==========================================
-// UPDATE ADDRESS
-// ==========================================
 
 export const updateAddress = createAsyncThunk(
   "address/update",
@@ -88,9 +79,6 @@ export const updateAddress = createAsyncThunk(
 );
 
 
-// ==========================================
-// DELETE ADDRESS
-// ==========================================
 
 export const deleteAddress = createAsyncThunk(
   "address/delete",
@@ -113,9 +101,7 @@ export const deleteAddress = createAsyncThunk(
 );
 
 
-// ==========================================
-// SET DEFAULT ADDRESS
-// ==========================================
+
 
 export const setDefaultAddress = createAsyncThunk(
   "address/setDefault",
@@ -138,18 +124,13 @@ export const setDefaultAddress = createAsyncThunk(
 );
 
 
-// ==========================================
-// INITIAL STATE
-// ==========================================
 
 const initialState = {
   addresses: [],
 };
 
 
-// ==========================================
-// SLICE
-// ==========================================
+
 
 const addressSlice = createSlice({
 
@@ -163,9 +144,7 @@ const addressSlice = createSlice({
 
     builder
 
-      // ==========================================
-      // GET ADDRESSES
-      // ==========================================
+      
 
       .addCase(
         getAddresses.fulfilled,
@@ -178,9 +157,7 @@ const addressSlice = createSlice({
       )
 
 
-      // ==========================================
-      // ADD ADDRESS
-      // ==========================================
+      
 
       .addCase(
         addAddress.fulfilled,
@@ -194,9 +171,7 @@ const addressSlice = createSlice({
       )
 
 
-      // ==========================================
-      // UPDATE ADDRESS
-      // ==========================================
+      
 
       .addCase(
         updateAddress.fulfilled,
@@ -219,9 +194,7 @@ const addressSlice = createSlice({
       )
 
 
-      // ==========================================
-      // DELETE ADDRESS
-      // ==========================================
+      
 
       .addCase(
         deleteAddress.fulfilled,
@@ -238,9 +211,7 @@ const addressSlice = createSlice({
       )
 
 
-      // ==========================================
-      // SET DEFAULT ADDRESS
-      // ==========================================
+      
 
       .addCase(
         setDefaultAddress.fulfilled,

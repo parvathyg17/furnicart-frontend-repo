@@ -1,8 +1,6 @@
 import api from "../../../services/api";
 
-// ==========================================
-// GET ROOM TYPES
-// ==========================================
+
 
 export const getAdminRoomTypesAPI =
   async (params) => {
@@ -17,9 +15,6 @@ export const getAdminRoomTypesAPI =
     return response.data;
   };
 
-// ==========================================
-// CREATE ROOM TYPE
-// ==========================================
 
 export const createRoomTypeAPI =
   async (data) => {
@@ -38,9 +33,7 @@ export const createRoomTypeAPI =
     return response.data;
   };
 
-// ==========================================
-// UPDATE ROOM TYPE
-// ==========================================
+
 
 export const updateRoomTypeAPI =
   async (
@@ -62,9 +55,6 @@ export const updateRoomTypeAPI =
     return response.data;
   };
 
-// ==========================================
-// DELETE ROOM TYPE
-// ==========================================
 
 export const deleteRoomTypeAPI =
   async (roomTypeId) => {
@@ -77,9 +67,7 @@ export const deleteRoomTypeAPI =
   };
 
 
-// ==========================================
-// RESTORE ROOM TYPE
-// ==========================================
+
 
 export const restoreRoomTypeAPI =
   async (roomTypeId) => {

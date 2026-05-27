@@ -25,9 +25,7 @@ import {
 
 } from "./productAPI";
 
-// ==========================================
-// PRODUCT THUNKS
-// ==========================================
+
 
 export const getAdminProducts =
   createAsyncThunk(
@@ -249,9 +247,7 @@ export const toggleProductStatus =
     }
   );
 
-// ==========================================
-// VARIANT THUNKS
-// ==========================================
+
 
 export const updateVariant =
   createAsyncThunk(
@@ -317,9 +313,7 @@ export const toggleVariantStatus =
     }
   );
 
-// ==========================================
-// IMAGE THUNKS
-// ==========================================
+
 
 export const uploadVariantImage =
   createAsyncThunk(
@@ -383,9 +377,7 @@ export const deleteVariantImage =
     }
   );
 
-// ==========================================
-// INITIAL STATE
-// ==========================================
+
 
 const initialState = {
 
@@ -402,9 +394,7 @@ const initialState = {
   productSuccess: null,
 };
 
-// ==========================================
-// SLICE
-// ==========================================
+
 
 const productSlice = createSlice({
 
@@ -425,9 +415,7 @@ const productSlice = createSlice({
 
   extraReducers: (builder) => {
 
-    // ==========================================
-    // GET PRODUCTS
-    // ==========================================
+    
 
     builder
 
@@ -485,9 +473,7 @@ const productSlice = createSlice({
         }
       );
 
-    // ==========================================
-    // GET PRODUCT DETAIL
-    // ==========================================
+    
 
     builder
 
@@ -527,9 +513,7 @@ const productSlice = createSlice({
         }
       );
 
-    // ==========================================
-    // CREATE PRODUCT
-    // ==========================================
+   
 
     builder
 
@@ -590,10 +574,7 @@ const productSlice = createSlice({
         }
       );
 
-    // ==========================================
-    // UPDATE PRODUCT
-    // ==========================================
-
+    
     builder
 
       .addCase(
@@ -652,9 +633,7 @@ const productSlice = createSlice({
         }
       );
 
-    // ==========================================
-    // DELETE PRODUCT
-    // ==========================================
+  
 
     builder
 
@@ -713,9 +692,7 @@ const productSlice = createSlice({
         }
       );
 
-    // ==========================================
-    // TOGGLE PRODUCT STATUS
-    // ==========================================
+    
 
     builder
 
@@ -752,10 +729,7 @@ const productSlice = createSlice({
         }
       );
 
-    // ==========================================
-    // CREATE VARIANT
-    // ==========================================
-
+    
     builder
 
       .addCase(
@@ -801,9 +775,7 @@ const productSlice = createSlice({
         }
       );
 
-    // ==========================================
-    // UPDATE VARIANT
-    // ==========================================
+    
 
     builder
 
@@ -834,9 +806,7 @@ const productSlice = createSlice({
         }
       );
 
-    // ==========================================
-    // TOGGLE VARIANT STATUS
-    // ==========================================
+   
 
     builder
 
@@ -894,9 +864,7 @@ const productSlice = createSlice({
         }
       );
 
-    // ==========================================
-    // UPLOAD VARIANT IMAGE
-    // ==========================================
+    
 
     builder
 
@@ -927,9 +895,7 @@ const productSlice = createSlice({
         }
       );
 
-    // ==========================================
-    // DELETE VARIANT IMAGE
-    // ==========================================
+    
 
     builder
 

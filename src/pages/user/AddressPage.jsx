@@ -1,6 +1,4 @@
-// ==========================================
-// src/pages/user/AddressPage.jsx
-// ==========================================
+
 
 import "../../styles/account.css";
 
@@ -37,9 +35,7 @@ export default function AddressPage() {
     );
 
 
-  // ==========================================
-  // LOCAL STATES
-  // ==========================================
+
 
   const [
     loadingLocal,
@@ -70,9 +66,7 @@ export default function AddressPage() {
     useState({});
 
 
-  // ==========================================
-  // FETCH ADDRESSES
-  // ==========================================
+  
 
   useEffect(() => {
 
@@ -90,9 +84,7 @@ export default function AddressPage() {
   ]);
 
 
-  // ==========================================
-  // INPUT CHANGE
-  // ==========================================
+  
 
   const handleChange =
     (e) => {
@@ -116,15 +108,13 @@ export default function AddressPage() {
     };
 
 
-  // ==========================================
-  // VALIDATE FORM
-  // ==========================================
+
 
   const validateForm = () => {
 
     const newErrors = {};
 
-    // NAME
+    
     if (!form.name.trim()) {
 
       newErrors.name =
@@ -132,7 +122,7 @@ export default function AddressPage() {
 
     }
 
-    // PHONE
+    
     if (!form.phone.trim()) {
 
       newErrors.phone =
@@ -149,7 +139,7 @@ export default function AddressPage() {
 
     }
 
-    // ADDRESS
+    
     if (
       !form.address_line.trim()
     ) {
@@ -167,7 +157,7 @@ export default function AddressPage() {
 
     }
 
-    // CITY
+    
     if (!form.city.trim()) {
 
       newErrors.city =
@@ -175,7 +165,7 @@ export default function AddressPage() {
 
     }
 
-    // STATE
+    
     if (!form.state.trim()) {
 
       newErrors.state =
@@ -183,7 +173,7 @@ export default function AddressPage() {
 
     }
 
-    // PINCODE
+    
     if (!form.pincode.trim()) {
 
       newErrors.pincode =
@@ -209,9 +199,7 @@ export default function AddressPage() {
   };
 
 
-  // ==========================================
-  // ADD / UPDATE ADDRESS
-  // ==========================================
+
 
   const handleSubmit =
     async () => {
@@ -271,9 +259,7 @@ export default function AddressPage() {
     };
 
 
-  // ==========================================
-  // EDIT ADDRESS
-  // ==========================================
+  
 
   const handleEdit =
     (address) => {
@@ -303,9 +289,6 @@ export default function AddressPage() {
     };
 
 
-  // ==========================================
-  // RESET FORM
-  // ==========================================
 
   const resetForm = () => {
 
@@ -325,9 +308,7 @@ export default function AddressPage() {
   };
 
 
-  // ==========================================
-  // CANCEL FORM
-  // ==========================================
+  
 
   const handleCancel =
     () => {
@@ -339,9 +320,7 @@ export default function AddressPage() {
     };
 
 
-  // ==========================================
-  // ADD NEW ADDRESS
-  // ==========================================
+ 
 
   const handleAddNew =
     () => {
@@ -357,7 +336,7 @@ export default function AddressPage() {
 
     <AccountLayout>
 
-      {/* HEADER */}
+     
       <div className="address-top">
 
         <div>
@@ -385,7 +364,7 @@ export default function AddressPage() {
       </div>
 
 
-      {/* FORM */}
+   
       {showForm && (
 
         <div className="address-form-wrapper">
@@ -413,7 +392,7 @@ export default function AddressPage() {
 
           <div className="address-form">
 
-            {/* NAME */}
+          
             <div>
 
               <input
@@ -441,7 +420,6 @@ export default function AddressPage() {
             </div>
 
 
-            {/* PHONE */}
             <div>
 
               <input
@@ -469,7 +447,6 @@ export default function AddressPage() {
             </div>
 
 
-            {/* ADDRESS */}
             <div className="full-address">
 
               <textarea

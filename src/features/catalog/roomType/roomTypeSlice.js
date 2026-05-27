@@ -13,9 +13,7 @@ import {
 
 } from "./roomTypeAPI";
 
-// ==========================================
-// THUNKS
-// ==========================================
+
 
 export const getAdminRoomTypes =
   createAsyncThunk(
@@ -143,9 +141,7 @@ export const deleteRoomType =
     }
   );
 
-  // ==========================================
-// RESTORE ROOM TYPE
-// ==========================================
+
 
 export const restoreRoomType =
   createAsyncThunk(
@@ -179,9 +175,7 @@ export const restoreRoomType =
     }
   );
 
-// ==========================================
-// INITIAL STATE
-// ==========================================
+
 
 const initialState = {
 
@@ -196,9 +190,7 @@ const initialState = {
   roomTypeSuccess: null,
 };
 
-// ==========================================
-// SLICE
-// ==========================================
+
 
 const roomTypeSlice = createSlice({
 
@@ -219,9 +211,7 @@ const roomTypeSlice = createSlice({
 
   extraReducers: (builder) => {
 
-    // ==========================================
-    // GET ROOM TYPES
-    // ==========================================
+    
 
     builder
 
@@ -279,9 +269,7 @@ const roomTypeSlice = createSlice({
         }
       );
 
-    // ==========================================
-    // CREATE ROOM TYPE
-    // ==========================================
+    
 
     builder
 
@@ -321,9 +309,7 @@ const roomTypeSlice = createSlice({
         }
       );
 
-    // ==========================================
-    // UPDATE ROOM TYPE
-    // ==========================================
+    
 
     builder
 
@@ -375,9 +361,7 @@ const roomTypeSlice = createSlice({
         }
       );
 
-    // ==========================================
-    // DELETE ROOM TYPE
-    // ==========================================
+    
 
     builder
 
@@ -432,9 +416,7 @@ const roomTypeSlice = createSlice({
       );
 
 
-    // ==========================================
-    // RESTORE ROOM TYPE
-    // ==========================================
+
 
     builder
 

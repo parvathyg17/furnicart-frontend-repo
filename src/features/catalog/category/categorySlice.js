@@ -15,9 +15,7 @@ import {
 
 } from "./categoryAPI";
 
-// ==========================================
-// GET CATEGORIES
-// ==========================================
+
 
 export const getAdminCategories =
   createAsyncThunk(
@@ -49,9 +47,7 @@ export const getAdminCategories =
     }
   );
 
-// ==========================================
-// CREATE CATEGORY
-// ==========================================
+
 
 export const createCategory =
   createAsyncThunk(
@@ -83,9 +79,7 @@ export const createCategory =
     }
   );
 
-// ==========================================
-// UPDATE CATEGORY
-// ==========================================
+
 
 export const updateCategory =
   createAsyncThunk(
@@ -121,9 +115,6 @@ export const updateCategory =
     }
   );
 
-// ==========================================
-// DELETE CATEGORY
-// ==========================================
 
 export const deleteCategory =
   createAsyncThunk(
@@ -157,9 +148,7 @@ export const deleteCategory =
     }
   );
 
-// ==========================================
-// RESTORE CATEGORY
-// ==========================================
+
 
 export const restoreCategory =
   createAsyncThunk(
@@ -193,9 +182,7 @@ export const restoreCategory =
     }
   );
 
-// ==========================================
-// INITIAL STATE
-// ==========================================
+
 
 const initialState = {
 
@@ -210,9 +197,7 @@ const initialState = {
   categorySuccess: null,
 };
 
-// ==========================================
-// SLICE
-// ==========================================
+
 
 const categorySlice = createSlice({
 
@@ -233,9 +218,7 @@ const categorySlice = createSlice({
 
   extraReducers: (builder) => {
 
-    // ==========================================
-    // GET CATEGORIES
-    // ==========================================
+    
 
     builder
 
@@ -294,9 +277,7 @@ const categorySlice = createSlice({
         }
       );
 
-    // ==========================================
-    // CREATE CATEGORY
-    // ==========================================
+    
 
     builder
 
@@ -341,9 +322,6 @@ const categorySlice = createSlice({
         }
       );
 
-    // ==========================================
-    // UPDATE CATEGORY
-    // ==========================================
 
     builder
 
@@ -396,9 +374,7 @@ const categorySlice = createSlice({
         }
       );
 
-    // ==========================================
-    // DELETE CATEGORY
-    // ==========================================
+    
 
     builder
 
@@ -453,9 +429,7 @@ const categorySlice = createSlice({
         }
       );
 
-    // ==========================================
-    // RESTORE CATEGORY
-    // ==========================================
+    
 
     builder
 

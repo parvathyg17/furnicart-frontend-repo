@@ -11,9 +11,7 @@ import {
   adminLogoutAPI,
 } from "./adminAPI";
 
-// ==========================================
-// ADMIN LOGIN
-// ==========================================
+
 
 export const adminLogin = createAsyncThunk(
   "admin/login",
@@ -33,9 +31,7 @@ export const adminLogin = createAsyncThunk(
   }
 );
 
-// ==========================================
-// ADMIN ME
-// ==========================================
+
 
 export const adminMe = createAsyncThunk(
   "admin/me",
@@ -53,9 +49,7 @@ export const adminMe = createAsyncThunk(
   }
 );
 
-// ==========================================
-// GET USERS
-// ==========================================
+
 
 export const getUsers = createAsyncThunk(
   "admin/users",
@@ -78,9 +72,7 @@ export const getUsers = createAsyncThunk(
   }
 );
 
-// ==========================================
-// BLOCK / UNBLOCK USER
-// ==========================================
+
 
 export const toggleUserBlock = createAsyncThunk(
   "admin/blockUser",
@@ -102,9 +94,6 @@ export const toggleUserBlock = createAsyncThunk(
   }
 );
 
-// ==========================================
-// ADMIN LOGOUT
-// ==========================================
 
 export const adminLogout = createAsyncThunk(
   "admin/logout",
@@ -124,9 +113,7 @@ export const adminLogout = createAsyncThunk(
   }
 );
 
-// ==========================================
-// INITIAL STATE
-// ==========================================
+
 
 const initialState = {
 
@@ -143,9 +130,7 @@ const initialState = {
   currentPage: 1,
 };
 
-// ==========================================
-// SLICE
-// ==========================================
+
 
 const adminSlice = createSlice({
 
@@ -159,9 +144,7 @@ const adminSlice = createSlice({
 
     builder
 
-      // ==========================================
-      // ADMIN LOGIN
-      // ==========================================
+      
 
       .addCase(
         adminLogin.pending,
@@ -203,9 +186,7 @@ const adminSlice = createSlice({
         }
       )
 
-      // ==========================================
-      // ADMIN ME
-      // ==========================================
+      
 
       .addCase(
         adminMe.pending,
@@ -248,9 +229,7 @@ const adminSlice = createSlice({
         }
       )
 
-      // ==========================================
-      // GET USERS
-      // ==========================================
+      
 
       .addCase(
         getUsers.fulfilled,
@@ -268,9 +247,7 @@ const adminSlice = createSlice({
         }
       )
 
-      // ==========================================
-      // BLOCK / UNBLOCK USER
-      // ==========================================
+     
 
       .addCase(
         toggleUserBlock.fulfilled,
@@ -300,9 +277,7 @@ const adminSlice = createSlice({
         }
       )
 
-      // ==========================================
-      // ADMIN LOGOUT
-      // ==========================================
+      
 
       .addCase(
         adminLogout.fulfilled,

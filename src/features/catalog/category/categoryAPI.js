@@ -1,8 +1,6 @@
 import api from "../../../services/api";
 
-// ==========================================
-// GET CATEGORIES
-// ==========================================
+
 
 export const getAdminCategoriesAPI =
   async (params) => {
@@ -17,9 +15,6 @@ export const getAdminCategoriesAPI =
     return response.data;
   };
 
-// ==========================================
-// CREATE CATEGORY
-// ==========================================
 
 export const createCategoryAPI =
   async (data) => {
@@ -38,9 +33,6 @@ export const createCategoryAPI =
     return response.data;
   };
 
-// ==========================================
-// UPDATE CATEGORY
-// ==========================================
 
 export const updateCategoryAPI =
   async (
@@ -62,9 +54,7 @@ export const updateCategoryAPI =
     return response.data;
   };
 
-// ==========================================
-// DELETE CATEGORY
-// ==========================================
+
 
 export const deleteCategoryAPI =
   async (categoryId) => {

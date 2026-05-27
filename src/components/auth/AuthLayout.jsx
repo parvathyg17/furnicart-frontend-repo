@@ -1,7 +1,3 @@
-// ===============================
-// src/components/auth/AuthLayout.jsx
-// ===============================
-
 import {
   Link,
 } from "react-router-dom";
@@ -33,10 +29,6 @@ function AuthLayout({
 }) {
 
 
-  // ==========================================
-  // AUTH STATE
-  // ==========================================
-
   const {
     user,
   } = useSelector(
@@ -49,7 +41,7 @@ function AuthLayout({
     <div className="auth-page">
 
 
-      {/* NAVBAR */}
+    
       <header className="auth-navbar">
 
         <div className="auth-logo">
@@ -62,7 +54,7 @@ function AuthLayout({
         </div>
 
 
-        {/* NAV LINKS */}
+        
         <nav className="auth-nav-links">
 
           <Link to="/">
@@ -84,10 +76,10 @@ function AuthLayout({
         </nav>
 
 
-        {/* NAV ICONS */}
+      
         <div className="auth-nav-icons">
 
-          {/* CART */}
+          
           <button>
 
             <ShoppingCart size={20} />
@@ -95,7 +87,6 @@ function AuthLayout({
           </button>
 
 
-          {/* PROFILE / LOGIN */}
           <Link
             to={
               user
@@ -143,11 +134,11 @@ function AuthLayout({
       </header>
 
 
-      {/* CONTAINER */}
+    
       <div className="auth-container">
 
 
-        {/* LEFT SIDE */}
+        
         <div className="auth-image-section">
 
           <img
@@ -170,7 +161,7 @@ function AuthLayout({
         </div>
 
 
-        {/* RIGHT SIDE */}
+        
         <div className="auth-form-section">
 
           {children}
@@ -180,7 +171,7 @@ function AuthLayout({
       </div>
 
 
-      {/* FOOTER */}
+      
       <footer className="auth-footer">
 
         <div className="footer-logo">

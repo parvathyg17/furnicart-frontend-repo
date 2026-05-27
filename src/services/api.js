@@ -11,9 +11,7 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// ==========================================
-// REQUEST INTERCEPTOR
-// ==========================================
+
 
 api.interceptors.request.use(
 
@@ -35,9 +33,7 @@ api.interceptors.request.use(
   }
 );
 
-// ==========================================
-// REFRESH CONTROL
-// ==========================================
+
 
 let isRefreshing =
   false;
@@ -67,9 +63,7 @@ const processQueue = (
   failedQueue = [];
 };
 
-// ==========================================
-// RESPONSE INTERCEPTOR
-// ==========================================
+
 
 api.interceptors.response.use(
 
@@ -83,9 +77,7 @@ api.interceptors.response.use(
     const url =
       originalRequest?.url || "";
 
-    // ==========================================
-    // PUBLIC ROUTES
-    // ==========================================
+   
 
     const publicRoutes = [
 
@@ -117,6 +109,27 @@ api.interceptors.response.use(
       );
 
     if (isPublicRoute) {
+
+      return Promise.reject(error);
+    }
+
+
+
+    const detail =
+      error.response?.data?.detail;
+
+    const errMsg =
+      error.response?.data?.error;
+
+    const isBlocked =
+
+      detail ===
+        "Your account is blocked" ||
+
+      errMsg ===
+        "Your account is blocked";
+
+    if (isBlocked) {
 
       return Promise.reject(error);
     }
@@ -198,10 +211,6 @@ api.interceptors.response.use(
         processQueue(
           refreshError
         );
-
-        // JUST REJECT
-        // NO LOGOUT
-        // NO REDIRECT
 
         return Promise.reject(
           refreshError

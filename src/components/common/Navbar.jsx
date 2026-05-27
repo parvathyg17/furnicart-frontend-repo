@@ -1,6 +1,4 @@
-// ==========================================
-// src/components/common/Navbar.jsx
-// ==========================================
+
 import "../../styles/common.css";
 import {
   Link,
@@ -19,9 +17,6 @@ import logofc from "../../assets/images/logofc.png";
 
 export default function Navbar() {
 
-  // ==========================================
-  // AUTH STATE
-  // ==========================================
 
   const {
     user,
@@ -35,7 +30,7 @@ export default function Navbar() {
 
       <div className="main-nav-inner">
 
-        {/* LOGO */}
+        
         <Link
           to="/"
           className="main-logo"
@@ -53,7 +48,7 @@ export default function Navbar() {
         </Link>
 
 
-        {/* NAV LINKS */}
+        
         <nav className="main-nav-links">
 
           <Link to="/">
@@ -75,10 +70,10 @@ export default function Navbar() {
         </nav>
 
 
-        {/* NAV ICONS */}
+    
         <div className="main-nav-icons">
 
-          {/* CART */}
+          
           <button>
 
             <ShoppingCart size={20} />
@@ -86,7 +81,7 @@ export default function Navbar() {
           </button>
 
 
-          {/* PROFILE / LOGIN */}
+          
           <Link
             to={
               user

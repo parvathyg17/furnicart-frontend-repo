@@ -1,8 +1,6 @@
 import api from "../../../services/api";
 
-// ==========================================
-// PRODUCTS
-// ==========================================
+
 
 export const getAdminProductsAPI =
   async (params) => {
@@ -72,9 +70,7 @@ export const toggleProductStatusAPI =
     return response.data;
   };
 
-// ==========================================
-// VARIANTS
-// ==========================================
+
 
 export const updateVariantAPI =
     async (
@@ -126,9 +122,7 @@ export const toggleVariantStatusAPI =
     }
   };
 
-// ==========================================
-// VARIANT IMAGES
-// ==========================================
+
 
 export const uploadVariantImageAPI =
     async ({

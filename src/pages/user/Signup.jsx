@@ -171,6 +171,16 @@ export default function Signup() {
       toast.success(
         successMessage.message
       );
+      
+      sessionStorage.setItem(
+        "otp_email",
+        successMessage.email
+      );
+
+      sessionStorage.setItem(
+        "otp_purpose",
+        "signup"
+      );
 
       navigate("/verify-otp", {
         state: {

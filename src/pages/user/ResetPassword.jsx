@@ -33,10 +33,16 @@ export default function ResetPassword() {
   const location = useLocation();
 
   const email =
-    location.state?.email;
+    location.state?.email ||
+    sessionStorage.getItem(
+      "reset_email"
+    );
 
   const otp =
-    location.state?.otp;
+    location.state?.otp ||
+    sessionStorage.getItem(
+      "reset_otp"
+    );
 
 
   // ==========================================

@@ -35,10 +35,16 @@ export default function OtpVerify() {
   const location = useLocation();
 
   const email =
-    location.state?.email;
+    location.state?.email ||
+    sessionStorage.getItem(
+      "otp_email"
+    );
 
   const purpose =
-    location.state?.purpose;
+    location.state?.purpose ||
+    sessionStorage.getItem(
+      "otp_purpose"
+    );
 
 
   // ==========================================
@@ -48,9 +54,6 @@ export default function OtpVerify() {
   const [otp, setOtp] =
     useState("");
 
-  const [timer, setTimer] =
-    useState(60);
-
   const [loadingLocal, setLoadingLocal] =
     useState(false);
 
@@ -58,6 +61,46 @@ export default function OtpVerify() {
     resendLoadingLocal,
     setResendLoadingLocal,
   ] = useState(false);
+
+
+  // ==========================================
+  // INITIAL TIMER
+  // ==========================================
+
+  const getInitialTimer = () => {
+
+    let storedTime =
+      localStorage.getItem(
+        "otp_resend_until"
+      );
+
+    // FIRST TIME OPENING OTP PAGE
+    if (!storedTime) {
+
+      storedTime =
+        Date.now() + 60000;
+
+      localStorage.setItem(
+        "otp_resend_until",
+        storedTime
+      );
+    }
+
+    const remaining =
+      Math.floor(
+        (
+          Number(storedTime) -
+          Date.now()
+        ) / 1000
+      );
+
+    return remaining > 0
+      ? remaining
+      : 0;
+  };
+
+  const [timer, setTimer] =
+    useState(getInitialTimer);
 
 
   // ==========================================
@@ -90,12 +133,20 @@ export default function OtpVerify() {
 
   useEffect(() => {
 
+    if (timer <= 0) {
+      return;
+    }
+
     const interval =
       setInterval(() => {
 
         setTimer((prev) => {
 
           if (prev <= 1) {
+
+            localStorage.removeItem(
+              "otp_resend_until"
+            );
 
             clearInterval(
               interval
@@ -115,7 +166,7 @@ export default function OtpVerify() {
         interval
       );
 
-  }, []);
+  }, [timer]);
 
 
   // ==========================================
@@ -164,6 +215,11 @@ export default function OtpVerify() {
         result.message
       );
 
+      // CLEAR TIMER STORAGE
+      localStorage.removeItem(
+        "otp_resend_until"
+      );
+
       // ==========================================
       // SIGNUP FLOW
       // ==========================================
@@ -181,6 +237,16 @@ export default function OtpVerify() {
       // ==========================================
 
       else {
+
+        sessionStorage.setItem(
+          "reset_email",
+          email
+        );
+
+        sessionStorage.setItem(
+          "reset_otp",
+          otp
+        );
 
         navigate(
           "/reset-password",
@@ -238,6 +304,14 @@ export default function OtpVerify() {
         );
 
         // RESET TIMER
+        const resendUntil =
+          Date.now() + 60000;
+
+        localStorage.setItem(
+          "otp_resend_until",
+          resendUntil
+        );
+
         setTimer(60);
 
       } catch (err) {

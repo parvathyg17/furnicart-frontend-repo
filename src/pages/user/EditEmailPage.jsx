@@ -66,14 +66,95 @@ export default function EditEmailPage() {
   const [otpSent, setOtpSent] =
     useState(false);
 
+  const getInitialTimer = () => {
+
+    const storedTime =
+      localStorage.getItem(
+        "email_change_resend_until"
+      );
+
+    if (!storedTime) {
+      return 0;
+    }
+
+    const remaining =
+      Math.floor(
+        (
+          Number(storedTime) -
+          Date.now()
+        ) / 1000
+      );
+
+    return remaining > 0
+      ? remaining
+      : 0;
+  };
+
   const [timer, setTimer] =
-    useState(0);
+    useState(getInitialTimer);
 
   const [email, setEmail] =
     useState({
       new_email: "",
       otp: "",
     });
+
+
+  // ==========================================
+  // RESTORE OTP FLOW
+  // ==========================================
+
+  useEffect(() => {
+
+    const storedEmail =
+      sessionStorage.getItem(
+        "email_change_new_email"
+      );
+
+    if (storedEmail) {
+
+      setEmail((prev) => ({
+        ...prev,
+        new_email: storedEmail,
+      }));
+
+      setOtpSent(true);
+    }
+
+  }, []);
+
+
+  // ==========================================
+  // INITIAL TIMER SETUP
+  // ==========================================
+
+  useEffect(() => {
+
+    const storedTime =
+      localStorage.getItem(
+        "email_change_resend_until"
+      );
+
+    if (!storedTime) {
+      return;
+    }
+
+    const remaining =
+      Math.floor(
+        (
+          Number(storedTime) -
+          Date.now()
+        ) / 1000
+      );
+
+    if (remaining > 0) {
+
+      setTimer(remaining);
+
+      setOtpSent(true);
+    }
+
+  }, []);
 
 
   // ==========================================
@@ -102,26 +183,34 @@ export default function EditEmailPage() {
 
   useEffect(() => {
 
-    let interval;
-
-    if (timer > 0) {
-
-      interval =
-        setInterval(() => {
-
-          setTimer(
-            (prev) =>
-              prev - 1
-          );
-
-        }, 1000);
-
+    if (timer <= 0) {
+      return;
     }
 
+    const interval =
+      setInterval(() => {
+
+        setTimer((prev) => {
+
+          if (prev <= 1) {
+
+            localStorage.removeItem(
+              "email_change_resend_until"
+            );
+
+            clearInterval(interval);
+
+            return 0;
+          }
+
+          return prev - 1;
+
+        });
+
+      }, 1000);
+
     return () =>
-      clearInterval(
-        interval
-      );
+      clearInterval(interval);
 
   }, [timer]);
 
@@ -192,6 +281,21 @@ export default function EditEmailPage() {
 
         setOtpSent(true);
 
+        // SAVE EMAIL
+        sessionStorage.setItem(
+          "email_change_new_email",
+          email.new_email
+        );
+
+        // SAVE TIMER
+        const resendUntil =
+          Date.now() + 60000;
+
+        localStorage.setItem(
+          "email_change_resend_until",
+          resendUntil
+        );
+
         setTimer(60);
 
       } catch (err) {
@@ -249,24 +353,33 @@ export default function EditEmailPage() {
         );
 
         await dispatch(
-  verifyEmailOTP({
-    new_email:
-      email.new_email,
+          verifyEmailOTP({
+            new_email:
+              email.new_email,
 
-    otp:
-      email.otp,
-  })
-).unwrap();
+            otp:
+              email.otp,
+          })
+        ).unwrap();
 
-await dispatch(
-  loadUser()
-).unwrap();
+        await dispatch(
+          loadUser()
+        ).unwrap();
 
-toast.success(
-  "Email updated successfully"
-);
+        // CLEANUP
+        sessionStorage.removeItem(
+          "email_change_new_email"
+        );
 
-navigate("/profile");
+        localStorage.removeItem(
+          "email_change_resend_until"
+        );
+
+        toast.success(
+          "Email updated successfully"
+        );
+
+        navigate("/profile");
 
       } catch (err) {
 
@@ -372,9 +485,13 @@ navigate("/profile");
                   ...email,
 
                   otp:
-                    e.target.value,
+                    e.target.value.replace(
+                      /\D/g,
+                      ""
+                    ),
                 })
               }
+              maxLength={6}
             />
 
             <button

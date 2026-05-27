@@ -77,6 +77,17 @@ export default function ForgotPassword() {
         "OTP sent successfully"
       );
 
+      // STORE TEMP OTP FLOW DATA
+      sessionStorage.setItem(
+        "otp_email",
+        email
+      );
+
+      sessionStorage.setItem(
+        "otp_purpose",
+        "forgot_password"
+      );
+
       navigate("/verify-otp", {
         state: {
           email,

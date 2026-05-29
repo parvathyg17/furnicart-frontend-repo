@@ -15,8 +15,6 @@ import {
 
 } from "./categoryAPI";
 
-
-
 export const getAdminCategories =
   createAsyncThunk(
 
@@ -47,7 +45,43 @@ export const getAdminCategories =
     }
   );
 
+export const getCategoryOptions =
+  createAsyncThunk(
 
+    "category/getCategoryOptions",
+
+    async (
+      _,
+      { rejectWithValue }
+    ) => {
+
+      try {
+
+        const response =
+          await getAdminCategoriesAPI({
+
+            page: 1,
+
+            page_size: 1000,
+
+            is_active: true,
+          });
+
+        return response.results;
+
+      } catch (err) {
+
+        return rejectWithValue(
+
+          err.response?.data || {
+
+            error:
+              "Failed to fetch category options",
+          }
+        );
+      }
+    }
+  );
 
 export const createCategory =
   createAsyncThunk(
@@ -78,8 +112,6 @@ export const createCategory =
       }
     }
   );
-
-
 
 export const updateCategory =
   createAsyncThunk(
@@ -115,7 +147,6 @@ export const updateCategory =
     }
   );
 
-
 export const deleteCategory =
   createAsyncThunk(
 
@@ -147,8 +178,6 @@ export const deleteCategory =
       }
     }
   );
-
-
 
 export const restoreCategory =
   createAsyncThunk(
@@ -182,22 +211,39 @@ export const restoreCategory =
     }
   );
 
-
-
 const initialState = {
 
   categories: [],
 
-  categoryPagination: null,
+  categoryOptions: [],
 
-  categoryLoading: false,
+  categoryPagination: {
+
+    count: 0,
+
+    totalPages: 1,
+
+    currentPage: 1,
+
+    next: null,
+
+    previous: null,
+  },
+
+  categoryListLoading: false,
+
+  categoryCreateLoading: false,
+
+  categoryUpdateLoading: false,
+
+  categoryDeleteLoading: false,
+
+  categoryRestoreLoading: false,
 
   categoryError: null,
 
   categorySuccess: null,
 };
-
-
 
 const categorySlice = createSlice({
 
@@ -218,8 +264,6 @@ const categorySlice = createSlice({
 
   extraReducers: (builder) => {
 
-    
-
     builder
 
       .addCase(
@@ -227,7 +271,7 @@ const categorySlice = createSlice({
 
         (state) => {
 
-          state.categoryLoading = true;
+          state.categoryListLoading = true;
 
           state.categoryError = null;
         }
@@ -238,27 +282,27 @@ const categorySlice = createSlice({
 
         (state, action) => {
 
-          state.categoryLoading = false;
+          state.categoryListLoading = false;
 
           state.categories =
-            action.payload.results;
+            action.payload.results || [];
 
           state.categoryPagination = {
 
             count:
-              action.payload.count,
+              action.payload.count || 0,
 
             totalPages:
-              action.payload.total_pages,
+              action.payload.total_pages || 1,
 
             currentPage:
-              action.payload.current_page,
+              action.payload.current_page || 1,
 
             next:
-              action.payload.next,
+              action.payload.next || null,
 
             previous:
-              action.payload.previous,
+              action.payload.previous || null,
           };
         }
       )
@@ -268,7 +312,48 @@ const categorySlice = createSlice({
 
         (state, action) => {
 
-          state.categoryLoading = false;
+          state.categoryListLoading = false;
+
+          const errorMessage =
+            getErrorMessage(
+              action.payload
+            );
+
+          if (
+
+            errorMessage &&
+            errorMessage
+              .toLowerCase()
+              .includes("invalid page")
+
+          ) {
+
+            state.categoryError = null;
+
+            return;
+          }
+
+          state.categoryError =
+            errorMessage;
+        }
+      );
+
+    builder
+
+      .addCase(
+        getCategoryOptions.fulfilled,
+
+        (state, action) => {
+
+          state.categoryOptions =
+            action.payload || [];
+        }
+      )
+
+      .addCase(
+        getCategoryOptions.rejected,
+
+        (state, action) => {
 
           state.categoryError =
             getErrorMessage(
@@ -276,8 +361,6 @@ const categorySlice = createSlice({
             );
         }
       );
-
-    
 
     builder
 
@@ -286,7 +369,7 @@ const categorySlice = createSlice({
 
         (state) => {
 
-          state.categoryLoading = true;
+          state.categoryCreateLoading = true;
 
           state.categoryError = null;
         }
@@ -295,16 +378,12 @@ const categorySlice = createSlice({
       .addCase(
         createCategory.fulfilled,
 
-        (state, action) => {
+        (state) => {
 
-          state.categoryLoading = false;
+          state.categoryCreateLoading = false;
 
           state.categorySuccess =
             "Category created successfully";
-
-          state.categories.unshift(
-            action.payload
-          );
         }
       )
 
@@ -313,7 +392,7 @@ const categorySlice = createSlice({
 
         (state, action) => {
 
-          state.categoryLoading = false;
+          state.categoryCreateLoading = false;
 
           state.categoryError =
             getErrorMessage(
@@ -321,7 +400,6 @@ const categorySlice = createSlice({
             );
         }
       );
-
 
     builder
 
@@ -330,7 +408,7 @@ const categorySlice = createSlice({
 
         (state) => {
 
-          state.categoryLoading = true;
+          state.categoryUpdateLoading = true;
 
           state.categoryError = null;
         }
@@ -339,24 +417,12 @@ const categorySlice = createSlice({
       .addCase(
         updateCategory.fulfilled,
 
-        (state, action) => {
+        (state) => {
 
-          state.categoryLoading = false;
+          state.categoryUpdateLoading = false;
 
           state.categorySuccess =
             "Category updated successfully";
-
-          state.categories =
-            state.categories.map(
-              (category) =>
-
-                category.id ===
-                action.payload.id
-
-                  ? action.payload
-
-                  : category
-            );
         }
       )
 
@@ -365,7 +431,7 @@ const categorySlice = createSlice({
 
         (state, action) => {
 
-          state.categoryLoading = false;
+          state.categoryUpdateLoading = false;
 
           state.categoryError =
             getErrorMessage(
@@ -373,8 +439,6 @@ const categorySlice = createSlice({
             );
         }
       );
-
-    
 
     builder
 
@@ -383,7 +447,7 @@ const categorySlice = createSlice({
 
         (state) => {
 
-          state.categoryLoading = true;
+          state.categoryDeleteLoading = true;
 
           state.categoryError = null;
         }
@@ -392,26 +456,12 @@ const categorySlice = createSlice({
       .addCase(
         deleteCategory.fulfilled,
 
-        (state, action) => {
+        (state) => {
 
-          state.categoryLoading = false;
+          state.categoryDeleteLoading = false;
 
           state.categorySuccess =
             "Category deleted successfully";
-
-          state.categories =
-            state.categories.map(
-              (category) =>
-
-                category.id === action.payload
-
-                  ? {
-                      ...category,
-                      is_active: false,
-                    }
-
-                  : category
-            );
         }
       )
 
@@ -420,7 +470,7 @@ const categorySlice = createSlice({
 
         (state, action) => {
 
-          state.categoryLoading = false;
+          state.categoryDeleteLoading = false;
 
           state.categoryError =
             getErrorMessage(
@@ -429,8 +479,6 @@ const categorySlice = createSlice({
         }
       );
 
-    
-
     builder
 
       .addCase(
@@ -438,7 +486,7 @@ const categorySlice = createSlice({
 
         (state) => {
 
-          state.categoryLoading = true;
+          state.categoryRestoreLoading = true;
 
           state.categoryError = null;
         }
@@ -447,26 +495,12 @@ const categorySlice = createSlice({
       .addCase(
         restoreCategory.fulfilled,
 
-        (state, action) => {
+        (state) => {
 
-          state.categoryLoading = false;
+          state.categoryRestoreLoading = false;
 
           state.categorySuccess =
             "Category restored successfully";
-
-          state.categories =
-            state.categories.map(
-              (category) =>
-
-                category.id === action.payload
-
-                  ? {
-                      ...category,
-                      is_active: true,
-                    }
-
-                  : category
-            );
         }
       )
 
@@ -475,7 +509,7 @@ const categorySlice = createSlice({
 
         (state, action) => {
 
-          state.categoryLoading = false;
+          state.categoryRestoreLoading = false;
 
           state.categoryError =
             getErrorMessage(

@@ -1,6 +1,7 @@
 import "../../../styles/createcategorymodal.css";
 
 import {
+  useEffect,
   useState,
 } from "react";
 
@@ -17,13 +18,13 @@ import {
 
 import {
   createRoomType,
-  getAdminRoomTypes,
 } from "../../../features/catalog/roomType/roomTypeSlice";
 
 export default function CreateRoomTypeModal({
 
   isOpen,
   onClose,
+  onSuccess,
 
 }) {
 
@@ -31,7 +32,7 @@ export default function CreateRoomTypeModal({
 
   const {
 
-    roomTypeLoading,
+    roomTypeCreateLoading,
 
   } = useSelector(
     (state) => state.roomType
@@ -46,9 +47,40 @@ export default function CreateRoomTypeModal({
   const [preview, setPreview] =
     useState(null);
 
-  // ==========================================
-  // HANDLE IMAGE
-  // ==========================================
+  const [formErrors, setFormErrors] =
+    useState({});
+
+
+  useEffect(() => {
+
+    if (!isOpen) {
+
+      setName("");
+      setImage(null);
+      setPreview(null);
+      setFormErrors({});
+    }
+
+  }, [isOpen]);
+
+  useEffect(() => {
+
+    return () => {
+
+      if (
+
+        preview &&
+        preview.startsWith("blob:")
+
+      ) {
+
+        URL.revokeObjectURL(
+          preview
+        );
+      }
+    };
+
+  }, [preview]);
 
   const handleImageChange =
     (e) => {
@@ -58,6 +90,60 @@ export default function CreateRoomTypeModal({
 
       if (!file) return;
 
+      if (
+        preview &&
+        preview.startsWith("blob:")
+      ) {
+
+        URL.revokeObjectURL(
+          preview
+        );
+      }
+
+      setFormErrors((prev) => ({
+
+        ...prev,
+
+        image: "",
+      }));
+
+      if (
+
+        file.size >
+        5 * 1024 * 1024
+
+      ) {
+
+        setFormErrors((prev) => ({
+
+          ...prev,
+
+          image:
+            "Image must be below 5MB",
+        }));
+
+        return;
+      }
+
+      if (
+
+        !file.type.startsWith(
+          "image/"
+        )
+
+      ) {
+
+        setFormErrors((prev) => ({
+
+          ...prev,
+
+          image:
+            "Only image files allowed",
+        }));
+
+        return;
+      }
+
       setImage(file);
 
       setPreview(
@@ -65,14 +151,12 @@ export default function CreateRoomTypeModal({
       );
     };
 
-  // ==========================================
-  // SUBMIT
-  // ==========================================
-
   const handleSubmit =
     async (e) => {
 
       e.preventDefault();
+
+      setFormErrors({});
 
       const formData =
         new FormData();
@@ -90,22 +174,15 @@ export default function CreateRoomTypeModal({
         );
       }
 
-      const result =
+      try {
+
         await dispatch(
+
           createRoomType(
             formData
           )
-        );
 
-      if (
-        createRoomType.fulfilled.match(
-          result
-        )
-      ) {
-
-        dispatch(
-          getAdminRoomTypes()
-        );
+        ).unwrap();
 
         setName("");
 
@@ -113,7 +190,32 @@ export default function CreateRoomTypeModal({
 
         setPreview(null);
 
+        setFormErrors({});
+
+        onSuccess?.();
+
         onClose();
+
+      } catch (error) {
+
+        setFormErrors({
+
+          name:
+
+            error?.name?.[0] ||
+
+            error?.name ||
+
+            "",
+
+          image:
+
+            error?.image?.[0] ||
+
+            error?.image ||
+
+            "",
+        });
       }
     };
 
@@ -124,8 +226,6 @@ export default function CreateRoomTypeModal({
     <div className="category-modal-overlay">
 
       <div className="category-modal">
-
-        {/* HEADER */}
 
         <div className="category-modal-header">
 
@@ -157,14 +257,10 @@ export default function CreateRoomTypeModal({
 
         </div>
 
-        {/* FORM */}
-
         <form
           onSubmit={handleSubmit}
           className="category-form"
         >
-
-          {/* NAME */}
 
           <div className="form-group">
 
@@ -177,18 +273,40 @@ export default function CreateRoomTypeModal({
             <input
               type="text"
               value={name}
-              onChange={(e) =>
+              onChange={(e) => {
+
                 setName(
                   e.target.value
-                )
-              }
+                );
+
+                setFormErrors((prev) => ({
+
+                  ...prev,
+
+                  name: "",
+                }));
+              }}
               placeholder="e.g. Living Room"
               required
+              className={
+                formErrors.name
+                  ? "input-error"
+                  : ""
+              }
             />
 
-          </div>
+            {
+              formErrors.name && (
 
-          {/* IMAGE */}
+                <p className="field-error">
+
+                  {formErrors.name}
+
+                </p>
+              )
+            }
+
+          </div>
 
           <div className="form-group">
 
@@ -199,7 +317,11 @@ export default function CreateRoomTypeModal({
             </label>
 
             <div
-              className="image-upload-box"
+              className={`image-upload-box ${
+                formErrors.image
+                  ? "input-error"
+                  : ""
+              }`}
               onClick={() =>
                 document
                   .getElementById(
@@ -257,9 +379,18 @@ export default function CreateRoomTypeModal({
 
             </div>
 
-          </div>
+            {
+              formErrors.image && (
 
-          {/* FOOTER */}
+                <p className="field-error">
+
+                  {formErrors.image}
+
+                </p>
+              )
+            }
+
+          </div>
 
           <div className="category-modal-footer">
 
@@ -275,14 +406,16 @@ export default function CreateRoomTypeModal({
 
             <button
               type="submit"
-              disabled={roomTypeLoading}
+              disabled={
+                roomTypeCreateLoading
+              }
               className="submit-button"
             >
 
               <Check size={18} />
 
               {
-                roomTypeLoading
+                roomTypeCreateLoading
 
                   ? "Creating..."
 

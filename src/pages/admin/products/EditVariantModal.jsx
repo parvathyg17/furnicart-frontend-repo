@@ -17,6 +17,7 @@ import {
 
 import {
   updateVariant,
+  clearProductMessages,
 } from "../../../features/catalog/product/productSlice";
 
 export default function EditVariantModal({
@@ -62,6 +63,11 @@ export default function EditVariantModal({
     is_active: true,
   });
 
+  const [
+    formErrors,
+    setFormErrors,
+  ] = useState({});
+
   // ==========================================
   // PREFILL
   // ==========================================
@@ -79,10 +85,10 @@ export default function EditVariantModal({
           variant.sku || "",
 
         price:
-          variant.price || "",
+          variant.price ?? "",
 
         stock:
-          variant.stock || "",
+          variant.stock ?? "",
 
         color:
           variant.color || "",
@@ -96,9 +102,26 @@ export default function EditVariantModal({
         is_active:
           variant.is_active ?? true,
       });
+
+      setFormErrors({});
     }
 
   }, [variant]);
+
+  useEffect(() => {
+
+    if (!isOpen)
+      return;
+
+    dispatch(
+      clearProductMessages()
+    );
+  }, [
+
+    dispatch,
+    isOpen,
+
+  ]);
 
   // ==========================================
   // HANDLE CHANGE
@@ -125,7 +148,131 @@ export default function EditVariantModal({
 
           : value,
     }));
+
+    setFormErrors((prev) => ({
+
+      ...prev,
+
+      [name]: "",
+    }));
   };
+
+  const mapApiErrors =
+    (payload) => {
+
+      if (
+        !payload ||
+        typeof payload !== "object"
+      ) {
+
+        return {};
+      }
+
+      const next = {};
+
+      if (
+        typeof payload.error === "string"
+      ) {
+
+        next._general =
+          payload.error;
+      }
+
+      for (const key of Object.keys(payload)) {
+
+        if (key === "error")
+          continue;
+
+        const val =
+          payload[key];
+
+        if (Array.isArray(val)) {
+
+          next[key] =
+            val[0];
+        } else if (
+
+          typeof val === "string"
+        ) {
+
+          next[key] = val;
+        }
+      }
+
+      return next;
+    };
+
+  const validateClient =
+    () => {
+
+      const next = {};
+
+      if (!formData.variant_name.trim()) {
+
+        next.variant_name =
+          "Variant name is required.";
+      }
+
+      if (!formData.sku.trim()) {
+
+        next.sku =
+          "SKU is required.";
+      }
+
+      const price =
+        Number(
+          formData.price
+        );
+
+      if (
+        !Number.isFinite(price) ||
+        price <= 0
+      ) {
+
+        next.price =
+          "Enter a price greater than 0.";
+      }
+
+      const stock =
+        Number(
+          formData.stock
+        );
+
+      if (
+        !Number.isFinite(stock) ||
+        stock < 0 ||
+        !Number.isInteger(stock)
+      ) {
+
+        next.stock =
+          "Enter a whole number stock of 0 or more.";
+      }
+
+      if (formData.is_active) {
+
+        if (!formData.color.trim()) {
+
+          next.color =
+            "Color / finish is required for an active variant.";
+        }
+
+        if (!formData.material.trim()) {
+
+          next.material =
+            "Material is required for an active variant.";
+        }
+
+        if (!formData.size.trim()) {
+
+          next.size =
+            "Size / dimensions are required for an active variant.";
+        }
+      }
+
+      setFormErrors(next);
+
+      return Object.keys(next).length === 0;
+    };
 
   // ==========================================
   // SUBMIT
@@ -136,13 +283,18 @@ export default function EditVariantModal({
 
       e.preventDefault();
 
+      if (!validateClient()) {
+
+        return;
+      }
+
       const payload = {
 
         variant_name:
-          formData.variant_name,
+          formData.variant_name.trim(),
 
         sku:
-          formData.sku,
+          formData.sku.trim(),
 
         price:
           Number(
@@ -155,13 +307,13 @@ export default function EditVariantModal({
           ),
 
         color:
-          formData.color,
+          formData.color.trim(),
 
         material:
-          formData.material,
+          formData.material.trim(),
 
         size:
-          formData.size,
+          formData.size.trim(),
 
         is_active:
           formData.is_active,
@@ -178,6 +330,25 @@ export default function EditVariantModal({
             data: payload,
           })
         );
+
+      if (
+        updateVariant.rejected.match(
+          result
+        )
+      ) {
+
+        setFormErrors(
+          mapApiErrors(
+            result.payload
+          )
+        );
+
+        dispatch(
+          clearProductMessages()
+        );
+
+        return;
+      }
 
       if (
         updateVariant.fulfilled.match(
@@ -246,7 +417,7 @@ export default function EditVariantModal({
             {/* ERROR */}
 
             {
-              productError && (
+              (productError || formErrors._general) && (
 
                 <div className="form-error">
 
@@ -255,9 +426,13 @@ export default function EditVariantModal({
 
                       ? productError
 
-                      : JSON.stringify(
-                          productError
-                        )
+                      : productError
+
+                        ? JSON.stringify(
+                            productError
+                          )
+
+                        : formErrors._general
                   }
 
                 </div>
@@ -287,6 +462,19 @@ export default function EditVariantModal({
                   required
                 />
 
+                {
+                  formErrors.variant_name && (
+
+                    <div className="form-error">
+
+                      {
+                        formErrors.variant_name
+                      }
+
+                    </div>
+                  )
+                }
+
               </div>
 
               <div className="form-group">
@@ -308,6 +496,19 @@ export default function EditVariantModal({
                   required
                 />
 
+                {
+                  formErrors.sku && (
+
+                    <div className="form-error">
+
+                      {
+                        formErrors.sku
+                      }
+
+                    </div>
+                  )
+                }
+
               </div>
 
             </div>
@@ -325,6 +526,7 @@ export default function EditVariantModal({
                 <input
                   type="number"
                   step="0.01"
+                  min="0.01"
                   name="price"
                   placeholder="0.00"
                   value={
@@ -335,6 +537,19 @@ export default function EditVariantModal({
                   }
                   required
                 />
+
+                {
+                  formErrors.price && (
+
+                    <div className="form-error">
+
+                      {
+                        formErrors.price
+                      }
+
+                    </div>
+                  )
+                }
 
               </div>
 
@@ -347,6 +562,8 @@ export default function EditVariantModal({
                 <input
                   type="number"
                   name="stock"
+                  min="0"
+                  step="1"
                   placeholder="0"
                   value={
                     formData.stock
@@ -356,6 +573,19 @@ export default function EditVariantModal({
                   }
                   required
                 />
+
+                {
+                  formErrors.stock && (
+
+                    <div className="form-error">
+
+                      {
+                        formErrors.stock
+                      }
+
+                    </div>
+                  )
+                }
 
               </div>
 
@@ -383,6 +613,9 @@ export default function EditVariantModal({
                     onChange={
                       handleChange
                     }
+                    required={
+                      formData.is_active
+                    }
                   />
 
                   <div
@@ -390,6 +623,19 @@ export default function EditVariantModal({
                   ></div>
 
                 </div>
+
+                {
+                  formErrors.color && (
+
+                    <div className="form-error">
+
+                      {
+                        formErrors.color
+                      }
+
+                    </div>
+                  )
+                }
 
               </div>
 
@@ -409,7 +655,23 @@ export default function EditVariantModal({
                   onChange={
                     handleChange
                   }
+                  required={
+                    formData.is_active
+                  }
                 />
+
+                {
+                  formErrors.material && (
+
+                    <div className="form-error">
+
+                      {
+                        formErrors.material
+                      }
+
+                    </div>
+                  )
+                }
 
               </div>
 
@@ -433,7 +695,23 @@ export default function EditVariantModal({
                 onChange={
                   handleChange
                 }
+                required={
+                  formData.is_active
+                }
               />
+
+              {
+                formErrors.size && (
+
+                  <div className="form-error">
+
+                    {
+                      formErrors.size
+                    }
+
+                  </div>
+                )
+              }
 
             </div>
 

@@ -77,6 +77,18 @@ export default function ForgotPassword() {
         "OTP sent successfully"
       );
 
+      // ==========================================
+      // RESET OTP TIMER
+      // ==========================================
+
+      const resendUntil =
+        Date.now() + 60000;
+
+      localStorage.setItem(
+        "otp_resend_until",
+        resendUntil
+      );
+
       // STORE TEMP OTP FLOW DATA
       sessionStorage.setItem(
         "otp_email",

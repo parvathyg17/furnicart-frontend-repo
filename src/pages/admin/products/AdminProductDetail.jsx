@@ -2,6 +2,10 @@ import "../../../styles/adminproductdetails.css";
 
 import {
   toggleVariantStatus,
+  clearProductMessages,
+  clearProductSuccess,
+  clearProductError,
+  getAdminProductDetail,
 } from "../../../features/catalog/product/productSlice";
 
 import EditVariantModal
@@ -27,11 +31,8 @@ import {
   Plus,
   Upload,
   MoreHorizontal,
+  X,
 } from "lucide-react";
-
-import {
-  getAdminProductDetail,
-} from "../../../features/catalog/product/productSlice";
 
 import EditProductModal
 from "./EditProductModal";
@@ -66,6 +67,8 @@ export default function AdminProductDetail() {
   const {
     productDetail,
     productLoading,
+    productSuccess,
+    productError,
   } = useSelector(
     (state) => state.product
   );
@@ -95,14 +98,27 @@ const handleEditVariant = (
 };
 
 const handleToggleVariant =
-  (variantId) => {
+    async (variantId) => {
 
-    dispatch(
-      toggleVariantStatus(
-        variantId
-      )
-    );
-  };
+      try {
+
+        await dispatch(
+          toggleVariantStatus(
+            variantId
+          )
+        ).unwrap();
+
+        dispatch(
+          getAdminProductDetail(
+            id
+          )
+        );
+
+      } catch (error) {
+
+        // Redux error already handled
+      }
+    };
   // ==========================================
   // FETCH PRODUCT
   // ==========================================
@@ -118,20 +134,44 @@ const handleToggleVariant =
 
   }, [dispatch, id]);
 
+  useEffect(() => {
+
+    if (!productSuccess)
+      return;
+
+    const timer = setTimeout(() => {
+
+      dispatch(
+        clearProductSuccess()
+      );
+    }, 5000);
+
+    return () =>
+      clearTimeout(timer);
+  }, [
+
+    dispatch,
+    productSuccess,
+
+  ]);
+
   // ==========================================
   // LOADING
   // ==========================================
 
-  if (
-    productLoading ||
-    !productDetail
-  ) {
+  if (!productDetail) {
 
     return (
 
       <div className="product-detail-loading">
 
-        Loading...
+        {
+          productLoading
+
+            ? "Loading..."
+
+            : "Product not found."
+        }
 
       </div>
     );
@@ -172,6 +212,76 @@ const handleToggleVariant =
   return (
 
     <div className="admin-product-detail-page">
+
+      {
+        productSuccess && (
+
+          <div
+            className="product-detail-flash success"
+            role="status"
+          >
+
+            <span>
+
+              {
+                productSuccess
+              }
+
+            </span>
+
+            <button
+              type="button"
+              className="product-detail-flash-dismiss"
+              onClick={() =>
+                dispatch(
+                  clearProductSuccess()
+                )
+              }
+              aria-label="Dismiss"
+            >
+
+              <X size={18} />
+
+            </button>
+
+          </div>
+        )
+      }
+
+      {
+        productError && (
+
+          <div
+            className="product-detail-flash error"
+            role="alert"
+          >
+
+            <span>
+
+              {
+                productError
+              }
+
+            </span>
+
+            <button
+              type="button"
+              className="product-detail-flash-dismiss"
+              onClick={() =>
+                dispatch(
+                  clearProductError()
+                )
+              }
+              aria-label="Dismiss"
+            >
+
+              <X size={18} />
+
+            </button>
+
+          </div>
+        )
+      }
 
       {/* BREADCRUMBS */}
 

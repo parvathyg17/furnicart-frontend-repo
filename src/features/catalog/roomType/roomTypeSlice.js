@@ -3,6 +3,9 @@ import {
   createAsyncThunk,
 } from "@reduxjs/toolkit";
 
+import getErrorMessage
+from "../../../utils/getErrorMessage";
+
 import {
 
   getAdminRoomTypesAPI,
@@ -12,8 +15,6 @@ import {
   restoreRoomTypeAPI,
 
 } from "./roomTypeAPI";
-
-
 
 export const getAdminRoomTypes =
   createAsyncThunk(
@@ -141,8 +142,6 @@ export const deleteRoomType =
     }
   );
 
-
-
 export const restoreRoomType =
   createAsyncThunk(
 
@@ -175,22 +174,37 @@ export const restoreRoomType =
     }
   );
 
-
-
 const initialState = {
 
   roomTypes: [],
 
-  roomTypePagination: null,
+  roomTypePagination: {
 
-  roomTypeLoading: false,
+    count: 0,
+
+    totalPages: 1,
+
+    currentPage: 1,
+
+    next: null,
+
+    previous: null,
+  },
+
+  roomTypeListLoading: false,
+
+  roomTypeCreateLoading: false,
+
+  roomTypeUpdateLoading: false,
+
+  roomTypeDeleteLoading: false,
+
+  roomTypeRestoreLoading: false,
 
   roomTypeError: null,
 
   roomTypeSuccess: null,
 };
-
-
 
 const roomTypeSlice = createSlice({
 
@@ -211,8 +225,6 @@ const roomTypeSlice = createSlice({
 
   extraReducers: (builder) => {
 
-    
-
     builder
 
       .addCase(
@@ -220,9 +232,11 @@ const roomTypeSlice = createSlice({
 
         (state) => {
 
-          state.roomTypeLoading = true;
+          state.roomTypeListLoading = true;
 
           state.roomTypeError = null;
+
+          state.roomTypeSuccess = null;
         }
       )
 
@@ -231,27 +245,27 @@ const roomTypeSlice = createSlice({
 
         (state, action) => {
 
-          state.roomTypeLoading = false;
+          state.roomTypeListLoading = false;
 
           state.roomTypes =
-            action.payload.results;
+            action.payload.results || [];
 
           state.roomTypePagination = {
 
             count:
-              action.payload.count,
+              action.payload.count || 0,
 
             totalPages:
-              action.payload.total_pages,
+              action.payload.total_pages || 1,
 
             currentPage:
-              action.payload.current_page,
+              action.payload.current_page || 1,
 
             next:
-              action.payload.next,
+              action.payload.next || null,
 
             previous:
-              action.payload.previous,
+              action.payload.previous || null,
           };
         }
       )
@@ -261,15 +275,33 @@ const roomTypeSlice = createSlice({
 
         (state, action) => {
 
-          state.roomTypeLoading = false;
+          state.roomTypeListLoading = false;
+
+          const errorMessage =
+            getErrorMessage(
+              action.payload
+            );
+
+          if (
+
+            errorMessage &&
+            errorMessage
+              .toLowerCase()
+              .includes("invalid page")
+
+          ) {
+
+            state.roomTypeError = null;
+
+            return;
+          }
+
+          state.roomTypeSuccess = null;
 
           state.roomTypeError =
-            action.payload?.error ||
-            "Failed to fetch room types";
+            errorMessage;
         }
       );
-
-    
 
     builder
 
@@ -278,9 +310,11 @@ const roomTypeSlice = createSlice({
 
         (state) => {
 
-          state.roomTypeLoading = true;
+          state.roomTypeCreateLoading = true;
 
           state.roomTypeError = null;
+
+          state.roomTypeSuccess = null;
         }
       )
 
@@ -289,7 +323,9 @@ const roomTypeSlice = createSlice({
 
         (state) => {
 
-          state.roomTypeLoading = false;
+          state.roomTypeCreateLoading = false;
+
+          state.roomTypeError = null;
 
           state.roomTypeSuccess =
             "Room type created successfully";
@@ -301,15 +337,16 @@ const roomTypeSlice = createSlice({
 
         (state, action) => {
 
-          state.roomTypeLoading = false;
+          state.roomTypeCreateLoading = false;
+
+          state.roomTypeSuccess = null;
 
           state.roomTypeError =
-            action.payload?.error ||
-            "Failed to create room type";
+            getErrorMessage(
+              action.payload
+            );
         }
       );
-
-    
 
     builder
 
@@ -318,33 +355,25 @@ const roomTypeSlice = createSlice({
 
         (state) => {
 
-          state.roomTypeLoading = true;
+          state.roomTypeUpdateLoading = true;
 
           state.roomTypeError = null;
+
+          state.roomTypeSuccess = null;
         }
       )
 
       .addCase(
         updateRoomType.fulfilled,
 
-        (state, action) => {
+        (state) => {
 
-          state.roomTypeLoading = false;
+          state.roomTypeUpdateLoading = false;
+
+          state.roomTypeError = null;
 
           state.roomTypeSuccess =
             "Room type updated successfully";
-
-          state.roomTypes =
-            state.roomTypes.map(
-              (roomType) =>
-
-                roomType.id ===
-                action.payload.id
-
-                  ? action.payload
-
-                  : roomType
-            );
         }
       )
 
@@ -353,15 +382,16 @@ const roomTypeSlice = createSlice({
 
         (state, action) => {
 
-          state.roomTypeLoading = false;
+          state.roomTypeUpdateLoading = false;
+
+          state.roomTypeSuccess = null;
 
           state.roomTypeError =
-            action.payload?.error ||
-            "Failed to update room type";
+            getErrorMessage(
+              action.payload
+            );
         }
       );
-
-    
 
     builder
 
@@ -370,35 +400,25 @@ const roomTypeSlice = createSlice({
 
         (state) => {
 
-          state.roomTypeLoading = true;
+          state.roomTypeDeleteLoading = true;
 
           state.roomTypeError = null;
+
+          state.roomTypeSuccess = null;
         }
       )
 
       .addCase(
         deleteRoomType.fulfilled,
 
-        (state, action) => {
+        (state) => {
 
-          state.roomTypeLoading = false;
+          state.roomTypeDeleteLoading = false;
+
+          state.roomTypeError = null;
 
           state.roomTypeSuccess =
             "Room type deleted successfully";
-
-          state.roomTypes =
-            state.roomTypes.map(
-              (roomType) =>
-
-                roomType.id === action.payload
-
-                  ? {
-                      ...roomType,
-                      is_active: false,
-                    }
-
-                  : roomType
-            );
         }
       )
 
@@ -407,16 +427,16 @@ const roomTypeSlice = createSlice({
 
         (state, action) => {
 
-          state.roomTypeLoading = false;
+          state.roomTypeDeleteLoading = false;
+
+          state.roomTypeSuccess = null;
 
           state.roomTypeError =
-            action.payload?.error ||
-            "Failed to delete room type";
+            getErrorMessage(
+              action.payload
+            );
         }
       );
-
-
-
 
     builder
 
@@ -425,35 +445,25 @@ const roomTypeSlice = createSlice({
 
         (state) => {
 
-          state.roomTypeLoading = true;
+          state.roomTypeRestoreLoading = true;
 
           state.roomTypeError = null;
+
+          state.roomTypeSuccess = null;
         }
       )
 
       .addCase(
         restoreRoomType.fulfilled,
 
-        (state, action) => {
+        (state) => {
 
-          state.roomTypeLoading = false;
+          state.roomTypeRestoreLoading = false;
+
+          state.roomTypeError = null;
 
           state.roomTypeSuccess =
             "Room type restored successfully";
-
-          state.roomTypes =
-            state.roomTypes.map(
-              (roomType) =>
-
-                roomType.id === action.payload
-
-                  ? {
-                      ...roomType,
-                      is_active: true,
-                    }
-
-                  : roomType
-            );
         }
       )
 
@@ -462,12 +472,14 @@ const roomTypeSlice = createSlice({
 
         (state, action) => {
 
-          state.roomTypeLoading = false;
+          state.roomTypeRestoreLoading = false;
+
+          state.roomTypeSuccess = null;
 
           state.roomTypeError =
-            action.payload?.error ||
-
-            "Failed to restore room type";
+            getErrorMessage(
+              action.payload
+            );
         }
       );
   },

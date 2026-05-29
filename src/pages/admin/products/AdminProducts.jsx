@@ -1,5 +1,6 @@
 import "../../../styles/adminproducts.css";
 
+import toast from "react-hot-toast";
 import {
   useEffect,
   useMemo,
@@ -26,11 +27,14 @@ import {
   Trash2,
   ChevronLeft,
   ChevronRight,
+  X,
 } from "lucide-react";
 
 import {
   getAdminProducts,
   deleteProduct,
+  clearProductSuccess,
+  clearProductError,
 } from "../../../features/catalog/product/productSlice";
 
 import {
@@ -54,6 +58,8 @@ export default function AdminProducts() {
     products,
     productPagination,
     productLoading,
+    productSuccess,
+    productError,
 
   } = useSelector(
     (state) => state.product
@@ -117,6 +123,17 @@ export default function AdminProducts() {
     openCreateModal,
     setOpenCreateModal,
   ] = useState(false);
+
+
+  const [
+    deleteModalOpen,
+    setDeleteModalOpen,
+  ] = useState(false);
+
+  const [
+    selectedProduct,
+    setSelectedProduct,
+  ] = useState(null);
 
   // ==========================================
   // FETCH CATEGORY + ROOM TYPES
@@ -189,63 +206,103 @@ export default function AdminProducts() {
   // DELETE PRODUCT
   // ==========================================
 
+  const openDeleteModal = (
+    product
+  ) => {
+
+    setSelectedProduct(
+      product
+    );
+
+    setDeleteModalOpen(
+      true
+    );
+  };
+
   const handleDeleteProduct =
-    async (productId) => {
+    async () => {
 
-      const confirmDelete =
-        window.confirm(
-          "Are you sure you want to delete this product?"
-        );
-
-      if (!confirmDelete)
+      if (!selectedProduct)
         return;
 
-      await dispatch(
-        deleteProduct(productId)
-      );
+      try {
 
-      const updatedCount =
-        (productPagination?.count || 1) - 1;
+        await dispatch(
+          deleteProduct(
+            selectedProduct.id
+          )
+        ).unwrap();
 
-      const updatedPages =
-        Math.ceil(updatedCount / 10);
-
-      if (
-        currentPage > updatedPages &&
-        currentPage > 1
-      ) {
-
-        setCurrentPage(
-          currentPage - 1
+        setDeleteModalOpen(
+          false
         );
 
-      } else {
+        setSelectedProduct(
+          null
+        );
 
-        dispatch(
-          getAdminProducts({
+        toast.success(
+          "Product deleted successfully"
+        );
 
-            page: currentPage,
+        const updatedCount =
+          (productPagination?.count || 1) - 1;
 
-            search,
+        const updatedPages =
+          Math.ceil(
+            updatedCount / 10
+          );
 
-            category,
+        if (
+          currentPage > updatedPages &&
+          currentPage > 1
+        ) {
 
-            room_type: roomType,
+          setCurrentPage(
+            currentPage - 1
+          );
 
-            sort,
+        } else {
 
-            is_active:
+          dispatch(
+            getAdminProducts({
 
-              status === "all"
+              page: currentPage,
 
-                ? ""
+              search,
 
-                : status === "active"
+              category,
 
-                  ? "true"
+              room_type: roomType,
 
-                  : "false",
-          })
+              sort,
+
+              is_active:
+
+                status === "all"
+
+                  ? ""
+
+                  : status === "active"
+
+                    ? "true"
+
+                    : "false",
+            })
+          );
+        }
+
+      } catch (error) {
+
+        toast.error(
+
+          typeof error === "string"
+
+            ? error
+
+            : error?.error ||
+
+              "Failed to delete product"
         );
       }
     };
@@ -269,9 +326,106 @@ export default function AdminProducts() {
 
   }, [totalPages]);
 
+  useEffect(() => {
+
+    if (!productSuccess)
+      return;
+
+    const timer = setTimeout(() => {
+
+      dispatch(
+        clearProductSuccess()
+      );
+    }, 5000);
+
+    return () =>
+      clearTimeout(timer);
+  }, [
+
+    dispatch,
+    productSuccess,
+
+  ]);
+
   return (
 
     <div className="admin-products-page">
+
+      {
+        productSuccess && (
+
+          <div
+            className="catalog-flash success"
+            role="status"
+          >
+
+            <span>
+
+              {
+                productSuccess
+              }
+
+            </span>
+
+            <button
+              type="button"
+              className="catalog-flash-dismiss"
+              onClick={() =>
+                dispatch(
+                  clearProductSuccess()
+                )
+              }
+              aria-label="Dismiss"
+            >
+
+              <X size={18} />
+
+            </button>
+
+          </div>
+        )
+      }
+
+      {
+        productError && (
+
+          <div
+            className="catalog-flash error"
+            role="alert"
+          >
+
+            <span>
+
+              {
+                typeof productError === "string"
+
+                  ? productError
+
+                  : JSON.stringify(
+                      productError
+                    )
+              }
+
+            </span>
+
+            <button
+              type="button"
+              className="catalog-flash-dismiss"
+              onClick={() =>
+                dispatch(
+                  clearProductError()
+                )
+              }
+              aria-label="Dismiss"
+            >
+
+              <X size={18} />
+
+            </button>
+
+          </div>
+        )
+      }
 
       {/* ========================================== */}
       {/* HEADER */}
@@ -740,14 +894,12 @@ export default function AdminProducts() {
                             type="button"
                             className="delete-btn"
                             onClick={() =>
-                              handleDeleteProduct(
-                                product.id
+                              openDeleteModal(
+                                product
                               )
                             }
                           >
-
                             <Trash2 size={18} />
-
                           </button>
 
                         </div>
@@ -877,6 +1029,98 @@ export default function AdminProducts() {
       {/* ========================================== */}
       {/* MODAL */}
       {/* ========================================== */}
+
+      {
+        deleteModalOpen && (
+
+          <div
+            className="modal-overlay"
+            onClick={() => {
+
+              setDeleteModalOpen(
+                false
+              );
+
+              setSelectedProduct(
+                null
+              );
+            }}
+          >
+
+            <div
+              className="delete-modal"
+              onClick={(e) =>
+                e.stopPropagation()
+              }
+            >
+
+              <h3>
+
+                Delete Product
+
+              </h3>
+
+              <p>
+
+                Are you sure you want to delete
+
+                <strong>
+
+                  {" "}
+                  {selectedProduct?.name}
+
+                </strong>
+
+                ?
+
+                <br />
+
+                <br />
+
+                This action cannot be undone.
+
+              </p>
+
+              <div className="delete-modal-actions">
+
+                <button
+                  type="button"
+                  className="cancel-btn"
+                  onClick={() => {
+
+                    setDeleteModalOpen(
+                      false
+                    );
+
+                    setSelectedProduct(
+                      null
+                    );
+                  }}
+                >
+
+                  Cancel
+
+                </button>
+
+                <button
+                  type="button"
+                  className="confirm-delete-btn"
+                  onClick={
+                    handleDeleteProduct
+                  }
+                >
+
+                  Delete
+
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+        )
+      }
 
       <CreateProductModal
 

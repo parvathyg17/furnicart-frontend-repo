@@ -43,6 +43,10 @@ import {
   deleteVariantImage,
 } from "../../../features/catalog/product/productSlice";
 
+import {
+  formatProductApiError,
+} from "../../../utils/productApiErrors.js";
+
 // ==========================================
 // CREATE IMAGE
 // ==========================================
@@ -530,11 +534,9 @@ export default function AdminVariantMediaLibrary() {
 
         setUploadError(
 
-          error?.error ||
+          formatProductApiError(error) ||
 
-          error?.detail ||
-
-          "Upload failed"
+            "Upload failed"
         );
 
       } finally {
@@ -629,6 +631,20 @@ export default function AdminVariantMediaLibrary() {
             {
               variant.variant_name
             }
+
+          </p>
+
+          <p className="media-minimum-hint">
+
+            Each active variant must have at least three images saved
+            before the product can go live. Currently saved on this
+            variant:{" "}
+
+            {
+              variant.images?.length || 0
+            }
+
+            {" "}/ 3
 
           </p>
 

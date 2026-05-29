@@ -17,10 +17,7 @@ import {
 } from "lucide-react";
 
 import {
-
   updateRoomType,
-  getAdminRoomTypes,
-
 } from "../../../features/catalog/roomType/roomTypeSlice";
 
 export default function EditRoomTypeModal({
@@ -28,6 +25,7 @@ export default function EditRoomTypeModal({
   isOpen,
   onClose,
   roomType,
+  onSuccess,
 
 }) {
 
@@ -35,7 +33,7 @@ export default function EditRoomTypeModal({
 
   const {
 
-    roomTypeLoading,
+    roomTypeUpdateLoading,
 
   } = useSelector(
     (state) => state.roomType
@@ -50,30 +48,52 @@ export default function EditRoomTypeModal({
   const [preview, setPreview] =
     useState(null);
 
-  // ==========================================
-  // PREFILL DATA
-  // ==========================================
+  const [formErrors, setFormErrors] =
+    useState({});
 
   useEffect(() => {
 
-    if (roomType) {
+    if (!isOpen) {
 
-      setName(
-        roomType.name || ""
-      );
-
-      setPreview(
-        roomType.image || null
-      );
-
+      setName("");
       setImage(null);
+      setPreview(null);
+      setFormErrors({});
+
+      return;
     }
 
-  }, [roomType]);
+    if (roomType) {
 
-  // ==========================================
-  // HANDLE IMAGE
-  // ==========================================
+      setName(roomType.name || "");
+      setPreview(roomType.image || null);
+      setImage(null);
+      setFormErrors({});
+    }
+
+  }, [
+    roomType,
+    isOpen,
+  ]);
+
+  useEffect(() => {
+
+    return () => {
+
+      if (
+
+        preview &&
+        preview.startsWith("blob:")
+
+      ) {
+
+        URL.revokeObjectURL(
+          preview
+        );
+      }
+    };
+
+  }, [preview]);
 
   const handleImageChange =
     (e) => {
@@ -83,6 +103,60 @@ export default function EditRoomTypeModal({
 
       if (!file) return;
 
+      if (
+        preview &&
+        preview.startsWith("blob:")
+      ) {
+
+        URL.revokeObjectURL(
+          preview
+        );
+      }
+
+      setFormErrors((prev) => ({
+
+        ...prev,
+
+        image: "",
+      }));
+
+      if (
+
+        file.size >
+        5 * 1024 * 1024
+
+      ) {
+
+        setFormErrors((prev) => ({
+
+          ...prev,
+
+          image:
+            "Image must be below 5MB",
+        }));
+
+        return;
+      }
+
+      if (
+
+        !file.type.startsWith(
+          "image/"
+        )
+
+      ) {
+
+        setFormErrors((prev) => ({
+
+          ...prev,
+
+          image:
+            "Only image files allowed",
+        }));
+
+        return;
+      }
+
       setImage(file);
 
       setPreview(
@@ -90,16 +164,14 @@ export default function EditRoomTypeModal({
       );
     };
 
-  // ==========================================
-  // SUBMIT
-  // ==========================================
-
   const handleSubmit =
     async (e) => {
 
       e.preventDefault();
 
       if (!roomType) return;
+
+      setFormErrors({});
 
       const formData =
         new FormData();
@@ -117,7 +189,8 @@ export default function EditRoomTypeModal({
         );
       }
 
-      const result =
+      try {
+
         await dispatch(
 
           updateRoomType({
@@ -127,19 +200,33 @@ export default function EditRoomTypeModal({
 
             data: formData,
           })
-        );
 
-      if (
-        updateRoomType.fulfilled.match(
-          result
-        )
-      ) {
+        ).unwrap();
 
-        dispatch(
-          getAdminRoomTypes()
-        );
+        onSuccess?.();
 
         onClose();
+
+      } catch (error) {
+
+        setFormErrors({
+
+          name:
+
+            error?.name?.[0] ||
+
+            error?.name ||
+
+            "",
+
+          image:
+
+            error?.image?.[0] ||
+
+            error?.image ||
+
+            "",
+        });
       }
     };
 
@@ -153,8 +240,6 @@ export default function EditRoomTypeModal({
     <div className="category-modal-overlay">
 
       <div className="category-modal">
-
-        {/* HEADER */}
 
         <div className="category-modal-header">
 
@@ -186,14 +271,10 @@ export default function EditRoomTypeModal({
 
         </div>
 
-        {/* FORM */}
-
         <form
           onSubmit={handleSubmit}
           className="category-form"
         >
-
-          {/* NAME */}
 
           <div className="form-group">
 
@@ -206,18 +287,40 @@ export default function EditRoomTypeModal({
             <input
               type="text"
               value={name}
-              onChange={(e) =>
+              onChange={(e) => {
+
                 setName(
                   e.target.value
-                )
-              }
+                );
+
+                setFormErrors((prev) => ({
+
+                  ...prev,
+
+                  name: "",
+                }));
+              }}
               placeholder="e.g. Living Room"
               required
+              className={
+                formErrors.name
+                  ? "input-error"
+                  : ""
+              }
             />
 
-          </div>
+            {
+              formErrors.name && (
 
-          {/* IMAGE */}
+                <p className="field-error">
+
+                  {formErrors.name}
+
+                </p>
+              )
+            }
+
+          </div>
 
           <div className="form-group">
 
@@ -228,7 +331,11 @@ export default function EditRoomTypeModal({
             </label>
 
             <div
-              className="image-upload-box"
+              className={`image-upload-box ${
+                formErrors.image
+                  ? "input-error"
+                  : ""
+              }`}
               onClick={() =>
                 document
                   .getElementById(
@@ -286,9 +393,18 @@ export default function EditRoomTypeModal({
 
             </div>
 
-          </div>
+            {
+              formErrors.image && (
 
-          {/* FOOTER */}
+                <p className="field-error">
+
+                  {formErrors.image}
+
+                </p>
+              )
+            }
+
+          </div>
 
           <div className="category-modal-footer">
 
@@ -304,14 +420,16 @@ export default function EditRoomTypeModal({
 
             <button
               type="submit"
-              disabled={roomTypeLoading}
+              disabled={
+                roomTypeUpdateLoading
+              }
               className="submit-button"
             >
 
               <Check size={18} />
 
               {
-                roomTypeLoading
+                roomTypeUpdateLoading
 
                   ? "Updating..."
 

@@ -1,40 +1,25 @@
-export default function getErrorMessage(error) {
+import {
+  formatProductApiError,
+} from "./productApiErrors.js";
 
-  // SIMPLE STRING
+/**
+ * Normalizes API / Redux rejection payloads for toasts and inline messages.
+ * Uses the same rules as catalog product errors: string `error` / `detail`,
+ * DRF field errors, and ignores noise like `success: false` when `error` is set.
+ */
+export default function getErrorMessage(error) {
 
   if (typeof error === "string") {
 
     return error;
   }
 
-  // DRF VALIDATION ERRORS
-
   if (
     typeof error === "object" &&
     error !== null
   ) {
 
-    const messages = [];
-
-    Object.keys(error).forEach((key) => {
-
-      const value = error[key];
-
-      if (Array.isArray(value)) {
-
-        messages.push(
-          `${key}: ${value.join(", ")}`
-        );
-
-      } else {
-
-        messages.push(
-          `${key}: ${value}`
-        );
-      }
-    });
-
-    return messages.join("\n");
+    return formatProductApiError(error);
   }
 
   return "Something went wrong";

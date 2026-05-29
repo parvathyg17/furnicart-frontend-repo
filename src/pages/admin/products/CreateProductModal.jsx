@@ -23,7 +23,12 @@ import {
 
 import {
   createProduct,
+  clearProductMessages,
 } from "../../../features/catalog/product/productSlice";
+
+import {
+  mapPayloadToFormErrors,
+} from "../../../utils/productApiErrors.js";
 
 import {
   getAdminCategories,
@@ -75,9 +80,12 @@ export default function CreateProductModal({
     room_type_ids: [],
 
     is_featured: false,
-
-    is_active: true,
   });
+
+  const [
+    formErrors,
+    setFormErrors,
+  ] = useState({});
 
   const [
     showCreateCategoryModal,
@@ -127,6 +135,23 @@ export default function CreateProductModal({
 
   ]);
 
+  useEffect(() => {
+
+    if (!isOpen)
+      return;
+
+    dispatch(
+      clearProductMessages()
+    );
+
+    setFormErrors({});
+  }, [
+
+    dispatch,
+    isOpen,
+
+  ]);
+
   // ==========================================
   // HANDLE CHANGE
   // ==========================================
@@ -152,6 +177,13 @@ export default function CreateProductModal({
 
           : value,
     }));
+
+    setFormErrors((prev) => ({
+
+      ...prev,
+
+      [name]: "",
+    }));
   };
 
   // ==========================================
@@ -176,6 +208,13 @@ export default function CreateProductModal({
               roomTypeId,
             ]),
           ],
+        }));
+
+        setFormErrors((prev) => ({
+
+          ...prev,
+
+          room_type_ids: "",
         }));
 
       } else {
@@ -211,9 +250,9 @@ export default function CreateProductModal({
       room_type_ids: [],
 
       is_featured: false,
-
-      is_active: true,
     });
+
+    setFormErrors({});
   };
 
   // ==========================================
@@ -231,33 +270,79 @@ export default function CreateProductModal({
   // SUBMIT
   // ==========================================
 
+  const validateClient =
+    () => {
+
+      const next = {};
+
+      if (!formData.name.trim()) {
+
+        next.name =
+          "Product name is required.";
+      }
+
+      if (!formData.description.trim()) {
+
+        next.description =
+          "Description is required.";
+      }
+
+      if (!formData.category) {
+
+        next.category =
+          "Select a category.";
+      }
+
+      if (
+        !formData.room_type_ids ||
+        formData.room_type_ids.length < 1
+      ) {
+
+        next.room_type_ids =
+          "Select at least one room type.";
+      }
+
+      setFormErrors(next);
+
+      return Object.keys(next).length === 0;
+    };
+
   const handleSubmit =
     async (e) => {
 
       e.preventDefault();
 
-      const result =
+      if (!validateClient()) {
+
+        return;
+      }
+
+      try {
+
         await dispatch(
-          createProduct(formData)
-        );
+          createProduct({
 
-      if (
-        createProduct.fulfilled.match(
-          result
-        )
-      ) {
+            ...formData,
 
-        // refresh products
+            is_active: false,
+          })
+        ).unwrap();
+
         if (onSuccess) {
 
           onSuccess();
         }
 
-        // reset form
         resetForm();
 
-        // close modal
         onClose();
+      } catch (err) {
+
+        setFormErrors(
+          mapPayloadToFormErrors(
+            err
+          )
+        );
       }
     };
 
@@ -310,6 +395,53 @@ export default function CreateProductModal({
 
           <div className="create-product-body">
 
+            {
+              formErrors._general && (
+
+                <div className="form-error">
+
+                  {
+                    formErrors._general
+                  }
+
+                </div>
+              )
+            }
+
+            {
+              Object.entries(formErrors)
+                .filter(
+                  ([key, msg]) =>
+
+                    msg &&
+                    ![
+                      "_general",
+                      "name",
+                      "description",
+                      "category",
+                      "room_type_ids",
+                    ].includes(key)
+                )
+                .map(([key, msg]) => (
+
+                  <div
+                    key={key}
+                    className="form-error"
+                    role="alert"
+                  >
+
+                    {
+                      typeof msg === "string"
+
+                        ? msg
+
+                        : String(msg)
+                    }
+
+                  </div>
+                ))
+            }
+
             {/* PRODUCT NAME */}
 
             <div className="form-group">
@@ -330,6 +462,19 @@ export default function CreateProductModal({
                 }
                 required
               />
+
+              {
+                formErrors.name && (
+
+                  <div className="form-error">
+
+                    {
+                      formErrors.name
+                    }
+
+                  </div>
+                )
+              }
 
             </div>
 
@@ -406,6 +551,19 @@ export default function CreateProductModal({
                   />
 
                 </div>
+
+                {
+                  formErrors.category && (
+
+                    <div className="form-error">
+
+                      {
+                        formErrors.category
+                      }
+
+                    </div>
+                  )
+                }
 
               </div>
 
@@ -484,6 +642,19 @@ export default function CreateProductModal({
 
                 </div>
 
+                {
+                  formErrors.room_type_ids && (
+
+                    <div className="form-error">
+
+                      {
+                        formErrors.room_type_ids
+                      }
+
+                    </div>
+                  )
+                }
+
               </div>
 
             </div>
@@ -505,7 +676,21 @@ export default function CreateProductModal({
                 onChange={
                   handleChange
                 }
+                required
               />
+
+              {
+                formErrors.description && (
+
+                  <div className="form-error">
+
+                    {
+                      formErrors.description
+                    }
+
+                  </div>
+                )
+              }
 
             </div>
 
@@ -548,38 +733,16 @@ export default function CreateProductModal({
 
               </div>
 
-              {/* ACTIVE */}
+              <div className="variant-note">
 
-              <div className="toggle-card">
+                <p>
 
-                <div>
+                  New products are saved as inactive. After you add at
+                  least three variants, three images per active variant,
+                  and complete all variant fields, you can activate the
+                  product from its detail page.
 
-                  <h4>
-                    Active Status
-                  </h4>
-
-                  <p>
-                    Visible to customers in catalog
-                  </p>
-
-                </div>
-
-                <label className="switch">
-
-                  <input
-                    type="checkbox"
-                    name="is_active"
-                    checked={
-                      formData.is_active
-                    }
-                    onChange={
-                      handleChange
-                    }
-                  />
-
-                  <span className="slider"></span>
-
-                </label>
+                </p>
 
               </div>
 
@@ -591,8 +754,8 @@ export default function CreateProductModal({
 
               <p>
 
-                Product imagery can be added later
-                while creating variants.
+                Product imagery is added per variant (minimum three
+                images each) from the variant media screen.
 
               </p>
 
@@ -647,6 +810,20 @@ export default function CreateProductModal({
         onClose={() =>
           setShowCreateCategoryModal(false)
         }
+
+        onSuccess={() => {
+
+          dispatch(
+            getAdminCategories({
+
+              page: 1,
+
+              page_size: 1000,
+
+              is_active: true,
+            })
+          );
+        }}
       />
 
       {/* CREATE ROOM TYPE MODAL */}
@@ -658,6 +835,20 @@ export default function CreateProductModal({
         onClose={() =>
           setShowCreateRoomTypeModal(false)
         }
+
+        onSuccess={() => {
+
+          dispatch(
+            getAdminRoomTypes({
+
+              page: 1,
+
+              page_size: 1000,
+
+              is_active: true,
+            })
+          );
+        }}
       />
 
     </div>

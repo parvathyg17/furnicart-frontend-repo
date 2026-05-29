@@ -25,6 +25,10 @@ import {
 
 } from "./productAPI";
 
+import {
+  formatProductApiError,
+} from "../../../utils/productApiErrors.js";
+
 
 
 export const getAdminProducts =
@@ -411,6 +415,18 @@ const productSlice = createSlice({
 
         state.productSuccess = null;
       },
+
+    clearProductSuccess:
+      (state) => {
+
+        state.productSuccess = null;
+      },
+
+    clearProductError:
+      (state) => {
+
+        state.productError = null;
+      },
   },
 
   extraReducers: (builder) => {
@@ -468,8 +484,9 @@ const productSlice = createSlice({
           state.productLoading = false;
 
           state.productError =
-            action.payload?.error ||
-            "Failed to fetch products";
+            formatProductApiError(
+              action.payload
+            ) || "Failed to fetch products";
         }
       );
 
@@ -508,8 +525,9 @@ const productSlice = createSlice({
           state.productLoading = false;
 
           state.productError =
-            action.payload?.error ||
-            "Failed to fetch product";
+            formatProductApiError(
+              action.payload
+            ) || "Failed to fetch product";
         }
       );
 
@@ -534,6 +552,8 @@ const productSlice = createSlice({
         (state, action) => {
 
           state.productLoading = false;
+
+          state.productError = null;
 
           state.productSuccess =
             "Product created successfully";
@@ -564,13 +584,14 @@ const productSlice = createSlice({
       .addCase(
         createProduct.rejected,
 
-        (state, action) => {
+        (state, _action) => {
 
           state.productLoading = false;
 
-          state.productError =
-            action.payload?.error ||
-            "Failed to create product";
+          state.productSuccess = null;
+
+          /* Validation + field errors are shown inside CreateProductModal */
+          state.productError = null;
         }
       );
 
@@ -594,6 +615,8 @@ const productSlice = createSlice({
         (state, action) => {
 
           state.productLoading = false;
+
+          state.productError = null;
 
           state.productSuccess =
             "Product updated successfully";
@@ -623,13 +646,14 @@ const productSlice = createSlice({
       .addCase(
         updateProduct.rejected,
 
-        (state, action) => {
+        (state, _action) => {
 
           state.productLoading = false;
 
-          state.productError =
-            action.payload?.error ||
-            "Failed to update product";
+          state.productSuccess = null;
+
+          /* Validation + field errors are shown inside EditProductModal */
+          state.productError = null;
         }
       );
 
@@ -687,8 +711,9 @@ const productSlice = createSlice({
           state.productLoading = false;
 
           state.productError =
-            action.payload?.error ||
-            "Failed to delete product";
+            formatProductApiError(
+              action.payload
+            ) || "Failed to delete product";
         }
       );
 
@@ -697,9 +722,24 @@ const productSlice = createSlice({
     builder
 
       .addCase(
+        toggleProductStatus.pending,
+
+        (state) => {
+
+          state.productLoading = true;
+
+          state.productError = null;
+        }
+      )
+
+      .addCase(
         toggleProductStatus.fulfilled,
 
         (state, action) => {
+
+          state.productLoading = false;
+
+          state.productError = null;
 
           state.products =
             state.products.map(
@@ -727,6 +767,21 @@ const productSlice = createSlice({
               action.payload.is_active;
           }
         }
+      )
+
+      .addCase(
+        toggleProductStatus.rejected,
+
+        (state, action) => {
+
+          state.productLoading = false;
+
+          state.productError =
+            formatProductApiError(
+              action.payload
+            ) ||
+            "Failed to toggle product status";
+        }
       );
 
     
@@ -750,6 +805,8 @@ const productSlice = createSlice({
 
           state.productLoading = false;
 
+          state.productError = null;
+
           state.productSuccess =
             "Variant created successfully";
 
@@ -769,9 +826,12 @@ const productSlice = createSlice({
 
           state.productLoading = false;
 
+          state.productSuccess = null;
+
           state.productError =
-            action.payload?.error ||
-            "Failed to create variant";
+            formatProductApiError(
+              action.payload
+            ) || "Failed to create variant";
         }
       );
 
@@ -780,9 +840,27 @@ const productSlice = createSlice({
     builder
 
       .addCase(
+        updateVariant.pending,
+
+        (state) => {
+
+          state.productLoading = true;
+
+          state.productError = null;
+        }
+      )
+
+      .addCase(
         updateVariant.fulfilled,
 
         (state, action) => {
+
+          state.productLoading = false;
+
+          state.productSuccess =
+            "Variant updated successfully";
+
+          state.productError = null;
 
           if (!state.productDetail)
             return;
@@ -803,6 +881,22 @@ const productSlice = createSlice({
 
                   : variant
             );
+        }
+      )
+
+      .addCase(
+        updateVariant.rejected,
+
+        (state, action) => {
+
+          state.productLoading = false;
+
+          state.productSuccess = null;
+
+          state.productError =
+            formatProductApiError(
+              action.payload
+            ) || "Failed to update variant";
         }
       );
 
@@ -827,6 +921,8 @@ const productSlice = createSlice({
         (state, action) => {
 
           state.productLoading = false;
+
+          state.productError = null;
 
           state.productSuccess =
             action.payload.message;
@@ -859,8 +955,9 @@ const productSlice = createSlice({
           state.productLoading = false;
 
           state.productError =
-            action.payload?.error ||
-            "Failed to toggle variant status";
+            formatProductApiError(
+              action.payload
+            ) || "Failed to toggle variant status";
         }
       );
 
@@ -926,6 +1023,10 @@ const productSlice = createSlice({
 export const {
 
   clearProductMessages,
+
+  clearProductSuccess,
+
+  clearProductError,
 
 } = productSlice.actions;
 

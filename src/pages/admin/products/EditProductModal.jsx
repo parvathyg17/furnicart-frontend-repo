@@ -1,5 +1,11 @@
 import "../../../styles/createproductmodal.css";
 
+import CreateCategoryModal
+from "../categories/CreateCategoryModal";
+
+import CreateRoomTypeModal
+from "../roomType/CreateRoomTypeModal";
+
 import {
   useEffect,
   useState,
@@ -17,7 +23,12 @@ import {
 
 import {
   updateProduct,
+  clearProductMessages,
 } from "../../../features/catalog/product/productSlice";
+
+import {
+  mapPayloadToFormErrors,
+} from "../../../utils/productApiErrors.js";
 
 import {
   getAdminCategories,
@@ -73,21 +84,64 @@ export default function EditProductModal({
     is_active: true,
   });
 
+  const [
+    formErrors,
+    setFormErrors,
+  ] = useState({});
+
+  const [
+    showCreateCategoryModal,
+    setShowCreateCategoryModal,
+  ] = useState(false);
+
+  const [
+    showCreateRoomTypeModal,
+    setShowCreateRoomTypeModal,
+  ] = useState(false);
+
   // ==========================================
   // FETCH DATA
   // ==========================================
 
   useEffect(() => {
 
+    if (!isOpen)
+      return;
+
     dispatch(
-      getAdminCategories()
+      clearProductMessages()
+    );
+
+    setFormErrors({});
+
+    dispatch(
+      getAdminCategories({
+
+        page: 1,
+
+        page_size: 1000,
+
+        is_active: true,
+      })
     );
 
     dispatch(
-      getAdminRoomTypes()
+      getAdminRoomTypes({
+
+        page: 1,
+
+        page_size: 1000,
+
+        is_active: true,
+      })
     );
 
-  }, [dispatch]);
+  }, [
+
+    dispatch,
+    isOpen,
+
+  ]);
 
   // ==========================================
   // PREFILL FORM
@@ -124,6 +178,47 @@ export default function EditProductModal({
   }, [product]);
 
   // ==========================================
+  // VALIDATE (CLIENT)
+  // ==========================================
+
+  const validateClient =
+    () => {
+
+      const next = {};
+
+      if (!formData.name.trim()) {
+
+        next.name =
+          "Product name is required.";
+      }
+
+      if (!formData.description.trim()) {
+
+        next.description =
+          "Description is required.";
+      }
+
+      if (!formData.category) {
+
+        next.category =
+          "Select a category.";
+      }
+
+      if (
+        !formData.room_type_ids ||
+        formData.room_type_ids.length < 1
+      ) {
+
+        next.room_type_ids =
+          "Select at least one room type.";
+      }
+
+      setFormErrors(next);
+
+      return Object.keys(next).length === 0;
+    };
+
+  // ==========================================
   // HANDLE CHANGE
   // ==========================================
 
@@ -148,7 +243,57 @@ export default function EditProductModal({
 
           : value,
     }));
+
+    setFormErrors((prev) => ({
+
+      ...prev,
+
+      [name]: "",
+    }));
   };
+
+  const handleRoomTypeToggle =
+    (roomTypeId, checked) => {
+
+      if (checked) {
+
+        setFormData((prev) => ({
+
+          ...prev,
+
+          room_type_ids: [
+
+            ...new Set([
+
+              ...prev.room_type_ids,
+
+              roomTypeId,
+            ]),
+          ],
+        }));
+
+        setFormErrors((prev) => ({
+
+          ...prev,
+
+          room_type_ids: "",
+        }));
+
+      } else {
+
+        setFormData((prev) => ({
+
+          ...prev,
+
+          room_type_ids:
+
+            prev.room_type_ids.filter(
+              (id) =>
+                id !== roomTypeId
+            ),
+        }));
+      }
+    };
 
   // ==========================================
   // SUBMIT
@@ -159,7 +304,13 @@ export default function EditProductModal({
 
       e.preventDefault();
 
-      const result =
+      if (!validateClient()) {
+
+        return;
+      }
+
+      try {
+
         await dispatch(
 
           updateProduct({
@@ -169,15 +320,16 @@ export default function EditProductModal({
 
             data: formData,
           })
-        );
-
-      if (
-        updateProduct.fulfilled.match(
-          result
-        )
-      ) {
+        ).unwrap();
 
         onClose();
+      } catch (err) {
+
+        setFormErrors(
+          mapPayloadToFormErrors(
+            err
+          )
+        );
       }
     };
 
@@ -234,6 +386,54 @@ export default function EditProductModal({
 
           <div className="create-product-body">
 
+            {
+              formErrors._general && (
+
+                <div className="form-error">
+
+                  {
+                    formErrors._general
+                  }
+
+                </div>
+              )
+            }
+
+            {
+              Object.entries(formErrors)
+                .filter(
+                  ([key, msg]) =>
+
+                    msg &&
+                    ![
+                      "_general",
+                      "name",
+                      "description",
+                      "category",
+                      "room_type_ids",
+                      "is_active",
+                    ].includes(key)
+                )
+                .map(([key, msg]) => (
+
+                  <div
+                    key={key}
+                    className="form-error"
+                    role="alert"
+                  >
+
+                    {
+                      typeof msg === "string"
+
+                        ? msg
+
+                        : String(msg)
+                    }
+
+                  </div>
+                ))
+            }
+
             {/* PRODUCT NAME */}
 
             <div className="form-group">
@@ -255,6 +455,19 @@ export default function EditProductModal({
                 required
               />
 
+              {
+                formErrors.name && (
+
+                  <div className="form-error">
+
+                    {
+                      formErrors.name
+                    }
+
+                  </div>
+                )
+              }
+
             </div>
 
             {/* CATEGORY + ROOM TYPE */}
@@ -265,9 +478,25 @@ export default function EditProductModal({
 
               <div className="form-group">
 
-                <label>
-                  CATEGORY
-                </label>
+                <div className="field-label-row">
+
+                  <label>
+                    CATEGORY
+                  </label>
+
+                  <button
+                    type="button"
+                    className="inline-create-link"
+                    onClick={() =>
+                      setShowCreateCategoryModal(true)
+                    }
+                  >
+
+                    + Create Category
+
+                  </button>
+
+                </div>
 
                 <div className="select-wrapper">
 
@@ -315,17 +544,44 @@ export default function EditProductModal({
 
                 </div>
 
+                {
+                  formErrors.category && (
+
+                    <div className="form-error">
+
+                      {
+                        formErrors.category
+                      }
+
+                    </div>
+                  )
+                }
+
               </div>
 
               {/* ROOM TYPE */}
 
-
-
                 <div className="form-group">
 
-                  <label>
-                    ROOM TYPES
-                  </label>
+                  <div className="field-label-row">
+
+                    <label>
+                      ROOM TYPES
+                    </label>
+
+                    <button
+                      type="button"
+                      className="inline-create-link"
+                      onClick={() =>
+                        setShowCreateRoomTypeModal(true)
+                      }
+                    >
+
+                      + Create Room Type
+
+                    </button>
+
+                  </div>
 
                   <div className="multi-room-grid">
 
@@ -354,37 +610,15 @@ export default function EditProductModal({
                                   item.id
                                 )
                               }
-                              onChange={(e) => {
+                              onChange={(e) =>
 
-                                if (e.target.checked) {
+                                handleRoomTypeToggle(
 
-                                  setFormData((prev) => ({
+                                  item.id,
 
-                                    ...prev,
-
-                                    room_type_ids: [
-
-                                      ...prev.room_type_ids,
-
-                                      item.id,
-                                    ],
-                                  }));
-
-                                } else {
-
-                                  setFormData((prev) => ({
-
-                                    ...prev,
-
-                                    room_type_ids:
-
-                                      prev.room_type_ids.filter(
-                                        (id) =>
-                                          id !== item.id
-                                      ),
-                                  }));
-                                }
-                              }}
+                                  e.target.checked
+                                )
+                              }
                             />
 
                             <span>
@@ -397,7 +631,21 @@ export default function EditProductModal({
 
                   </div>
 
+                  {
+                    formErrors.room_type_ids && (
+
+                      <div className="form-error">
+
+                        {
+                          formErrors.room_type_ids
+                        }
+
+                      </div>
+                    )
+                  }
+
                 </div>
+
               </div>
 
             {/* DESCRIPTION */}
@@ -417,7 +665,21 @@ export default function EditProductModal({
                 onChange={
                   handleChange
                 }
+                required
               />
+
+              {
+                formErrors.description && (
+
+                  <div className="form-error">
+
+                    {
+                      formErrors.description
+                    }
+
+                  </div>
+                )
+              }
 
             </div>
 
@@ -495,6 +757,19 @@ export default function EditProductModal({
 
               </div>
 
+              {
+                formErrors.is_active && (
+
+                  <div className="form-error">
+
+                    {
+                      formErrors.is_active
+                    }
+
+                  </div>
+                )
+              }
+
             </div>
 
             {/* NOTE */}
@@ -503,10 +778,11 @@ export default function EditProductModal({
 
               <p>
 
-                Variant pricing, stock,
-                and product imagery can
-                be managed separately
-                within variants.
+                To set the product active, add at least three variants,
+                three images per active variant, and complete all
+                variant fields (name, SKU, color, material, size,
+                price, stock). Price must be greater than zero and
+                stock cannot be negative.
 
               </p>
 
@@ -551,6 +827,52 @@ export default function EditProductModal({
         </form>
 
       </div>
+
+      <CreateCategoryModal
+
+        isOpen={showCreateCategoryModal}
+
+        onClose={() =>
+          setShowCreateCategoryModal(false)
+        }
+
+        onSuccess={() => {
+
+          dispatch(
+            getAdminCategories({
+
+              page: 1,
+
+              page_size: 1000,
+
+              is_active: true,
+            })
+          );
+        }}
+      />
+
+      <CreateRoomTypeModal
+
+        isOpen={showCreateRoomTypeModal}
+
+        onClose={() =>
+          setShowCreateRoomTypeModal(false)
+        }
+
+        onSuccess={() => {
+
+          dispatch(
+            getAdminRoomTypes({
+
+              page: 1,
+
+              page_size: 1000,
+
+              is_active: true,
+            })
+          );
+        }}
+      />
 
     </div>
   );

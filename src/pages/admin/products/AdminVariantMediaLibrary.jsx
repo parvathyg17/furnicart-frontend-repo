@@ -33,7 +33,6 @@ import {
   Crop,
   RotateCw,
   ZoomOut,
-  Check,
   RefreshCw,
 } from "lucide-react";
 

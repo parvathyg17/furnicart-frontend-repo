@@ -1,4 +1,48 @@
 
+export function formatCheckoutValidationError(payload) {
+
+  if (
+    payload == null ||
+    typeof payload !== "object"
+  ) {
+
+    return "Could not validate checkout.";
+  }
+
+  const summary =
+    typeof payload.message === "string"
+      ? payload.message.trim()
+      : "";
+
+  const issues = payload.line_issues;
+
+  if (
+    Array.isArray(issues) &&
+    issues.length
+  ) {
+
+    const detail =
+      issues
+        .map(
+          (row) =>
+            typeof row.message === "string"
+              ? row.message.trim()
+              : ""
+        )
+        .filter(Boolean)
+        .join(" ");
+
+    if (summary && detail) {
+
+      return `${summary} ${detail}`;
+    }
+
+    return summary || detail || formatProductApiError(payload);
+  }
+
+  return summary || formatProductApiError(payload);
+}
+
 
 export function formatProductApiError(payload) {
 

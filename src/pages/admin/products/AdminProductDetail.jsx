@@ -2,7 +2,6 @@ import "../../../styles/adminproductdetails.css";
 
 import {
   toggleVariantStatus,
-  clearProductMessages,
   clearProductSuccess,
   clearProductError,
   getAdminProductDetail,
@@ -184,6 +183,19 @@ const handleToggleVariant =
   const variants =
     productDetail.variants || [];
 
+  const hasSellableVariant =
+    variants.some(
+      (v) =>
+        v.is_active &&
+        (v.stock || 0) > 0
+    );
+
+  const showActiveProductStatus =
+    Boolean(
+      productDetail.is_active
+    ) &&
+    hasSellableVariant;
+
   const totalInventory =
     variants.reduce(
       (acc, item) =>
@@ -357,7 +369,7 @@ const handleToggleVariant =
 
           <div
             className={
-              productDetail.is_active
+              showActiveProductStatus
 
                 ? "product-status active"
 
@@ -366,7 +378,7 @@ const handleToggleVariant =
           >
 
             {
-              productDetail.is_active
+              showActiveProductStatus
 
                 ? "ACTIVE STATUS"
 

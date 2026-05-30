@@ -4,12 +4,17 @@ import "../../styles/home.css";
 import logofc from "../../assets/images/logofc.png";
 
 import {
+  useEffect,
+  useState,
+} from "react";
+
+import {
   ArrowRight,
   ShoppingCart,
-  User,
   Star,
   Truck,
   ShieldCheck,
+  Heart,
 } from "lucide-react";
 
 import {
@@ -20,6 +25,73 @@ import {
   useSelector,
 } from "react-redux";
 
+import {
+  fetchFeaturedProducts,
+} from "../../features/shop/shopAPI";
+
+function featuredProductPrice(product) {
+
+  const variants = (product.variants || []).filter(
+    (v) => v.is_active
+  );
+
+  if (!variants.length)
+    return null;
+
+  const n = Math.min(
+    ...variants.map(
+      (v) => Number(v.price)
+    )
+  );
+
+  if (Number.isNaN(n))
+    return null;
+
+  return n.toLocaleString(
+    undefined,
+    {
+
+      minimumFractionDigits: 2,
+
+      maximumFractionDigits: 2,
+    }
+  );
+}
+
+function featuredProductBlurb(product) {
+
+  const t = (product.description || "").trim();
+
+  if (!t)
+    return product.category_name || "";
+
+  return t.length > 120
+
+    ? `${t.slice(0, 117)}…`
+
+    : t;
+}
+
+function featuredProductSoldOut(product) {
+
+  const variants =
+    product?.variants || [];
+
+  if (!variants.length) {
+
+    return (
+      product?.stock_status ===
+      "out_of_stock"
+    );
+  }
+
+  return !variants.some(
+    (v) =>
+      v.is_active &&
+      (v.stock || 0) > 0
+  );
+}
+
 export default function Home() {
 
   const {
@@ -27,6 +99,59 @@ export default function Home() {
     checkingAuth,
   } = useSelector(
     (state) => state.auth
+  );
+
+  const [
+    featuredProducts,
+    setFeaturedProducts,
+  ] = useState([]);
+
+  const [
+    featuredLoading,
+    setFeaturedLoading,
+  ] = useState(true);
+
+  useEffect(
+    () => {
+
+      let cancelled = false;
+
+      (async () => {
+
+        try {
+
+          const data = await fetchFeaturedProducts(
+            6
+          );
+
+          if (!cancelled) {
+
+            setFeaturedProducts(
+
+              Array.isArray(data?.results)
+
+                ? data.results
+
+                : []
+            );
+          }
+        } catch {
+
+          if (!cancelled)
+            setFeaturedProducts([]);
+        } finally {
+
+          if (!cancelled)
+            setFeaturedLoading(false);
+        }
+      })();
+
+      return () => {
+
+        cancelled = true;
+      };
+    },
+    []
   );
 
   if (checkingAuth) {
@@ -82,11 +207,29 @@ export default function Home() {
 
           <div className="home-nav-icons">
 
-            
+            <Link
+              to={
+                user
+                  ? "/wishlist"
+                  : "/login"
+              }
+              className="profile-nav-link"
+              aria-label="Wishlist"
+            >
+              <Heart size={20} />
+            </Link>
 
-            <button>
+            <Link
+              to={
+                user
+                  ? "/cart"
+                  : "/login"
+              }
+              className="profile-nav-link"
+              aria-label="Cart"
+            >
               <ShoppingCart size={20} />
-            </button>
+            </Link>
 
             <Link
   to={
@@ -248,7 +391,7 @@ export default function Home() {
       </section>
 
       {/* =====================================
-          COLLECTION
+          FEATURED PRODUCTS
       ===================================== */}
 
       <section className="collection-section">
@@ -258,11 +401,11 @@ export default function Home() {
           <div>
 
             <span>
-              Curated Collection
+              Featured
             </span>
 
             <h2>
-              Signature Pieces
+              Hand-picked for you
             </h2>
 
           </div>
@@ -278,71 +421,150 @@ export default function Home() {
 
         <div className="collection-grid">
 
-          <div className="collection-card">
+          {
+            featuredLoading && (
 
-            <img
-              src="https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?q=80&w=1200&auto=format&fit=crop"
-              alt=""
-            />
+              <>
 
-            <div className="collection-info">
+                <div className="collection-card collection-card-skeleton">
 
-              <h3>
-                Premium Chair
-              </h3>
+                  <div className="collection-skeleton-img" />
 
-              <p>
-                Modern handcrafted
-                seating collection.
+                  <div className="collection-info">
+
+                    <div className="collection-skeleton-line" />
+
+                    <div className="collection-skeleton-line short" />
+
+                  </div>
+
+                </div>
+
+                <div className="collection-card collection-card-skeleton">
+
+                  <div className="collection-skeleton-img" />
+
+                  <div className="collection-info">
+
+                    <div className="collection-skeleton-line" />
+
+                    <div className="collection-skeleton-line short" />
+
+                  </div>
+
+                </div>
+
+                <div className="collection-card collection-card-skeleton">
+
+                  <div className="collection-skeleton-img" />
+
+                  <div className="collection-info">
+
+                    <div className="collection-skeleton-line" />
+
+                    <div className="collection-skeleton-line short" />
+
+                  </div>
+
+                </div>
+
+              </>
+            )
+          }
+
+          {
+            !featuredLoading &&
+            featuredProducts.length > 0 &&
+            featuredProducts.map(
+              (p) => {
+
+                const price = featuredProductPrice(
+                  p
+                );
+
+                const soldOut =
+                  featuredProductSoldOut(
+                    p
+                  );
+
+                return (
+
+                  <Link
+                    key={p.id}
+                    className="collection-card"
+                    to={`/shop/product/${p.id}`}
+                  >
+
+                    <div className="collection-card-media">
+
+                      {
+                        soldOut && (
+
+                          <span className="fc-sold-out-badge">
+                            Sold out
+                          </span>
+                        )
+                      }
+
+                      {
+                        p.thumbnail ? (
+
+                          <img
+                            src={p.thumbnail}
+                            alt={p.name}
+                          />
+                        ) : (
+
+                          <div className="collection-card-ph">
+                            No image
+                          </div>
+                        )
+                      }
+
+                    </div>
+
+                    <div className="collection-info">
+
+                      <h3>
+                        {p.name}
+                      </h3>
+
+                      <p>
+                        {featuredProductBlurb(
+                          p
+                        )}
+                      </p>
+
+                      {
+                        price && (
+
+                          <span className="collection-price">
+
+                            $
+                            {price}
+                          </span>
+                        )
+                      }
+
+                    </div>
+
+                  </Link>
+                );
+              }
+            )
+          }
+
+          {
+            !featuredLoading &&
+            featuredProducts.length === 0 && (
+
+              <p className="collection-empty">
+
+                No featured products yet. Browse the full collection in the
+                shop, or ask an admin to mark items as featured in the catalog.
               </p>
-
-            </div>
-
-          </div>
-
-          <div className="collection-card">
-
-            <img
-              src="https://images.unsplash.com/photo-1484101403633-562f891dc89a?q=80&w=1200&auto=format&fit=crop"
-              alt=""
-            />
-
-            <div className="collection-info">
-
-              <h3>
-                Luxe Sofa
-              </h3>
-
-              <p>
-                Elegant comfort for
-                refined interiors.
-              </p>
-
-            </div>
-
-          </div>
-
-          <div className="collection-card">
-
-            <img
-              src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1200&auto=format&fit=crop"
-              alt=""
-            />
-
-            <div className="collection-info">
-
-              <h3>
-                Minimal Table
-              </h3>
-
-              <p>
-                Contemporary furniture
-                with timeless appeal.
-              </p>
-
-            </div>
-
-          </div>
+            )
+          }
 
         </div>
 

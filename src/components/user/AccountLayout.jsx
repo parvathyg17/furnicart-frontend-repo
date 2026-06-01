@@ -1,4 +1,5 @@
 import "../../styles/account.css";
+import "../../styles/home.css";
 import logofc from "../../assets/images/logofc.png";
 
 import {
@@ -7,6 +8,7 @@ import {
   Lock,
   LogOut,
   ShoppingCart,
+  Heart,
 } from "lucide-react";
 
 import {
@@ -17,6 +19,7 @@ import {
 
 import {
   useDispatch,
+  useSelector,
 } from "react-redux";
 
 import {
@@ -34,6 +37,12 @@ export default function AccountLayout({
   const dispatch = useDispatch();
 
   const navigate = useNavigate();
+
+  const {
+    user,
+  } = useSelector(
+    (state) => state.auth
+  );
 
   const [
     showLogoutModal,
@@ -61,20 +70,27 @@ export default function AccountLayout({
 
       
 
-      <header className="account-navbar">
+      <header className="home-navbar">
 
-        <div className="account-nav-inner">
+        <div className="home-nav-inner">
 
           <Link
             to="/"
-            className="account-logo"
+            className="home-logo"
           >
-           <div className="auth-logo">
-                     <img src={logofc} alt="logo" />
-                   </div>
+
+            <div className="auth-logo">
+
+              <img
+                src={logofc}
+                alt="logo"
+              />
+
+            </div>
+
           </Link>
 
-          <nav className="account-nav-links">
+          <nav className="home-nav-links">
 
             <Link to="/">
               Home
@@ -94,17 +110,80 @@ export default function AccountLayout({
 
           </nav>
 
-          <div className="account-nav-icons">
+          <div className="home-nav-icons">
 
-            
+            <Link
+              to={
+                user
+                  ? "/wishlist"
+                  : "/login"
+              }
+              className="profile-nav-link"
+              aria-label="Wishlist"
+            >
 
-            <button>
+              <Heart size={20} />
+
+            </Link>
+
+            <Link
+              to={
+                user
+                  ? "/cart"
+                  : "/login"
+              }
+              className="profile-nav-link"
+              aria-label="Cart"
+            >
+
               <ShoppingCart size={20} />
-            </button>
 
-            <button>
-              <User size={20} />
-            </button>
+            </Link>
+
+            <Link
+              to={
+                user
+                  ? "/profile"
+                  : "/login"
+              }
+              className="profile-nav-link"
+            >
+
+              {
+                user ? (
+
+                  user.profile_image ? (
+
+                    <img
+                      src={`http://127.0.0.1:8000${user.profile_image}`}
+                      alt="profile"
+                      className="nav-profile-image"
+                    />
+
+                  ) : (
+
+                    <div className="nav-profile-avatar">
+
+                      {
+                        user.username?.charAt(
+                          0
+                        ).toUpperCase()
+                      }
+
+                    </div>
+                  )
+
+                ) : (
+
+                  <span className="login-nav-btn">
+
+                    Login
+
+                  </span>
+                )
+              }
+
+            </Link>
 
           </div>
 
@@ -112,9 +191,7 @@ export default function AccountLayout({
 
       </header>
 
-
-
-      <div className="account-page">
+      <div className="account-page account-page--below-home-navbar">
 
         
 

@@ -3,6 +3,7 @@ import "../../../styles/admincategories.css";
 import {
   useEffect,
   useState,
+  useCallback,
 } from "react";
 
 import {
@@ -45,16 +46,22 @@ export default function AdminCategories() {
 
     categories,
     categoryPagination,
-    categoryLoading,
+
+    categoryListLoading,
+
+    categoryUpdateLoading,
+
+    categoryDeleteLoading,
+
+    categoryRestoreLoading,
+
     categorySuccess,
+
+    categoryError,
 
   } = useSelector(
     (state) => state.category
   );
-
-  // ==========================================
-  // STATES
-  // ==========================================
 
   const [
     activeTab,
@@ -91,10 +98,6 @@ export default function AdminCategories() {
     setSelectedCategory,
   ] = useState(null);
 
-  // ==========================================
-  // CONFIRM MODAL STATES
-  // ==========================================
-
   const [
     showConfirmModal,
     setShowConfirmModal,
@@ -110,19 +113,27 @@ export default function AdminCategories() {
     setConfirmText,
   ] = useState("");
 
-  // ==========================================
-  // TOASTS
-  // ==========================================
-
   useEffect(() => {
 
-    if (categorySuccess) {
+    if (
+      categorySuccess
+    ) {
 
-      toast.success(categorySuccess);
-
-      dispatch(
-        clearCategoryMessages()
+      toast.success(
+        categorySuccess
       );
+
+      const timer =
+        setTimeout(() => {
+
+          dispatch(
+            clearCategoryMessages()
+          );
+
+        }, 3000);
+
+      return () =>
+        clearTimeout(timer);
     }
 
   }, [
@@ -132,9 +143,63 @@ export default function AdminCategories() {
 
   ]);
 
-  // ==========================================
-  // RESET PAGE
-  // ==========================================
+  useEffect(() => {
+
+    if (
+
+      !categoryListLoading &&
+
+      currentPage >
+
+      (
+        categoryPagination?.totalPages || 1
+      )
+
+    ) {
+
+      setCurrentPage(
+
+        categoryPagination?.totalPages || 1
+      );
+    }
+
+  }, [
+
+    currentPage,
+    categoryPagination,
+    categoryListLoading,
+
+  ]);
+
+  useEffect(() => {
+
+    if (
+      categoryError
+    ) {
+
+      toast.error(
+        categoryError
+      );
+
+      const timer =
+        setTimeout(() => {
+
+          dispatch(
+            clearCategoryMessages()
+          );
+
+        }, 3000);
+
+      return () =>
+        clearTimeout(timer);
+    }
+
+  }, [
+
+    categoryError,
+    dispatch,
+
+  ]);
 
   useEffect(() => {
 
@@ -148,48 +213,61 @@ export default function AdminCategories() {
 
   ]);
 
-  // ==========================================
-  // FETCH
-  // ==========================================
+  const fetchCategories =
+    useCallback(
+
+      (
+        page = currentPage
+      ) => {
+
+        const params = {
+
+          page,
+
+          search,
+
+          sort,
+        };
+
+        if (
+          activeTab === "active"
+        ) {
+
+          params.is_active =
+            "true";
+        }
+
+        if (
+          activeTab === "deleted"
+        ) {
+
+          params.is_active =
+            "false";
+        }
+
+        dispatch(
+          getAdminCategories(
+            params
+          )
+        );
+      },
+
+      [
+
+        dispatch,
+        currentPage,
+        search,
+        sort,
+        activeTab,
+
+      ]
+    );
 
   useEffect(() => {
 
-    const params = {
+    fetchCategories();
 
-      page: currentPage,
-
-      search,
-
-      sort,
-    };
-
-    if (activeTab === "active") {
-
-      params.is_active = "true";
-    }
-
-    if (activeTab === "deleted") {
-
-      params.is_active = "false";
-    }
-
-    dispatch(
-      getAdminCategories(params)
-    );
-
-  }, [
-
-    dispatch,
-    currentPage,
-    activeTab,
-    search,
-    sort,
-
-  ]);
-
-  // ==========================================
-  // DELETE
-  // ==========================================
+  }, [fetchCategories]);
 
   const handleDelete =
     (categoryId) => {
@@ -227,37 +305,12 @@ export default function AdminCategories() {
             return;
           }
 
-          const params = {
-
-            page: currentPage,
-
-            search,
-
-            sort,
-          };
-
-          if (activeTab === "active") {
-
-            params.is_active = "true";
-          }
-
-          if (activeTab === "deleted") {
-
-            params.is_active = "false";
-          }
-
-          dispatch(
-            getAdminCategories(params)
-          );
+          fetchCategories();
         }
       );
 
       setShowConfirmModal(true);
     };
-
-  // ==========================================
-  // RESTORE
-  // ==========================================
 
   const handleRestore =
     (categoryId) => {
@@ -295,37 +348,12 @@ export default function AdminCategories() {
             return;
           }
 
-          const params = {
-
-            page: currentPage,
-
-            search,
-
-            sort,
-          };
-
-          if (activeTab === "active") {
-
-            params.is_active = "true";
-          }
-
-          if (activeTab === "deleted") {
-
-            params.is_active = "false";
-          }
-
-          dispatch(
-            getAdminCategories(params)
-          );
+          fetchCategories();
         }
       );
 
       setShowConfirmModal(true);
     };
-
-  // ==========================================
-  // EDIT
-  // ==========================================
 
   const handleEdit =
     (category) => {
@@ -340,8 +368,6 @@ export default function AdminCategories() {
   return (
 
     <div className="admin-categories-page">
-
-      {/* HEADER */}
 
       <div className="categories-topbar">
 
@@ -380,15 +406,9 @@ export default function AdminCategories() {
 
       </div>
 
-      {/* CARD */}
-
       <div className="categories-card">
 
-        {/* TOOLBAR */}
-
         <div className="categories-toolbar">
-
-          {/* SEARCH */}
 
           <div className="category-search">
 
@@ -406,8 +426,6 @@ export default function AdminCategories() {
             />
 
           </div>
-
-          {/* TABS */}
 
           <div className="category-tabs">
 
@@ -458,8 +476,6 @@ export default function AdminCategories() {
 
           </div>
 
-          {/* SORT */}
-
           <select
             value={sort}
             onChange={(e) =>
@@ -490,11 +506,7 @@ export default function AdminCategories() {
 
         </div>
 
-        {/* TABLE */}
-
         <div className="category-table">
-
-          {/* HEADER */}
 
           <div className="category-table-header">
 
@@ -512,10 +524,8 @@ export default function AdminCategories() {
 
           </div>
 
-          {/* ROWS */}
-
           {
-            categoryLoading ? (
+            categoryListLoading ? (
 
               <div className="empty-state">
 
@@ -533,8 +543,6 @@ export default function AdminCategories() {
                     className="category-row"
                   >
 
-                    {/* IMAGE */}
-
                     <div className="category-image-cell">
 
                       <img
@@ -547,15 +555,11 @@ export default function AdminCategories() {
 
                     </div>
 
-                    {/* NAME */}
-
                     <div className="category-name-cell">
 
                       {category.name}
 
                     </div>
-
-                    {/* PARENT */}
 
                     <div className="category-parent-cell">
 
@@ -565,8 +569,6 @@ export default function AdminCategories() {
 
                     </div>
 
-                    {/* CHILDREN */}
-
                     <div className="category-count-cell">
 
                       {
@@ -574,8 +576,6 @@ export default function AdminCategories() {
                       }
 
                     </div>
-
-                    {/* STATUS */}
 
                     <div>
 
@@ -601,12 +601,13 @@ export default function AdminCategories() {
 
                     </div>
 
-                    {/* ACTIONS */}
-
                     <div className="category-actions">
 
                       <button
                         className="icon-btn"
+                        disabled={
+                          categoryUpdateLoading
+                        }
                         onClick={() =>
                           handleEdit(category)
                         }
@@ -621,6 +622,9 @@ export default function AdminCategories() {
 
                           <button
                             className="icon-btn delete-btn"
+                            disabled={
+                              categoryDeleteLoading
+                            }
                             onClick={() =>
                               handleDelete(
                                 category.id
@@ -636,6 +640,9 @@ export default function AdminCategories() {
 
                           <button
                             className="restore-btn"
+                            disabled={
+                              categoryRestoreLoading
+                            }
                             onClick={() =>
                               handleRestore(
                                 category.id
@@ -645,7 +652,11 @@ export default function AdminCategories() {
 
                             <RotateCcw size={16} />
 
-                            Restore
+                            {
+                              categoryRestoreLoading
+                                ? "Restoring..."
+                                : "Restore"
+                            }
 
                           </button>
 
@@ -671,8 +682,6 @@ export default function AdminCategories() {
 
         </div>
 
-        {/* FOOTER */}
-
         <div className="category-footer">
 
           <p>
@@ -697,7 +706,8 @@ export default function AdminCategories() {
 
             <button
               disabled={
-                !categoryPagination?.previous
+                !categoryPagination?.previous ||
+                categoryListLoading
               }
               onClick={() =>
                 setCurrentPage(
@@ -734,7 +744,8 @@ export default function AdminCategories() {
 
             <button
               disabled={
-                !categoryPagination?.next
+                !categoryPagination?.next ||
+                categoryListLoading
               }
               onClick={() =>
                 setCurrentPage(
@@ -755,29 +766,43 @@ export default function AdminCategories() {
 
       </div>
 
-      {/* CREATE MODAL */}
-
       <CreateCategoryModal
         isOpen={showCreateModal}
         onClose={() =>
           setShowCreateModal(false)
         }
+        onSuccess={() => {
+
+          if (currentPage !== 1) {
+
+            setCurrentPage(1);
+
+          } else {
+
+            fetchCategories(1);
+          }
+        }}
       />
 
-      {/* EDIT MODAL */}
-
       <EditCategoryModal
+
         isOpen={showEditModal}
+
         onClose={() => {
 
           setShowEditModal(false);
 
           setSelectedCategory(null);
         }}
-        category={selectedCategory}
-      />
 
-      {/* CONFIRM MODAL */}
+        category={selectedCategory}
+
+        onSuccess={() => {
+
+          fetchCategories();
+        }}
+
+      />
 
       {
         showConfirmModal && (
@@ -816,6 +841,10 @@ export default function AdminCategories() {
 
                 <button
                   className="confirm-submit-btn"
+                  disabled={
+                    categoryDeleteLoading ||
+                    categoryRestoreLoading
+                  }
                   onClick={async () => {
 
                     if (confirmAction) {
@@ -829,7 +858,15 @@ export default function AdminCategories() {
                   }}
                 >
 
-                  Confirm
+                  {
+                    categoryDeleteLoading ||
+
+                    categoryRestoreLoading
+
+                      ? "Processing..."
+
+                      : "Confirm"
+                  }
 
                 </button>
 

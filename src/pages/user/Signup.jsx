@@ -171,7 +171,19 @@ export default function Signup() {
       toast.success(
         successMessage.message
       );
-      
+
+      // ==========================================
+      // RESET OTP TIMER
+      // ==========================================
+
+      const resendUntil =
+        Date.now() + 60000;
+
+      localStorage.setItem(
+        "otp_resend_until",
+        resendUntil
+      );
+
       sessionStorage.setItem(
         "otp_email",
         successMessage.email

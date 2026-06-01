@@ -103,23 +103,11 @@ export const updateVariantAPI =
 export const toggleVariantStatusAPI =
   async (variantId) => {
 
-    try {
+    const response = await api.patch(
+      `admin/products/variants/${variantId}/toggle-status/`
+    );
 
-      const response = await api.patch(
-        `admin/products/variants/${variantId}/toggle-status/`
-      );
-
-      return response.data;
-
-    } catch (error) {
-
-      throw (
-        error.response?.data || {
-          error:
-            "Failed to toggle variant status",
-        }
-      );
-    }
+    return response.data;
   };
 
 

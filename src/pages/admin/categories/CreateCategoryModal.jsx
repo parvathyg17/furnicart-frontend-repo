@@ -1,6 +1,7 @@
 import "../../../styles/createcategorymodal.css";
 
 import {
+  useEffect,
   useState,
 } from "react";
 
@@ -17,14 +18,17 @@ import {
 } from "lucide-react";
 
 import {
+
   createCategory,
-  getAdminCategories,
+  getCategoryOptions,
+
 } from "../../../features/catalog/category/categorySlice";
 
 export default function CreateCategoryModal({
 
   isOpen,
   onClose,
+  onSuccess,
 
 }) {
 
@@ -32,8 +36,8 @@ export default function CreateCategoryModal({
 
   const {
 
-    categories,
-    categoryLoading,
+    categoryOptions,
+    categoryCreateLoading,
 
   } = useSelector(
     (state) => state.category
@@ -57,9 +61,38 @@ export default function CreateCategoryModal({
   const [formErrors, setFormErrors] =
     useState({});
 
-  // ==========================================
-  // HANDLE CHANGE
-  // ==========================================
+  useEffect(() => {
+
+    if (isOpen) {
+
+      dispatch(
+        getCategoryOptions()
+      );
+    }
+
+  }, [
+
+    dispatch,
+    isOpen,
+
+  ]);
+
+  useEffect(() => {
+
+    return () => {
+
+      if (
+        preview &&
+        preview.startsWith("blob:")
+      ) {
+
+        URL.revokeObjectURL(
+          preview
+        );
+      }
+    };
+
+  }, [preview]);
 
   const handleChange = (e) => {
 
@@ -84,10 +117,6 @@ export default function CreateCategoryModal({
       [name]: value,
     }));
   };
-
-  // ==========================================
-  // HANDLE IMAGE
-  // ==========================================
 
   const handleImageChange =
     (e) => {
@@ -149,10 +178,6 @@ export default function CreateCategoryModal({
       );
     };
 
-  // ==========================================
-  // SUBMIT
-  // ==========================================
-
   const handleSubmit =
     async (e) => {
 
@@ -199,10 +224,6 @@ export default function CreateCategoryModal({
 
         ).unwrap();
 
-        dispatch(
-          getAdminCategories()
-        );
-
         setFormData({
 
           name: "",
@@ -217,6 +238,8 @@ export default function CreateCategoryModal({
         setPreview(null);
 
         setFormErrors({});
+
+        onSuccess?.();
 
         onClose();
 
@@ -233,8 +256,6 @@ export default function CreateCategoryModal({
     <div className="category-modal-overlay">
 
       <div className="category-modal">
-
-        {/* HEADER */}
 
         <div className="category-modal-header">
 
@@ -266,18 +287,12 @@ export default function CreateCategoryModal({
 
         </div>
 
-        {/* FORM */}
-
         <form
           onSubmit={handleSubmit}
           className="category-form"
         >
 
-          {/* GRID */}
-
           <div className="category-grid">
-
-            {/* NAME */}
 
             <div className="form-group">
 
@@ -314,8 +329,6 @@ export default function CreateCategoryModal({
 
             </div>
 
-            {/* PARENT */}
-
             <div className="form-group">
 
               <label>
@@ -337,7 +350,7 @@ export default function CreateCategoryModal({
                   </option>
 
                   {
-                    categories.map(
+                    categoryOptions.map(
                       (category) => (
 
                         <option
@@ -362,8 +375,6 @@ export default function CreateCategoryModal({
             </div>
 
           </div>
-
-          {/* DESCRIPTION */}
 
           <div className="form-group">
 
@@ -397,8 +408,6 @@ export default function CreateCategoryModal({
             }
 
           </div>
-
-          {/* IMAGE */}
 
           <div className="form-group">
 
@@ -484,8 +493,6 @@ export default function CreateCategoryModal({
 
           </div>
 
-          {/* FOOTER */}
-
           <div className="category-modal-footer">
 
             <button
@@ -500,14 +507,16 @@ export default function CreateCategoryModal({
 
             <button
               type="submit"
-              disabled={categoryLoading}
+              disabled={
+                categoryCreateLoading
+              }
               className="submit-button"
             >
 
               <Check size={18} />
 
               {
-                categoryLoading
+                categoryCreateLoading
 
                   ? "Creating..."
 

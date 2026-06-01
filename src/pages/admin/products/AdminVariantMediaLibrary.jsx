@@ -33,7 +33,6 @@ import {
   Crop,
   RotateCw,
   ZoomOut,
-  Check,
   RefreshCw,
 } from "lucide-react";
 
@@ -43,9 +42,11 @@ import {
   deleteVariantImage,
 } from "../../../features/catalog/product/productSlice";
 
-// ==========================================
-// CREATE IMAGE
-// ==========================================
+import {
+  formatProductApiError,
+} from "../../../utils/productApiErrors.js";
+
+
 
 const createImage = (url) =>
   new Promise((resolve, reject) => {
@@ -65,9 +66,7 @@ const createImage = (url) =>
     image.src = url;
   });
 
-// ==========================================
-// CROPPED IMAGE
-// ==========================================
+
 
 async function getCroppedImg(
   imageSrc,
@@ -530,11 +529,9 @@ export default function AdminVariantMediaLibrary() {
 
         setUploadError(
 
-          error?.error ||
+          formatProductApiError(error) ||
 
-          error?.detail ||
-
-          "Upload failed"
+            "Upload failed"
         );
 
       } finally {
@@ -629,6 +626,20 @@ export default function AdminVariantMediaLibrary() {
             {
               variant.variant_name
             }
+
+          </p>
+
+          <p className="media-minimum-hint">
+
+            Each active variant must have at least three images saved
+            before the product can go live. Currently saved on this
+            variant:{" "}
+
+            {
+              variant.images?.length || 0
+            }
+
+            {" "}/ 3
 
           </p>
 

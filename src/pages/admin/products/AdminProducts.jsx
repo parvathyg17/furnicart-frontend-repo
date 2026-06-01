@@ -1,5 +1,6 @@
 import "../../../styles/adminproducts.css";
 
+import toast from "react-hot-toast";
 import {
   useEffect,
   useMemo,
@@ -31,6 +32,7 @@ import {
 import {
   getAdminProducts,
   deleteProduct,
+  clearProductMessages,
 } from "../../../features/catalog/product/productSlice";
 
 import {
@@ -54,14 +56,13 @@ export default function AdminProducts() {
     products,
     productPagination,
     productLoading,
+    productSuccess,
+    productError,
 
   } = useSelector(
     (state) => state.product
   );
 
-  // ==========================================
-  // CATEGORY STATE
-  // ==========================================
 
   const {
     categories,
@@ -69,9 +70,7 @@ export default function AdminProducts() {
     (state) => state.category
   );
 
-  // ==========================================
-  // ROOM TYPE STATE
-  // ==========================================
+ 
 
   const {
     roomTypes,
@@ -79,9 +78,7 @@ export default function AdminProducts() {
     (state) => state.roomType
   );
 
-  // ==========================================
-  // FILTER STATES
-  // ==========================================
+
 
   const [
     search,
@@ -118,9 +115,18 @@ export default function AdminProducts() {
     setOpenCreateModal,
   ] = useState(false);
 
-  // ==========================================
-  // FETCH CATEGORY + ROOM TYPES
-  // ==========================================
+
+  const [
+    deleteModalOpen,
+    setDeleteModalOpen,
+  ] = useState(false);
+
+  const [
+    selectedProduct,
+    setSelectedProduct,
+  ] = useState(null);
+
+
 
   useEffect(() => {
 
@@ -140,9 +146,7 @@ export default function AdminProducts() {
 
   }, [dispatch]);
 
-  // ==========================================
-  // FETCH PRODUCTS
-  // ==========================================
+
 
   useEffect(() => {
 
@@ -185,74 +189,97 @@ export default function AdminProducts() {
 
   ]);
 
-  // ==========================================
-  // DELETE PRODUCT
-  // ==========================================
+ 
+
+  const openDeleteModal = (
+    product
+  ) => {
+
+    setSelectedProduct(
+      product
+    );
+
+    setDeleteModalOpen(
+      true
+    );
+  };
 
   const handleDeleteProduct =
-    async (productId) => {
+    async () => {
 
-      const confirmDelete =
-        window.confirm(
-          "Are you sure you want to delete this product?"
-        );
-
-      if (!confirmDelete)
+      if (!selectedProduct)
         return;
 
-      await dispatch(
-        deleteProduct(productId)
-      );
+      try {
 
-      const updatedCount =
-        (productPagination?.count || 1) - 1;
+        await dispatch(
+          deleteProduct(
+            selectedProduct.id
+          )
+        ).unwrap();
 
-      const updatedPages =
-        Math.ceil(updatedCount / 10);
-
-      if (
-        currentPage > updatedPages &&
-        currentPage > 1
-      ) {
-
-        setCurrentPage(
-          currentPage - 1
+        setDeleteModalOpen(
+          false
         );
 
-      } else {
-
-        dispatch(
-          getAdminProducts({
-
-            page: currentPage,
-
-            search,
-
-            category,
-
-            room_type: roomType,
-
-            sort,
-
-            is_active:
-
-              status === "all"
-
-                ? ""
-
-                : status === "active"
-
-                  ? "true"
-
-                  : "false",
-          })
+        setSelectedProduct(
+          null
         );
+
+        const updatedCount =
+          (productPagination?.count || 1) - 1;
+
+        const updatedPages =
+          Math.ceil(
+            updatedCount / 10
+          );
+
+        if (
+          currentPage > updatedPages &&
+          currentPage > 1
+        ) {
+
+          setCurrentPage(
+            currentPage - 1
+          );
+
+        } else {
+
+          dispatch(
+            getAdminProducts({
+
+              page: currentPage,
+
+              search,
+
+              category,
+
+              room_type: roomType,
+
+              sort,
+
+              is_active:
+
+                status === "all"
+
+                  ? ""
+
+                  : status === "active"
+
+                    ? "true"
+
+                    : "false",
+            })
+          );
+        }
+
+      } catch (error) {
+
+        /* deleteProduct.rejected sets productError; toast via useEffect */
       }
     };
 
-  // ==========================================
-  // PAGINATION
-  // ==========================================
+  
 
   const totalPages =
     productPagination?.totalPages ?? 0;
@@ -269,13 +296,70 @@ export default function AdminProducts() {
 
   }, [totalPages]);
 
+  useEffect(() => {
+
+    if (!productSuccess)
+      return;
+
+    toast.success(
+      productSuccess
+    );
+
+    const timer =
+      setTimeout(() => {
+
+        dispatch(
+          clearProductMessages()
+        );
+      }, 3000);
+
+    return () =>
+      clearTimeout(timer);
+  }, [
+
+    dispatch,
+    productSuccess,
+
+  ]);
+
+  useEffect(() => {
+
+    if (!productError)
+      return;
+
+    toast.error(
+
+      typeof productError === "string"
+
+        ? productError
+
+        : JSON.stringify(
+            productError
+          )
+    );
+
+    const timer =
+      setTimeout(() => {
+
+        dispatch(
+          clearProductMessages()
+        );
+      }, 3000);
+
+    return () =>
+      clearTimeout(timer);
+  }, [
+
+    dispatch,
+    productError,
+
+  ]);
+
   return (
 
     <div className="admin-products-page">
 
-      {/* ========================================== */}
-      {/* HEADER */}
-      {/* ========================================== */}
+     
 
       <div className="products-header">
 
@@ -312,9 +396,7 @@ export default function AdminProducts() {
 
       </div>
 
-      {/* ========================================== */}
-      {/* FILTERS */}
-      {/* ========================================== */}
+ 
 
       <div className="products-filters">
 
@@ -422,11 +504,11 @@ export default function AdminProducts() {
 
         </select>
 
-        {/* STATUS */}
+       
 
         <div className="status-tabs">
 
-          {/* SORT */}
+          
 
           <select
             value={sort}
@@ -527,9 +609,6 @@ export default function AdminProducts() {
 
       </div>
 
-      {/* ========================================== */}
-      {/* PRODUCTS */}
-      {/* ========================================== */}
 
       {
         productLoading ? (
@@ -570,7 +649,7 @@ export default function AdminProducts() {
                       className="product-card"
                     >
 
-                      {/* IMAGE */}
+                      
 
                       <div className="product-image-wrapper">
 
@@ -617,7 +696,7 @@ export default function AdminProducts() {
 
                       </div>
 
-                      {/* CONTENT */}
+                      
 
                       <div className="product-content">
 
@@ -740,14 +819,12 @@ export default function AdminProducts() {
                             type="button"
                             className="delete-btn"
                             onClick={() =>
-                              handleDeleteProduct(
-                                product.id
+                              openDeleteModal(
+                                product
                               )
                             }
                           >
-
                             <Trash2 size={18} />
-
                           </button>
 
                         </div>
@@ -773,9 +850,7 @@ export default function AdminProducts() {
         )
       }
 
-      {/* ========================================== */}
-      {/* FOOTER */}
-      {/* ========================================== */}
+      
 
       {
         products?.length > 0 && (
@@ -874,9 +949,99 @@ export default function AdminProducts() {
         )
       }
 
-      {/* ========================================== */}
-      {/* MODAL */}
-      {/* ========================================== */}
+      
+
+      {
+        deleteModalOpen && (
+
+          <div
+            className="modal-overlay"
+            onClick={() => {
+
+              setDeleteModalOpen(
+                false
+              );
+
+              setSelectedProduct(
+                null
+              );
+            }}
+          >
+
+            <div
+              className="delete-modal"
+              onClick={(e) =>
+                e.stopPropagation()
+              }
+            >
+
+              <h3>
+
+                Delete Product
+
+              </h3>
+
+              <p>
+
+                Are you sure you want to delete
+
+                <strong>
+
+                  {" "}
+                  {selectedProduct?.name}
+
+                </strong>
+
+                ?
+
+                <br />
+
+                <br />
+
+                This action cannot be undone.
+
+              </p>
+
+              <div className="delete-modal-actions">
+
+                <button
+                  type="button"
+                  className="cancel-btn"
+                  onClick={() => {
+
+                    setDeleteModalOpen(
+                      false
+                    );
+
+                    setSelectedProduct(
+                      null
+                    );
+                  }}
+                >
+
+                  Cancel
+
+                </button>
+
+                <button
+                  type="button"
+                  className="confirm-delete-btn"
+                  onClick={
+                    handleDeleteProduct
+                  }
+                >
+
+                  Delete
+
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+        )
+      }
 
       <CreateProductModal
 

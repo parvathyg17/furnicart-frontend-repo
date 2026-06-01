@@ -9,6 +9,7 @@ from "./EditRoomTypeModal";
 import {
   useEffect,
   useState,
+  useCallback,
 } from "react";
 
 import {
@@ -16,11 +17,14 @@ import {
   useSelector,
 } from "react-redux";
 
+import toast from "react-hot-toast";
+
 import {
 
   getAdminRoomTypes,
   deleteRoomType,
   restoreRoomType,
+  clearRoomTypeMessages,
 
 } from "../../../features/catalog/roomType/roomTypeSlice";
 
@@ -37,19 +41,20 @@ export default function AdminRoomTypes() {
 
   const dispatch = useDispatch();
 
-  const {
+ const {
 
     roomTypes,
     roomTypePagination,
-    roomTypeLoading,
+    roomTypeListLoading,
+    roomTypeDeleteLoading,
+    roomTypeRestoreLoading,
+    roomTypeUpdateLoading,
+    roomTypeError,
+    roomTypeSuccess,
 
   } = useSelector(
     (state) => state.roomType
   );
-
-  // ==========================================
-  // STATES
-  // ==========================================
 
   const [page, setPage] =
     useState(1);
@@ -62,7 +67,7 @@ export default function AdminRoomTypes() {
   const [
     statusFilter,
     setStatusFilter,
-  ] = useState("active");
+  ] = useState("true");
 
   const [
     sort,
@@ -84,53 +89,136 @@ export default function AdminRoomTypes() {
     setSelectedRoomType,
   ] = useState(null);
 
-  // ==========================================
-  // FETCH ROOM TYPES
-  // ==========================================
+  useEffect(() => {
+
+    if (roomTypeSuccess) {
+
+      toast.success(roomTypeSuccess);
+
+      const timer =
+        setTimeout(() => {
+
+          dispatch(
+            clearRoomTypeMessages()
+          );
+
+        }, 3000);
+
+      return () =>
+        clearTimeout(timer);
+    }
+
+  }, [roomTypeSuccess, dispatch]);
 
   useEffect(() => {
 
-    const params = {
+    if (roomTypeError) {
 
-      page,
+      toast.error(roomTypeError);
 
-      search,
+      const timer =
+        setTimeout(() => {
 
-      sort,
-    };
+          dispatch(
+            clearRoomTypeMessages()
+          );
 
-    if (
-      statusFilter !== "all"
-    ) {
+        }, 3000);
 
-      params.is_active =
-        statusFilter;
+      return () =>
+        clearTimeout(timer);
     }
 
-    dispatch(
-      getAdminRoomTypes(params)
-    );
+  }, [roomTypeError, dispatch]);
+
+  useEffect(() => {
+
+    if (
+
+      !roomTypeListLoading &&
+
+      page >
+
+      (
+        roomTypePagination?.totalPages || 1
+      )
+
+    ) {
+
+      setPage(
+
+        roomTypePagination?.totalPages || 1
+      );
+    }
 
   }, [
 
-    dispatch,
     page,
-    search,
-    statusFilter,
-    sort,
+    roomTypePagination,
+    roomTypeListLoading,
 
   ]);
 
-  // ==========================================
-  // DELETE
-  // ==========================================
+  const fetchRoomTypes =
+    useCallback(
+
+      (
+        targetPage = page
+      ) => {
+
+        const params = {
+
+          page: targetPage,
+
+          search,
+
+          sort,
+        };
+
+        if (
+          statusFilter !== "all"
+        ) {
+
+          params.is_active =
+            statusFilter;
+        }
+
+        dispatch(
+          getAdminRoomTypes(params)
+        );
+      },
+
+      [
+        dispatch,
+        page,
+        search,
+        statusFilter,
+        sort,
+      ]
+    );
+
+  useEffect(() => {
+
+    fetchRoomTypes();
+
+  }, [fetchRoomTypes]);
 
   const handleDelete =
     async (roomTypeId) => {
 
-      await dispatch(
-        deleteRoomType(roomTypeId)
-      );
+      const result =
+        await dispatch(
+          deleteRoomType(roomTypeId)
+        );
+
+      if (
+        !deleteRoomType.fulfilled.match(
+          result
+        )
+      ) {
+
+        return;
+      }
 
       if (
         roomTypes.length === 1 &&
@@ -144,38 +232,25 @@ export default function AdminRoomTypes() {
         return;
       }
 
-      const params = {
-
-        page,
-
-        search,
-
-        sort,
-      };
-
-      if (
-        statusFilter !== "all"
-      ) {
-
-        params.is_active =
-          statusFilter;
-      }
-
-      dispatch(
-        getAdminRoomTypes(params)
-      );
+      fetchRoomTypes(page);
     };
-
-  // ==========================================
-  // RESTORE
-  // ==========================================
 
   const handleRestore =
     async (roomTypeId) => {
 
-      await dispatch(
-        restoreRoomType(roomTypeId)
-      );
+      const result =
+        await dispatch(
+          restoreRoomType(roomTypeId)
+        );
+
+      if (
+        !restoreRoomType.fulfilled.match(
+          result
+        )
+      ) {
+
+          return;
+      }
 
       if (
         roomTypes.length === 1 &&
@@ -189,31 +264,27 @@ export default function AdminRoomTypes() {
         return;
       }
 
-      const params = {
-
-        page,
-
-        search,
-
-        sort,
-      };
-
-      if (
-        statusFilter !== "all"
-      ) {
-
-        params.is_active =
-          statusFilter;
-      }
-
-      dispatch(
-        getAdminRoomTypes(params)
-      );
+      fetchRoomTypes(page);
     };
 
-  // ==========================================
-  // EDIT
-  // ==========================================
+  const handleCreateSuccess =
+    () => {
+
+      if (page !== 1) {
+
+        setPage(1);
+
+      } else {
+
+        fetchRoomTypes(1);
+      }
+    };
+
+  const handleEditSuccess =
+    () => {
+
+      fetchRoomTypes(page);
+    };
 
   const handleEdit =
     (roomType) => {
@@ -228,10 +299,6 @@ export default function AdminRoomTypes() {
   return (
 
     <div className="admin-room-types-page">
-
-      {/* ========================================== */}
-      {/* HEADER */}
-      {/* ========================================== */}
 
       <div className="room-types-header">
 
@@ -266,19 +333,9 @@ export default function AdminRoomTypes() {
 
       </div>
 
-      {/* ========================================== */}
-      {/* CARD */}
-      {/* ========================================== */}
-
       <div className="room-types-card">
 
-        {/* ========================================== */}
-        {/* TOOLBAR */}
-        {/* ========================================== */}
-
         <div className="room-types-toolbar">
-
-          {/* SEARCH */}
 
           <input
             type="text"
@@ -294,8 +351,6 @@ export default function AdminRoomTypes() {
             }}
             className="room-type-search"
           />
-
-          {/* STATUS TABS */}
 
           <div className="room-type-tabs">
 
@@ -361,8 +416,6 @@ export default function AdminRoomTypes() {
 
           </div>
 
-          {/* SORT */}
-
           <select
             value={sort}
             onChange={(e) => {
@@ -396,13 +449,7 @@ export default function AdminRoomTypes() {
 
         </div>
 
-        {/* ========================================== */}
-        {/* TABLE */}
-        {/* ========================================== */}
-
         <div className="room-type-table">
-
-          {/* HEADER */}
 
           <div className="room-type-table-header">
 
@@ -416,10 +463,8 @@ export default function AdminRoomTypes() {
 
           </div>
 
-          {/* ROWS */}
-
           {
-            roomTypeLoading ? (
+            roomTypeListLoading ? (
 
               <div className="room-type-row">
 
@@ -437,8 +482,6 @@ export default function AdminRoomTypes() {
                     className="room-type-row"
                   >
 
-                    {/* IMAGE */}
-
                     <div>
 
                       <img
@@ -453,15 +496,11 @@ export default function AdminRoomTypes() {
 
                     </div>
 
-                    {/* NAME */}
-
                     <div className="room-type-name">
 
                       {roomType.name}
 
                     </div>
-
-                    {/* STATUS */}
 
                     <div>
 
@@ -491,12 +530,13 @@ export default function AdminRoomTypes() {
 
                     </div>
 
-                    {/* ACTIONS */}
-
                     <div className="room-type-actions">
 
                       <button
                         className="action-btn"
+                        disabled={
+                          roomTypeUpdateLoading
+                        }
                         onClick={() =>
                           handleEdit(roomType)
                         }
@@ -511,6 +551,9 @@ export default function AdminRoomTypes() {
 
                           <button
                             className="action-btn"
+                            disabled={
+                              roomTypeDeleteLoading
+                            }
                             onClick={() =>
                               handleDelete(
                                 roomType.id
@@ -526,6 +569,9 @@ export default function AdminRoomTypes() {
 
                           <button
                             className="action-btn"
+                            disabled={
+                              roomTypeRestoreLoading
+                            }
                             onClick={() =>
                               handleRestore(
                                 roomType.id
@@ -559,16 +605,13 @@ export default function AdminRoomTypes() {
 
         </div>
 
-        {/* ========================================== */}
-        {/* FOOTER */}
-        {/* ========================================== */}
-
         <div className="room-types-footer">
 
           <button
             className="pagination-btn"
             disabled={
-              !roomTypePagination?.previous
+              !roomTypePagination?.previous ||
+              roomTypeListLoading
             }
             onClick={() =>
               setPage(
@@ -603,7 +646,8 @@ export default function AdminRoomTypes() {
           <button
             className="pagination-btn"
             disabled={
-              !roomTypePagination?.next
+              !roomTypePagination?.next ||
+              roomTypeListLoading
             }
             onClick={() =>
               setPage(
@@ -623,27 +667,28 @@ export default function AdminRoomTypes() {
 
       </div>
 
-      {/* ========================================== */}
-      {/* CREATE MODAL */}
-      {/* ========================================== */}
-
       <CreateRoomTypeModal
         isOpen={openCreateModal}
         onClose={() =>
           setOpenCreateModal(false)
         }
+        onSuccess={
+          handleCreateSuccess
+        }
       />
-
-      {/* ========================================== */}
-      {/* EDIT MODAL */}
-      {/* ========================================== */}
 
       <EditRoomTypeModal
         isOpen={openEditModal}
-        onClose={() =>
-          setOpenEditModal(false)
-        }
+        onClose={() => {
+
+          setOpenEditModal(false);
+
+          setSelectedRoomType(null);
+        }}
         roomType={selectedRoomType}
+        onSuccess={
+          handleEditSuccess
+        }
       />
 
     </div>

@@ -1,7 +1,11 @@
 import "../../../styles/adminproductdetails.css";
 
+import toast from "react-hot-toast";
+
 import {
   toggleVariantStatus,
+  clearProductMessages,
+  getAdminProductDetail,
 } from "../../../features/catalog/product/productSlice";
 
 import EditVariantModal
@@ -29,10 +33,6 @@ import {
   MoreHorizontal,
 } from "lucide-react";
 
-import {
-  getAdminProductDetail,
-} from "../../../features/catalog/product/productSlice";
-
 import EditProductModal
 from "./EditProductModal";
 
@@ -45,9 +45,7 @@ export default function AdminProductDetail() {
 
   const { id } = useParams();
 
-  // ==========================================
-  // STATE
-  // ==========================================
+ 
 
   const [
     openEditModal,
@@ -59,13 +57,13 @@ export default function AdminProductDetail() {
     setOpenVariantModal,
   ] = useState(false);
 
-  // ==========================================
-  // REDUX
-  // ==========================================
+
 
   const {
     productDetail,
     productLoading,
+    productSuccess,
+    productError,
   } = useSelector(
     (state) => state.product
   );
@@ -95,17 +93,27 @@ const handleEditVariant = (
 };
 
 const handleToggleVariant =
-  (variantId) => {
+    async (variantId) => {
 
-    dispatch(
-      toggleVariantStatus(
-        variantId
-      )
-    );
-  };
-  // ==========================================
-  // FETCH PRODUCT
-  // ==========================================
+      try {
+
+        await dispatch(
+          toggleVariantStatus(
+            variantId
+          )
+        ).unwrap();
+
+        dispatch(
+          getAdminProductDetail(
+            id
+          )
+        );
+
+      } catch (error) {
+
+       
+      }
+    };
 
   useEffect(() => {
 
@@ -118,31 +126,102 @@ const handleToggleVariant =
 
   }, [dispatch, id]);
 
-  // ==========================================
-  // LOADING
-  // ==========================================
+  useEffect(() => {
 
-  if (
-    productLoading ||
-    !productDetail
-  ) {
+    if (!productSuccess)
+      return;
+
+    toast.success(
+      productSuccess
+    );
+
+    const timer =
+      setTimeout(() => {
+
+        dispatch(
+          clearProductMessages()
+        );
+      }, 3000);
+
+    return () =>
+      clearTimeout(timer);
+  }, [
+
+    dispatch,
+    productSuccess,
+
+  ]);
+
+  useEffect(() => {
+
+    if (!productError)
+      return;
+
+    toast.error(
+
+      typeof productError === "string"
+
+        ? productError
+
+        : JSON.stringify(
+            productError
+          )
+    );
+
+    const timer =
+      setTimeout(() => {
+
+        dispatch(
+          clearProductMessages()
+        );
+      }, 3000);
+
+    return () =>
+      clearTimeout(timer);
+  }, [
+
+    dispatch,
+    productError,
+
+  ]);
+
+  
+
+  if (!productDetail) {
 
     return (
 
       <div className="product-detail-loading">
 
-        Loading...
+        {
+          productLoading
+
+            ? "Loading..."
+
+            : "Product not found."
+        }
 
       </div>
     );
   }
 
-  // ==========================================
-  // DATA
-  // ==========================================
+
 
   const variants =
     productDetail.variants || [];
+
+  const hasSellableVariant =
+    variants.some(
+      (v) =>
+        v.is_active &&
+        (v.stock || 0) > 0
+    );
+
+  const showActiveProductStatus =
+    Boolean(
+      productDetail.is_active
+    ) &&
+    hasSellableVariant;
 
   const totalInventory =
     variants.reduce(
@@ -165,9 +244,7 @@ const handleToggleVariant =
 
       "";
 
-  // ==========================================
-  // JSX
-  // ==========================================
+  
 
   return (
 
@@ -247,7 +324,7 @@ const handleToggleVariant =
 
           <div
             className={
-              productDetail.is_active
+              showActiveProductStatus
 
                 ? "product-status active"
 
@@ -256,7 +333,7 @@ const handleToggleVariant =
           >
 
             {
-              productDetail.is_active
+              showActiveProductStatus
 
                 ? "ACTIVE STATUS"
 
@@ -304,7 +381,7 @@ const handleToggleVariant =
 
           </div>
 
-          {/* TITLE */}
+          
 
           <h1>
 
@@ -314,7 +391,7 @@ const handleToggleVariant =
 
           </h1>
 
-          {/* DESCRIPTION */}
+        
 
           <p className="product-description">
 
@@ -325,7 +402,7 @@ const handleToggleVariant =
 
           </p>
 
-          {/* META */}
+          
 
          <div className="product-meta-grid">
 
@@ -399,7 +476,7 @@ const handleToggleVariant =
 
             </div>
 
-          {/* ACTIONS */}
+          
 
           <div className="product-detail-actions">
 
@@ -430,7 +507,7 @@ const handleToggleVariant =
 
       </div>
 
-      {/* VARIANTS */}
+      
 
       <div className="variants-section">
 
@@ -464,7 +541,7 @@ const handleToggleVariant =
 
         </div>
 
-        {/* GRID */}
+        
 
         {
           variants.length > 0 ? (
@@ -507,7 +584,7 @@ const handleToggleVariant =
 
                         </div>
 
-                        {/* CONTENT */}
+                    
 
                         <div className="variant-content">
 
@@ -559,15 +636,13 @@ const handleToggleVariant =
 
                           </div>
 
-                          {/* META */}
+                   
 
                           <div className="variant-meta">
 
                             <div>
 
-                              <span
-                                className="color-dot"
-                              ></span>
+                              
 
                               {
                                 variant.color ||
@@ -587,7 +662,7 @@ const handleToggleVariant =
 
                           </div>
 
-                          {/* PRICE */}
+                         
 
                           <div className="variant-price-stock">
 
@@ -612,7 +687,7 @@ const handleToggleVariant =
 
                           </div>
 
-                          {/* BUTTONS */}
+                          
 
                           <div className="variant-actions">
 
@@ -682,7 +757,7 @@ const handleToggleVariant =
 
       </div>
 
-      {/* EDIT PRODUCT MODAL */}
+      
 
       <EditProductModal
 
@@ -700,7 +775,7 @@ const handleToggleVariant =
 
       />
 
-      {/* CREATE VARIANT MODAL */}
+      
 
       <CreateVariantModal
 

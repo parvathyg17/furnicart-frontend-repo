@@ -13,6 +13,14 @@ import ResetPassword from "../../pages/user/ResetPassword";
 
 import Home from "../../pages/user/Home";
 
+import Shop from "../../pages/user/Shop";
+
+import ProductDetail from "../../pages/user/ProductDetail";
+
+import Cart from "../../pages/user/Cart";
+
+import Wishlist from "../../pages/user/Wishlist";
+
 import ProfilePage from "../../pages/user/ProfilePage";
 import EditProfile from "../../pages/user/EditProfile";
 import ChangePasswordPage from "../../pages/user/ChangePassword";
@@ -31,6 +39,34 @@ export default function UserRoutes() {
       <Route
         path="/"
         element={<Home />}
+      />
+
+      <Route
+        path="/shop"
+        element={<Shop />}
+      />
+
+      <Route
+        path="/shop/product/:productId"
+        element={<ProductDetail />}
+      />
+
+      <Route
+        path="/cart"
+        element={
+          <PrivateRoute>
+            <Cart />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/wishlist"
+        element={
+          <PrivateRoute>
+            <Wishlist />
+          </PrivateRoute>
+        }
       />
 
       <Route

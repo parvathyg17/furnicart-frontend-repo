@@ -20,7 +20,7 @@ import {
 import {
 
   updateCategory,
-  getAdminCategories,
+  getCategoryOptions,
 
 } from "../../../features/catalog/category/categorySlice";
 
@@ -29,6 +29,7 @@ export default function EditCategoryModal({
   isOpen,
   onClose,
   category,
+  onSuccess,
 
 }) {
 
@@ -36,8 +37,8 @@ export default function EditCategoryModal({
 
   const {
 
-    categories,
-    categoryLoading,
+    categoryOptions,
+    categoryUpdateLoading,
 
   } = useSelector(
     (state) => state.category
@@ -60,10 +61,6 @@ export default function EditCategoryModal({
 
   const [formErrors, setFormErrors] =
     useState({});
-
-  // ==========================================
-  // LOAD CATEGORY
-  // ==========================================
 
   useEffect(() => {
 
@@ -97,9 +94,38 @@ export default function EditCategoryModal({
 
   }, [category]);
 
-  // ==========================================
-  // HANDLE CHANGE
-  // ==========================================
+  useEffect(() => {
+
+    if (isOpen) {
+
+      dispatch(
+        getCategoryOptions()
+      );
+    }
+
+  }, [
+
+    dispatch,
+    isOpen,
+
+  ]);
+
+  useEffect(() => {
+
+    return () => {
+
+      if (
+        preview &&
+        preview.startsWith("blob:")
+      ) {
+
+        URL.revokeObjectURL(
+          preview
+        );
+      }
+    };
+
+  }, [preview]);
 
   const handleChange = (e) => {
 
@@ -124,10 +150,6 @@ export default function EditCategoryModal({
       [name]: value,
     }));
   };
-
-  // ==========================================
-  // HANDLE IMAGE
-  // ==========================================
 
   const handleImageChange =
     (e) => {
@@ -189,10 +211,6 @@ export default function EditCategoryModal({
       );
     };
 
-  // ==========================================
-  // SUBMIT
-  // ==========================================
-
   const handleSubmit =
     async (e) => {
 
@@ -249,9 +267,7 @@ export default function EditCategoryModal({
           })
         ).unwrap();
 
-        dispatch(
-          getAdminCategories()
-        );
+        onSuccess?.();
 
         onClose();
 
@@ -269,8 +285,6 @@ export default function EditCategoryModal({
     <div className="category-modal-overlay">
 
       <div className="category-modal">
-
-        {/* HEADER */}
 
         <div className="category-modal-header">
 
@@ -302,19 +316,13 @@ export default function EditCategoryModal({
 
         </div>
 
-        {/* FORM */}
-
         <form
           onSubmit={handleSubmit}
           className="category-form"
           encType="multipart/form-data"
         >
 
-          {/* GRID */}
-
           <div className="category-grid">
-
-            {/* NAME */}
 
             <div className="form-group">
 
@@ -351,8 +359,6 @@ export default function EditCategoryModal({
 
             </div>
 
-            {/* PARENT */}
-
             <div className="form-group">
 
               <label>
@@ -379,7 +385,7 @@ export default function EditCategoryModal({
                   </option>
 
                   {
-                    categories
+                    categoryOptions
 
                       .filter(
                         (item) =>
@@ -422,8 +428,6 @@ export default function EditCategoryModal({
 
           </div>
 
-          {/* DESCRIPTION */}
-
           <div className="form-group">
 
             <label>
@@ -456,8 +460,6 @@ export default function EditCategoryModal({
             }
 
           </div>
-
-          {/* IMAGE */}
 
           <div className="form-group">
 
@@ -543,8 +545,6 @@ export default function EditCategoryModal({
 
           </div>
 
-          {/* FOOTER */}
-
           <div className="category-modal-footer">
 
             <button
@@ -559,14 +559,16 @@ export default function EditCategoryModal({
 
             <button
               type="submit"
-              disabled={categoryLoading}
+              disabled={
+                categoryUpdateLoading
+              }
               className="submit-button"
             >
 
               <Pencil size={18} />
 
               {
-                categoryLoading
+                categoryUpdateLoading
 
                   ? "Updating..."
 

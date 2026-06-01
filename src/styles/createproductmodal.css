@@ -608,3 +608,8 @@
 
   border-color:#111;
 }
+
+.form-error{
+
+  color: red;
+}

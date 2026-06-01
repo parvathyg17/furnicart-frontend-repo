@@ -601,3 +601,66 @@
   display: flex;
   align-items: center;
 }
+
+/* Flash messages (Redux productSuccess / productError) */
+
+.product-detail-flash {
+
+  display: flex;
+
+  align-items: flex-start;
+
+  justify-content: space-between;
+
+  gap: 16px;
+
+  padding: 14px 18px;
+
+  margin-bottom: 20px;
+
+  border-radius: 12px;
+
+  font-size: 14px;
+
+  line-height: 1.45;
+}
+
+.product-detail-flash.success {
+
+  background: #e8f5e9;
+
+  color: #1b5e20;
+
+  border: 1px solid #a5d6a7;
+}
+
+.product-detail-flash.error {
+
+  background: #ffebee;
+
+  color: #b71c1c;
+
+  border: 1px solid #ef9a9a;
+}
+
+.product-detail-flash-dismiss {
+
+  flex-shrink: 0;
+
+  padding: 4px 10px;
+
+  border: none;
+
+  border-radius: 8px;
+
+  background: rgba(0, 0, 0, 0.06);
+
+  cursor: pointer;
+
+  font-size: 13px;
+}
+
+.product-detail-flash-dismiss:hover {
+
+  background: rgba(0, 0, 0, 0.1);
+}

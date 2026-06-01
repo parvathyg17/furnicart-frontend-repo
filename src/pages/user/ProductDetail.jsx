@@ -18,6 +18,8 @@ import {
   useSelector,
 } from "react-redux";
 
+import toast from "react-hot-toast";
+
 import {
   Heart,
   ZoomIn,
@@ -32,6 +34,7 @@ import {
   addToCartApi,
 } from "../../features/cart/cartAPI";
 import {
+  fetchWishlist,
   toggleWishlistApi,
 } from "../../features/wishlist/wishlistAPI.js";
 
@@ -225,16 +228,6 @@ export default function ProductDetail() {
   ] = useState(1);
 
   const [
-    actionMsg,
-    setActionMsg,
-  ] = useState(null);
-
-  const [
-    actionErr,
-    setActionErr,
-  ] = useState(null);
-
-  const [
     specsOpen,
     setSpecsOpen,
   ] = useState(true);
@@ -243,6 +236,11 @@ export default function ProductDetail() {
     shippingOpen,
     setShippingOpen,
   ] = useState(false);
+
+  const [
+    wishlistedVariantIds,
+    setWishlistedVariantIds,
+  ] = useState([]);
 
   useEffect(() => {
 
@@ -399,6 +397,77 @@ export default function ProductDetail() {
 
   useEffect(() => {
 
+    let cancelled = false;
+
+    if (!user) {
+
+      setWishlistedVariantIds(
+        []
+      );
+
+      return;
+    }
+
+    (
+      async () => {
+
+        try {
+
+          const data =
+            await fetchWishlist();
+
+          if (cancelled)
+            return;
+
+          const ids =
+
+            (data.results || [])
+
+              .map(
+                (row) =>
+                  row.variant?.id
+              )
+
+              .filter(
+                (id) =>
+                  id != null
+              )
+
+              .map(
+                (id) =>
+                  Number(
+                    id
+                  )
+              );
+
+          setWishlistedVariantIds(
+            ids
+          );
+        } catch {
+
+          if (!cancelled) {
+
+            setWishlistedVariantIds(
+              []
+            );
+          }
+        }
+      }
+    )();
+
+    return () => {
+
+      cancelled = true;
+    };
+  }, [
+
+    user,
+    productId,
+
+  ]);
+
+  useEffect(() => {
+
     setGalleryIndex(0);
   }, [selectedVariantId]);
 
@@ -413,6 +482,17 @@ export default function ProductDetail() {
         ),
 
       [product, selectedVariantId]
+    );
+
+  const variantIsWishlisted =
+    Boolean(
+      user &&
+        selectedVariant &&
+        wishlistedVariantIds.includes(
+          Number(
+            selectedVariant.id
+          )
+        )
     );
 
   const galleryImages =
@@ -756,10 +836,6 @@ export default function ProductDetail() {
   const handleAddToCart =
     async () => {
 
-      setActionMsg(null);
-
-      setActionErr(null);
-
       if (!user) {
 
         navigate(
@@ -774,7 +850,7 @@ export default function ProductDetail() {
         isOutOfStock
       ) {
 
-        setActionErr(
+        toast.error(
 
           "This option is out of stock or unavailable."
         );
@@ -792,12 +868,12 @@ export default function ProductDetail() {
           quantity: qty,
         });
 
-        setActionMsg(
+        toast.success(
           "Added to cart."
         );
       } catch (err) {
 
-        setActionErr(
+        toast.error(
 
           formatProductApiError(
             err.response?.data
@@ -810,10 +886,6 @@ export default function ProductDetail() {
 
   const handleWishlist =
     async () => {
-
-      setActionMsg(null);
-
-      setActionErr(null);
 
       if (!user) {
 
@@ -834,7 +906,43 @@ export default function ProductDetail() {
             selectedVariant.id
           );
 
-        setActionMsg(
+        const vid =
+          Number(
+            selectedVariant.id
+          );
+
+        setWishlistedVariantIds(
+          (prev) => {
+
+            if (
+              res.is_wishlisted
+            ) {
+
+              if (
+                prev.includes(
+                  vid
+                )
+              ) {
+
+                return prev;
+              }
+
+              return [
+
+                ...prev,
+
+                vid,
+              ];
+            }
+
+            return prev.filter(
+              (id) =>
+                id !== vid
+            );
+          }
+        );
+
+        toast.success(
 
           res.is_wishlisted
 
@@ -844,7 +952,7 @@ export default function ProductDetail() {
         );
       } catch (err) {
 
-        setActionErr(
+        toast.error(
 
           formatProductApiError(
             err.response?.data
@@ -1239,7 +1347,7 @@ export default function ProductDetail() {
 
                   <p className="pd-user-price artisan-font-serif pd-user-pdp-price">
 
-                    $
+                    ₹
                     {formatMoney(displayPrice)}
                   </p>
                 )
@@ -1342,7 +1450,7 @@ export default function ProductDetail() {
 
                             <span className="pd-user-variant-pill-meta">
 
-                              $
+                              ₹
                               {formatMoney(v.price)}
 
                               {!variantSoldOut && (
@@ -1350,7 +1458,7 @@ export default function ProductDetail() {
                                 <>
 
                                   {" "}
-                                  · {v.stock} in stock
+                                  
                                 </>
                               )}
 
@@ -1445,38 +1553,47 @@ export default function ProductDetail() {
 
                 <button
                   type="button"
-                  className="pd-user-btn-wish"
-                  aria-label="Wishlist"
+                  className={
+
+                    variantIsWishlisted
+
+                      ? "pd-user-btn-wish is-wishlisted"
+
+                      : "pd-user-btn-wish"
+                  }
+                  aria-label={
+
+                    variantIsWishlisted
+
+                      ? "Remove from wishlist"
+
+                      : "Add to wishlist"
+                  }
                   onClick={handleWishlist}
                 >
 
-                  <Heart size={18} />
+                  <Heart
+                    size={18}
+                    fill={
+
+                      variantIsWishlisted
+
+                        ? "currentColor"
+
+                        : "none"
+                    }
+                    strokeWidth={
+
+                      variantIsWishlisted
+
+                        ? 1.5
+
+                        : 2
+                    }
+                  />
                 </button>
 
               </div>
-
-              {
-                actionMsg && (
-
-                  <p className="artisan-banner success pd-user-flash">
-
-                    {actionMsg}
-                  </p>
-                )
-              }
-
-              {
-                actionErr && (
-
-                  <p
-                    className="artisan-banner error pd-user-flash"
-                    role="alert"
-                  >
-
-                    {actionErr}
-                  </p>
-                )
-              }
 
               <div className="pd-user-pdp-accordions">
 
@@ -1738,7 +1855,7 @@ export default function ProductDetail() {
 
                                 <p className="pd-user-pdp-related-price">
 
-                                  $
+                                  ₹
                                   {formatMoney(rpPrice)}
                                 </p>
                               )

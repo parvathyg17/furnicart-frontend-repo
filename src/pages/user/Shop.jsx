@@ -125,23 +125,6 @@ function displayPrice(product) {
   return null;
 }
 
-function isNewArrival(product) {
-
-  if (!product?.created_at)
-    return false;
-
-  const created =
-    new Date(
-      product.created_at
-    );
-
-  const days =
-    (Date.now() - created) /
-    (86400 * 1000);
-
-  return days <= 21;
-}
-
 export default function Shop() {
 
   const [
@@ -1202,7 +1185,7 @@ export default function Shop() {
 
             </div>
 
-            <div className="artisan-field-block">
+            {/* <div className="artisan-field-block">
 
               <span className="artisan-field-label">
                 Brand
@@ -1224,7 +1207,7 @@ export default function Shop() {
                 }
               />
 
-            </div>
+            </div> */}
 
           </aside>
 
@@ -1260,9 +1243,6 @@ export default function Shop() {
                           p.category_name ||
                           "Furniture";
 
-                        const isNew =
-                          isNewArrival(p);
-
                         const variant =
                           firstListableVariant(
                             p
@@ -1290,15 +1270,6 @@ export default function Shop() {
                               className="artisan-card-media"
                               to={`/shop/product/${p.id}`}
                             >
-
-                              {
-                                isNew && (
-
-                                  <span className="artisan-badge-new">
-                                    NEW ARRIVAL
-                                  </span>
-                                )
-                              }
 
                               {
                                 showSoldOut && (
@@ -1364,7 +1335,7 @@ export default function Shop() {
                                 price !== null && (
 
                                   <p className="artisan-card-price">
-                                    $
+                                    ₹
                                     {price.toLocaleString(
                                       undefined,
                                       {

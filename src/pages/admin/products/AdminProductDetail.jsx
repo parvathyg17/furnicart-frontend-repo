@@ -1,9 +1,10 @@
 import "../../../styles/adminproductdetails.css";
 
+import toast from "react-hot-toast";
+
 import {
   toggleVariantStatus,
-  clearProductSuccess,
-  clearProductError,
+  clearProductMessages,
   getAdminProductDetail,
 } from "../../../features/catalog/product/productSlice";
 
@@ -30,7 +31,6 @@ import {
   Plus,
   Upload,
   MoreHorizontal,
-  X,
 } from "lucide-react";
 
 import EditProductModal
@@ -45,9 +45,7 @@ export default function AdminProductDetail() {
 
   const { id } = useParams();
 
-  // ==========================================
-  // STATE
-  // ==========================================
+ 
 
   const [
     openEditModal,
@@ -59,9 +57,7 @@ export default function AdminProductDetail() {
     setOpenVariantModal,
   ] = useState(false);
 
-  // ==========================================
-  // REDUX
-  // ==========================================
+
 
   const {
     productDetail,
@@ -115,12 +111,9 @@ const handleToggleVariant =
 
       } catch (error) {
 
-        // Redux error already handled
+       
       }
     };
-  // ==========================================
-  // FETCH PRODUCT
-  // ==========================================
 
   useEffect(() => {
 
@@ -138,12 +131,17 @@ const handleToggleVariant =
     if (!productSuccess)
       return;
 
-    const timer = setTimeout(() => {
+    toast.success(
+      productSuccess
+    );
 
-      dispatch(
-        clearProductSuccess()
-      );
-    }, 5000);
+    const timer =
+      setTimeout(() => {
+
+        dispatch(
+          clearProductMessages()
+        );
+      }, 3000);
 
     return () =>
       clearTimeout(timer);
@@ -154,9 +152,40 @@ const handleToggleVariant =
 
   ]);
 
-  // ==========================================
-  // LOADING
-  // ==========================================
+  useEffect(() => {
+
+    if (!productError)
+      return;
+
+    toast.error(
+
+      typeof productError === "string"
+
+        ? productError
+
+        : JSON.stringify(
+            productError
+          )
+    );
+
+    const timer =
+      setTimeout(() => {
+
+        dispatch(
+          clearProductMessages()
+        );
+      }, 3000);
+
+    return () =>
+      clearTimeout(timer);
+  }, [
+
+    dispatch,
+    productError,
+
+  ]);
+
+  
 
   if (!productDetail) {
 
@@ -176,9 +205,7 @@ const handleToggleVariant =
     );
   }
 
-  // ==========================================
-  // DATA
-  // ==========================================
+
 
   const variants =
     productDetail.variants || [];
@@ -217,83 +244,11 @@ const handleToggleVariant =
 
       "";
 
-  // ==========================================
-  // JSX
-  // ==========================================
+  
 
   return (
 
     <div className="admin-product-detail-page">
-
-      {
-        productSuccess && (
-
-          <div
-            className="product-detail-flash success"
-            role="status"
-          >
-
-            <span>
-
-              {
-                productSuccess
-              }
-
-            </span>
-
-            <button
-              type="button"
-              className="product-detail-flash-dismiss"
-              onClick={() =>
-                dispatch(
-                  clearProductSuccess()
-                )
-              }
-              aria-label="Dismiss"
-            >
-
-              <X size={18} />
-
-            </button>
-
-          </div>
-        )
-      }
-
-      {
-        productError && (
-
-          <div
-            className="product-detail-flash error"
-            role="alert"
-          >
-
-            <span>
-
-              {
-                productError
-              }
-
-            </span>
-
-            <button
-              type="button"
-              className="product-detail-flash-dismiss"
-              onClick={() =>
-                dispatch(
-                  clearProductError()
-                )
-              }
-              aria-label="Dismiss"
-            >
-
-              <X size={18} />
-
-            </button>
-
-          </div>
-        )
-      }
 
       {/* BREADCRUMBS */}
 
@@ -426,7 +381,7 @@ const handleToggleVariant =
 
           </div>
 
-          {/* TITLE */}
+          
 
           <h1>
 
@@ -436,7 +391,7 @@ const handleToggleVariant =
 
           </h1>
 
-          {/* DESCRIPTION */}
+        
 
           <p className="product-description">
 
@@ -447,7 +402,7 @@ const handleToggleVariant =
 
           </p>
 
-          {/* META */}
+          
 
          <div className="product-meta-grid">
 
@@ -521,7 +476,7 @@ const handleToggleVariant =
 
             </div>
 
-          {/* ACTIONS */}
+          
 
           <div className="product-detail-actions">
 
@@ -552,7 +507,7 @@ const handleToggleVariant =
 
       </div>
 
-      {/* VARIANTS */}
+      
 
       <div className="variants-section">
 
@@ -586,7 +541,7 @@ const handleToggleVariant =
 
         </div>
 
-        {/* GRID */}
+        
 
         {
           variants.length > 0 ? (
@@ -629,7 +584,7 @@ const handleToggleVariant =
 
                         </div>
 
-                        {/* CONTENT */}
+                    
 
                         <div className="variant-content">
 
@@ -681,15 +636,13 @@ const handleToggleVariant =
 
                           </div>
 
-                          {/* META */}
+                   
 
                           <div className="variant-meta">
 
                             <div>
 
-                              <span
-                                className="color-dot"
-                              ></span>
+                              
 
                               {
                                 variant.color ||
@@ -709,7 +662,7 @@ const handleToggleVariant =
 
                           </div>
 
-                          {/* PRICE */}
+                         
 
                           <div className="variant-price-stock">
 
@@ -734,7 +687,7 @@ const handleToggleVariant =
 
                           </div>
 
-                          {/* BUTTONS */}
+                          
 
                           <div className="variant-actions">
 
@@ -804,7 +757,7 @@ const handleToggleVariant =
 
       </div>
 
-      {/* EDIT PRODUCT MODAL */}
+      
 
       <EditProductModal
 
@@ -822,7 +775,7 @@ const handleToggleVariant =
 
       />
 
-      {/* CREATE VARIANT MODAL */}
+      
 
       <CreateVariantModal
 

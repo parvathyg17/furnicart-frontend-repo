@@ -578,7 +578,7 @@ export default function Wishlist() {
 
                           <p className="wishlist-card-price">
 
-                            $
+                            ₹
                             {formatWishlistMoney(
                               v?.price,
                             )}

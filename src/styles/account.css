@@ -23,9 +23,15 @@ body {
 
 .account-page {
   display: flex;
+  align-items: flex-start;
   gap: 30px;
   padding: 40px;
   min-height: 100vh;
+}
+
+/* Fixed home navbar (same as Home.jsx) — keep content below it */
+.account-page--below-home-navbar {
+  padding-top: 124px;
 }
 
 .account-sidebar {
@@ -43,14 +49,6 @@ body {
   flex-shrink: 0;
 
   border: 1px solid #e7dfd7;
-}
-
-.account-page {
-  display: flex;
-  align-items: flex-start;
-  gap: 30px;
-  padding: 40px;
-  min-height: 100vh;
 }
 
 .account-sidebar h2 {

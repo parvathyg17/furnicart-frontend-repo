@@ -540,7 +540,7 @@ export default function Home() {
 
                           <span className="collection-price">
 
-                            $
+                          ₹ 
                             {price}
                           </span>
                         )

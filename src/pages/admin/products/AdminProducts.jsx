@@ -27,14 +27,12 @@ import {
   Trash2,
   ChevronLeft,
   ChevronRight,
-  X,
 } from "lucide-react";
 
 import {
   getAdminProducts,
   deleteProduct,
-  clearProductSuccess,
-  clearProductError,
+  clearProductMessages,
 } from "../../../features/catalog/product/productSlice";
 
 import {
@@ -65,9 +63,6 @@ export default function AdminProducts() {
     (state) => state.product
   );
 
-  // ==========================================
-  // CATEGORY STATE
-  // ==========================================
 
   const {
     categories,
@@ -75,9 +70,7 @@ export default function AdminProducts() {
     (state) => state.category
   );
 
-  // ==========================================
-  // ROOM TYPE STATE
-  // ==========================================
+ 
 
   const {
     roomTypes,
@@ -85,9 +78,7 @@ export default function AdminProducts() {
     (state) => state.roomType
   );
 
-  // ==========================================
-  // FILTER STATES
-  // ==========================================
+
 
   const [
     search,
@@ -135,9 +126,7 @@ export default function AdminProducts() {
     setSelectedProduct,
   ] = useState(null);
 
-  // ==========================================
-  // FETCH CATEGORY + ROOM TYPES
-  // ==========================================
+
 
   useEffect(() => {
 
@@ -157,9 +146,7 @@ export default function AdminProducts() {
 
   }, [dispatch]);
 
-  // ==========================================
-  // FETCH PRODUCTS
-  // ==========================================
+
 
   useEffect(() => {
 
@@ -202,9 +189,7 @@ export default function AdminProducts() {
 
   ]);
 
-  // ==========================================
-  // DELETE PRODUCT
-  // ==========================================
+ 
 
   const openDeleteModal = (
     product
@@ -239,10 +224,6 @@ export default function AdminProducts() {
 
         setSelectedProduct(
           null
-        );
-
-        toast.success(
-          "Product deleted successfully"
         );
 
         const updatedCount =
@@ -294,22 +275,11 @@ export default function AdminProducts() {
 
       } catch (error) {
 
-        toast.error(
-
-          typeof error === "string"
-
-            ? error
-
-            : error?.error ||
-
-              "Failed to delete product"
-        );
+        /* deleteProduct.rejected sets productError; toast via useEffect */
       }
     };
 
-  // ==========================================
-  // PAGINATION
-  // ==========================================
+  
 
   const totalPages =
     productPagination?.totalPages ?? 0;
@@ -331,12 +301,17 @@ export default function AdminProducts() {
     if (!productSuccess)
       return;
 
-    const timer = setTimeout(() => {
+    toast.success(
+      productSuccess
+    );
 
-      dispatch(
-        clearProductSuccess()
-      );
-    }, 5000);
+    const timer =
+      setTimeout(() => {
+
+        dispatch(
+          clearProductMessages()
+        );
+      }, 3000);
 
     return () =>
       clearTimeout(timer);
@@ -347,89 +322,44 @@ export default function AdminProducts() {
 
   ]);
 
+  useEffect(() => {
+
+    if (!productError)
+      return;
+
+    toast.error(
+
+      typeof productError === "string"
+
+        ? productError
+
+        : JSON.stringify(
+            productError
+          )
+    );
+
+    const timer =
+      setTimeout(() => {
+
+        dispatch(
+          clearProductMessages()
+        );
+      }, 3000);
+
+    return () =>
+      clearTimeout(timer);
+  }, [
+
+    dispatch,
+    productError,
+
+  ]);
+
   return (
 
     <div className="admin-products-page">
 
-      {
-        productSuccess && (
-
-          <div
-            className="catalog-flash success"
-            role="status"
-          >
-
-            <span>
-
-              {
-                productSuccess
-              }
-
-            </span>
-
-            <button
-              type="button"
-              className="catalog-flash-dismiss"
-              onClick={() =>
-                dispatch(
-                  clearProductSuccess()
-                )
-              }
-              aria-label="Dismiss"
-            >
-
-              <X size={18} />
-
-            </button>
-
-          </div>
-        )
-      }
-
-      {
-        productError && (
-
-          <div
-            className="catalog-flash error"
-            role="alert"
-          >
-
-            <span>
-
-              {
-                typeof productError === "string"
-
-                  ? productError
-
-                  : JSON.stringify(
-                      productError
-                    )
-              }
-
-            </span>
-
-            <button
-              type="button"
-              className="catalog-flash-dismiss"
-              onClick={() =>
-                dispatch(
-                  clearProductError()
-                )
-              }
-              aria-label="Dismiss"
-            >
-
-              <X size={18} />
-
-            </button>
-
-          </div>
-        )
-      }
-
-      {/* ========================================== */}
-      {/* HEADER */}
-      {/* ========================================== */}
+     
 
       <div className="products-header">
 
@@ -466,9 +396,7 @@ export default function AdminProducts() {
 
       </div>
 
-      {/* ========================================== */}
-      {/* FILTERS */}
-      {/* ========================================== */}
+ 
 
       <div className="products-filters">
 
@@ -576,11 +504,11 @@ export default function AdminProducts() {
 
         </select>
 
-        {/* STATUS */}
+       
 
         <div className="status-tabs">
 
-          {/* SORT */}
+          
 
           <select
             value={sort}
@@ -681,9 +609,6 @@ export default function AdminProducts() {
 
       </div>
 
-      {/* ========================================== */}
-      {/* PRODUCTS */}
-      {/* ========================================== */}
 
       {
         productLoading ? (
@@ -724,7 +649,7 @@ export default function AdminProducts() {
                       className="product-card"
                     >
 
-                      {/* IMAGE */}
+                      
 
                       <div className="product-image-wrapper">
 
@@ -771,7 +696,7 @@ export default function AdminProducts() {
 
                       </div>
 
-                      {/* CONTENT */}
+                      
 
                       <div className="product-content">
 
@@ -925,9 +850,7 @@ export default function AdminProducts() {
         )
       }
 
-      {/* ========================================== */}
-      {/* FOOTER */}
-      {/* ========================================== */}
+      
 
       {
         products?.length > 0 && (
@@ -1026,9 +949,7 @@ export default function AdminProducts() {
         )
       }
 
-      {/* ========================================== */}
-      {/* MODAL */}
-      {/* ========================================== */}
+      
 
       {
         deleteModalOpen && (

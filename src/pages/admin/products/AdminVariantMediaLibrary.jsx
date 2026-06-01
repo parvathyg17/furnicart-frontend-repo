@@ -46,9 +46,7 @@ import {
   formatProductApiError,
 } from "../../../utils/productApiErrors.js";
 
-// ==========================================
-// CREATE IMAGE
-// ==========================================
+
 
 const createImage = (url) =>
   new Promise((resolve, reject) => {
@@ -68,9 +66,7 @@ const createImage = (url) =>
     image.src = url;
   });
 
-// ==========================================
-// CROPPED IMAGE
-// ==========================================
+
 
 async function getCroppedImg(
   imageSrc,

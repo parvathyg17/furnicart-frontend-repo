@@ -633,6 +633,25 @@ export default function Cart() {
                                 </div>
 
                                 {
+                                  row.quantity >=
+                                    maxQ && (
+
+                                    <p className="cart-bag-qty-cap-note">
+
+                                      Maximum{" "}
+
+                                      {maxQ}
+
+                                      {" "}
+
+                                      for this item (cart limit or
+                                      stock).
+
+                                    </p>
+                                  )
+                                }
+
+                                {
                                   lineProblem && (
 
                                     <div
@@ -651,7 +670,7 @@ export default function Cart() {
 
                                 <p className="cart-bag-line-price artisan-font-serif">
 
-                                  $
+                                  ₹
                                   {formatCartMoney(
                                     row.line_subtotal,
                                   )}
@@ -712,7 +731,7 @@ export default function Cart() {
 
                       <dd>
 
-                        $
+                        ₹
                         {formatCartMoney(
                           data.subtotal,
                         )}
@@ -759,7 +778,7 @@ export default function Cart() {
 
                     <span className="cart-bag-summary-total-val artisan-font-serif">
 
-                      $
+                      ₹
                       {formatCartMoney(
                         data.subtotal,
                       )}

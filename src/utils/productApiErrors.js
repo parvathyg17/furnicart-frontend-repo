@@ -64,6 +64,46 @@ export function formatProductApiError(payload) {
     return String(payload);
   }
 
+  // Cart / DRF: Response(exc.detail) is often a bare JSON array, e.g.
+  // ["Maximum 10 units allowed per item."]
+  if (Array.isArray(payload) && payload.length) {
+
+    const texts = payload
+
+      .map((item) => {
+
+        if (typeof item === "string") {
+
+          return item.trim();
+        }
+
+        if (
+          item &&
+          typeof item === "object"
+        ) {
+
+          if (typeof item.string === "string") {
+
+            return item.string.trim();
+          }
+
+          if (typeof item.detail === "string") {
+
+            return item.detail.trim();
+          }
+        }
+
+        return "";
+      })
+
+      .filter(Boolean);
+
+    if (texts.length > 0) {
+
+      return texts.join(" ");
+    }
+  }
+
   if (typeof payload.error === "string") {
 
     return payload.error;
@@ -78,11 +118,42 @@ export function formatProductApiError(payload) {
 
     const first = payload.detail[0];
 
-    return typeof first === "string"
+    if (typeof first === "string") {
 
-      ? first
+      return first;
+    }
 
-      : JSON.stringify(first);
+    if (
+      first &&
+      typeof first === "object" &&
+      typeof first.string === "string"
+    ) {
+
+      return first.string;
+    }
+
+    return JSON.stringify(first);
+  }
+
+  // Nested field errors: { "detail": { "quantity": ["…"] } }
+  if (
+    payload.detail &&
+    typeof payload.detail === "object" &&
+    !Array.isArray(payload.detail)
+  ) {
+
+    const nested =
+      formatProductApiError(
+        payload.detail,
+      );
+
+    if (
+      nested &&
+      nested !== "Something went wrong."
+    ) {
+
+      return nested;
+    }
   }
 
   if (

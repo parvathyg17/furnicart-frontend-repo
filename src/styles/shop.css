@@ -1286,6 +1286,25 @@
   border-color: var(--artisan-ink);
 }
 
+.artisan-shop .pd-user-btn-wish.is-wishlisted {
+  color: #dc2626;
+  border-color: rgba(220, 38, 38, 0.45);
+  background: #fff1f2;
+}
+
+.artisan-shop .pd-user-btn-wish.is-wishlisted:hover {
+  border-color: #dc2626;
+  background: #ffe4e6;
+}
+
+.artisan-shop .pd-user-btn-wish.is-wishlisted svg {
+  fill: currentColor;
+}
+
+.artisan-shop .pd-user-btn-wish:not(.is-wishlisted) svg {
+  fill: none;
+}
+
 .artisan-shop .pd-user-flash {
   margin-top: 0.75rem;
 }
@@ -1565,6 +1584,21 @@
   border: 1px solid var(--artisan-line);
   background: #fff;
   color: var(--artisan-ink);
+}
+
+.artisan-shop .pd-user-pdp-actions .pd-user-btn-wish.is-wishlisted {
+  color: #dc2626;
+  border-color: rgba(220, 38, 38, 0.45);
+  background: #fff1f2;
+}
+
+.artisan-shop .pd-user-pdp-actions .pd-user-btn-wish.is-wishlisted:hover {
+  border-color: #dc2626;
+  background: #ffe4e6;
+}
+
+.artisan-shop .pd-user-pdp-actions .pd-user-btn-wish.is-wishlisted svg {
+  fill: currentColor;
 }
 
 .pd-zoom-fab {
@@ -1926,6 +1960,13 @@
   font-size: 0.9rem;
   font-weight: 600;
   color: var(--bag-ink);
+}
+
+.cart-bag-qty-cap-note {
+  margin: 0.35rem 0 0;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: var(--bag-muted, #6b5b52);
 }
 
 .cart-bag-line-alert {

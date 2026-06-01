@@ -120,8 +120,6 @@ export default function EditProductModal({
         page: 1,
 
         page_size: 1000,
-
-        is_active: true,
       })
     );
 
@@ -149,32 +147,49 @@ export default function EditProductModal({
 
   useEffect(() => {
 
-    if (product) {
+    if (!product)
+      return;
 
-      setFormData({
+    const rawCategory =
+      product.category;
 
-        name:
-          product.name || "",
+    const categoryId =
 
-        description:
-          product.description || "",
+      rawCategory == null ||
+      rawCategory === ""
 
-        category:
-          product.category || "",
+        ? ""
 
-        room_type_ids:
-          product.room_types?.map(
-            (item) => item.id
-          ) || [],
+        : typeof rawCategory === "object"
 
-        is_featured:
-          product.is_featured || false,
+          ? String(
+              rawCategory.id ?? ""
+            )
 
-        is_active:
-          product.is_active ?? true,
-      });
-    }
+          : String(rawCategory);
 
+    setFormData({
+
+      name:
+        product.name || "",
+
+      description:
+        product.description || "",
+
+      category:
+        categoryId,
+
+      room_type_ids:
+        product.room_types?.map(
+          (item) => item.id
+        ) || [],
+
+      is_featured:
+        product.is_featured || false,
+
+      is_active:
+        product.is_active ?? true,
+    });
   }, [product]);
 
   // ==========================================
@@ -516,24 +531,33 @@ export default function EditProductModal({
                     </option>
 
                     {
-                      categories
-                        ?.filter(
-                          (item) =>
-                            item.is_active
+                      categories?.map(
+                        (item) => (
+
+                          <option
+                            key={item.id}
+                            value={
+                              String(
+                                item.id
+                              )
+                            }
+                          >
+
+                            {
+                              item.name
+                            }
+
+                            {
+                              item.is_active
+
+                                ? ""
+
+                                : " (inactive)"
+                            }
+
+                          </option>
                         )
-                        ?.map(
-                          (item) => (
-
-                            <option
-                              key={item.id}
-                              value={item.id}
-                            >
-
-                              {item.name}
-
-                            </option>
-                          )
-                        )
+                      )
                     }
 
                   </select>

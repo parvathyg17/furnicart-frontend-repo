@@ -8,6 +8,7 @@ import {
 
 import {
   Link,
+  useNavigate,
 } from "react-router-dom";
 
 import {
@@ -88,6 +89,8 @@ function cartLineImageUrl(
 
 export default function Cart() {
 
+  const navigate = useNavigate();
+
   const [
     data,
     setData,
@@ -104,11 +107,6 @@ export default function Cart() {
   ] = useState(null);
 
   const [
-    checkoutMsg,
-    setCheckoutMsg,
-  ] = useState(null);
-
-  const [
     checkoutErr,
     setCheckoutErr,
   ] = useState(null);
@@ -120,9 +118,14 @@ export default function Cart() {
 
   const load =
     useCallback(
-      async () => {
+      async (
+        { silent = false } = {},
+      ) => {
 
-        setLoading(true);
+        if (!silent) {
+
+          setLoading(true);
+        }
 
         setError(null);
 
@@ -144,7 +147,10 @@ export default function Cart() {
           );
         } finally {
 
-          setLoading(false);
+          if (!silent) {
+
+            setLoading(false);
+          }
         }
       },
 
@@ -238,8 +244,6 @@ export default function Cart() {
       nextQty
     ) => {
 
-      setCheckoutMsg(null);
-
       setCheckoutErr(null);
 
       try {
@@ -251,7 +255,9 @@ export default function Cart() {
 
         setError(null);
 
-        await load();
+        await load(
+          { silent: true },
+        );
       } catch (err) {
 
         setError(
@@ -268,8 +274,6 @@ export default function Cart() {
   const remove =
     async (itemId) => {
 
-      setCheckoutMsg(null);
-
       setCheckoutErr(null);
 
       try {
@@ -278,7 +282,9 @@ export default function Cart() {
           itemId
         );
 
-        await load();
+        await load(
+          { silent: true },
+        );
       } catch (err) {
 
         setError(
@@ -295,8 +301,6 @@ export default function Cart() {
   const handleCheckout =
     async () => {
 
-      setCheckoutMsg(null);
-
       setCheckoutErr(null);
 
       setCheckoutBusy(true);
@@ -308,12 +312,13 @@ export default function Cart() {
 
         if (res.valid) {
 
-          setCheckoutMsg(
-
-            "Your cart passed stock checks. Full checkout flow is not wired yet — this confirms the server validated availability."
+          await load(
+            { silent: true },
           );
 
-          await load();
+          navigate(
+            "/checkout",
+          );
         }
       } catch (err) {
 
@@ -333,7 +338,9 @@ export default function Cart() {
             "Checkout cannot proceed with the current cart."
         );
 
-        await load();
+        await load(
+          { silent: true },
+        );
       } finally {
 
         setCheckoutBusy(false);
@@ -392,19 +399,6 @@ export default function Cart() {
             >
 
               {checkoutErr}
-            </div>
-          )
-        }
-
-        {
-          checkoutMsg && (
-
-            <div
-              className="shop-banner success cart-bag-banner"
-              role="status"
-            >
-
-              {checkoutMsg}
             </div>
           )
         }
@@ -791,7 +785,8 @@ export default function Cart() {
                     className="cart-bag-checkout"
                     disabled={
                       checkoutBusy ||
-                      !data?.items?.length
+                      !data?.items?.length ||
+                      !data?.can_checkout
                     }
                     onClick={handleCheckout}
                   >

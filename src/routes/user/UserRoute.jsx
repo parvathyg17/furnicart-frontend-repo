@@ -27,6 +27,10 @@ import ChangePasswordPage from "../../pages/user/ChangePassword";
 import AddressPage from "../../pages/user/AddressPage";
 import EditEmailPage from "../../pages/user/EditEmailPage";
 
+import Checkout from "../../pages/user/Checkout";
+import OrderSuccess from "../../pages/user/OrderSuccess";
+import OrderDetail from "../../pages/user/OrderDetail";
+
 import PrivateRoute from "../user/PrivateRoute";
 import PublicRoute from "../user/PublicRoute";
 
@@ -56,6 +60,33 @@ export default function UserRoutes() {
         element={
           <PrivateRoute>
             <Cart />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/checkout"
+        element={
+          <PrivateRoute>
+            <Checkout />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/checkout/success/:orderNumber"
+        element={
+          <PrivateRoute>
+            <OrderSuccess />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/orders/:orderNumber"
+        element={
+          <PrivateRoute>
+            <OrderDetail />
           </PrivateRoute>
         }
       />

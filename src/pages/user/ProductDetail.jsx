@@ -3,6 +3,7 @@ import "../../styles/shop.css";
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -322,6 +323,14 @@ export default function ProductDetail() {
     productId,
     navigate,
   ]);
+
+  useLayoutEffect(() => {
+
+    window.scrollTo(
+      0,
+      0,
+    );
+  }, [productId]);
 
   useEffect(() => {
 
@@ -1793,7 +1802,14 @@ export default function ProductDetail() {
               <div className="artisan-grid pd-user-related-grid pd-user-pdp-related-grid">
 
                 {
-                  product.related_products.map(
+                  product.related_products
+
+                    .filter(
+                      (rp) =>
+                        rp?.id != null,
+                    )
+
+                    .map(
                     (rp) => {
 
                       const rpSoldOut =
@@ -1808,13 +1824,15 @@ export default function ProductDetail() {
 
                       return (
 
-                        <Link
+                        <article
                           key={rp.id}
                           className="artisan-card pd-user-related-card pd-user-pdp-related-card"
-                          to={`/shop/product/${rp.id}`}
                         >
 
-                          <div className="artisan-card-media pd-user-related-media">
+                          <Link
+                            className="artisan-card-media pd-user-related-media"
+                            to={`/shop/product/${rp.id}`}
+                          >
 
                             {
                               rpSoldOut && (
@@ -1841,29 +1859,36 @@ export default function ProductDetail() {
                               )
                             }
 
-                          </div>
+                          </Link>
 
                           <div className="artisan-card-body pd-user-pdp-related-body">
 
-                            <h3 className="artisan-font-serif pd-user-related-name">
+                            <Link
+                              className="pd-user-related-card-detail-link"
+                              to={`/shop/product/${rp.id}`}
+                            >
 
-                              {rp.name}
-                            </h3>
+                              <h3 className="artisan-font-serif pd-user-related-name">
 
-                            {
-                              rpPrice !== null && (
+                                {rp.name}
+                              </h3>
 
-                                <p className="pd-user-pdp-related-price">
+                              {
+                                rpPrice !== null && (
 
-                                  ₹
-                                  {formatMoney(rpPrice)}
-                                </p>
-                              )
-                            }
+                                  <p className="pd-user-pdp-related-price">
+
+                                    ₹
+                                    {formatMoney(rpPrice)}
+                                  </p>
+                                )
+                              }
+
+                            </Link>
 
                           </div>
 
-                        </Link>
+                        </article>
                       );
                     }
                   )

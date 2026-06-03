@@ -562,13 +562,27 @@ export default function AdminVariantMediaLibrary() {
   // ==========================================
 
   const handleDelete =
-    (imageId) => {
+    async (imageId) => {
 
-      dispatch(
-        deleteVariantImage(
-          imageId
-        )
-      );
+      setUploadError("");
+
+      try {
+
+        await dispatch(
+          deleteVariantImage(
+            imageId
+          )
+        ).unwrap();
+      } catch (payload) {
+
+        setUploadError(
+          formatProductApiError(
+            payload
+          ) ||
+
+            "Failed to delete image"
+        );
+      }
     };
 
   // ==========================================

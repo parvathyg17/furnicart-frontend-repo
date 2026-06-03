@@ -67,12 +67,12 @@ const SORT_OPTIONS = [
 
   {
     value: "a_z",
-    label: "Name: A–Z",
+    label: "Name: A-Z",
   },
 
   {
     value: "z_a",
-    label: "Name: Z–A",
+    label: "Name: Z-A",
   },
 ];
 

@@ -616,20 +616,28 @@ const handleToggleVariant =
 
                             <span
                               className={
-                                variant.is_active
+                                !variant.is_active
 
-                                  ? "variant-status active"
+                                  ? "variant-status inactive"
 
-                                  : "variant-status inactive"
+                                  : (variant.stock || 0) < 1
+
+                                    ? "variant-status out-of-stock"
+
+                                    : "variant-status active"
                               }
                             >
 
                               {
-                                variant.is_active
+                                !variant.is_active
 
-                                  ? "ACTIVE"
+                                  ? "INACTIVE"
 
-                                  : "INACTIVE"
+                                  : (variant.stock || 0) < 1
+
+                                    ? "OUT OF STOCK"
+
+                                    : "ACTIVE"
                               }
 
                             </span>

@@ -411,6 +411,13 @@
   color: #a04141;
 }
 
+.variant-status.out-of-stock {
+
+  background: #fff3e0;
+
+  color: #b45309;
+}
+
 /* META */
 
 .variant-meta {

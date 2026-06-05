@@ -13,6 +13,7 @@ import {
 
 import {
   fetchOrderApi,
+  downloadOrderInvoicePdf,
 } from "../../features/orders/orderAPI";
 
 import {
@@ -115,6 +116,16 @@ export default function OrderSuccess() {
     setOrder,
   ] = useState(null);
 
+  const [
+    invoiceBusy,
+    setInvoiceBusy,
+  ] = useState(false);
+
+  const [
+    invoiceError,
+    setInvoiceError,
+  ] = useState(null);
+
   useEffect(() => {
 
     let cancelled = false;
@@ -177,6 +188,44 @@ export default function OrderSuccess() {
   const detailPath = order
     ? `/orders/${encodeURIComponent(order.order_number)}`
     : "#";
+
+  const handleDownloadInvoice = async () => {
+
+    if (
+      !order?.order_number
+    ) {
+
+      return;
+    }
+
+    setInvoiceBusy(
+      true,
+    );
+
+    setInvoiceError(
+      null,
+    );
+
+    try {
+
+      await downloadOrderInvoicePdf(
+        order.order_number,
+      );
+    } catch (err) {
+
+      setInvoiceError(
+
+        err.message ||
+
+          "Could not download invoice.",
+      );
+    } finally {
+
+      setInvoiceBusy(
+        false,
+      );
+    }
+  };
 
   return (
 
@@ -245,6 +294,19 @@ export default function OrderSuccess() {
 
               </p>
 
+              {
+                invoiceError && (
+
+                  <p
+                    className="checkout-success-invoice-err"
+                    role="alert"
+                  >
+
+                    {invoiceError}
+                  </p>
+                )
+              }
+
               <div className="checkout-success-actions">
 
                 <Link
@@ -253,6 +315,24 @@ export default function OrderSuccess() {
                 >
                   View order details
                 </Link>
+
+                <button
+                  type="button"
+                  className="checkout-btn-secondary"
+                  disabled={
+                    invoiceBusy
+                  }
+                  onClick={
+                    handleDownloadInvoice
+                  }
+                >
+
+                  {
+                    invoiceBusy
+                      ? "Preparing PDF…"
+                      : "Download invoice (PDF)"
+                  }
+                </button>
 
                 <Link
                   className="checkout-btn-secondary"

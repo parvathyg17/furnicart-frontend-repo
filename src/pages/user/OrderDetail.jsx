@@ -13,6 +13,9 @@ import {
 
 import {
   fetchOrderApi,
+  downloadOrderInvoicePdf,
+  cancelOrderApi,
+  cancelOrderLineApi,
 } from "../../features/orders/orderAPI.js";
 
 import {
@@ -70,6 +73,36 @@ export default function OrderDetail() {
     loading,
     setLoading,
   ] = useState(true);
+
+  const [
+    invoiceBusy,
+    setInvoiceBusy,
+  ] = useState(false);
+
+  const [
+    invoiceError,
+    setInvoiceError,
+  ] = useState(null);
+
+  const [
+    cancelTarget,
+    setCancelTarget,
+  ] = useState(null);
+
+  const [
+    cancelReason,
+    setCancelReason,
+  ] = useState("");
+
+  const [
+    cancelBusy,
+    setCancelBusy,
+  ] = useState(false);
+
+  const [
+    cancelModalError,
+    setCancelModalError,
+  ] = useState(null);
 
   useEffect(() => {
 
@@ -130,6 +163,209 @@ export default function OrderDetail() {
     };
   }, [orderNumber]);
 
+  const refetchOrder = async () => {
+
+    if (
+      !orderNumber
+    ) {
+
+      return;
+    }
+
+    try {
+
+      const data = await fetchOrderApi(
+        decodeURIComponent(orderNumber),
+      );
+
+      setOrder(
+        data,
+      );
+    } catch (err) {
+
+      setError(
+
+        formatProductApiError(
+          err.response?.data,
+        ) ||
+
+          "Could not refresh this order.",
+      );
+    }
+  };
+
+  const handleDownloadInvoice = async () => {
+
+    if (
+      !order?.order_number
+    ) {
+
+      return;
+    }
+
+    setInvoiceBusy(
+      true,
+    );
+
+    setInvoiceError(
+      null,
+    );
+
+    try {
+
+      await downloadOrderInvoicePdf(
+        order.order_number,
+      );
+    } catch (err) {
+
+      setInvoiceError(
+
+        err.message ||
+
+          "Could not download invoice.",
+      );
+    } finally {
+
+      setInvoiceBusy(
+        false,
+      );
+    }
+  };
+
+  const canModifyOrder =
+    order?.status === "pending";
+
+  const openCancelOrderModal = () => {
+
+    if (!canModifyOrder) {
+
+      return;
+    }
+
+    setCancelModalError(
+      null,
+    );
+
+    setCancelReason(
+      "",
+    );
+
+    setCancelTarget(
+      { type: "order" },
+    );
+  };
+
+  const openCancelLineModal = (lineId) => {
+
+    if (!canModifyOrder) {
+
+      return;
+    }
+
+    setCancelModalError(
+      null,
+    );
+
+    setCancelReason(
+      "",
+    );
+
+    setCancelTarget(
+      { type: "line", lineId },
+    );
+  };
+
+  const closeCancelModal = () => {
+
+    if (cancelBusy) {
+
+      return;
+    }
+
+    setCancelTarget(
+      null,
+    );
+
+    setCancelReason(
+      "",
+    );
+
+    setCancelModalError(
+      null,
+    );
+  };
+
+  const submitCancel = async () => {
+
+    if (!order?.order_number || !cancelTarget) {
+
+      return;
+    }
+
+    setCancelBusy(
+      true,
+    );
+
+    setCancelModalError(
+      null,
+    );
+
+    try {
+
+      const body = {};
+
+      if (cancelReason.trim()) {
+
+        body.reason = cancelReason.trim().slice(
+          0,
+          500,
+        );
+      }
+
+      if (cancelTarget.type === "order") {
+
+        await cancelOrderApi(
+          order.order_number,
+          body,
+        );
+      } else {
+
+        await cancelOrderLineApi(
+          order.order_number,
+          cancelTarget.lineId,
+          body,
+        );
+      }
+
+      await refetchOrder();
+
+      setCancelTarget(
+        null,
+      );
+
+      setCancelReason(
+        "",
+      );
+    } catch (err) {
+
+      setCancelModalError(
+
+        formatProductApiError(
+          err.response?.data,
+        ) ||
+
+          err.message ||
+
+          "Could not complete cancellation.",
+      );
+    } finally {
+
+      setCancelBusy(
+        false,
+      );
+    }
+  };
+
   return (
 
     <div className="artisan-shop order-detail-shell">
@@ -151,12 +387,30 @@ export default function OrderDetail() {
             </p>
           </div>
 
-          <Link
-            className="checkout-back"
-            to="/shop"
+          <div
+            style={{
+              display: "flex",
+              gap: "0.5rem",
+              flexWrap: "wrap",
+              justifyContent: "flex-end",
+            }}
           >
-            Continue shopping
-          </Link>
+
+            <Link
+              className="checkout-back"
+              to="/orders"
+            >
+              My orders
+            </Link>
+
+            <Link
+              className="checkout-back"
+              to="/shop"
+            >
+              Continue shopping
+            </Link>
+
+          </div>
 
         </header>
 
@@ -176,6 +430,8 @@ export default function OrderDetail() {
               {error}
             </div>
           ) : order ? (
+
+            <>
 
             <div className="checkout-panel">
 
@@ -221,6 +477,48 @@ export default function OrderDetail() {
 
               </p>
 
+              {
+                order.cancelled_at && (
+
+                  <p
+                    style={{
+                      margin: "0 0 0.75rem",
+                      fontSize: "0.9rem",
+                      color: "#7a4a4a",
+                    }}
+                  >
+
+                    <strong>
+                      Cancelled on:
+                    </strong>
+
+                    {" "}
+
+                    {
+                      new Date(
+                        order.cancelled_at,
+                      ).toLocaleString()
+                    }
+
+                    {
+                      order.cancellation_reason
+                        ? (
+                          <>
+
+                            {" "}
+                            —
+                            {" "}
+
+                            {order.cancellation_reason}
+                          </>
+                        )
+                        : null
+                    }
+
+                  </p>
+                )
+              }
+
               <p style={{ margin: "0 0 1rem", fontSize: "0.9rem", color: "#5c534a" }}>
 
                 <strong>
@@ -248,6 +546,68 @@ export default function OrderDetail() {
 
               </p>
 
+              {
+                invoiceError && (
+
+                  <div
+                    className="shop-banner error cart-bag-banner"
+                    role="alert"
+                    style={{ marginBottom: "0.75rem" }}
+                  >
+
+                    {invoiceError}
+                  </div>
+                )
+              }
+
+              <div
+                style={{
+                  marginBottom: "1rem",
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: "0.5rem",
+                }}
+              >
+
+                <button
+                  type="button"
+                  className="checkout-btn-secondary"
+                  disabled={
+                    invoiceBusy
+                  }
+                  onClick={
+                    handleDownloadInvoice
+                  }
+                >
+
+                  {
+                    invoiceBusy
+                      ? "Preparing PDF…"
+                      : "Download invoice (PDF)"
+                  }
+                </button>
+
+                {
+                  canModifyOrder && (
+
+                    <button
+                      type="button"
+                      className="checkout-btn-secondary order-cancel-order-btn"
+                      disabled={
+                        invoiceBusy
+                      }
+                      onClick={
+                        openCancelOrderModal
+                      }
+                    >
+
+                      Cancel entire order
+                    </button>
+                  )
+                }
+
+              </div>
+
               <h2 className="checkout-panel-title artisan-font-serif">
 
                 Items
@@ -271,6 +631,10 @@ export default function OrderDetail() {
                       Line total
                     </th>
 
+                    <th style={{ textAlign: "right", whiteSpace: "nowrap" }}>
+                      Actions
+                    </th>
+
                   </tr>
 
                 </thead>
@@ -279,15 +643,41 @@ export default function OrderDetail() {
 
                   {
                     (order.lines || []).map(
-                      (line) => (
+                      (line) => {
 
-                        <tr key={line.id}>
+                        const lineCancelled =
+                          line.status === "cancelled";
+
+                        return (
+
+                        <tr
+                          key={line.id}
+                          className={
+                            lineCancelled
+                              ? "order-detail-line--cancelled"
+                              : undefined
+                          }
+                        >
 
                           <td>
 
                             <div style={{ fontWeight: 600 }}>
 
                               {line.product_name}
+
+                              {
+                                lineCancelled
+                                  ? (
+
+                                    <span className="order-detail-line-badge">
+
+                                      {" "}
+                                      Cancelled
+                                    </span>
+                                  )
+                                  : null
+                              }
+
                             </div>
 
                             <div style={{ fontSize: "0.82rem", color: "#6b635c" }}>
@@ -300,6 +690,18 @@ export default function OrderDetail() {
 
                               {line.sku}
                             </div>
+
+                            {
+                              lineCancelled && line.cancellation_reason
+                                ? (
+
+                                  <div className="order-detail-line-reason">
+
+                                    {line.cancellation_reason}
+                                  </div>
+                                )
+                                : null
+                            }
 
                           </td>
 
@@ -314,8 +716,38 @@ export default function OrderDetail() {
                             {formatMoney(line.line_total)}
                           </td>
 
+                          <td style={{ textAlign: "right" }}>
+
+                            {
+                              canModifyOrder && !lineCancelled
+                                ? (
+
+                                  <button
+                                    type="button"
+                                    className="order-cancel-line-btn"
+                                    onClick={() => {
+
+                                      openCancelLineModal(
+                                        line.id,
+                                      );
+                                    }}
+                                  >
+
+                                    Cancel line
+                                  </button>
+                                )
+                                : (
+                                  <span className="cart-bag-muted">
+                                    —
+                                  </span>
+                                )
+                            }
+
+                          </td>
+
                         </tr>
-                      ),
+                      );
+                      },
                     )
                   }
 
@@ -400,6 +832,135 @@ export default function OrderDetail() {
               </div>
 
             </div>
+
+            {
+              cancelTarget && (
+
+                <div
+                  className="order-cancel-overlay"
+                  role="presentation"
+                  onClick={
+                    closeCancelModal
+                  }
+                >
+
+                  <div
+                    className="order-cancel-dialog"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="order-cancel-title"
+                    onClick={(e) => {
+
+                      e.stopPropagation();
+                    }}
+                  >
+
+                    <h2
+                      id="order-cancel-title"
+                      className="checkout-panel-title artisan-font-serif"
+                      style={{ marginTop: 0 }}
+                    >
+
+                      {
+                        cancelTarget.type === "order"
+                          ? "Cancel entire order?"
+                          : "Cancel this line?"
+                      }
+
+                    </h2>
+
+                    <p className="order-cancel-dialog-hint">
+
+                      {
+                        cancelTarget.type === "order"
+                          ? "This cancels every item and restores stock. This cannot be undone."
+                          : "Stock for this item will be restored. If it is your last active item, the whole order will be cancelled."
+                      }
+
+                    </p>
+
+                    <label
+                      className="order-cancel-label"
+                      htmlFor="order-cancel-reason"
+                    >
+
+                      Reason (optional)
+                    </label>
+
+                    <textarea
+                      id="order-cancel-reason"
+                      className="order-cancel-textarea"
+                      rows={3}
+                      maxLength={500}
+                      value={
+                        cancelReason
+                      }
+                      onChange={(e) => {
+
+                        setCancelReason(
+                          e.target.value,
+                        );
+                      }}
+                      placeholder="Tell us why (optional)"
+                    />
+
+                    {
+                      cancelModalError && (
+
+                        <div
+                          className="shop-banner error cart-bag-banner"
+                          role="alert"
+                          style={{ marginBottom: "0.75rem" }}
+                        >
+
+                          {cancelModalError}
+                        </div>
+                      )
+                    }
+
+                    <div className="order-cancel-dialog-actions">
+
+                      <button
+                        type="button"
+                        className="checkout-btn-secondary"
+                        disabled={
+                          cancelBusy
+                        }
+                        onClick={
+                          closeCancelModal
+                        }
+                      >
+
+                        Keep order
+                      </button>
+
+                      <button
+                        type="button"
+                        className="checkout-btn-primary order-cancel-confirm-btn"
+                        disabled={
+                          cancelBusy
+                        }
+                        onClick={
+                          submitCancel
+                        }
+                      >
+
+                        {
+                          cancelBusy
+                            ? "Working…"
+                            : "Confirm cancel"
+                        }
+                      </button>
+
+                    </div>
+
+                  </div>
+
+                </div>
+              )
+            }
+
+            </>
           ) : null
         }
 

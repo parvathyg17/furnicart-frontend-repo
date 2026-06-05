@@ -612,6 +612,473 @@ body {
   font-size: 14px;
 }
 
+/* —— My orders (artisan card layout) —— */
+.orders-artisan-wrap {
+  width: 100%;
+  max-width: 880px;
+}
+
+.orders-artisan-head {
+  margin-bottom: 1.5rem;
+}
+
+.orders-artisan-title {
+  font-family: "Playfair Display", serif;
+  font-size: clamp(1.65rem, 3vw, 2.1rem);
+  font-weight: 600;
+  color: #2c241c;
+  margin: 0 0 0.45rem;
+  letter-spacing: -0.02em;
+}
+
+.orders-artisan-lead {
+  margin: 0;
+  color: #6b635c;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  max-width: 36rem;
+}
+
+.orders-artisan-search {
+  margin-bottom: 1rem;
+}
+
+.orders-artisan-search-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 0.65rem 0.55rem 0.85rem;
+  background: #fff;
+  border: 1px solid #e0d5c8;
+  border-radius: 999px;
+  box-shadow: 0 1px 0 rgba(44, 36, 28, 0.04);
+}
+
+.orders-artisan-search-icon {
+  flex-shrink: 0;
+  color: #8b7f72;
+}
+
+.orders-artisan-search-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  font-size: 0.95rem;
+  font-family: inherit;
+  color: #2c241c;
+  outline: none;
+}
+
+.orders-artisan-search-input::placeholder {
+  color: #a69b8f;
+}
+
+.orders-artisan-search-btn {
+  flex-shrink: 0;
+  padding: 0.5rem 1.15rem;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.88rem;
+  font-family: inherit;
+  background: linear-gradient(180deg, #4a3226 0%, #35241c 100%);
+  color: #faf8f5;
+}
+
+.orders-artisan-search-btn:hover {
+  filter: brightness(1.05);
+}
+
+.orders-artisan-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.orders-artisan-pill {
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  border: 1px solid #d4c9bc;
+  background: #fff;
+  color: #5c534a;
+  font-size: 0.86rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.orders-artisan-pill:hover {
+  border-color: #b9a896;
+  color: #2c241c;
+}
+
+.orders-artisan-pill--active {
+  background: linear-gradient(180deg, #4a3226 0%, #35241c 100%);
+  border-color: #35241c;
+  color: #faf8f5;
+}
+
+.orders-artisan-clear {
+  display: block;
+  margin: 0 0 1rem;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #6b5344;
+  font-size: 0.86rem;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.orders-artisan-banner {
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  background: #fff5f5;
+  color: #8b2e2e;
+  font-size: 0.9rem;
+}
+
+.orders-artisan-muted {
+  color: #7a7168;
+}
+
+.orders-artisan-empty {
+  text-align: center;
+  padding: 2.5rem 1.25rem;
+  border: 1px dashed #d4c9bc;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.7);
+  color: #6b635c;
+}
+
+.orders-artisan-empty-cta {
+  margin-top: 1rem;
+  display: inline-block;
+}
+
+.orders-artisan-count {
+  margin: 0 0 1rem;
+  font-size: 0.92rem;
+  color: #6b635c;
+}
+
+.orders-artisan-count strong {
+  color: #2c241c;
+}
+
+.orders-artisan-cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.orders-artisan-card {
+  background: #fff;
+  border: 1px solid #e7dfd7;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(44, 36, 28, 0.06);
+}
+
+.orders-artisan-card-head {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 0.75rem 1rem;
+  align-items: start;
+  padding: 1rem 1.15rem;
+  background: linear-gradient(180deg, #f3efe8 0%, #ebe4db 100%);
+  border-bottom: 1px solid #e0d5c8;
+}
+
+@media (max-width: 720px) {
+  .orders-artisan-card-head {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .orders-artisan-card-detail {
+    grid-column: 1 / -1;
+  }
+}
+
+.orders-artisan-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.orders-artisan-card-label {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #7a7168;
+  font-weight: 600;
+}
+
+.orders-artisan-card-value {
+  font-size: 0.92rem;
+  color: #2c241c;
+  font-weight: 500;
+}
+
+.orders-artisan-card-id {
+  font-family: ui-monospace, monospace;
+  font-size: 0.85rem;
+}
+
+.orders-artisan-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #2c241c;
+}
+
+.orders-artisan-status::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #a69b8f;
+}
+
+.orders-artisan-status--pending::before {
+  background: #d4a017;
+}
+
+.orders-artisan-status--shipped::before {
+  background: #2f6fad;
+}
+
+.orders-artisan-status--out_for_delivery::before {
+  background: #5b7c99;
+}
+
+.orders-artisan-status--delivered::before {
+  background: #2d6b3a;
+}
+
+.orders-artisan-status--cancelled::before {
+  background: #a34b4b;
+}
+
+.orders-artisan-card-detail {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  justify-self: end;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #4a3226;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.orders-artisan-card-detail:hover {
+  text-decoration: underline;
+}
+
+.orders-artisan-card-body {
+  padding: 0.85rem 1.15rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.orders-artisan-line {
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  gap: 0.85rem;
+  align-items: center;
+}
+
+.orders-artisan-line--cancelled {
+  opacity: 0.7;
+}
+
+.orders-artisan-line--cancelled .orders-artisan-line-title::after {
+  content: " · cancelled";
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #9a6b6b;
+}
+
+.orders-artisan-line-thumb {
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f3efe8;
+  border: 1px solid #e7dfd7;
+}
+
+.orders-artisan-line-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.orders-artisan-line-ph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 0.65rem;
+  color: #9a9188;
+  text-align: center;
+  padding: 0.25rem;
+}
+
+.orders-artisan-line-title {
+  font-family: "Playfair Display", serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #2c241c;
+  line-height: 1.25;
+}
+
+.orders-artisan-line-sub {
+  font-size: 0.82rem;
+  color: #6b635c;
+  margin-top: 0.2rem;
+}
+
+.orders-artisan-line-price {
+  text-align: right;
+}
+
+.orders-artisan-line-amount {
+  font-weight: 600;
+  color: #2c241c;
+  font-size: 0.92rem;
+}
+
+.orders-artisan-line-qty {
+  font-size: 0.78rem;
+  color: #7a7168;
+  margin-top: 0.2rem;
+}
+
+.orders-artisan-card-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 1.15rem 1.05rem;
+  border-top: 1px solid #efe8df;
+  background: #fdfcfa;
+}
+
+.orders-artisan-card-hint {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #6b635c;
+  line-height: 1.45;
+  max-width: 22rem;
+}
+
+.orders-artisan-card-total {
+  text-align: right;
+  margin-left: auto;
+}
+
+.orders-artisan-card-total-label {
+  display: block;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #7a7168;
+  font-weight: 600;
+}
+
+.orders-artisan-card-total-amt {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #2c241c;
+  font-variant-numeric: tabular-nums;
+}
+
+.orders-artisan-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 1.75rem;
+}
+
+.orders-artisan-page-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid #d4c9bc;
+  background: #fff;
+  color: #4a3226;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.orders-artisan-page-btn:hover:not(:disabled) {
+  background: #faf8f5;
+  border-color: #b9a896;
+}
+
+.orders-artisan-page-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.orders-artisan-page-num {
+  min-width: 40px;
+  height: 40px;
+  padding: 0 0.35rem;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #5c534a;
+  font-weight: 600;
+  font-size: 0.9rem;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.orders-artisan-page-num:hover {
+  background: rgba(74, 50, 38, 0.06);
+}
+
+.orders-artisan-page-num--active {
+  background: linear-gradient(180deg, #4a3226 0%, #35241c 100%);
+  color: #faf8f5;
+  border-color: #35241c;
+}
+
+.orders-artisan-page-ellipsis {
+  padding: 0 0.25rem;
+  color: #a69b8f;
+  font-weight: 600;
+}
+
+.secondary-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 /* =========================================
    RESPONSIVE
 ========================================= */

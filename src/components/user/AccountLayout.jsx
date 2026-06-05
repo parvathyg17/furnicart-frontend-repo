@@ -9,6 +9,7 @@ import {
   LogOut,
   ShoppingCart,
   Heart,
+  Package,
 } from "lucide-react";
 
 import {
@@ -220,6 +221,21 @@ export default function AccountLayout({
             >
               <User size={18} />
               Profile
+            </NavLink>
+
+            <NavLink
+              to="/orders"
+              end
+              className={({
+                isActive,
+              }) =>
+                isActive
+                  ? "account-menu active"
+                  : "account-menu"
+              }
+            >
+              <Package size={18} />
+              My orders
             </NavLink>
 
             <NavLink

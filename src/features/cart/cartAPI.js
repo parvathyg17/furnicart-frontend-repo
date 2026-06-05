@@ -59,3 +59,12 @@ export async function validateCheckoutApi() {
 
   return response.data;
 }
+
+export async function fetchCheckoutPreview() {
+
+  const response = await api.get(
+    "cart/checkout-preview/",
+  );
+
+  return response.data;
+}

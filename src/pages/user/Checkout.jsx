@@ -22,6 +22,7 @@ import {
 
 import {
   fetchCart,
+  fetchCheckoutPreview,
 } from "../../features/cart/cartAPI";
 
 import {
@@ -73,6 +74,29 @@ function lineImageUrl(variant) {
   return pick.image_url || pick.image || null;
 }
 
+function gstPercentLabel(
+  gstRateStr,
+) {
+
+  const n = Number(
+    gstRateStr,
+  );
+
+  if (
+    Number.isNaN(
+      n,
+    ) ||
+    n <= 0
+  ) {
+
+    return null;
+  }
+
+  return Math.round(
+    n * 100,
+  );
+}
+
 export default function Checkout() {
 
   const dispatch = useDispatch();
@@ -104,6 +128,23 @@ export default function Checkout() {
   ] = useState(null);
 
   const [
+    pricingPreview,
+    setPricingPreview,
+  ] = useState(null);
+
+  const [
+    pricingError,
+    setPricingError,
+  ] = useState(null);
+
+  const [
+    selectedPaymentMethod,
+    setSelectedPaymentMethod,
+  ] = useState(
+    "cod",
+  );
+
+  const [
     placeError,
     setPlaceError,
   ] = useState(null);
@@ -133,11 +174,46 @@ export default function Checkout() {
 
         try {
 
-          const res = await fetchCart();
+          const cartRes = await fetchCart();
 
           if (!cancelled) {
 
-            setCartData(res);
+            setCartData(
+              cartRes,
+            );
+          }
+
+          try {
+
+            const preview = await fetchCheckoutPreview();
+
+            if (!cancelled) {
+
+              setPricingPreview(
+                preview,
+              );
+
+              setPricingError(
+                null,
+              );
+            }
+          } catch (prevErr) {
+
+            if (!cancelled) {
+
+              setPricingPreview(
+                null,
+              );
+
+              setPricingError(
+
+                formatProductApiError(
+                  prevErr.response?.data,
+                ) ||
+
+                  "Could not load checkout totals.",
+              );
+            }
           }
         } catch (err) {
 
@@ -185,24 +261,44 @@ export default function Checkout() {
   }, [addresses, selectedAddressId]);
 
   const subtotalNum = Number(
-    cartData?.subtotal ?? 0,
+    pricingPreview?.subtotal ??
+      cartData?.subtotal ??
+      0,
   );
 
-  const taxDisplay = 0;
-
-  const shipDisplay = 0;
-
-  const discountDisplay = 0;
-
-  const grandPreview = (
-    subtotalNum + taxDisplay + shipDisplay - discountDisplay
+  const taxNum = Number(
+    pricingPreview?.tax_total ?? 0,
   );
+
+  const shipNum = Number(
+    pricingPreview?.shipping_total ?? 0,
+  );
+
+  const discountNum = Number(
+    pricingPreview?.discount_total ?? 0,
+  );
+
+  const grandNum = Number(
+    pricingPreview?.grand_total ??
+      (
+        subtotalNum + taxNum + shipNum - discountNum
+      ),
+  );
+
+  const gstPct = gstPercentLabel(
+    pricingPreview?.gst_rate,
+  );
+
+  const freeShipMin = pricingPreview?.free_shipping_min_subtotal;
 
   const canPlace =
     Boolean(
       cartData?.items?.length &&
       cartData?.can_checkout &&
+      pricingPreview &&
+      !pricingError &&
       selectedAddressId &&
+      selectedPaymentMethod === "cod" &&
       !placeBusy,
     );
 
@@ -217,6 +313,8 @@ export default function Checkout() {
       const order = await createOrderApi(
         {
           address_id: selectedAddressId,
+
+          payment_method: selectedPaymentMethod,
         },
       );
 
@@ -259,8 +357,9 @@ export default function Checkout() {
 
             <p className="checkout-sub">
 
-              Choose a delivery address and confirm your order. Payment is
-              cash on delivery.
+              Choose a delivery address, payment method, and confirm. Tax
+              (GST) and shipping are calculated on our servers — totals here
+              match what you pay.
             </p>
           </div>
 
@@ -272,6 +371,19 @@ export default function Checkout() {
           </Link>
 
         </header>
+
+        {
+          pricingError && (
+
+            <div
+              className="shop-banner error cart-bag-banner"
+              role="alert"
+            >
+
+              {pricingError}
+            </div>
+          )
+        }
 
         {
           cartError && (
@@ -561,16 +673,22 @@ export default function Checkout() {
                   <div className="checkout-summary-line">
 
                     <dt>
-                      Taxes
+
+                      {
+                        gstPct != null
+                          ? `GST (${gstPct}%)`
+                          : "GST"
+                      }
+
                     </dt>
 
-                    <dd className="checkout-summary-muted">
+                    <dd>
 
                       ₹
-                      {formatMoney(taxDisplay)}
+                      {formatMoney(
+                        taxNum,
+                      )}
 
-                      {" "}
-                      (optional — not charged yet)
                     </dd>
 
                   </div>
@@ -581,14 +699,47 @@ export default function Checkout() {
                       Shipping
                     </dt>
 
-                    <dd className="checkout-summary-muted">
+                    <dd>
 
-                      ₹
-                      {formatMoney(shipDisplay)}
+                      {
+                        pricingPreview?.shipping_tier ===
+                        "free_over_threshold"
+                          ? (
+
+                              <span>
+
+                                Free
+                              </span>
+                            )
+                          : (
+
+                              <>
+                                ₹
+                                {formatMoney(
+                                  shipNum,
+                                )}
+                              </>
+                            )
+                      }
 
                     </dd>
 
                   </div>
+
+                  {
+                    freeShipMin && (
+
+                      <p className="checkout-pricing-note">
+
+                        Free shipping on subtotals of ₹
+                        {formatMoney(
+                          freeShipMin,
+                        )}
+                        {" "}
+                        or more; otherwise a flat delivery fee applies.
+                      </p>
+                    )
+                  }
 
                   <div className="checkout-summary-line">
 
@@ -596,10 +747,19 @@ export default function Checkout() {
                       Discounts
                     </dt>
 
-                    <dd className="checkout-summary-muted">
+                    <dd>
 
                       ₹
-                      {formatMoney(discountDisplay)}
+                      {formatMoney(
+                        discountNum,
+                      )}
+
+                      {" "}
+
+                      <span className="checkout-summary-muted">
+
+                        (coupons coming later)
+                      </span>
 
                     </dd>
 
@@ -612,26 +772,138 @@ export default function Checkout() {
                 <div className="checkout-summary-total">
 
                   <span>
-                    Total (preview)
+                    Total
                   </span>
 
                   <span>
 
                     ₹
-                    {formatMoney(grandPreview)}
+                    {formatMoney(
+                      grandNum,
+                    )}
                   </span>
 
                 </div>
 
-                <div className="checkout-cod">
+                <section
+                  className="checkout-payment-block"
+                  aria-label="Payment method"
+                >
 
-                  <strong>
-                    Cash on delivery
-                  </strong>
+                  <h3 className="checkout-payment-title artisan-font-serif">
 
-                  Pay when your order arrives. You will receive confirmation on
-                  this order number after placing the order.
-                </div>
+                    Payment
+                  </h3>
+
+                  <label className="checkout-payment-option">
+
+                    <input
+                      type="radio"
+                      name="pay-method"
+                      value="cod"
+                      checked={
+                        selectedPaymentMethod ===
+                        "cod"
+                      }
+                      onChange={() => {
+
+                        setSelectedPaymentMethod(
+                          "cod",
+                        );
+                      }}
+                    />
+
+                    <div>
+
+                      <div className="checkout-payment-option-head">
+
+                        <strong>
+                          Cash on delivery
+                        </strong>
+
+                      </div>
+
+                      <p className="checkout-payment-option-desc">
+
+                        Pay when your order arrives. Your order total above is
+                        final.
+                      </p>
+
+                    </div>
+
+                  </label>
+
+                  <div
+                    className="checkout-payment-option checkout-payment-option--disabled"
+                    aria-disabled
+                  >
+
+                    <input
+                      type="radio"
+                      name="pay-method"
+                      value="razorpay"
+                      disabled
+                    />
+
+                    <div>
+
+                      <div className="checkout-payment-option-head">
+
+                        <strong>
+                          Razorpay
+                        </strong>
+
+                        <span className="checkout-payment-soon">
+                          Coming soon
+                        </span>
+
+                      </div>
+
+                      <p className="checkout-payment-option-desc">
+
+                        Card, UPI, and net banking — not available yet.
+                      </p>
+
+                    </div>
+
+                  </div>
+
+                  <div
+                    className="checkout-payment-option checkout-payment-option--disabled"
+                    aria-disabled
+                  >
+
+                    <input
+                      type="radio"
+                      name="pay-method"
+                      value="wallet"
+                      disabled
+                    />
+
+                    <div>
+
+                      <div className="checkout-payment-option-head">
+
+                        <strong>
+                          Wallet
+                        </strong>
+
+                        <span className="checkout-payment-soon">
+                          Coming soon
+                        </span>
+
+                      </div>
+
+                      <p className="checkout-payment-option-desc">
+
+                        Pay with your Furnicart wallet — not available yet.
+                      </p>
+
+                    </div>
+
+                  </div>
+
+                </section>
 
                 <button
                   type="button"

@@ -187,7 +187,7 @@ export default function Cart() {
                 setData(res);
               } catch {
 
-                /* keep last good snapshot */
+                
               }
             }
           )();

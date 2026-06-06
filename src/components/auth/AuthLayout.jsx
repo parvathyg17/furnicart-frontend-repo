@@ -172,7 +172,7 @@ function AuthLayout({
 
 
       
-      <footer className="auth-footer">
+      {/* <footer className="auth-footer">
 
         <div className="footer-logo">
 
@@ -203,7 +203,7 @@ function AuthLayout({
 
         </div>
 
-      </footer>
+      </footer> */}
 
     </div>
   );

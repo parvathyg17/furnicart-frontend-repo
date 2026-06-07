@@ -3,6 +3,7 @@ import "../../styles/shop.css";
 import {
   useCallback,
   useEffect,
+  useRef,
   useState,
 } from "react";
 
@@ -19,6 +20,14 @@ import {
 } from "../../features/cart/cartAPI";
 
 import {
+  useBackgroundServerSync,
+} from "../../hooks/useBackgroundServerSync.js";
+
+import {
+  stableStringify,
+} from "../../utils/stableStringify.js";
+
+import {
   formatCheckoutValidationError,
   formatProductApiError,
 } from "../../utils/productApiErrors.js";
@@ -26,8 +35,6 @@ import {
 import {
   Trash2,
 } from "lucide-react";
-
-const CART_POLL_MS = 20000;
 
 function formatCartMoney(
   value,
@@ -116,6 +123,11 @@ export default function Cart() {
     setCheckoutBusy,
   ] = useState(false);
 
+  const lastCartSigRef =
+    useRef(
+      null,
+    );
+
   const load =
     useCallback(
       async (
@@ -125,26 +137,46 @@ export default function Cart() {
         if (!silent) {
 
           setLoading(true);
-        }
 
-        setError(null);
+          setError(null);
+        }
 
         try {
 
           const res =
             await fetchCart();
 
+          const snap =
+            stableStringify(
+              res,
+            );
+
+          if (
+            silent &&
+            lastCartSigRef.current ===
+              snap
+          ) {
+
+            return;
+          }
+
+          lastCartSigRef.current =
+            snap;
+
           setData(res);
         } catch (err) {
 
-          setError(
+          if (!silent) {
 
-            formatProductApiError(
-              err.response?.data
-            ) ||
+            setError(
 
-              "Could not load cart."
-          );
+              formatProductApiError(
+                err.response?.data
+              ) ||
+
+                "Could not load cart."
+            );
+          }
         } finally {
 
           if (!silent) {
@@ -162,81 +194,22 @@ export default function Cart() {
     load();
   }, [load]);
 
-  useEffect(() => {
+  useBackgroundServerSync(
+    {
 
-    const id =
-      setInterval(
-        () => {
+      enabled: true,
 
-          if (
-            document.visibilityState !==
-            "visible"
-          ) {
+      pollIntervalMs: 90_000,
 
-            return;
-          }
-
-          (
-            async () => {
-
-              try {
-
-                const res =
-                  await fetchCart();
-
-                setData(res);
-              } catch {
-
-                
-              }
-            }
-          )();
-        },
-
-        CART_POLL_MS
-      );
-
-    const onVis =
-      () => {
-
-        if (
-          document.visibilityState ===
-          "visible"
-        ) {
-
-          (
-            async () => {
-
-              try {
-
-                const res =
-                  await fetchCart();
-
-                setData(res);
-              } catch {
-
-                /* ignore */
-              }
-            }
-          )();
-        }
-      };
-
-    document.addEventListener(
-      "visibilitychange",
-      onVis
-    );
-
-    return () => {
-
-      clearInterval(id);
-
-      document.removeEventListener(
-        "visibilitychange",
-        onVis
-      );
-    };
-  }, []);
+      onRefresh:
+        () =>
+          load(
+            {
+              silent: true,
+            },
+          ),
+    },
+  );
 
   const changeQty =
     async (

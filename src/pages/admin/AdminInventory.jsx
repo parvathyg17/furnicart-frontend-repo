@@ -3,6 +3,7 @@ import "../../styles/admin-inventory.css";
 import {
   useCallback,
   useEffect,
+  useRef,
   useState,
 } from "react";
 
@@ -22,6 +23,14 @@ import {
 import {
   fetchAdminInventoryStock,
 } from "../../features/admin/adminAPI";
+
+import {
+  useBackgroundServerSync,
+} from "../../hooks/useBackgroundServerSync.js";
+
+import {
+  stableStringify,
+} from "../../utils/stableStringify.js";
 
 const PAGE_SIZE = 20;
 
@@ -354,95 +363,173 @@ export default function AdminInventory() {
     true,
   );
 
-  const load = useCallback(
-    async () => {
+  const lastInventorySigRef =
+    useRef(
+      null,
+    );
 
-      setErr(
-        null,
-      );
+  const load =
+    useCallback(
+      async (
+        { silent = false } = {},
+      ) => {
 
-      setLoading(
-        true,
-      );
+        if (!silent) {
 
-      try {
+          setErr(
+            null,
+          );
 
-        const data = await fetchAdminInventoryStock(
-          {
-            page,
-            pageSize: PAGE_SIZE,
-            search,
-            ordering,
-            lowStock: lowStockFilter,
-          },
-        );
+          setLoading(
+            true,
+          );
+        }
 
-        setRows(
-          data.results || [],
-        );
+        try {
 
-        setTotalPages(
-          data.total_pages || 1,
-        );
+          const data =
+            await fetchAdminInventoryStock(
+              {
+                page,
 
-        setTotalCount(
-          typeof data.count === "number"
-            ? data.count
-            : (
-              data.results || []
-            ).length,
-        );
+                pageSize: PAGE_SIZE,
 
-        if (
-          data.summary
-        ) {
+                search,
 
-          setSummary(
-            data.summary,
+                ordering,
+
+                lowStock: lowStockFilter,
+              },
+            );
+
+          const snapPayload =
+            {
+
+              results:
+                data.results || [],
+
+              total_pages:
+                data.total_pages || 1,
+
+              count:
+                typeof data.count === "number"
+                  ? data.count
+                  : (
+                    data.results || []
+                  ).length,
+
+              summary:
+                data.summary ||
+                null,
+            };
+
+          const snap =
+            stableStringify(
+              snapPayload,
+            );
+
+          if (
+            silent &&
+            lastInventorySigRef.current ===
+              snap
+          ) {
+
+            return;
+          }
+
+          lastInventorySigRef.current =
+            snap;
+
+          setRows(
+            data.results || [],
+          );
+
+          setTotalPages(
+            data.total_pages || 1,
+          );
+
+          setTotalCount(
+            typeof data.count === "number"
+              ? data.count
+              : (
+                data.results || []
+              ).length,
           );
 
           if (
-            typeof data.summary.low_stock_threshold === "number"
+            data.summary
           ) {
 
-            setLowThreshold(
-              data.summary.low_stock_threshold,
+            setSummary(
+              data.summary,
+            );
+
+            if (
+              typeof data.summary.low_stock_threshold === "number"
+            ) {
+
+              setLowThreshold(
+                data.summary.low_stock_threshold,
+              );
+            }
+          }
+        } catch (e) {
+
+          if (!silent) {
+
+            setSummary(
+              null,
+            );
+
+            setErr(
+              e.response?.data?.detail ||
+                "Could not load inventory.",
+            );
+          }
+        } finally {
+
+          if (!silent) {
+
+            setLoading(
+              false,
             );
           }
         }
-      } catch (e) {
-
-        setSummary(
-          null,
-        );
-
-        setErr(
-          e.response?.data?.detail ||
-            "Could not load inventory.",
-        );
-      } finally {
-
-        setLoading(
-          false,
-        );
-      }
-    },
-    [
-      page,
-      search,
-      ordering,
-      lowStockFilter,
-    ],
-  );
+      },
+      [
+        page,
+        search,
+        ordering,
+        lowStockFilter,
+      ],
+    );
 
   useEffect(
     () => {
 
+      lastInventorySigRef.current =
+        null;
+
       load();
     },
-    [
-      load,
-    ],
+    [load],
+  );
+
+  useBackgroundServerSync(
+    {
+
+      enabled: true,
+
+      pollIntervalMs: 90_000,
+
+      onRefresh:
+        () =>
+          load(
+            {
+              silent: true,
+            },
+          ),
+    },
   );
 
   const start = totalCount === 0

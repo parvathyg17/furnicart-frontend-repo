@@ -3,6 +3,7 @@ import "../../styles/account.css";
 import {
   useCallback,
   useEffect,
+  useRef,
   useState,
 } from "react";
 
@@ -29,6 +30,14 @@ import {
 import {
   formatProductApiError,
 } from "../../utils/productApiErrors.js";
+
+import {
+  useBackgroundServerSync,
+} from "../../hooks/useBackgroundServerSync.js";
+
+import {
+  stableStringify,
+} from "../../utils/stableStringify.js";
 
 const PAGE_SIZE = 10;
 
@@ -197,67 +206,133 @@ export default function Purchases() {
     false,
   );
 
-  const load = useCallback(
-    async () => {
+  const lastPurchasesSigRef =
+    useRef(
+      null,
+    );
 
-      setLoading(
-        true,
-      );
+  const load =
+    useCallback(
+      async (
+        { silent = false } = {},
+      ) => {
 
-      setError(
-        null,
-      );
+        if (!silent) {
 
-      try {
+          setLoading(
+            true,
+          );
 
-        const data = await fetchPurchasesList(
-          {
-            page,
-            pageSize: PAGE_SIZE,
-            search,
-            fulfillmentStatus: fulfillmentFilter,
-            lineStatus: lineStatusFilter,
-          },
-        );
+          setError(
+            null,
+          );
+        }
 
-        setResults(
-          data.results || [],
-        );
+        try {
 
-        setTotalPages(
-          data.total_pages || 1,
-        );
-      } catch (err) {
+          const data =
+            await fetchPurchasesList(
+              {
+                page,
 
-        setError(
+                pageSize: PAGE_SIZE,
 
-          formatProductApiError(
-            err.response?.data,
-          ) ||
+                search,
 
-            "Could not load purchases.",
-        );
-      } finally {
+                fulfillmentStatus: fulfillmentFilter,
 
-        setLoading(
-          false,
-        );
-      }
-    },
-    [
-      page,
-      search,
-      fulfillmentFilter,
-      lineStatusFilter,
-    ],
-  );
+                lineStatus: lineStatusFilter,
+              },
+            );
+
+          const snap =
+            stableStringify(
+              {
+
+                results:
+                  data.results || [],
+
+                total_pages:
+                  data.total_pages || 1,
+              },
+            );
+
+          if (
+            silent &&
+            lastPurchasesSigRef.current ===
+              snap
+          ) {
+
+            return;
+          }
+
+          lastPurchasesSigRef.current =
+            snap;
+
+          setResults(
+            data.results || [],
+          );
+
+          setTotalPages(
+            data.total_pages || 1,
+          );
+        } catch (err) {
+
+          if (!silent) {
+
+            setError(
+
+              formatProductApiError(
+                err.response?.data,
+              ) ||
+
+                "Could not load purchases.",
+            );
+          }
+        } finally {
+
+          if (!silent) {
+
+            setLoading(
+              false,
+            );
+          }
+        }
+      },
+      [
+        page,
+        search,
+        fulfillmentFilter,
+        lineStatusFilter,
+      ],
+    );
 
   useEffect(
     () => {
 
+      lastPurchasesSigRef.current =
+        null;
+
       load();
     },
     [load],
+  );
+
+  useBackgroundServerSync(
+    {
+
+      enabled: true,
+
+      pollIntervalMs: 90_000,
+
+      onRefresh:
+        () =>
+          load(
+            {
+              silent: true,
+            },
+          ),
+    },
   );
 
   const handleSearchSubmit = (

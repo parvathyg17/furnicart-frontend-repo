@@ -1,6 +1,7 @@
 import "../../styles/adminusers.css";
 
 import {
+  useCallback,
   useEffect,
   useState,
 } from "react";
@@ -23,6 +24,10 @@ import {
   getUsers,
   toggleUserBlock,
 } from "../../features/admin/adminSlice";
+
+import {
+  useBackgroundServerSync,
+} from "../../hooks/useBackgroundServerSync.js";
 
 export default function AdminUsers() {
 
@@ -73,14 +78,20 @@ export default function AdminUsers() {
   // FETCH USERS
   // ==========================================
 
-  useEffect(() => {
+  const fetchUsersList =
+    useCallback(
+      async (
+        { silent = false } = {},
+      ) => {
 
-    const fetchUsers =
-      async () => {
+        if (!silent) {
+
+          setLoadingLocal(
+            true,
+          );
+        }
 
         try {
-
-          setLoadingLocal(true);
 
           await dispatch(
             getUsers({
@@ -91,24 +102,58 @@ export default function AdminUsers() {
 
         } catch (err) {
 
-          toast.error(
-            err?.error ||
-            "Failed to load users"
-          );
+          if (!silent) {
+
+            toast.error(
+              err?.error ||
+              "Failed to load users"
+            );
+          }
 
         } finally {
 
-          setLoadingLocal(false);
+          if (!silent) {
+
+            setLoadingLocal(
+              false,
+            );
+          }
         }
-      };
+      },
 
-    fetchUsers();
+      [
+        dispatch,
+        page,
+        search,
+      ],
+    );
 
-  }, [
-    dispatch,
-    page,
-    search,
-  ]);
+  useEffect(
+    () => {
+
+      fetchUsersList();
+    },
+    [
+      fetchUsersList,
+    ],
+  );
+
+  useBackgroundServerSync(
+    {
+
+      enabled: true,
+
+      pollIntervalMs: 120_000,
+
+      onRefresh:
+        () =>
+          fetchUsersList(
+            {
+              silent: true,
+            },
+          ),
+    },
+  );
 
   // ==========================================
   // MODAL

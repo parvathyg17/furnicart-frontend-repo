@@ -4,7 +4,9 @@ import "../../styles/home.css";
 import logofc from "../../assets/images/logofc.png";
 
 import {
+  useCallback,
   useEffect,
+  useRef,
   useState,
 } from "react";
 
@@ -28,6 +30,14 @@ import {
 import {
   fetchFeaturedProducts,
 } from "../../features/shop/shopAPI";
+
+import {
+  useBackgroundServerSync,
+} from "../../hooks/useBackgroundServerSync.js";
+
+import {
+  stableStringify,
+} from "../../utils/stableStringify.js";
 
 function featuredProductPrice(product) {
 
@@ -111,47 +121,108 @@ export default function Home() {
     setFeaturedLoading,
   ] = useState(true);
 
-  useEffect(
-    () => {
+  const lastFeaturedSigRef =
+    useRef(
+      null,
+    );
 
-      let cancelled = false;
+  const loadFeatured =
+    useCallback(
+      async (
+        { silent = false } = {},
+      ) => {
 
-      (async () => {
+        if (!silent) {
+
+          setFeaturedLoading(
+            true,
+          );
+        }
 
         try {
 
-          const data = await fetchFeaturedProducts(
-            6
-          );
-
-          if (!cancelled) {
-
-            setFeaturedProducts(
-
-              Array.isArray(data?.results)
-
-                ? data.results
-
-                : []
+          const data =
+            await fetchFeaturedProducts(
+              6,
             );
+
+          const rows =
+            Array.isArray(
+              data?.results,
+            )
+
+              ? data.results
+
+              : [];
+
+          const snap =
+            stableStringify(
+              rows,
+            );
+
+          if (
+            silent &&
+            lastFeaturedSigRef.current ===
+              snap
+          ) {
+
+            return;
           }
+
+          lastFeaturedSigRef.current =
+            snap;
+
+          setFeaturedProducts(
+            rows,
+          );
         } catch {
 
-          if (!cancelled)
-            setFeaturedProducts([]);
+          if (!silent) {
+
+            setFeaturedProducts(
+              [],
+            );
+          }
         } finally {
 
-          if (!cancelled)
-            setFeaturedLoading(false);
+          if (!silent) {
+
+            setFeaturedLoading(
+              false,
+            );
+          }
         }
-      })();
+      },
 
-      return () => {
+      [],
+    );
 
-        cancelled = true;
-      };
+  useEffect(
+    () => {
+
+      loadFeatured();
     },
-    []
+
+    [
+      loadFeatured,
+    ],
+  );
+
+  useBackgroundServerSync(
+    {
+
+      enabled: true,
+
+      pollIntervalMs: 120_000,
+
+      onRefresh:
+        () =>
+          loadFeatured(
+            {
+              silent: true,
+            },
+          ),
+    },
   );
 
   if (checkingAuth) {

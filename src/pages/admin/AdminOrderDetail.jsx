@@ -2,8 +2,10 @@ import "../../styles/admin-orders.css";
 
 import {
   Fragment,
+  useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -24,6 +26,14 @@ import {
   patchAdminLineFulfillment,
   postAdminCancelOrder,
 } from "../../features/admin/adminAPI";
+
+import {
+  useBackgroundServerSync,
+} from "../../hooks/useBackgroundServerSync.js";
+
+import {
+  stableStringify,
+} from "../../utils/stableStringify.js";
 
 const IMAGE_BASE = (
   import.meta.env.VITE_API_URL || ""
@@ -609,40 +619,101 @@ export default function AdminOrderDetail() {
     false,
   );
 
-  const load = async () => {
-
-    setErr(
+  const lastOrderSigRef =
+    useRef(
       null,
     );
 
-    try {
+  const load =
+    useCallback(
+      async (
+        { silent = false } = {},
+      ) => {
 
-      const data = await fetchAdminOrder(
-        decodeURIComponent(
-          orderNumber,
-        ),
-      );
+        if (!silent) {
 
-      setOrder(
-        data,
-      );
-    } catch (e) {
+          setErr(
+            null,
+          );
+        }
 
-      setErr(
-        e.response?.data?.detail ||
-          "Order not found.",
-      );
-    }
-  };
+        try {
+
+          const data =
+            await fetchAdminOrder(
+              decodeURIComponent(
+                orderNumber,
+              ),
+            );
+
+          const snap =
+            stableStringify(
+              data,
+            );
+
+          if (
+            silent &&
+            lastOrderSigRef.current ===
+              snap
+          ) {
+
+            return;
+          }
+
+          lastOrderSigRef.current =
+            snap;
+
+          setOrder(
+            data,
+          );
+        } catch (e) {
+
+          if (!silent) {
+
+            setErr(
+              e.response?.data?.detail ||
+                "Order not found.",
+            );
+          }
+        }
+      },
+
+      [
+        orderNumber,
+      ],
+    );
 
   useEffect(
     () => {
+
+      lastOrderSigRef.current =
+        null;
 
       load();
     },
     [
       orderNumber,
+      load,
     ],
+  );
+
+  useBackgroundServerSync(
+    {
+
+      enabled: Boolean(
+        orderNumber,
+      ),
+
+      pollIntervalMs: 90_000,
+
+      onRefresh:
+        () =>
+          load(
+            {
+              silent: true,
+            },
+          ),
+    },
   );
 
   const tracker = useMemo(
@@ -721,6 +792,11 @@ export default function AdminOrderDetail() {
         value,
       );
 
+      lastOrderSigRef.current =
+        stableStringify(
+          data,
+        );
+
       setOrder(
         data,
       );
@@ -777,6 +853,11 @@ export default function AdminOrderDetail() {
         order.order_number,
         cancelReason,
       );
+
+      lastOrderSigRef.current =
+        stableStringify(
+          data,
+        );
 
       setOrder(
         data,

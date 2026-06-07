@@ -4,6 +4,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -26,6 +27,14 @@ import {
 import {
   formatProductApiError,
 } from "../../utils/productApiErrors.js";
+
+import {
+  useBackgroundServerSync,
+} from "../../hooks/useBackgroundServerSync.js";
+
+import {
+  stableStringify,
+} from "../../utils/stableStringify.js";
 
 const PAGE_SIZE = 10;
 
@@ -404,75 +413,143 @@ export default function OrdersList() {
     "",
   );
 
-  const loadOrders = useCallback(
-    async () => {
+  const lastOrdersSigRef =
+    useRef(
+      null,
+    );
 
-      setLoading(
-        true,
-      );
+  const loadOrders =
+    useCallback(
+      async (
+        { silent = false } = {},
+      ) => {
 
-      setError(
-        null,
-      );
+        if (!silent) {
 
-      try {
+          setLoading(
+            true,
+          );
 
-        const data = await fetchOrdersList(
-          {
-            page: currentPage,
-            pageSize: PAGE_SIZE,
-            search: appliedSearch,
-            status: appliedStatus,
-          },
-        );
+          setError(
+            null,
+          );
+        }
 
-        setResults(
-          data.results || [],
-        );
+        try {
 
-        setCount(
-          data.count ?? 0,
-        );
+          const data =
+            await fetchOrdersList(
+              {
+                page: currentPage,
 
-        setTotalPages(
-          data.total_pages || 1,
-        );
-      } catch (err) {
+                pageSize: PAGE_SIZE,
 
-        setError(
+                search: appliedSearch,
 
-          formatProductApiError(
-            err.response?.data,
-          ) ||
+                status: appliedStatus,
+              },
+            );
 
-            "Could not load orders.",
-        );
+          const snap =
+            stableStringify(
+              {
 
-        setResults(
-          [],
-        );
-      } finally {
+                results:
+                  data.results || [],
 
-        setLoading(
-          false,
-        );
-      }
-    },
-    [
-      currentPage,
-      appliedSearch,
-      appliedStatus,
-    ],
-  );
+                count:
+                  data.count ?? 0,
+
+                total_pages:
+                  data.total_pages || 1,
+              },
+            );
+
+          if (
+            silent &&
+            lastOrdersSigRef.current ===
+              snap
+          ) {
+
+            return;
+          }
+
+          lastOrdersSigRef.current =
+            snap;
+
+          setResults(
+            data.results || [],
+          );
+
+          setCount(
+            data.count ?? 0,
+          );
+
+          setTotalPages(
+            data.total_pages || 1,
+          );
+        } catch (err) {
+
+          if (!silent) {
+
+            setError(
+
+              formatProductApiError(
+                err.response?.data,
+              ) ||
+
+                "Could not load orders.",
+            );
+
+            setResults(
+              [],
+            );
+          }
+        } finally {
+
+          if (!silent) {
+
+            setLoading(
+              false,
+            );
+          }
+        }
+      },
+      [
+        currentPage,
+        appliedSearch,
+        appliedStatus,
+      ],
+    );
 
   useEffect(
     () => {
+
+      lastOrdersSigRef.current =
+        null;
 
       loadOrders();
     },
     [
       loadOrders,
     ],
+  );
+
+  useBackgroundServerSync(
+    {
+
+      enabled: true,
+
+      pollIntervalMs: 90_000,
+
+      onRefresh:
+        () =>
+          loadOrders(
+            {
+              silent: true,
+            },
+          ),
+    },
   );
 
   const handleSearchSubmit = (

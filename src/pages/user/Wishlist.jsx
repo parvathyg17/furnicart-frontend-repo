@@ -5,7 +5,9 @@ import "../../styles/shop.css";
 import logofc from "../../assets/images/logofc.png";
 
 import {
+  useCallback,
   useEffect,
+  useRef,
   useState,
 } from "react";
 
@@ -31,6 +33,14 @@ import {
 import {
   addToCartApi,
 } from "../../features/cart/cartAPI";
+
+import {
+  useBackgroundServerSync,
+} from "../../hooks/useBackgroundServerSync.js";
+
+import {
+  stableStringify,
+} from "../../utils/stableStringify.js";
 
 import {
   formatProductApiError,
@@ -92,6 +102,27 @@ function wishlistVariantImage(
     pick.image ||
     null
   );
+}
+
+function wishlistVariantCanAddToBag(
+  variant,
+) {
+
+  if (!variant)
+    return false;
+
+  if (!variant.is_active)
+    return false;
+
+  if (
+    (Number(variant.stock) || 0) <
+    1
+  ) {
+
+    return false;
+  }
+
+  return true;
 }
 
 function wishlistVariantSubtitle(
@@ -158,53 +189,112 @@ export default function Wishlist() {
     setError,
   ] = useState(null);
 
+  const lastWishlistSigRef =
+    useRef(
+      null,
+    );
+
   const load =
-    async () => {
+    useCallback(
+      async (
+        { silent = false } = {},
+      ) => {
 
-      setLoading(true);
+        if (!silent) {
 
-      setError(null);
+          setLoading(true);
 
-      try {
-
-        const res =
-          await fetchWishlist();
-
-        setItems(
-          res.results || [],
-        );
-      } catch (err) {
-
-        if (
-          err.response?.status ===
-          401
-        ) {
-
-          navigate(
-            "/login",
-          );
-
-          return;
+          setError(null);
         }
 
-        setError(
+        try {
 
-          formatProductApiError(
-            err.response?.data,
-          ) ||
+          const res =
+            await fetchWishlist();
 
-            "Could not load wishlist.",
-        );
-      } finally {
+          const rows =
+            res.results || [];
 
-        setLoading(false);
-      }
-    };
+          const snap =
+            stableStringify(
+              rows,
+            );
+
+          if (
+            silent &&
+            lastWishlistSigRef.current ===
+              snap
+          ) {
+
+            return;
+          }
+
+          lastWishlistSigRef.current =
+            snap;
+
+          setItems(
+            rows,
+          );
+        } catch (err) {
+
+          if (
+            err.response?.status ===
+            401
+          ) {
+
+            navigate(
+              "/login",
+            );
+
+            return;
+          }
+
+          if (!silent) {
+
+            setError(
+
+              formatProductApiError(
+                err.response?.data,
+              ) ||
+
+                "Could not load wishlist.",
+            );
+          }
+        } finally {
+
+          if (!silent) {
+
+            setLoading(false);
+          }
+        }
+      },
+
+      [
+        navigate,
+      ],
+    );
 
   useEffect(() => {
 
     load();
-  }, []);
+  }, [load]);
+
+  useBackgroundServerSync(
+    {
+
+      enabled: true,
+
+      pollIntervalMs: 90_000,
+
+      onRefresh:
+        () =>
+          load(
+            {
+              silent: true,
+            },
+          ),
+    },
+  );
 
   const remove =
     async (variantId) => {
@@ -518,6 +608,11 @@ export default function Wishlist() {
                     const pid =
                       p?.id || "";
 
+                    const canMoveToBag =
+                      wishlistVariantCanAddToBag(
+                        v,
+                      );
+
                     return (
 
                       <li
@@ -543,6 +638,22 @@ export default function Wishlist() {
                                 className="wishlist-card-ph"
                                 aria-hidden="true"
                               />
+                            )
+                          }
+
+                          {
+                            !canMoveToBag && (
+
+                              <span
+                                className="wishlist-card-media-badge"
+                                role="status"
+                              >
+                                {
+                                  v?.is_active === false
+                                    ? "Unavailable"
+                                    : "Out of stock"
+                                }
+                              </span>
                             )
                           }
 
@@ -584,9 +695,45 @@ export default function Wishlist() {
                             )}
                           </p>
 
+                          {
+                            !canMoveToBag && (
+
+                              <p
+                                className="wishlist-card-stock-note"
+                                role="status"
+                              >
+
+                                {
+                                  v?.is_active === false
+                                    ? (
+                                      "This option is no longer available. "
+                                      + "Remove it or pick another variant on the product page."
+                                    )
+                                    : (
+                                      "This item is out of stock. "
+                                      + "You can keep it here and try again later."
+                                    )
+                                }
+
+                              </p>
+                            )
+                          }
+
                           <button
                             type="button"
                             className="wishlist-move-btn"
+                            disabled={
+                              !canMoveToBag
+                            }
+                            aria-label={
+                              canMoveToBag
+                                ? "Move to bag"
+                                : (
+                                  v?.is_active === false
+                                    ? "Unavailable — cannot add to bag"
+                                    : "Out of stock — cannot add to bag"
+                                )
+                            }
                             onClick={() =>
                               moveToCart(
                                 v.id,

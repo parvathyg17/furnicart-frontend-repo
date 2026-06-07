@@ -38,6 +38,10 @@ from "./CreateCategoryModal";
 import EditCategoryModal
 from "./EditCategoryModal";
 
+import {
+  useBackgroundServerSync,
+} from "../../../hooks/useBackgroundServerSync.js";
+
 export default function AdminCategories() {
 
   const dispatch = useDispatch();
@@ -268,6 +272,18 @@ export default function AdminCategories() {
     fetchCategories();
 
   }, [fetchCategories]);
+
+  useBackgroundServerSync(
+    {
+
+      enabled: true,
+
+      pollIntervalMs: 120_000,
+
+      onRefresh:
+        fetchCategories,
+    },
+  );
 
   const handleDelete =
     (categoryId) => {

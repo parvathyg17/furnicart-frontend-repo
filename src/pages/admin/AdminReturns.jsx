@@ -3,6 +3,7 @@ import "../../styles/admin-return.css";
 import {
   useCallback,
   useEffect,
+  useRef,
   useState,
 } from "react";
 
@@ -20,6 +21,14 @@ import {
   fetchAdminReturns,
   patchAdminReturn,
 } from "../../features/admin/adminAPI";
+
+import {
+  useBackgroundServerSync,
+} from "../../hooks/useBackgroundServerSync.js";
+
+import {
+  stableStringify,
+} from "../../utils/stableStringify.js";
 
 const PAGE_SIZE = 10;
 
@@ -438,62 +447,112 @@ export default function AdminReturns() {
     null,
   );
 
-  const load = useCallback(
-    async () => {
+  const lastReturnsSigRef =
+    useRef(
+      null,
+    );
 
-      setErr(
-        null,
-      );
+  const load =
+    useCallback(
+      async (
+        { silent = false } = {},
+      ) => {
 
-      setLoading(
-        true,
-      );
+        if (!silent) {
 
-      try {
+          setErr(
+            null,
+          );
 
-        const data = await fetchAdminReturns(
-          {
-            page,
-            pageSize: PAGE_SIZE,
-            status,
-            search,
-          },
-        );
+          setLoading(
+            true,
+          );
+        }
 
-        setRows(
-          data.results || [],
-        );
+        try {
 
-        setTotalPages(
-          data.total_pages || 1,
-        );
+          const data =
+            await fetchAdminReturns(
+              {
+                page,
 
-        setTotalCount(
-          typeof data.count === "number"
-            ? data.count
-            : (
-              data.results || []
-            ).length,
-        );
-      } catch (e) {
+                pageSize: PAGE_SIZE,
 
-        setErr(
-          e.response?.data?.detail ||
-            "Could not load returns.",
-        );
-      } finally {
+                status,
 
-        setLoading(
-          false,
-        );
-      }
-    },
-    [
-      page,
-      status,
-      search,
-    ],
-  );
+                search,
+              },
+            );
+
+          const snap =
+            stableStringify(
+              {
+
+                results:
+                  data.results || [],
+
+                total_pages:
+                  data.total_pages || 1,
+
+                count:
+                  typeof data.count === "number"
+                    ? data.count
+                    : (
+                      data.results || []
+                    ).length,
+              },
+            );
+
+          if (
+            silent &&
+            lastReturnsSigRef.current ===
+              snap
+          ) {
+
+            return;
+          }
+
+          lastReturnsSigRef.current =
+            snap;
+
+          setRows(
+            data.results || [],
+          );
+
+          setTotalPages(
+            data.total_pages || 1,
+          );
+
+          setTotalCount(
+            typeof data.count === "number"
+              ? data.count
+              : (data.results || []).length,
+          );
+        } catch (e) {
+
+          if (!silent) {
+
+            setErr(
+              e.response?.data?.detail ||
+                "Could not load returns.",
+            );
+          }
+        } finally {
+
+          if (!silent) {
+
+            setLoading(
+              false,
+            );
+          }
+        }
+      },
+      [
+        page,
+        status,
+        search,
+      ],
+    );
 
   useEffect(
     () => {
@@ -505,22 +564,32 @@ export default function AdminReturns() {
       setProcessId(
         null,
       );
-    },
-    [
-      page,
-      status,
-      search,
-    ],
-  );
 
-  useEffect(
-    () => {
+      lastReturnsSigRef.current =
+        null;
 
       load();
     },
     [
       load,
     ],
+  );
+
+  useBackgroundServerSync(
+    {
+
+      enabled: true,
+
+      pollIntervalMs: 90_000,
+
+      onRefresh:
+        () =>
+          load(
+            {
+              silent: true,
+            },
+          ),
+    },
   );
 
   const act = async (

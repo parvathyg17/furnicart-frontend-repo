@@ -7,7 +7,9 @@ import {
 } from "lucide-react";
 
 import {
+  useCallback,
   useEffect,
+  useRef,
   useState,
 } from "react";
 
@@ -16,6 +18,14 @@ import toast from "react-hot-toast";
 import {
   getDashboardStatsAPI,
 } from "../../features/admin/adminAPI";
+
+import {
+  useBackgroundServerSync,
+} from "../../hooks/useBackgroundServerSync.js";
+
+import {
+  stableStringify,
+} from "../../utils/stableStringify.js";
 
 export default function AdminDashboard() {
 
@@ -42,36 +52,95 @@ export default function AdminDashboard() {
   // FETCH DASHBOARD STATS
   // ==========================================
 
-  useEffect(() => {
+  const lastStatsSigRef =
+    useRef(
+      null,
+    );
 
-    const fetchStats =
-      async () => {
+  const loadStats =
+    useCallback(
+      async (
+        { silent = false } = {},
+      ) => {
+
+        if (!silent) {
+
+          setLoadingLocal(
+            true,
+          );
+        }
 
         try {
-
-          setLoadingLocal(true);
 
           const data =
             await getDashboardStatsAPI();
 
-          setStats(data);
+          const snap =
+            stableStringify(
+              data,
+            );
 
+          if (
+            silent &&
+            lastStatsSigRef.current ===
+              snap
+          ) {
+
+            return;
+          }
+
+          lastStatsSigRef.current =
+            snap;
+
+          setStats(
+            data,
+          );
         } catch (err) {
 
-          toast.error(
-            "Failed to load dashboard"
-          );
+          if (!silent) {
 
+            toast.error(
+              "Failed to load dashboard"
+            );
+          }
         } finally {
 
-          setLoadingLocal(false);
+          if (!silent) {
 
+            setLoadingLocal(
+              false,
+            );
+          }
         }
-      };
+      },
 
-    fetchStats();
+      [],
+    );
 
-  }, []);
+  useEffect(
+    () => {
+
+      loadStats();
+    },
+    [loadStats],
+  );
+
+  useBackgroundServerSync(
+    {
+
+      enabled: true,
+
+      pollIntervalMs: 120_000,
+
+      onRefresh:
+        () =>
+          loadStats(
+            {
+              silent: true,
+            },
+          ),
+    },
+  );
 
   // ==========================================
   // LOADING

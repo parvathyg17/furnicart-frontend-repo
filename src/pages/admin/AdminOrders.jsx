@@ -3,6 +3,7 @@ import "../../styles/admin-orders.css";
 import {
   useCallback,
   useEffect,
+  useRef,
   useState,
 } from "react";
 
@@ -20,6 +21,14 @@ import {
 import {
   fetchAdminOrders,
 } from "../../features/admin/adminAPI";
+
+import {
+  useBackgroundServerSync,
+} from "../../hooks/useBackgroundServerSync.js";
+
+import {
+  stableStringify,
+} from "../../utils/stableStringify.js";
 
 const PAGE_SIZE = 10;
 
@@ -460,69 +469,142 @@ export default function AdminOrders() {
     true,
   );
 
-  const load = useCallback(
-    async () => {
+  const lastRowsSigRef =
+    useRef(
+      null,
+    );
 
-      setErr(
-        null,
-      );
+  const load =
+    useCallback(
+      async (
+        { silent = false } = {},
+      ) => {
 
-      setLoading(
-        true,
-      );
+        if (!silent) {
 
-      try {
+          setErr(
+            null,
+          );
 
-        const data = await fetchAdminOrders(
-          {
-            page,
-            pageSize: PAGE_SIZE,
-            search,
-            status,
-            ordering,
-          },
-        );
+          setLoading(
+            true,
+          );
+        }
 
-        setRows(
-          data.results || [],
-        );
+        try {
 
-        setTotalPages(
-          data.total_pages || 1,
-        );
+          const data =
+            await fetchAdminOrders(
+              {
+                page,
 
-        setTotalCount(
-          typeof data.count === "number"
-            ? data.count
-            : (data.results || []).length,
-        );
-      } catch (e) {
+                pageSize: PAGE_SIZE,
 
-        setErr(
-          e.response?.data?.detail ||
-            "Could not load orders.",
-        );
-      } finally {
+                search,
 
-        setLoading(
-          false,
-        );
-      }
-    },
-    [
-      page,
-      search,
-      status,
-      ordering,
-    ],
-  );
+                status,
+
+                ordering,
+              },
+            );
+
+          const snap =
+            stableStringify(
+              {
+
+                results:
+                  data.results || [],
+
+                total_pages:
+                  data.total_pages || 1,
+
+                count:
+                  typeof data.count === "number"
+                    ? data.count
+                    : (
+                      data.results || []
+                    ).length,
+              },
+            );
+
+          if (
+            silent &&
+            lastRowsSigRef.current ===
+              snap
+          ) {
+
+            return;
+          }
+
+          lastRowsSigRef.current =
+            snap;
+
+          setRows(
+            data.results || [],
+          );
+
+          setTotalPages(
+            data.total_pages || 1,
+          );
+
+          setTotalCount(
+            typeof data.count === "number"
+              ? data.count
+              : (data.results || []).length,
+          );
+        } catch (e) {
+
+          if (!silent) {
+
+            setErr(
+              e.response?.data?.detail ||
+                "Could not load orders.",
+            );
+          }
+        } finally {
+
+          if (!silent) {
+
+            setLoading(
+              false,
+            );
+          }
+        }
+      },
+      [
+        page,
+        search,
+        status,
+        ordering,
+      ],
+    );
 
   useEffect(
     () => {
 
+      lastRowsSigRef.current =
+        null;
+
       load();
     },
     [load],
+  );
+
+  useBackgroundServerSync(
+    {
+
+      enabled: true,
+
+      pollIntervalMs: 90_000,
+
+      onRefresh:
+        () =>
+          load(
+            {
+              silent: true,
+            },
+          ),
+    },
   );
 
   const start = totalCount === 0

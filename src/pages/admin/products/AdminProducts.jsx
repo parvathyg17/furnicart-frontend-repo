@@ -2,6 +2,7 @@ import "../../../styles/adminproducts.css";
 
 import toast from "react-hot-toast";
 import {
+  useCallback,
   useEffect,
   useMemo,
   useState,
@@ -42,6 +43,10 @@ import {
 import {
   getAdminRoomTypes,
 } from "../../../features/catalog/roomType/roomTypeSlice";
+
+import {
+  useBackgroundServerSync,
+} from "../../../hooks/useBackgroundServerSync.js";
 
 export default function AdminProducts() {
 
@@ -189,7 +194,64 @@ export default function AdminProducts() {
 
   ]);
 
- 
+  const refreshAdminProducts =
+    useCallback(
+      () => {
+
+        dispatch(
+          getAdminProducts(
+            {
+
+              page: currentPage,
+
+              search,
+
+              sort,
+
+              category,
+
+              room_type: roomType,
+
+              is_active:
+
+                status === "all"
+
+                  ? ""
+
+                  : status === "active"
+
+                    ? "true"
+
+                    : "false",
+            },
+          ),
+        );
+      },
+
+      [
+
+        dispatch,
+        currentPage,
+        search,
+        sort,
+        category,
+        roomType,
+        status,
+
+      ],
+    );
+
+  useBackgroundServerSync(
+    {
+
+      enabled: true,
+
+      pollIntervalMs: 90_000,
+
+      onRefresh:
+        refreshAdminProducts,
+    },
+  );
 
   const openDeleteModal = (
     product

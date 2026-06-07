@@ -29,6 +29,10 @@ import {
 } from "../../../features/catalog/roomType/roomTypeSlice";
 
 import {
+  useBackgroundServerSync,
+} from "../../../hooks/useBackgroundServerSync.js";
+
+import {
   Plus,
   Pencil,
   Trash2,
@@ -202,6 +206,18 @@ export default function AdminRoomTypes() {
     fetchRoomTypes();
 
   }, [fetchRoomTypes]);
+
+  useBackgroundServerSync(
+    {
+
+      enabled: true,
+
+      pollIntervalMs: 120_000,
+
+      onRefresh:
+        fetchRoomTypes,
+    },
+  );
 
   const handleDelete =
     async (roomTypeId) => {

@@ -50,6 +50,7 @@ export async function fetchAdminOrders(
     pageSize = 10,
     search = "",
     status = "",
+    ordering = "-placed_at",
   } = {},
 ) {
 
@@ -89,8 +90,96 @@ export async function fetchAdminOrders(
     );
   }
 
+  if (
+    ordering
+  ) {
+
+    params.set(
+      "ordering",
+      ordering,
+    );
+  }
+
   const res = await api.get(
     `admin/orders/?${params.toString()}`,
+  );
+
+  return res.data;
+}
+
+export async function postAdminCancelOrder(
+  orderNumber,
+  reason = "",
+) {
+
+  const res = await api.post(
+    `admin/orders/${encodeURIComponent(orderNumber)}/cancel/`,
+    {
+      reason: reason || "",
+    },
+  );
+
+  return res.data;
+}
+
+export async function fetchAdminInventoryStock(
+  {
+    page = 1,
+    pageSize = 20,
+    search = "",
+    ordering = "-id",
+    lowStock = false,
+  } = {},
+) {
+
+  const params = new URLSearchParams();
+
+  params.set(
+    "page",
+    String(
+      page,
+    ),
+  );
+
+  params.set(
+    "page_size",
+    String(
+      pageSize,
+    ),
+  );
+
+  if (
+    search.trim()
+  ) {
+
+    params.set(
+      "search",
+      search.trim(),
+    );
+  }
+
+  if (
+    ordering
+  ) {
+
+    params.set(
+      "ordering",
+      ordering,
+    );
+  }
+
+  if (
+    lowStock
+  ) {
+
+    params.set(
+      "low_stock",
+      "1",
+    );
+  }
+
+  const res = await api.get(
+    `admin/inventory/?${params.toString()}`,
   );
 
   return res.data;

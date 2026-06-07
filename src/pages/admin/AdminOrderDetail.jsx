@@ -22,6 +22,7 @@ import {
 import {
   fetchAdminOrder,
   patchAdminLineFulfillment,
+  postAdminCancelOrder,
 } from "../../features/admin/adminAPI";
 
 const IMAGE_BASE = (
@@ -524,6 +525,42 @@ function fulfillmentPillClass(
   return "aod-pill aod-pill--pending";
 }
 
+function canAdminCancelEntireOrder(
+  order,
+) {
+
+  if (
+    !order ||
+    order.status === "cancelled"
+  ) {
+
+    return false;
+  }
+
+  const lines = order.lines || [];
+
+  const active = lines.filter(
+    (
+      ln,
+    ) =>
+      ln.status === "active",
+  );
+
+  if (
+    active.length === 0
+  ) {
+
+    return false;
+  }
+
+  return active.every(
+    (
+      ln,
+    ) =>
+      (ln.fulfillment_status || "pending") === "pending",
+  );
+}
+
 export default function AdminOrderDetail() {
 
   const {
@@ -549,6 +586,27 @@ export default function AdminOrderDetail() {
     setBusyLine,
   ] = useState(
     null,
+  );
+
+  const [
+    cancelModalOpen,
+    setCancelModalOpen,
+  ] = useState(
+    false,
+  );
+
+  const [
+    cancelReason,
+    setCancelReason,
+  ] = useState(
+    "",
+  );
+
+  const [
+    cancelBusy,
+    setCancelBusy,
+  ] = useState(
+    false,
   );
 
   const load = async () => {
@@ -696,6 +754,71 @@ export default function AdminOrderDetail() {
     }
   };
 
+  const onCancelEntireOrder = async () => {
+
+    if (
+      !order?.order_number
+    ) {
+
+      return;
+    }
+
+    setCancelBusy(
+      true,
+    );
+
+    setErr(
+      null,
+    );
+
+    try {
+
+      const data = await postAdminCancelOrder(
+        order.order_number,
+        cancelReason,
+      );
+
+      setOrder(
+        data,
+      );
+
+      setCancelModalOpen(
+        false,
+      );
+
+      setCancelReason(
+        "",
+      );
+    } catch (e) {
+
+      const msg = (
+
+        e.response?.data &&
+        (
+          e.response.data.detail ||
+          e.response.data.reason?.[
+            0
+          ] ||
+          JSON.stringify(
+            e.response.data,
+          )
+        )
+      ) ||
+        "Could not cancel order.";
+
+      setErr(
+        typeof msg === "string"
+          ? msg
+          : "Could not cancel order.",
+      );
+    } finally {
+
+      setCancelBusy(
+        false,
+      );
+    }
+  };
+
   if (
     err &&
     !order
@@ -759,6 +882,10 @@ export default function AdminOrderDetail() {
   ) ||
     0;
 
+  const showAdminCancelOrder = canAdminCancelEntireOrder(
+    order,
+  );
+
   return (
 
     <div className="aod-page">
@@ -804,6 +931,30 @@ export default function AdminOrderDetail() {
           order.placed_at,
         )}
       </p>
+
+      {
+        showAdminCancelOrder && (
+
+          <p style={{ margin: "0 0 1rem" }}>
+
+            <button
+              type="button"
+              className="ao-btn-ghost"
+              style={{
+                borderColor: "#b45309",
+                color: "#b45309",
+              }}
+              onClick={() =>
+                setCancelModalOpen(
+                  true,
+                )
+              }
+            >
+              Cancel entire order
+            </button>
+          </p>
+        )
+      }
 
       {
         err && (
@@ -1406,6 +1557,126 @@ export default function AdminOrderDetail() {
           </div>
         </aside>
       </div>
+
+      {
+        cancelModalOpen && (
+
+          <div
+            className="aod-cancel-overlay"
+            role="presentation"
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(0,0,0,0.35)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 50,
+            }}
+            onClick={() => {
+
+              if (
+                !cancelBusy
+              ) {
+
+                setCancelModalOpen(
+                  false,
+                );
+              }
+            }}
+          >
+
+            <div
+              role="dialog"
+              aria-modal
+              aria-labelledby="aod-cancel-title"
+              style={{
+                background: "#fff",
+                padding: "1.5rem",
+                maxWidth: "26rem",
+                borderRadius: "8px",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
+              }}
+              onClick={(e) =>
+                e.stopPropagation()
+              }
+            >
+
+              <h2
+                id="aod-cancel-title"
+                style={{
+                  margin: "0 0 0.75rem",
+                  fontSize: "1.1rem",
+                }}
+              >
+                Cancel this order?
+              </h2>
+
+              <p style={{ margin: "0 0 1rem", fontSize: "0.9rem", color: "#57534e" }}>
+                This cancels every line that is still unshipped and restores stock.
+                Optional note for the record.
+              </p>
+
+              <label
+                htmlFor="aod-cancel-reason"
+                style={{
+                  display: "block",
+                  fontSize: "0.85rem",
+                  marginBottom: "0.35rem",
+                }}
+              >
+                Note (optional)
+              </label>
+
+              <textarea
+                id="aod-cancel-reason"
+                rows={3}
+                maxLength={500}
+                value={cancelReason}
+                onChange={(e) =>
+                  setCancelReason(
+                    e.target.value,
+                  )
+                }
+                style={{
+                  width: "100%",
+                  boxSizing: "border-box",
+                  marginBottom: "1rem",
+                }}
+              />
+
+              <div style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end" }}>
+
+                <button
+                  type="button"
+                  className="ao-btn-ghost"
+                  disabled={cancelBusy}
+                  onClick={() =>
+                    setCancelModalOpen(
+                      false,
+                    )
+                  }
+                >
+                  Close
+                </button>
+
+                <button
+                  type="button"
+                  className="ao-btn-ghost"
+                  disabled={cancelBusy}
+                  style={{
+                    borderColor: "#b45309",
+                    color: "#b45309",
+                  }}
+                  onClick={onCancelEntireOrder}
+                >
+                  {cancelBusy ? "Cancelling…" : "Confirm cancel"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+      }
     </div>
   );
 }

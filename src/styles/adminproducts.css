@@ -2,11 +2,11 @@
 
 .admin-products-page {
 
-  min-height: 100vh;
+  min-height: 0;
 
-  padding: 40px;
+  padding: 0;
 
-  background: #f5f3ef;
+  background: transparent;
 
   font-family: "Inter", sans-serif;
 }

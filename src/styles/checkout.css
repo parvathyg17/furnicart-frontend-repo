@@ -190,6 +190,30 @@
   font-size: 0.95rem;
 }
 
+.checkout-item-thumb-link {
+  display: block;
+  width: 72px;
+  border-radius: 10px;
+  overflow: hidden;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.checkout-item-thumb-link:focus-visible {
+  outline: 2px solid #c4a882;
+  outline-offset: 2px;
+}
+
+.checkout-item-title a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.checkout-item-title a:hover {
+  color: #5c4a3a;
+}
+
 .checkout-item-sub {
   font-size: 0.8rem;
   color: #6b635c;
@@ -307,6 +331,84 @@
   font-size: 0.78rem;
   color: #8a8078;
   text-align: center;
+}
+
+/* Place-order confirmation */
+.checkout-confirm-block {
+  margin-bottom: 1rem;
+  font-size: 0.88rem;
+  color: #4a423a;
+}
+
+.checkout-confirm-block strong {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: #2c241c;
+  font-size: 0.82rem;
+}
+
+.checkout-confirm-address {
+  margin: 0;
+  line-height: 1.45;
+  color: #5c534a;
+}
+
+.checkout-confirm-items {
+  list-style: none;
+  margin: 0.35rem 0 0;
+  padding: 0;
+}
+
+.checkout-confirm-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid #efe8df;
+  font-size: 0.85rem;
+}
+
+.checkout-confirm-item:last-child {
+  border-bottom: none;
+}
+
+.checkout-confirm-totals {
+  margin: 0 0 1rem;
+  padding: 0.75rem 0 0;
+  border-top: 1px solid #e5dcd2;
+}
+
+.checkout-confirm-total-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.3rem 0;
+  font-size: 0.85rem;
+  color: #5c534a;
+}
+
+.checkout-confirm-total-row span:last-child {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: #3d342b;
+}
+
+.checkout-confirm-grand {
+  margin-top: 0.45rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid #e5dcd2;
+  font-size: 1rem;
+}
+
+.checkout-confirm-grand span:first-child {
+  font-weight: 700;
+  color: #2c241c;
+}
+
+.checkout-confirm-grand span:last-child {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #2c241c;
 }
 
 /* Success */

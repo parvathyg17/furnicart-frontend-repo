@@ -154,6 +154,11 @@ export default function Checkout() {
     setPlaceBusy,
   ] = useState(false);
 
+  const [
+    confirmPlaceOpen,
+    setConfirmPlaceOpen,
+  ] = useState(false);
+
   useEffect(() => {
 
     dispatch(
@@ -291,22 +296,50 @@ export default function Checkout() {
 
   const freeShipMin = pricingPreview?.free_shipping_min_subtotal;
 
-  const canPlace =
+  const orderReady =
     Boolean(
       cartData?.items?.length &&
       cartData?.can_checkout &&
       pricingPreview &&
       !pricingError &&
       selectedAddressId &&
-      selectedPaymentMethod === "cod" &&
+      selectedPaymentMethod === "cod",
+    );
+
+  const canPlace =
+    Boolean(
+      orderReady &&
       !placeBusy,
     );
 
-  const handlePlaceOrder = async () => {
+  const openPlaceConfirm = () => {
 
-    setPlaceError(null);
+    if (
+      !orderReady ||
+      placeBusy
+    ) {
 
-    setPlaceBusy(true);
+      return;
+    }
+
+    setPlaceError(
+      null,
+    );
+
+    setConfirmPlaceOpen(
+      true,
+    );
+  };
+
+  const runPlaceOrder = async () => {
+
+    setPlaceError(
+      null,
+    );
+
+    setPlaceBusy(
+      true,
+    );
 
     try {
 
@@ -316,6 +349,10 @@ export default function Checkout() {
 
           payment_method: selectedPaymentMethod,
         },
+      );
+
+      setConfirmPlaceOpen(
+        false,
       );
 
       navigate(
@@ -336,7 +373,9 @@ export default function Checkout() {
       );
     } finally {
 
-      setPlaceBusy(false);
+      setPlaceBusy(
+        false,
+      );
     }
   };
 
@@ -582,6 +621,31 @@ export default function Checkout() {
                           row.variant,
                         );
 
+                        const productTo =
+                          row.product_id
+                            ? `/shop/product/${row.product_id}`
+                            : null;
+
+                        const thumbEl =
+                          url
+                            ? (
+
+                              <img
+                                className="checkout-item-thumb"
+                                src={url}
+                                alt=""
+                              />
+                            )
+                            : (
+
+                              <div
+                                className="checkout-item-thumb checkout-item-thumb-ph"
+                              >
+
+                                No image
+                              </div>
+                            );
+
                         return (
 
                           <div
@@ -590,29 +654,34 @@ export default function Checkout() {
                           >
 
                             {
-                              url ? (
+                              productTo
+                                ? (
 
-                                <img
-                                  className="checkout-item-thumb"
-                                  src={url}
-                                  alt=""
-                                />
-                              ) : (
-
-                                <div
-                                  className="checkout-item-thumb checkout-item-thumb-ph"
-                                >
-
-                                  No image
-                                </div>
-                              )
+                                  <Link
+                                    to={productTo}
+                                    className="checkout-item-thumb-link"
+                                    aria-label={`View ${row.product_name || "product"}`}
+                                  >
+                                    {thumbEl}
+                                  </Link>
+                                )
+                                : thumbEl
                             }
 
                             <div>
 
                               <div className="checkout-item-title">
 
-                                {row.product_name}
+                                {
+                                  productTo
+                                    ? (
+
+                                      <Link to={productTo}>
+                                        {row.product_name}
+                                      </Link>
+                                    )
+                                    : row.product_name
+                                }
                               </div>
 
                               <div className="checkout-item-sub">
@@ -909,7 +978,7 @@ export default function Checkout() {
                   type="button"
                   className="checkout-place"
                   disabled={!canPlace}
-                  onClick={handlePlaceOrder}
+                  onClick={openPlaceConfirm}
                 >
 
                   {
@@ -943,6 +1012,265 @@ export default function Checkout() {
         }
 
       </main>
+
+      {
+        confirmPlaceOpen &&
+        cartData?.items?.length && (
+
+          <div
+            className="order-cancel-overlay"
+            role="presentation"
+            onClick={() => {
+
+              if (
+                !placeBusy
+              ) {
+
+                setConfirmPlaceOpen(
+                  false,
+                );
+              }
+            }}
+          >
+
+            <div
+              className="order-cancel-dialog"
+              role="dialog"
+              aria-modal
+              aria-labelledby="checkout-confirm-title"
+              onClick={(e) =>
+                e.stopPropagation()
+              }
+            >
+
+              <h2
+                id="checkout-confirm-title"
+                className="checkout-panel-title artisan-font-serif"
+                style={{ marginTop: 0 }}
+              >
+                Confirm your order
+              </h2>
+
+              <p className="order-cancel-dialog-hint">
+                Are you sure you want to place this order? You will pay cash on
+                delivery when your furniture arrives.
+              </p>
+
+              {
+                (() => {
+
+                  const addr = addresses.find(
+                    (
+                      a,
+                    ) =>
+                      a.id === selectedAddressId,
+                  );
+
+                  return addr
+                    ? (
+
+                      <div className="checkout-confirm-block">
+
+                        <strong>
+                          Deliver to
+                        </strong>
+
+                        <p className="checkout-confirm-address">
+
+                          {addr.name}
+                          {" · "}
+                          {addr.phone}
+
+                          <br />
+
+                          {
+                            [
+                              addr.address_line,
+                              addr.city,
+                              `${addr.state} ${addr.pincode}`,
+                            ].filter(Boolean).join(
+                              ", ",
+                            )
+                          }
+
+                        </p>
+                      </div>
+                    )
+                    : null;
+                })()
+              }
+
+              <div className="checkout-confirm-block">
+
+                <strong>
+                  Items
+                </strong>
+
+                <ul className="checkout-confirm-items">
+
+                  {
+                    cartData.items.map(
+                      (
+                        row,
+                      ) => (
+
+                        <li
+                          key={row.id}
+                          className="checkout-confirm-item"
+                        >
+
+                          <span>
+                            {row.product_name}
+                            {" "}
+                            ×
+                            {" "}
+                            {row.quantity}
+                          </span>
+
+                          <span>
+                            ₹
+                            {formatMoney(
+                              row.line_subtotal,
+                            )}
+                          </span>
+                        </li>
+                      ),
+                    )
+                  }
+                </ul>
+              </div>
+
+              <div className="checkout-confirm-totals">
+
+                <div className="checkout-confirm-total-row">
+
+                  <span>
+                    Subtotal
+                  </span>
+
+                  <span>
+                    ₹
+                    {formatMoney(
+                      cartData.subtotal,
+                    )}
+                  </span>
+                </div>
+
+                <div className="checkout-confirm-total-row">
+
+                  <span>
+
+                    {
+                      gstPct != null
+                        ? `GST (${gstPct}%)`
+                        : "GST"
+                    }
+
+                  </span>
+
+                  <span>
+                    ₹
+                    {formatMoney(
+                      taxNum,
+                    )}
+                  </span>
+                </div>
+
+                <div className="checkout-confirm-total-row">
+
+                  <span>
+                    Shipping
+                  </span>
+
+                  <span>
+
+                    {
+                      pricingPreview?.shipping_tier ===
+                      "free_over_threshold"
+                        ? "Free"
+                        : `₹${formatMoney(
+                          shipNum,
+                        )}`
+                    }
+
+                  </span>
+                </div>
+
+                {
+                  discountNum > 0 && (
+
+                    <div className="checkout-confirm-total-row">
+
+                      <span>
+                        Discounts
+                      </span>
+
+                      <span>
+                        −₹
+                        {formatMoney(
+                          discountNum,
+                        )}
+                      </span>
+                    </div>
+                  )
+                }
+
+                <div className="checkout-confirm-total-row checkout-confirm-grand">
+
+                  <span>
+                    Order total
+                  </span>
+
+                  <span>
+                    ₹
+                    {formatMoney(
+                      grandNum,
+                    )}
+                  </span>
+                </div>
+              </div>
+
+              {
+                placeError && (
+
+                  <p
+                    className="shop-banner error cart-bag-banner"
+                    style={{ marginBottom: "0.75rem" }}
+                    role="alert"
+                  >
+                    {placeError}
+                  </p>
+                )
+              }
+
+              <div className="order-cancel-dialog-actions">
+
+                <button
+                  type="button"
+                  className="checkout-btn-secondary"
+                  disabled={placeBusy}
+                  onClick={() =>
+                    setConfirmPlaceOpen(
+                      false,
+                    )
+                  }
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="button"
+                  className="checkout-btn-primary"
+                  disabled={placeBusy}
+                  onClick={runPlaceOrder}
+                >
+                  {placeBusy ? "Placing order…" : "Yes, place order"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+      }
 
     </div>
   );

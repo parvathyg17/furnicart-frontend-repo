@@ -1014,6 +1014,16 @@ body {
   line-height: 1.25;
 }
 
+.orders-artisan-line-title a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.orders-artisan-line-title a:hover {
+  color: #5c4a3a;
+}
+
 .orders-artisan-line-sub {
   font-size: 0.82rem;
   color: #6b635c;

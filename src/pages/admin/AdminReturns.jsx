@@ -586,6 +586,30 @@ export default function AdminReturns() {
     totalPages,
   );
 
+  const filtersActive =
+    Boolean(status) ||
+    Boolean(search.trim()) ||
+    Boolean(draft.trim());
+
+  const handleClearFilters = () => {
+
+    setDraft(
+      "",
+    );
+
+    setSearch(
+      "",
+    );
+
+    setStatus(
+      "",
+    );
+
+    setPage(
+      1,
+    );
+  };
+
   return (
 
     <div className="ar-artisan">
@@ -650,6 +674,19 @@ export default function AdminReturns() {
         >
           Search
         </button>
+
+        {
+          filtersActive && (
+
+            <button
+              type="button"
+              className="ar-btn-ghost"
+              onClick={handleClearFilters}
+            >
+              Clear filters
+            </button>
+          )
+        }
       </form>
 
       {

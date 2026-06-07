@@ -851,7 +851,20 @@ export default function OrdersList() {
 
                                       <div className="orders-artisan-line-title">
 
-                                        {line.product_name}
+                                        {
+                                          line.product_id
+                                            ? (
+
+                                              <Link
+                                                to={
+                                                  `/shop/product/${line.product_id}`
+                                                }
+                                              >
+                                                {line.product_name}
+                                              </Link>
+                                            )
+                                            : line.product_name
+                                        }
                                       </div>
 
                                       <div className="orders-artisan-line-sub">

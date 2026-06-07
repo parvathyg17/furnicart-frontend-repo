@@ -4,11 +4,11 @@ ROOT
 
 .variant-media-page {
 
-  min-height: 100vh;
+  min-height: 0;
 
-  padding: 32px;
+  padding: 0;
 
-  background: #f6f7f9;
+  background: transparent;
 
   font-family: Inter, sans-serif;
 }

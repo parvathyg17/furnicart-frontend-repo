@@ -42,6 +42,27 @@ const STATUS_FILTER = {
   partially_delivered: "Partially delivered",
 };
 
+const DEFAULT_ORDERING = "-placed_at";
+
+const ORDERING_OPTIONS = [
+  {
+    value: "-placed_at",
+    label: "Order date (newest first)",
+  },
+  {
+    value: "placed_at",
+    label: "Order date (oldest first)",
+  },
+  {
+    value: "-grand_total",
+    label: "Total (high to low)",
+  },
+  {
+    value: "grand_total",
+    label: "Total (low to high)",
+  },
+];
+
 function formatMoney(
   v,
 ) {
@@ -419,6 +440,13 @@ export default function AdminOrders() {
   );
 
   const [
+    ordering,
+    setOrdering,
+  ] = useState(
+    DEFAULT_ORDERING,
+  );
+
+  const [
     err,
     setErr,
   ] = useState(
@@ -451,6 +479,7 @@ export default function AdminOrders() {
             pageSize: PAGE_SIZE,
             search,
             status,
+            ordering,
           },
         );
 
@@ -484,6 +513,7 @@ export default function AdminOrders() {
       page,
       search,
       status,
+      ordering,
     ],
   );
 
@@ -510,6 +540,35 @@ export default function AdminOrders() {
     page,
     totalPages,
   );
+
+  const filtersActive =
+    Boolean(status) ||
+    Boolean(search.trim()) ||
+    Boolean(draft.trim()) ||
+    ordering !== DEFAULT_ORDERING;
+
+  const handleClearFilters = () => {
+
+    setDraft(
+      "",
+    );
+
+    setSearch(
+      "",
+    );
+
+    setStatus(
+      "",
+    );
+
+    setOrdering(
+      DEFAULT_ORDERING,
+    );
+
+    setPage(
+      1,
+    );
+  };
 
   return (
 
@@ -604,12 +663,59 @@ export default function AdminOrders() {
 
         </select>
 
+        <select
+          className="ao-filter"
+          value={ordering}
+          onChange={(e) => {
+
+            setPage(
+              1,
+            );
+
+            setOrdering(
+              e.target.value,
+            );
+          }}
+          aria-label="Sort orders"
+        >
+
+          {
+            ORDERING_OPTIONS.map(
+              (
+                opt,
+              ) => (
+
+                <option
+                  key={opt.value}
+                  value={opt.value}
+                >
+                  {opt.label}
+                </option>
+              ),
+            )
+          }
+
+        </select>
+
         <button
           type="submit"
           className="ao-btn-ghost"
         >
           Search
         </button>
+
+        {
+          filtersActive && (
+
+            <button
+              type="button"
+              className="ao-btn-ghost"
+              onClick={handleClearFilters}
+            >
+              Clear filters
+            </button>
+          )
+        }
 
       </form>
 

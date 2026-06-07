@@ -30,10 +30,12 @@ from "../../pages/admin/roomtype/AdminRoomTypes";
 
 import AdminProducts
 from "../../pages/admin/products/AdminProducts";
-
+import AdminVariantMediaLibrary from "../../pages/admin/products/AdminVariantMediaLibrary"
 import AdminProductDetail
 from "../../pages/admin/products/AdminProductDetail";
-import AdminVariantMediaLibrary from "../../pages/admin/products/AdminVariantMediaLibrary";
+import AdminOrders from "../../pages/admin/AdminOrders";
+import AdminOrderDetail from "../../pages/admin/AdminOrderDetail";
+import AdminReturns from "../../pages/admin/AdminReturns";
 
 export default function AdminRoutes() {
 
@@ -114,6 +116,27 @@ export default function AdminRoutes() {
           path="room-types"
           element={
             <AdminRoomType />
+          }
+        />
+
+        <Route
+          path="orders/returns"
+          element={
+            <AdminReturns />
+          }
+        />
+
+        <Route
+          path="orders/:orderNumber"
+          element={
+            <AdminOrderDetail />
+          }
+        />
+
+        <Route
+          path="orders"
+          element={
+            <AdminOrders />
           }
         />
 

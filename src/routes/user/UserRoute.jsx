@@ -31,6 +31,7 @@ import Checkout from "../../pages/user/Checkout";
 import OrderSuccess from "../../pages/user/OrderSuccess";
 import OrdersList from "../../pages/user/OrderList";
 import OrderDetail from "../../pages/user/OrderDetail";
+import Purchases from "../../pages/user/Purchases";
 
 import PrivateRoute from "../user/PrivateRoute";
 import PublicRoute from "../user/PublicRoute";
@@ -79,6 +80,15 @@ export default function UserRoutes() {
         element={
           <PrivateRoute>
             <OrderSuccess />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/purchases"
+        element={
+          <PrivateRoute>
+            <Purchases />
           </PrivateRoute>
         }
       />

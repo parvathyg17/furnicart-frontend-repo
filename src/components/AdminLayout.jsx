@@ -8,6 +8,8 @@ import {
   FolderKanban,
   Sofa,
   Package2,
+  ClipboardList,
+  RotateCcw,
 } from "lucide-react";
 
 import {
@@ -137,6 +139,43 @@ export default function AdminLayout() {
 
               Users
 
+            </Link>
+
+            
+
+            <Link
+              to="/admin/orders"
+              className={
+                location.pathname.startsWith(
+                  "/admin/orders",
+                ) &&
+                !location.pathname.includes(
+                  "/admin/orders/returns",
+                )
+                  ? "admin-nav-link active"
+                  : "admin-nav-link"
+              }
+            >
+
+              <ClipboardList size={20} />
+
+              Orders
+            </Link>
+
+            <Link
+              to="/admin/orders/returns"
+              className={
+                location.pathname.includes(
+                  "/admin/orders/returns",
+                )
+                  ? "admin-nav-link active"
+                  : "admin-nav-link"
+              }
+            >
+
+              <RotateCcw size={20} />
+
+              Returns
             </Link>
 
             

@@ -1,0 +1,489 @@
+/* User order detail — luxe / artisan layout + per-line tracking */
+.odl-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 0 2.5rem;
+}
+
+.odl-breadcrumb {
+  font-size: 0.8rem;
+  color: #6b635c;
+  margin: 0 0 1.25rem;
+}
+
+.odl-breadcrumb a {
+  color: #4a3226;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.odl-breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.odl-breadcrumb span {
+  margin: 0 0.35rem;
+  opacity: 0.45;
+}
+
+.odl-hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.odl-hero-title {
+  font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  font-size: clamp(1.65rem, 3.5vw, 2.25rem);
+  font-weight: 600;
+  color: #1c1917;
+  margin: 0 0 0.35rem;
+  line-height: 1.15;
+}
+
+.odl-hero-sub {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #6b635c;
+}
+
+.odl-btn-invoice {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 1.15rem;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(180deg, #2c241c 0%, #1a1410 100%);
+  color: #faf8f5;
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.odl-btn-invoice:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.odl-btn-invoice:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.odl-meta-strip {
+  font-size: 0.86rem;
+  color: #5c534a;
+  margin-bottom: 1.25rem;
+  line-height: 1.5;
+}
+
+.odl-meta-strip strong {
+  color: #2c241c;
+}
+
+.odl-order-track {
+  background: #fff;
+  border: 1px solid #e7dfd7;
+  border-radius: 16px;
+  padding: 1.25rem 1rem 1.35rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 1px 0 rgba(44, 36, 28, 0.04);
+}
+
+.odl-order-track-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8a8078;
+  margin: 0 0 1rem;
+}
+
+.odl-track-flex {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.odl-track-col {
+  flex: 1 1 0;
+  min-width: 0;
+  text-align: center;
+}
+
+.odl-track-bar {
+  flex: 0.35 1 20px;
+  height: 3px;
+  background: #e7dfd7;
+  border-radius: 2px;
+  margin-top: 17px;
+  min-width: 6px;
+}
+
+.odl-track-bar--on {
+  background: #2d6b3a;
+}
+
+.odl-track-dot {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  margin: 0 auto 0.45rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #e7dfd7;
+  font-size: 0.8rem;
+  background: #faf8f5;
+  color: #a8a29e;
+}
+
+.odl-track-dot--done {
+  background: #2d6b3a;
+  border-color: #2d6b3a;
+  color: #fff;
+}
+
+.odl-track-dot--current {
+  background: #2c241c;
+  border-color: #2c241c;
+  color: #fff;
+  box-shadow: 0 0 0 4px rgba(44, 36, 28, 0.12);
+}
+
+.odl-track-dot--upcoming {
+  background: #fafaf9;
+  color: #a8a29e;
+}
+
+.odl-track-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #78716c;
+  line-height: 1.25;
+}
+
+.odl-track-label--current {
+  color: #2c241c;
+}
+
+.odl-track-label--done {
+  color: #365314;
+}
+
+.odl-track-meta {
+  font-size: 0.7rem;
+  color: #a8a29e;
+  margin-top: 0.15rem;
+  min-height: 1rem;
+}
+
+.odl-cards-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 720px) {
+  .odl-cards-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.odl-info-card {
+  background: #fff;
+  border: 1px solid #e7dfd7;
+  border-radius: 16px;
+  padding: 1.1rem 1.15rem;
+  box-shadow: 0 1px 0 rgba(44, 36, 28, 0.04);
+}
+
+.odl-info-card h3 {
+  margin: 0 0 0.75rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #8a8078;
+}
+
+.odl-info-card p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #2c241c;
+}
+
+.odl-summary-card {
+  background: #fff;
+  border: 1px solid #e7dfd7;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 1px 0 rgba(44, 36, 28, 0.04);
+}
+
+.odl-summary-head {
+  padding: 1rem 1.15rem;
+  border-bottom: 1px solid #e7dfd7;
+}
+
+.odl-summary-head h2 {
+  margin: 0;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #1c1917;
+}
+
+.odl-line-block {
+  border-bottom: 1px solid #efe8e0;
+}
+
+.odl-line-block:last-of-type {
+  border-bottom: none;
+}
+
+.odl-line-row {
+  display: grid;
+  grid-template-columns: 72px 1fr auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 1.1rem 1.15rem;
+}
+
+@media (max-width: 640px) {
+  .odl-line-row {
+    grid-template-columns: 56px 1fr;
+    grid-template-rows: auto auto;
+  }
+
+  .odl-line-side {
+    grid-column: 1 / -1;
+    flex-direction: row !important;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.odl-line-thumb {
+  width: 72px;
+  height: 72px;
+  border-radius: 12px;
+  object-fit: cover;
+  background: #f3efe8;
+  border: 1px solid #e7dfd7;
+}
+
+.odl-line-thumb--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.62rem;
+  text-align: center;
+  color: #a8a29e;
+  line-height: 1.2;
+}
+
+.odl-line-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #1c1917;
+  margin: 0 0 0.25rem;
+}
+
+.odl-line-variant {
+  font-size: 0.82rem;
+  color: #6b635c;
+  margin: 0;
+}
+
+.odl-line-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.odl-line-qty-price {
+  text-align: right;
+  font-size: 0.86rem;
+  color: #5c534a;
+}
+
+.odl-line-qty-price strong {
+  display: block;
+  font-size: 1rem;
+  color: #1c1917;
+  margin-top: 0.15rem;
+}
+
+.odl-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.65rem 0.35rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.odl-status-badge:hover {
+  filter: brightness(0.98);
+}
+
+.odl-status-badge:focus {
+  outline: 2px solid #4a3226;
+  outline-offset: 2px;
+}
+
+.odl-status-badge--pending {
+  background: #fffbeb;
+  color: #92400e;
+  border-color: #fde68a;
+}
+
+.odl-status-badge--shipped {
+  background: #ecfdf5;
+  color: #047857;
+  border-color: #a7f3d0;
+}
+
+.odl-status-badge--ofd {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+}
+
+.odl-status-badge--delivered {
+  background: #f0fdf4;
+  color: #166534;
+  border-color: #bbf7d0;
+}
+
+.odl-status-badge--returned {
+  background: #faf5ff;
+  color: #6b21a8;
+  border-color: #e9d5ff;
+}
+
+.odl-status-badge--cancelled {
+  background: #fef2f2;
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+
+.odl-status-badge--open {
+  box-shadow: 0 0 0 2px rgba(74, 50, 38, 0.15);
+}
+
+.odl-status-badge .odl-chevron {
+  transition: transform 0.2s ease;
+  opacity: 0.85;
+}
+
+.odl-status-badge .odl-chevron--up {
+  transform: rotate(-180deg);
+}
+
+.odl-line-tracking {
+  padding: 0 1.15rem 1.15rem;
+  margin-top: -0.25rem;
+}
+
+.odl-mini-track {
+  background: #faf8f5;
+  border: 1px solid #e7dfd7;
+  border-radius: 12px;
+  padding: 1rem 0.75rem;
+}
+
+.odl-mini-track--muted {
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+.odl-mini-track-note {
+  margin: 0.65rem 0 0;
+  font-size: 0.82rem;
+  color: #6b635c;
+}
+
+.odl-line-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  justify-content: flex-end;
+}
+
+.odl-line-actions button {
+  font-size: 0.78rem;
+}
+
+.odl-totals {
+  padding: 1rem 1.15rem 1.25rem;
+  background: #faf8f5;
+  border-top: 1px solid #e7dfd7;
+}
+
+.odl-totals > div {
+  margin: 0;
+  max-width: 320px;
+  margin-left: auto;
+}
+
+.odl-total-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.88rem;
+  color: #5c534a;
+  padding: 0.35rem 0;
+}
+
+.odl-total-row strong {
+  color: #2c241c;
+}
+
+.odl-total-final {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e7dfd7;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1c1917;
+}
+
+.odl-toolbar-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 1.5rem;
+  font-size: 0.88rem;
+}
+
+.odl-toolbar-links a {
+  color: #4a3226;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.odl-toolbar-links a:hover {
+  text-decoration: underline;
+}

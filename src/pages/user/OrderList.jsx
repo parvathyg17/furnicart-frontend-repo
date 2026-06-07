@@ -36,13 +36,19 @@ const STATUS_LABELS = {
   out_for_delivery: "Out for delivery",
   delivered: "Delivered",
   cancelled: "Cancelled",
+  partially_cancelled: "Partially cancelled",
+  partially_shipped: "Partially shipped",
+  partially_delivered: "Partially delivered",
 };
 
 const STATUS_PILL_ORDER = [
   "",
   "pending",
+  "partially_cancelled",
+  "partially_shipped",
   "shipped",
   "out_for_delivery",
+  "partially_delivered",
   "delivered",
   "cancelled",
 ];
@@ -210,6 +216,18 @@ function orderFooterHint(
         )}.`
         : "Delivered. Thank you for your purchase.";
 
+    case "partially_cancelled":
+
+      return "Some items were cancelled; remaining items are being prepared.";
+
+    case "partially_shipped":
+
+      return "Part of your order is on the way; other items are still preparing.";
+
+    case "partially_delivered":
+
+      return "Some items are delivered; others are still in transit.";
+
     case "cancelled":
 
       return "This order was cancelled.";
@@ -291,6 +309,34 @@ function buildPageList(
   }
 
   return out;
+}
+
+function lineReturnStatusLabel(
+  line,
+) {
+
+  if (
+    line.open_return?.status === "approved"
+  ) {
+
+    return "Return approved";
+  }
+
+  if (
+    line.open_return?.status === "pending"
+  ) {
+
+    return "Return pending review";
+  }
+
+  if (
+    line.last_return?.status === "rejected"
+  ) {
+
+    return "Return request rejected";
+  }
+
+  return null;
 }
 
 export default function OrdersList() {
@@ -537,47 +583,53 @@ export default function OrdersList() {
 
         </form>
 
-        <div className="orders-artisan-pills">
+        <div className="orders-artisan-filter">
 
-          {
-            STATUS_PILL_ORDER.map(
-              (val) => (
+          <label
+            className="orders-artisan-filter-label"
+            htmlFor="orders-status-filter"
+          >
+            Order status
+          </label>
 
-                <button
-                  key={
-                    val ||
-                    "all"
-                  }
-                  type="button"
-                  className={
-                    `orders-artisan-pill${
+          <select
+            id="orders-status-filter"
+            className="orders-artisan-filter-select"
+            value={appliedStatus}
+            onChange={(e) => {
 
-                      appliedStatus === val
-                        ? " orders-artisan-pill--active"
-                        : ""
-                    }`
-                  }
-                  onClick={() => {
+              setAppliedStatus(
+                e.target.value,
+              );
 
-                    setAppliedStatus(
-                      val,
-                    );
+              setCurrentPage(
+                1,
+              );
+            }}
+          >
 
-                    setCurrentPage(
-                      1,
-                    );
-                  }}
-                >
+            {
+              STATUS_PILL_ORDER.map(
+                (val) => (
 
-                  {
-                    STATUS_LABELS[val] ||
-                    "All"
-                  }
-                </button>
-              ),
-            )
-          }
-
+                  <option
+                    key={
+                      val ||
+                      "all"
+                    }
+                    value={val}
+                  >
+                    {
+                      STATUS_LABELS[
+                        val
+                      ] ||
+                      "All"
+                    }
+                  </option>
+                ),
+              )
+            }
+          </select>
         </div>
 
         {
@@ -740,17 +792,39 @@ export default function OrdersList() {
                                   line.image_url,
                                 );
 
+                                const lineClass = (
+
+                                  () => {
+
+                                    if (
+                                      line.status === "cancelled"
+                                    ) {
+
+                                      return "orders-artisan-line orders-artisan-line--cancelled";
+                                    }
+
+                                    if (
+                                      line.fulfillment_status === "returned"
+                                    ) {
+
+                                      return "orders-artisan-line orders-artisan-line--returned";
+                                    }
+
+                                    return "orders-artisan-line";
+                                  }
+                                )();
+
+                                const returnLabel = lineReturnStatusLabel(
+                                  line,
+                                );
+
                                 return (
 
                                   <div
                                     key={
                                       line.id
                                     }
-                                    className={
-                                      line.status === "cancelled"
-                                        ? "orders-artisan-line orders-artisan-line--cancelled"
-                                        : "orders-artisan-line"
-                                    }
+                                    className={lineClass}
                                   >
 
                                     <div className="orders-artisan-line-thumb">
@@ -784,6 +858,30 @@ export default function OrdersList() {
 
                                         {line.variant_name}
                                       </div>
+
+                                      {
+                                        returnLabel && (
+
+                                          <div
+                                            className="orders-artisan-line-sub"
+                                            style={
+                                              line.last_return?.status === "rejected"
+                                                ? {
+                                                  color: "#991b1b",
+                                                  marginTop: "0.25rem",
+                                                  fontSize: "0.85rem",
+                                                }
+                                                : {
+                                                  color: "#6b635c",
+                                                  marginTop: "0.25rem",
+                                                  fontSize: "0.85rem",
+                                                }
+                                            }
+                                          >
+                                            {returnLabel}
+                                          </div>
+                                        )
+                                      }
                                     </div>
 
                                     <div className="orders-artisan-line-price">

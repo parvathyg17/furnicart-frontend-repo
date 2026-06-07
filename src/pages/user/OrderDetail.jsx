@@ -1,7 +1,9 @@
 import "../../styles/shop.css";
 import "../../styles/checkout.css";
+import "../../styles/orderdetail.css";
 
 import {
+  useCallback,
   useEffect,
   useState,
 } from "react";
@@ -9,13 +11,21 @@ import {
 import {
   Link,
   useParams,
+  useLocation,
 } from "react-router-dom";
+
+import {
+  Check,
+  ChevronDown,
+  Download,
+} from "lucide-react";
 
 import {
   fetchOrderApi,
   downloadOrderInvoicePdf,
   cancelOrderApi,
   cancelOrderLineApi,
+  submitReturnRequest,
 } from "../../features/orders/orderAPI.js";
 
 import {
@@ -47,17 +57,801 @@ const PAYMENT_LABELS = {
   other: "Other",
 };
 
+const PAYMENT_STATUS_LABELS = {
+  pending: "Pending",
+  processing: "Processing",
+  paid: "Paid",
+  failed: "Failed",
+  refunded: "Refunded",
+  partially_refunded: "Partially refunded",
+};
+
+/**
+ * Extra payment line for the customer UI. COD orders stay ``pending`` until
+ * delivery — showing raw ``pending`` looks like an error, so we omit it.
+ */
+function paymentStatusFollowLine(
+  order,
+) {
+
+  const ps = order.payment_status;
+
+  const pm = order.payment_method;
+
+  if (
+    !ps
+  ) {
+
+    return null;
+  }
+
+  if (
+    ps === "pending" &&
+    pm === "cod"
+  ) {
+
+    return null;
+  }
+
+  return PAYMENT_STATUS_LABELS[
+    ps
+  ] ||
+    ps;
+}
+
 const STATUS_LABELS = {
   pending: "Pending",
   shipped: "Shipped",
   out_for_delivery: "Out for delivery",
   delivered: "Delivered",
   cancelled: "Cancelled",
+  partially_cancelled: "Partially cancelled",
+  partially_shipped: "Partially shipped",
+  partially_delivered: "Partially delivered",
 };
+
+const FULFILLMENT_LABELS = {
+  pending: "Pending",
+  shipped: "Shipped",
+  out_for_delivery: "Out for delivery",
+  delivered: "Delivered",
+  returned: "Returned",
+};
+
+const IMAGE_BASE = (
+  import.meta.env.VITE_API_URL || ""
+).replace(
+  /\/$/,
+  "",
+);
+
+const ORDER_TRACK_STEPS = [
+  {
+    key: "pending",
+    label: "Ordered",
+  },
+  {
+    key: "shipped",
+    label: "Shipped",
+  },
+  {
+    key: "out_for_delivery",
+    label: "Out for delivery",
+  },
+  {
+    key: "delivered",
+    label: "Delivered",
+  },
+];
+
+const LINE_TRACK_STEPS = [
+  {
+    key: "ordered",
+    label: "Ordered",
+  },
+  {
+    key: "shipped",
+    label: "Shipped",
+  },
+  {
+    key: "ofd",
+    label: "Out for delivery",
+  },
+  {
+    key: "delivered",
+    label: "Delivered",
+  },
+];
+
+function formatDateShort(
+  iso,
+) {
+
+  if (
+    !iso
+  ) {
+
+    return "—";
+  }
+
+  const d = new Date(
+    iso,
+  );
+
+  if (
+    Number.isNaN(
+      d.getTime(),
+    )
+  ) {
+
+    return "—";
+  }
+
+  return d.toLocaleDateString(
+    undefined,
+    {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    },
+  );
+}
+
+function lineImageSrc(
+  imageUrl,
+) {
+
+  if (
+    !imageUrl
+  ) {
+
+    return null;
+  }
+
+  if (
+    imageUrl.startsWith(
+      "http",
+    )
+  ) {
+
+    return imageUrl;
+  }
+
+  const path = imageUrl.startsWith(
+    "/",
+  )
+    ? imageUrl
+    : `/${imageUrl}`;
+
+  return `${IMAGE_BASE}${path}`;
+}
+
+function resolveOrderTracker(
+  status,
+) {
+
+  if (
+    status === "cancelled"
+  ) {
+
+    return {
+      cancelled: true,
+      phase: 0,
+      allDelivered: false,
+    };
+  }
+
+  const allDelivered = status === "delivered";
+
+  const phase = (
+    {
+      pending: 0,
+      partially_cancelled: 0,
+      partially_shipped: 1,
+      shipped: 1,
+      out_for_delivery: 2,
+      partially_delivered: 3,
+      delivered: 3,
+    }[
+      status
+    ] ?? 0
+  );
+
+  return {
+    cancelled: false,
+    phase,
+    allDelivered,
+  };
+}
+
+function orderBarFilled(
+  barIndex,
+  phase,
+  allDelivered,
+) {
+
+  if (
+    allDelivered
+  ) {
+
+    return barIndex < 3;
+  }
+
+  return barIndex < phase;
+}
+
+function orderStepDotKind(
+  stepIndex,
+  tracker,
+) {
+
+  if (
+    tracker.cancelled
+  ) {
+
+    return "upcoming";
+  }
+
+  if (
+    tracker.allDelivered
+  ) {
+
+    return "done";
+  }
+
+  if (
+    stepIndex < tracker.phase
+  ) {
+
+    return "done";
+  }
+
+  if (
+    stepIndex === tracker.phase
+  ) {
+
+    return "current";
+  }
+
+  return "upcoming";
+}
+
+function OrderProgressStepper(
+  {
+    order,
+  },
+) {
+
+  const tracker = resolveOrderTracker(
+    order.status,
+  );
+
+  const placed = formatDateShort(
+    order.placed_at,
+  );
+
+  return (
+
+    <div className="odl-order-track">
+
+      <p className="odl-order-track-title">
+        Order status
+      </p>
+
+      {
+        tracker.cancelled && (
+
+          <p style={{ margin: "0 0 0.75rem", fontSize: "0.88rem", color: "#991b1b" }}>
+            This order was cancelled.
+          </p>
+        )
+      }
+
+      <div
+        className="odl-track-flex"
+        role="list"
+        aria-label="Order shipping progress"
+      >
+
+        {
+          ORDER_TRACK_STEPS.map(
+            (
+              step,
+              i,
+            ) => {
+
+              const kind = orderStepDotKind(
+                i,
+                tracker,
+              );
+
+              const labelClass = [
+                "odl-track-label",
+                kind === "current"
+                  ? "odl-track-label--current"
+                  : "",
+                kind === "done"
+                  ? "odl-track-label--done"
+                  : "",
+              ].filter(
+                Boolean,
+              ).join(
+                " ",
+              );
+
+              const dotClass = [
+                "odl-track-dot",
+                kind === "done"
+                  ? "odl-track-dot--done"
+                  : "",
+                kind === "current"
+                  ? "odl-track-dot--current"
+                  : "",
+                kind === "upcoming"
+                  ? "odl-track-dot--upcoming"
+                  : "",
+              ].filter(
+                Boolean,
+              ).join(
+                " ",
+              );
+
+              const meta = (
+
+                kind === "done" &&
+                i === 0 &&
+                order.placed_at
+              )
+                ? placed
+                : "";
+
+              return (
+
+                <div key={step.key} style={{ display: "contents" }}>
+
+                  {
+                    i > 0 && (
+
+                      <div
+                        className={
+                          `odl-track-bar${
+                            orderBarFilled(
+                              i - 1,
+                              tracker.phase,
+                              tracker.allDelivered,
+                            )
+                              ? " odl-track-bar--on"
+                              : ""
+                          }`
+                        }
+                        aria-hidden
+                      />
+                    )
+                  }
+
+                  <div
+                    className="odl-track-col"
+                    role="listitem"
+                  >
+
+                    <div className={dotClass}>
+
+                      {
+                        kind === "done"
+                          ? (
+                            <Check size={16} strokeWidth={2.5} aria-hidden />
+                          )
+                          : null
+                      }
+                    </div>
+
+                    <div className={labelClass}>
+                      {step.label}
+                    </div>
+
+                    <div className="odl-track-meta">
+                      {meta}
+                    </div>
+                  </div>
+                </div>
+              );
+            },
+          )
+        }
+      </div>
+    </div>
+  );
+}
+
+function lineFulfillmentPhase(
+  fs,
+) {
+
+  if (
+    fs === "shipped"
+  ) {
+
+    return 1;
+  }
+
+  if (
+    fs === "out_for_delivery"
+  ) {
+
+    return 2;
+  }
+
+  if (
+    fs === "delivered"
+  ) {
+
+    return 3;
+  }
+
+  return 0;
+}
+
+function RejectedReturnNotice(
+  {
+    lastReturn,
+    className = "odl-mini-track-note",
+  },
+) {
+
+  if (
+    !lastReturn ||
+    lastReturn.status !== "rejected"
+  ) {
+
+    return null;
+  }
+
+  const note = (
+    typeof lastReturn.admin_note === "string"
+      ? lastReturn.admin_note.trim()
+      : ""
+  );
+
+  return (
+    <p className={`${className} odl-return-rejected`}>
+      <strong>
+        Return request rejected
+      </strong>
+
+      {
+        lastReturn.resolved_at
+          ? (
+            <>
+              {" "}
+
+              <span className="odl-return-rejected-date">
+                (
+                {formatDateShort(lastReturn.resolved_at)}
+                )
+              </span>
+            </>
+          )
+          : null
+      }
+
+      {
+        note
+          ? (
+            <>
+              <br />
+
+              <span className="odl-return-rejected-note">
+                {note}
+              </span>
+            </>
+          )
+          : null
+      }
+    </p>
+  );
+}
+
+function LineItemTracking(
+  {
+    line,
+    orderPlacedAt,
+  },
+) {
+
+  if (
+    line.status === "cancelled"
+  ) {
+
+    return (
+
+      <div className="odl-mini-track odl-mini-track--muted">
+
+        <p style={{ margin: 0, fontSize: "0.88rem", color: "#991b1b" }}>
+          This line item was cancelled.
+        </p>
+
+        {
+          line.cancellation_reason && (
+
+            <p className="odl-mini-track-note">
+              {line.cancellation_reason}
+            </p>
+          )
+        }
+      </div>
+    );
+  }
+
+  const fs = line.fulfillment_status || "pending";
+
+  if (
+    fs === "returned"
+  ) {
+
+    return (
+
+      <div>
+
+        <div className="odl-mini-track">
+
+          <p style={{ margin: 0, fontSize: "0.82rem", color: "#5c534a" }}>
+            This item was marked
+            {" "}
+
+            <strong>
+              returned
+            </strong>
+
+            {" "}
+            after delivery.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const phase = lineFulfillmentPhase(
+    fs,
+  );
+
+  const allDelivered = fs === "delivered";
+
+  const placed = formatDateShort(
+    orderPlacedAt,
+  );
+
+  return (
+
+    <div className="odl-mini-track">
+
+      <div
+        className="odl-track-flex"
+        role="list"
+        aria-label="Item fulfillment"
+      >
+
+        {
+          LINE_TRACK_STEPS.map(
+            (
+              step,
+              i,
+            ) => {
+
+              const kind = (
+
+                () => {
+
+                  if (
+                    allDelivered
+                  ) {
+
+                    return "done";
+                  }
+
+                  if (
+                    i < phase
+                  ) {
+
+                    return "done";
+                  }
+
+                  if (
+                    i === phase
+                  ) {
+
+                    return "current";
+                  }
+
+                  return "upcoming";
+                }
+              )();
+
+              const labelClass = [
+                "odl-track-label",
+                kind === "current"
+                  ? "odl-track-label--current"
+                  : "",
+                kind === "done"
+                  ? "odl-track-label--done"
+                  : "",
+              ].filter(
+                Boolean,
+              ).join(
+                " ",
+              );
+
+              const dotClass = [
+                "odl-track-dot",
+                kind === "done"
+                  ? "odl-track-dot--done"
+                  : "",
+                kind === "current"
+                  ? "odl-track-dot--current"
+                  : "",
+                kind === "upcoming"
+                  ? "odl-track-dot--upcoming"
+                  : "",
+              ].filter(
+                Boolean,
+              ).join(
+                " ",
+              );
+
+              const barIdx = i - 1;
+
+              const barOn = (
+
+                allDelivered
+                  ? barIdx < 3
+                  : barIdx < phase
+              );
+
+              const meta = (
+
+                kind === "done" &&
+                i === 0 &&
+                orderPlacedAt
+              )
+                ? placed
+                : "";
+
+              return (
+
+                <div key={step.key} style={{ display: "contents" }}>
+
+                  {
+                    i > 0 && (
+
+                      <div
+                        className={
+                          `odl-track-bar${
+                            barOn
+                              ? " odl-track-bar--on"
+                              : ""
+                          }`
+                        }
+                        aria-hidden
+                      />
+                    )
+                  }
+
+                  <div
+                    className="odl-track-col"
+                    role="listitem"
+                  >
+
+                    <div className={dotClass}>
+
+                      {
+                        kind === "done"
+                          ? (
+                            <Check size={14} strokeWidth={2.5} aria-hidden />
+                          )
+                          : null
+                      }
+                    </div>
+
+                    <div className={labelClass}>
+                      {step.label}
+                    </div>
+
+                    <div className="odl-track-meta">
+                      {meta}
+                    </div>
+                  </div>
+                </div>
+              );
+            },
+          )
+        }
+      </div>
+
+      {
+        line.open_return && (
+
+          <p className="odl-mini-track-note">
+            {line.open_return.status === "approved"
+              ? "Return approved — follow any instructions we sent by email."
+              : "Return request submitted — we will notify you when it is reviewed."}
+          </p>
+        )
+      }
+
+      <RejectedReturnNotice
+        lastReturn={line.last_return}
+      />
+    </div>
+  );
+}
+
+function lineStatusBadgeClass(
+  line,
+) {
+
+  if (
+    line.status === "cancelled"
+  ) {
+
+    return "odl-status-badge--cancelled";
+  }
+
+  const fs = line.fulfillment_status || "pending";
+
+  if (
+    fs === "returned"
+  ) {
+
+    return "odl-status-badge--returned";
+  }
+
+  if (
+    fs === "delivered"
+  ) {
+
+    return "odl-status-badge--delivered";
+  }
+
+  if (
+    fs === "out_for_delivery"
+  ) {
+
+    return "odl-status-badge--ofd";
+  }
+
+  if (
+    fs === "shipped"
+  ) {
+
+    return "odl-status-badge--shipped";
+  }
+
+  return "odl-status-badge--pending";
+}
+
+function lineStatusLabel(
+  line,
+) {
+
+  if (
+    line.status === "cancelled"
+  ) {
+
+    return "Cancelled";
+  }
+
+  const fs = line.fulfillment_status || "pending";
+
+  return FULFILLMENT_LABELS[
+    fs
+  ] ||
+    fs;
+}
 
 export default function OrderDetail() {
 
   const { orderNumber } = useParams();
+
+  const location = useLocation();
 
   const [
     order,
@@ -102,6 +896,31 @@ export default function OrderDetail() {
   const [
     cancelModalError,
     setCancelModalError,
+  ] = useState(null);
+
+  const [
+    returnTargetLineId,
+    setReturnTargetLineId,
+  ] = useState(null);
+
+  const [
+    returnReason,
+    setReturnReason,
+  ] = useState("");
+
+  const [
+    returnBusy,
+    setReturnBusy,
+  ] = useState(false);
+
+  const [
+    returnModalError,
+    setReturnModalError,
+  ] = useState(null);
+
+  const [
+    trackingLineId,
+    setTrackingLineId,
   ] = useState(null);
 
   useEffect(() => {
@@ -161,9 +980,10 @@ export default function OrderDetail() {
 
       cancelled = true;
     };
-  }, [orderNumber]);
+  }, [orderNumber, location.key]);
 
-  const refetchOrder = async () => {
+  const refetchOrder = useCallback(
+    async () => {
 
     if (
       !orderNumber
@@ -191,6 +1011,135 @@ export default function OrderDetail() {
 
           "Could not refresh this order.",
       );
+      }
+    },
+    [orderNumber],
+  );
+
+  useEffect(
+    () => {
+
+      const onPageShow = (
+        e,
+      ) => {
+
+        if (
+          e.persisted &&
+          orderNumber
+        ) {
+
+          refetchOrder();
+        }
+      };
+
+      window.addEventListener(
+        "pageshow",
+        onPageShow,
+      );
+
+      return () => {
+
+        window.removeEventListener(
+          "pageshow",
+          onPageShow,
+        );
+      };
+    },
+    [
+      orderNumber,
+      refetchOrder,
+    ],
+  );
+
+  const canCancelLine = (line) =>
+    line.status === "active" &&
+    (line.fulfillment_status || "pending") === "pending";
+
+  const canCancelEntireOrder =
+    order &&
+    (order.lines || []).some(
+      (l) =>
+        l.status === "active",
+    ) &&
+    (order.lines || []).every(
+      (l) =>
+        l.status !== "active" ||
+        (l.fulfillment_status || "pending") === "pending",
+    );
+
+  const openReturnModal = (lineId) => {
+
+    setReturnModalError(null);
+
+    setReturnReason("");
+
+    setReturnTargetLineId(lineId);
+  };
+
+  const closeReturnModal = () => {
+
+    if (returnBusy) {
+
+      return;
+    }
+
+    setReturnTargetLineId(null);
+
+    setReturnReason("");
+
+    setReturnModalError(null);
+  };
+
+  const submitReturn = async () => {
+
+    if (!order?.order_number || !returnTargetLineId) {
+
+      return;
+    }
+
+    const r = returnReason.trim();
+
+    if (!r) {
+
+      setReturnModalError("Please enter a return reason.");
+
+      return;
+    }
+
+    setReturnBusy(true);
+
+    setReturnModalError(null);
+
+    try {
+
+      const data = await submitReturnRequest(
+        order.order_number,
+        returnTargetLineId,
+        { reason: r },
+      );
+
+      setOrder(
+        data,
+      );
+
+      setReturnTargetLineId(null);
+
+      setReturnReason("");
+    } catch (err) {
+
+      setReturnModalError(
+
+        formatProductApiError(
+          err.response?.data,
+        ) ||
+
+          err.message ||
+
+          "Could not submit return.",
+      );
+    } finally {
+
+      setReturnBusy(false);
     }
   };
 
@@ -232,12 +1181,11 @@ export default function OrderDetail() {
     }
   };
 
-  const canModifyOrder =
-    order?.status === "pending";
-
   const openCancelOrderModal = () => {
 
-    if (!canModifyOrder) {
+    if (
+      !canCancelEntireOrder
+    ) {
 
       return;
     }
@@ -257,7 +1205,17 @@ export default function OrderDetail() {
 
   const openCancelLineModal = (lineId) => {
 
-    if (!canModifyOrder) {
+    const line = order?.lines?.find(
+      (l) =>
+        l.id === lineId,
+    );
+
+    if (
+      !line ||
+      !canCancelLine(
+        line,
+      )
+    ) {
 
       return;
     }
@@ -372,48 +1330,6 @@ export default function OrderDetail() {
 
       <main className="order-detail-main">
 
-        <header className="checkout-head">
-
-          <div>
-
-            <h1 className="checkout-title artisan-font-serif">
-
-              Order details
-            </h1>
-
-            <p className="checkout-sub">
-
-              Confirmation and line items for your purchase.
-            </p>
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              gap: "0.5rem",
-              flexWrap: "wrap",
-              justifyContent: "flex-end",
-            }}
-          >
-
-            <Link
-              className="checkout-back"
-              to="/orders"
-            >
-              My orders
-            </Link>
-
-            <Link
-              className="checkout-back"
-              to="/shop"
-            >
-              Continue shopping
-            </Link>
-
-          </div>
-
-        </header>
-
         {
           loading ? (
 
@@ -433,56 +1349,72 @@ export default function OrderDetail() {
 
             <>
 
-            <div className="checkout-panel">
+            <div className="odl-page">
 
-              <p style={{ margin: "0 0 0.75rem", color: "#5c534a" }}>
+              <nav className="odl-breadcrumb" aria-label="Breadcrumb">
 
-                <strong>
-                  Order ID:
-                </strong>
+                <Link to="/profile">
+                  My account
+                </Link>
 
-                {" "}
+                <span>
+                  /
+                </span>
 
-                {order.order_number}
+                <Link to="/orders">
+                  My orders
+                </Link>
 
-                {" "}
-                ·
-                {" "}
+                <span>
+                  /
+                </span>
 
-                <strong>
-                  Status:
-                </strong>
+                <span aria-current="page">
+                  Order #
+                  {order.order_number}
+                </span>
+              </nav>
 
-                {" "}
+              <div className="odl-hero">
 
-                {
-                  STATUS_LABELS[order.status] ||
-                  order.status
-                }
+                <div>
 
-                {" "}
-                ·
-                {" "}
+                  <h1 className="odl-hero-title">
+                    Order #
+                    {order.order_number}
+                  </h1>
 
-                <strong>
-                  Payment:
-                </strong>
+                  <p className="odl-hero-sub">
+                    Placed on
+                    {" "}
 
-                {" "}
+                    {formatDateShort(
+                      order.placed_at,
+                    )}
+                  </p>
+                </div>
 
-                {
-                  PAYMENT_LABELS[order.payment_method] ||
-                  order.payment_method
-                }
+                <button
+                  type="button"
+                  className="odl-btn-invoice"
+                  disabled={invoiceBusy}
+                  onClick={handleDownloadInvoice}
+                >
 
-              </p>
+                  <Download size={18} aria-hidden />
+
+                  {invoiceBusy
+                    ? "Preparing…"
+                    : "Download invoice"}
+                </button>
+              </div>
 
               {
                 order.cancelled_at && (
 
                   <p
                     style={{
-                      margin: "0 0 0.75rem",
+                      margin: "0 0 1rem",
                       fontSize: "0.9rem",
                       color: "#7a4a4a",
                     }}
@@ -494,57 +1426,53 @@ export default function OrderDetail() {
 
                     {" "}
 
-                    {
-                      new Date(
-                        order.cancelled_at,
-                      ).toLocaleString()
-                    }
+                    {new Date(order.cancelled_at).toLocaleString()}
 
-                    {
-                      order.cancellation_reason
-                        ? (
-                          <>
-
+                    {order.cancellation_reason
+                      ? (
+                        <>
                             {" "}
                             —
                             {" "}
-
                             {order.cancellation_reason}
                           </>
                         )
-                        : null
-                    }
-
+                      : null}
                   </p>
                 )
               }
 
-              <p style={{ margin: "0 0 1rem", fontSize: "0.9rem", color: "#5c534a" }}>
+              <div className="odl-meta-strip">
 
                 <strong>
-                  Ship to:
+                  Order status:
                 </strong>
 
                 {" "}
 
-                {order.shipping_name}
-                ,
+                {STATUS_LABELS[order.status] || order.status}
+
+                {" · "}
+
+                <strong>
+                  Payment:
+                </strong>
+
                 {" "}
 
-                {order.shipping_phone}
-                <br />
+                {PAYMENT_LABELS[order.payment_method] || order.payment_method}
 
-                {
-                  [
-                    order.shipping_address_line,
-                    order.shipping_city,
-                    `${order.shipping_state} ${order.shipping_pincode}`,
-                  ].join(
-                    ", ",
+                {paymentStatusFollowLine(order)
+                  ? (
+                    <>
+                      {" "}
+                      (
+                      {paymentStatusFollowLine(order)}
+                      )
+                    </>
                   )
-                }
-
-              </p>
+                  : null}
+              </div>
 
               {
                 invoiceError && (
@@ -554,7 +1482,6 @@ export default function OrderDetail() {
                     role="alert"
                     style={{ marginBottom: "0.75rem" }}
                   >
-
                     {invoiceError}
                   </div>
                 )
@@ -569,158 +1496,245 @@ export default function OrderDetail() {
                 }}
               >
 
-                <button
-                  type="button"
-                  className="checkout-btn-secondary"
-                  disabled={
-                    invoiceBusy
-                  }
-                  onClick={
-                    handleDownloadInvoice
-                  }
-                >
-
-                  {
-                    invoiceBusy
-                      ? "Preparing PDF…"
-                      : "Download invoice (PDF)"
-                  }
-                </button>
-
                 {
-                  canModifyOrder && (
+                  canCancelEntireOrder && (
 
                     <button
                       type="button"
                       className="checkout-btn-secondary order-cancel-order-btn"
-                      disabled={
-                        invoiceBusy
-                      }
-                      onClick={
-                        openCancelOrderModal
-                      }
+                      disabled={invoiceBusy}
+                      onClick={openCancelOrderModal}
                     >
-
                       Cancel entire order
                     </button>
                   )
                 }
-
               </div>
 
-              <h2 className="checkout-panel-title artisan-font-serif">
+              <OrderProgressStepper order={order} />
 
-                Items
-              </h2>
+              <div className="odl-cards-row">
 
-              <table className="order-detail-table">
+                <div className="odl-info-card">
 
-                <thead>
+                  <h3>
+                    Shipping address
+                  </h3>
 
-                  <tr>
+                  <p>
 
-                    <th>
-                      Product
-                    </th>
+                    <strong>
+                      {order.shipping_name}
+                    </strong>
 
-                    <th>
-                      Qty
-                    </th>
+                    {order.shipping_phone
+                      ? (
+                        <>
+                          {" · "}
+                          {order.shipping_phone}
+                        </>
+                      )
+                      : null}
 
-                    <th style={{ textAlign: "right" }}>
-                      Line total
-                    </th>
+                    <br />
 
-                    <th style={{ textAlign: "right", whiteSpace: "nowrap" }}>
-                      Actions
-                    </th>
+                    {[
+                      order.shipping_address_line,
+                      order.shipping_city,
+                      `${order.shipping_state} ${order.shipping_pincode}`,
+                    ].filter(Boolean).join(", ")}
+                  </p>
+                </div>
 
-                  </tr>
+                <div className="odl-info-card">
 
-                </thead>
+                  <h3>
+                    Payment method
+                  </h3>
 
-                <tbody>
+                  <p>
+                    {PAYMENT_LABELS[order.payment_method] || order.payment_method}
+
+                    {paymentStatusFollowLine(order)
+                      ? (
+                        <>
+                          <br />
+
+                          <span style={{ fontSize: "0.85rem", color: "#6b635c" }}>
+                            Payment status:
+                            {" "}
+
+                            {paymentStatusFollowLine(order)}
+                          </span>
+                        </>
+                      )
+                      : order.payment_method === "cod"
+                        ? (
+                          <>
+                            <br />
+
+                            <span style={{ fontSize: "0.85rem", color: "#6b635c" }}>
+                              Payment is collected when your order is delivered.
+                            </span>
+                          </>
+                        )
+                      : null}
+                  </p>
+                </div>
+              </div>
+
+              <div className="odl-summary-card">
+
+                <div className="odl-summary-head">
+
+                  <h2>
+                    Order summary
+                  </h2>
+                </div>
 
                   {
                     (order.lines || []).map(
                       (line) => {
 
-                        const lineCancelled =
-                          line.status === "cancelled";
+                      const lineCancelled = line.status === "cancelled";
+
+                      const fs = line.fulfillment_status || "pending";
+
+                      const canReturn =
+                        !lineCancelled &&
+                        line.status === "active" &&
+                        fs === "delivered" &&
+                        !line.has_return_request;
+
+                      const img = lineImageSrc(line.image_url);
+
+                      const trackingOpen = trackingLineId === line.id;
 
                         return (
 
-                        <tr
+                        <div
                           key={line.id}
-                          className={
-                            lineCancelled
-                              ? "order-detail-line--cancelled"
-                              : undefined
-                          }
+                          className="odl-line-block"
                         >
 
-                          <td>
+                          <div className="odl-line-row">
 
-                            <div style={{ fontWeight: 600 }}>
+                            {
+                              img
+                                ? (
+                                  <img
+                                    className="odl-line-thumb"
+                                    src={img}
+                                    alt=""
+                                  />
+                                )
+                                : (
+                                  <div
+                                    className="odl-line-thumb odl-line-thumb--empty"
+                                    aria-hidden
+                                  >
+                                    No image
+                                  </div>
+                                )
+                            }
 
+                            <div>
+
+                              <p className="odl-line-name">
                               {line.product_name}
+                              </p>
+
+                              <p className="odl-line-variant">
+                                {line.variant_name}
+                                {" · SKU "}
+                                {line.sku}
+                              </p>
 
                               {
-                                lineCancelled
+                                lineCancelled && line.cancellation_reason
                                   ? (
-
-                                    <span className="order-detail-line-badge">
-
-                                      {" "}
-                                      Cancelled
-                                    </span>
+                                    <p className="odl-line-variant" style={{ color: "#991b1b" }}>
+                                      {line.cancellation_reason}
+                                    </p>
                                   )
                                   : null
                               }
 
-                            </div>
+                              <button
+                                type="button"
+                                className={
+                                  `odl-status-badge ${lineStatusBadgeClass(line)}${trackingOpen ? " odl-status-badge--open" : ""}`
+                                }
+                                aria-expanded={trackingOpen}
+                                onClick={() => {
 
-                            <div style={{ fontSize: "0.82rem", color: "#6b635c" }}>
+                                  setTrackingLineId(
+                                    (prev) =>
+                                      prev === line.id
+                                        ? null
+                                        : line.id,
+                                  );
+                                }}
+                              >
 
-                              {line.variant_name}
+                                <span aria-hidden>
+                                  ●
+                                </span>
 
-                              {" "}
-                              ·
-                              {" "}
+                                {" "}
 
-                              {line.sku}
-                            </div>
+                                {String(
+                                  lineStatusLabel(
+                                    line,
+                                  ),
+                                ).toUpperCase()}
 
-                            {
-                              lineCancelled && line.cancellation_reason
-                                ? (
+                                <ChevronDown
+                                  size={16}
+                                  className={
+                                    `odl-chevron${trackingOpen ? " odl-chevron--up" : ""}`
+                                  }
+                                  aria-hidden
+                                />
+                              </button>
 
-                                  <div className="order-detail-line-reason">
+                              {
+                                line.open_return && (
 
-                                    {line.cancellation_reason}
-                                  </div>
+                                  <p className="odl-line-variant" style={{ color: "#8b6914", marginTop: "0.35rem" }}>
+                                    {line.open_return.status === "approved"
+                                      ? "Return approved"
+                                      : "Return requested"}
+                                  </p>
                                 )
-                                : null
-                            }
+                              }
 
-                          </td>
+                              <RejectedReturnNotice
+                                lastReturn={line.last_return}
+                                className="odl-line-variant"
+                              />
+                            </div>
 
-                          <td>
+                            <div className="odl-line-side">
 
+                              <div className="odl-line-qty-price">
+
+                                <span>
+                                  Qty:
+                                  {" "}
                             {line.quantity}
-                          </td>
+                                </span>
 
-                          <td style={{ textAlign: "right" }}>
-
+                                <strong>
                             ₹
                             {formatMoney(line.line_total)}
-                          </td>
+                                </strong>
+                              </div>
 
-                          <td style={{ textAlign: "right" }}>
+                              <div className="odl-line-actions">
 
                             {
-                              canModifyOrder && !lineCancelled
-                                ? (
+                                  canCancelLine(line) && (
 
                                   <button
                                     type="button"
@@ -732,105 +1746,133 @@ export default function OrderDetail() {
                                       );
                                     }}
                                   >
-
                                     Cancel line
                                   </button>
                                 )
-                                : (
-                                  <span className="cart-bag-muted">
-                                    —
-                                  </span>
-                                )
-                            }
+                                }
 
-                          </td>
+                                {
+                                  canReturn && (
 
-                        </tr>
+                                    <button
+                                      type="button"
+                                      className="checkout-btn-secondary"
+                                      style={{ fontSize: "0.78rem" }}
+                                      onClick={() => {
+
+                                        openReturnModal(
+                                          line.id,
+                                        );
+                                      }}
+                                    >
+                                      Request return
+                                    </button>
+                                  )
+                                }
+                              </div>
+                            </div>
+                          </div>
+
+                          {
+                            trackingOpen && (
+
+                              <div className="odl-line-tracking">
+
+                                <LineItemTracking
+                                  line={line}
+                                  orderPlacedAt={order.placed_at}
+                                />
+                              </div>
+                            )
+                          }
+                        </div>
                       );
-                      },
-                    )
-                  }
+                    },
+                  )
+                }
 
-                </tbody>
+                <div className="odl-totals">
 
-              </table>
+                  <div>
 
-              <div className="checkout-summary-divider" />
+                    <div className="odl-total-row">
 
-              <dl className="checkout-summary-lines">
-
-                <div className="checkout-summary-line">
-
-                  <dt>
+                      <span>
                     Subtotal
-                  </dt>
+                      </span>
 
-                  <dd>
-
+                      <span>
                     ₹
                     {formatMoney(order.subtotal)}
-                  </dd>
-
+                      </span>
                 </div>
 
-                <div className="checkout-summary-line">
+                    <div className="odl-total-row">
 
-                  <dt>
-                    Taxes
-                  </dt>
+                      <span>
+                        Shipping
+                      </span>
 
-                  <dd>
-
-                    ₹
-                    {formatMoney(order.tax_total)}
-                  </dd>
-
+                      <span>
+                        {Number(order.shipping_total) === 0
+                          ? "Free"
+                          : `₹${formatMoney(order.shipping_total)}`}
+                      </span>
                 </div>
 
-                <div className="checkout-summary-line">
+                    <div className="odl-total-row">
 
-                  <dt>
-                    Shipping
-                  </dt>
+                      <span>
+                        Tax
+                      </span>
 
-                  <dd>
-
-                    ₹
-                    {formatMoney(order.shipping_total)}
-                  </dd>
-
+                      <span>
+                        ₹
+                        {formatMoney(order.tax_total)}
+                      </span>
                 </div>
 
-                <div className="checkout-summary-line">
+                    <div className="odl-total-row">
 
-                  <dt>
+                      <span>
                     Discounts
-                  </dt>
+                      </span>
 
-                  <dd>
-
+                      <span>
                     ₹
                     {formatMoney(order.discount_total)}
-                  </dd>
-
+                      </span>
                 </div>
 
-              </dl>
-
-              <div className="checkout-summary-total">
+                    <div className="odl-total-final">
 
                 <span>
-                  Grand total
+                        Total
                 </span>
 
                 <span>
-
                   ₹
                   {formatMoney(order.grand_total)}
                 </span>
-
+                    </div>
+                  </div>
+                </div>
               </div>
 
+              <div className="odl-toolbar-links">
+
+                <Link to="/orders">
+                  My orders
+                </Link>
+
+                <Link to="/purchases">
+                  My purchases
+                </Link>
+
+                <Link to="/shop">
+                  Continue shopping
+                </Link>
+              </div>
             </div>
 
             {
@@ -949,6 +1991,111 @@ export default function OrderDetail() {
                           cancelBusy
                             ? "Working…"
                             : "Confirm cancel"
+                        }
+                      </button>
+
+                    </div>
+
+                  </div>
+
+                </div>
+              )
+            }
+
+            {
+              returnTargetLineId !== null && (
+
+                <div
+                  className="order-cancel-overlay"
+                  role="presentation"
+                  onClick={closeReturnModal}
+                >
+
+                  <div
+                    className="order-cancel-dialog"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="order-return-title"
+                    onClick={(e) => {
+
+                      e.stopPropagation();
+                    }}
+                  >
+
+                    <h2
+                      id="order-return-title"
+                      className="checkout-panel-title artisan-font-serif"
+                      style={{ marginTop: 0 }}
+                    >
+
+                      Request return
+                    </h2>
+
+                    <p className="order-cancel-dialog-hint">
+
+                      Returns require a reason. An administrator will review your
+                      request before stock is adjusted.
+                    </p>
+
+                    <label
+                      className="order-cancel-label"
+                      htmlFor="order-return-reason"
+                    >
+
+                      Reason (required)
+                    </label>
+
+                    <textarea
+                      id="order-return-reason"
+                      className="order-cancel-textarea"
+                      rows={4}
+                      maxLength={2000}
+                      value={returnReason}
+                      onChange={(e) => {
+
+                        setReturnReason(
+                          e.target.value,
+                        );
+                      }}
+                    />
+
+                    {
+                      returnModalError && (
+
+                        <div
+                          className="shop-banner error cart-bag-banner"
+                          role="alert"
+                          style={{ marginBottom: "0.75rem" }}
+                        >
+
+                          {returnModalError}
+                        </div>
+                      )
+                    }
+
+                    <div className="order-cancel-dialog-actions">
+
+                      <button
+                        type="button"
+                        className="checkout-btn-secondary"
+                        disabled={returnBusy}
+                        onClick={closeReturnModal}
+                      >
+
+                        Close
+                      </button>
+
+                      <button
+                        type="button"
+                        className="checkout-btn-primary order-cancel-confirm-btn"
+                        disabled={returnBusy}
+                        onClick={submitReturn}
+                      >
+
+                        {
+                          returnBusy
+                            ? "Submitting…"
+                            : "Submit return"
                         }
                       </button>
 

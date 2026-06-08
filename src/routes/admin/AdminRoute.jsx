@@ -38,6 +38,7 @@ import AdminOrderDetail from "../../pages/admin/AdminOrderDetail";
 import AdminReturns from "../../pages/admin/AdminReturns";
 import AdminInventory from "../../pages/admin/AdminInventory";
 
+
 export default function AdminRoutes() {
 
   return (
@@ -57,6 +58,8 @@ export default function AdminRoutes() {
           </AdminPublicRoute>
         }
       />
+
+      
 
       {/* ADMIN LAYOUT */}
 
@@ -92,6 +95,8 @@ export default function AdminRoutes() {
             <AdminDashboard />
           }
         />
+
+       
 
         {/* USERS */}
 

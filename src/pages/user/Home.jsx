@@ -39,6 +39,10 @@ import {
   stableStringify,
 } from "../../utils/stableStringify.js";
 
+import {
+  shopProductPathFrom,
+} from "../../utils/shopProductPath.js";
+
 function featuredProductPrice(product) {
 
   const variants = (product.variants || []).filter(
@@ -558,12 +562,20 @@ export default function Home() {
                     p
                   );
 
+                const productPath =
+                  shopProductPathFrom(
+                    p,
+                  );
+
                 return (
 
                   <Link
                     key={p.id}
                     className="collection-card"
-                    to={`/shop/product/${p.id}`}
+                    to={
+                      productPath ||
+                      "/shop"
+                    }
                   >
 
                     <div className="collection-card-media">

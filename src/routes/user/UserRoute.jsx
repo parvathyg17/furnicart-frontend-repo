@@ -53,7 +53,7 @@ export default function UserRoutes() {
       />
 
       <Route
-        path="/shop/product/:productId"
+        path="/shop/product/:productSlug"
         element={<ProductDetail />}
       />
 

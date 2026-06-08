@@ -1016,7 +1016,7 @@ body {
 
 .orders-artisan-line-title a {
   color: inherit;
-  text-decoration: underline;
+  text-decoration: none;
   text-underline-offset: 3px;
 }
 

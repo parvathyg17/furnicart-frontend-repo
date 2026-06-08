@@ -19,6 +19,10 @@ import {
   firstListableVariant,
 } from "../shopListUtils.js";
 
+import {
+  shopProductPathFrom,
+} from "../../../utils/shopProductPath.js";
+
 export default function ShopProductGrid(
   {
     loading,
@@ -89,6 +93,11 @@ export default function ShopProductGrid(
                   p.stock_status ===
                     "out_of_stock");
 
+              const productPath =
+                shopProductPathFrom(
+                  p,
+                );
+
               return (
 
                 <article
@@ -98,7 +107,10 @@ export default function ShopProductGrid(
 
                   <Link
                     className="artisan-card-media"
-                    to={`/shop/product/${p.id}`}
+                    to={
+                      productPath ||
+                      "/shop"
+                    }
                   >
 
                     {
@@ -146,7 +158,10 @@ export default function ShopProductGrid(
 
                     <Link
                       className="artisan-card-title artisan-font-serif"
-                      to={`/shop/product/${p.id}`}
+                      to={
+                        productPath ||
+                        "/shop"
+                      }
                     >
                       {p.name}
                     </Link>

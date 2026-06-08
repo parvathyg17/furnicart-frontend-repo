@@ -11,6 +11,10 @@ import {
   relatedDisplayPrice,
 } from "../productDetailUtils.js";
 
+import {
+  shopProductPathFrom,
+} from "../../../utils/shopProductPath.js";
+
 export default function ProductRelatedGrid(
   {
     relatedProducts,
@@ -59,6 +63,11 @@ export default function ProductRelatedGrid(
                     rp,
                   );
 
+                const rpPath =
+                  shopProductPathFrom(
+                    rp,
+                  );
+
                 return (
 
                   <article
@@ -68,7 +77,10 @@ export default function ProductRelatedGrid(
 
                     <Link
                       className="artisan-card-media pd-user-related-media"
-                      to={`/shop/product/${rp.id}`}
+                      to={
+                        rpPath ||
+                        "/shop"
+                      }
                     >
 
                       {
@@ -100,7 +112,10 @@ export default function ProductRelatedGrid(
 
                       <Link
                         className="pd-user-related-card-detail-link"
-                        to={`/shop/product/${rp.id}`}
+                        to={
+                          rpPath ||
+                          "/shop"
+                        }
                       >
 
                         <h3 className="artisan-font-serif pd-user-related-name">

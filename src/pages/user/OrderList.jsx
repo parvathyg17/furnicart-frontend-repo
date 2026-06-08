@@ -36,6 +36,10 @@ import {
   stableStringify,
 } from "../../utils/stableStringify.js";
 
+import {
+  shopProductPathFrom,
+} from "../../utils/shopProductPath.js";
+
 const PAGE_SIZE = 10;
 
 const STATUS_LABELS = {
@@ -895,6 +899,11 @@ export default function OrdersList() {
                                   line,
                                 );
 
+                                const lineProductPath =
+                                  shopProductPathFrom(
+                                    line,
+                                  );
+
                                 return (
 
                                   <div
@@ -929,12 +938,12 @@ export default function OrdersList() {
                                       <div className="orders-artisan-line-title">
 
                                         {
-                                          line.product_id
+                                          lineProductPath
                                             ? (
 
                                               <Link
                                                 to={
-                                                  `/shop/product/${line.product_id}`
+                                                  lineProductPath
                                                 }
                                               >
                                                 {line.product_name}

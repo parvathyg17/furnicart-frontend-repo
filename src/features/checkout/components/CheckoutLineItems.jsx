@@ -10,6 +10,10 @@ import {
   lineImageUrl,
 } from "../checkoutUtils.js";
 
+import {
+  shopProductPathFrom,
+} from "../../../utils/shopProductPath.js";
+
 export default function CheckoutLineItems(
   {
     items,
@@ -33,9 +37,9 @@ export default function CheckoutLineItems(
             );
 
             const productTo =
-              row.product_id
-                ? `/shop/product/${row.product_id}`
-                : null;
+              shopProductPathFrom(
+                row,
+              );
 
             const thumbEl =
               url

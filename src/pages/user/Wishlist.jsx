@@ -46,6 +46,10 @@ import {
   formatProductApiError,
 } from "../../utils/productApiErrors.js";
 
+import {
+  shopProductPathFrom,
+} from "../../utils/shopProductPath.js";
+
 function formatWishlistMoney(
   value,
 ) {
@@ -605,8 +609,10 @@ export default function Wishlist() {
                         v,
                       );
 
-                    const pid =
-                      p?.id || "";
+                    const productPath =
+                      shopProductPathFrom(
+                        p,
+                      );
 
                     const canMoveToBag =
                       wishlistVariantCanAddToBag(
@@ -622,7 +628,10 @@ export default function Wishlist() {
 
                         <Link
                           className="wishlist-card-media"
-                          to={`/shop/product/${pid}`}
+                          to={
+                            productPath ||
+                            "/shop"
+                          }
                         >
 
                           {
@@ -663,7 +672,10 @@ export default function Wishlist() {
 
                           <Link
                             className="wishlist-card-title-link"
-                            to={`/shop/product/${pid}`}
+                            to={
+                              productPath ||
+                              "/shop"
+                            }
                           >
 
                             <h2 className="wishlist-card-title">

@@ -39,16 +39,16 @@ import {
 export default function useProductDetailData() {
 
   const {
-    productId,
+    productSlug,
   } = useParams();
 
-  const productIdRef =
+  const productSlugRef =
     useRef(
-      productId,
+      productSlug,
     );
 
-  productIdRef.current =
-    productId;
+  productSlugRef.current =
+    productSlug;
 
   const lastProductSigRef =
     useRef(
@@ -133,7 +133,7 @@ export default function useProductDetailData() {
 
           const data =
             await fetchUserProduct(
-              productId
+              productSlug,
             );
 
           if (cancelled)
@@ -200,7 +200,7 @@ export default function useProductDetailData() {
     };
   }, [
 
-    productId,
+    productSlug,
     navigate,
   ]);
 
@@ -210,23 +210,23 @@ export default function useProductDetailData() {
       0,
       0,
     );
-  }, [productId]);
+  }, [productSlug]);
 
   const refreshProductSilently =
     useCallback(
       async () => {
 
-        const id =
-          productIdRef.current;
+        const ref =
+          productSlugRef.current;
 
-        if (!id)
+        if (!ref)
           return;
 
         try {
 
           const data =
             await fetchUserProduct(
-              id,
+              ref,
             );
 
           const snap =
@@ -292,7 +292,7 @@ export default function useProductDetailData() {
     {
 
       enabled: Boolean(
-        productId,
+        productSlug,
       ),
 
       pollIntervalMs: 90_000,
@@ -377,7 +377,7 @@ export default function useProductDetailData() {
   }, [
 
     user,
-    productId,
+    productSlug,
 
   ]);
 

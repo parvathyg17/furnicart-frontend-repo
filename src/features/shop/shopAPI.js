@@ -27,10 +27,19 @@ export async function fetchFeaturedProducts(
   );
 }
 
-export async function fetchUserProduct(productId) {
+export async function fetchUserProduct(
+  productRef,
+) {
+
+  const enc =
+    encodeURIComponent(
+      String(
+        productRef,
+      ),
+    );
 
   const response = await api.get(
-    `products/${productId}/`,
+    `products/${enc}/`,
   );
 
   return response.data;

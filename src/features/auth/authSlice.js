@@ -80,7 +80,7 @@ export const loginUser = createAsyncThunk(
 
 export const loadUser = createAsyncThunk(
   "auth/loadUser",
-  async (_, { rejectWithValue }) => {
+  async (arg, { rejectWithValue }) => {
     try {
       return await getMeAPI();
     } catch (err) {
@@ -191,8 +191,13 @@ const authSlice = createSlice({
 
   
   builder
-    .addCase(loadUser.pending, (state) => {
-      state.checkingAuth = true;
+    .addCase(loadUser.pending, (state, action) => {
+      const silent =
+        action.meta?.arg?.silent === true;
+
+      if (!silent) {
+        state.checkingAuth = true;
+      }
     })
 
     .addCase(loadUser.fulfilled, (state, action) => {

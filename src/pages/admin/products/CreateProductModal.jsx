@@ -738,7 +738,7 @@ export default function CreateProductModal({
                 <p>
 
                   New products are saved as inactive. After you add at
-                  least three variants, three images per active variant,
+                  least one variants, three images per active variant,
                   and complete all variant fields, you can activate the
                   product from its detail page.
 

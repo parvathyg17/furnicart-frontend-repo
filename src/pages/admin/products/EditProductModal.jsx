@@ -802,7 +802,7 @@ export default function EditProductModal({
 
               <p>
 
-                To set the product active, add at least three variants,
+                To set the product active, add at least one variants,
                 three images per active variant, and complete all
                 variant fields (name, SKU, color, material, size,
                 price, stock). Price must be greater than zero and

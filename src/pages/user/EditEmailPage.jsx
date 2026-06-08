@@ -363,7 +363,15 @@ export default function EditEmailPage() {
         ).unwrap();
 
         await dispatch(
-          loadUser()
+          loadUser(
+            {
+              silent: true,
+            },
+          )
+        ).unwrap();
+
+        await dispatch(
+          getProfile()
         ).unwrap();
 
         // CLEANUP

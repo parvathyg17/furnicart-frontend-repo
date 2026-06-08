@@ -106,6 +106,8 @@ export const verifyEmailOTP = createAsyncThunk(
 
 const initialState = {
   profile: null,
+  /** Bumps when profile payload changes so avatar URLs bypass browser cache. */
+  displayRevision: 0,
 };
 
 
@@ -130,6 +132,8 @@ const profileSlice = createSlice({
           state.profile =
             action.payload;
 
+          state.displayRevision += 1;
+
         }
       )
 
@@ -142,6 +146,8 @@ const profileSlice = createSlice({
 
           state.profile =
             action.payload;
+
+          state.displayRevision += 1;
 
         }
       );

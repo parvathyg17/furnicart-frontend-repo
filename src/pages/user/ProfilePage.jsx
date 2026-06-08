@@ -26,24 +26,20 @@ export default function ProfilePage() {
 
   const navigate = useNavigate();
 
-  const { profile } = useSelector(
-    (state) => state.profile
-  );
+  const { profile, displayRevision } =
+    useSelector(
+      (state) => state.profile
+    );
 
   const IMAGE_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
 
-  if (!profile) {
-
     dispatch(getProfile());
 
-  }
-
-}, [
-  dispatch,
-  profile,
-]);
+  }, [
+    dispatch,
+  ]);
 
   if (!profile) {
     return (
@@ -68,7 +64,7 @@ export default function ProfilePage() {
 
               {profile.profile_image ? (
                 <img
-                  src={`${IMAGE_URL}${profile.profile_image}`}
+                  src={`${IMAGE_URL}${profile.profile_image}${profile.profile_image.includes("?") ? "&" : "?"}v=${displayRevision}`}
                   alt=""
                 />
               ) : (

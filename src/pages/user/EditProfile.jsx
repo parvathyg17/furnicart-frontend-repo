@@ -246,18 +246,26 @@ export default function EditProfilePage() {
         }
 
         await dispatch(
-  updateProfile(fd)
-).unwrap();
+          updateProfile(fd)
+        ).unwrap();
 
-    await dispatch(
-      loadUser()
-    ).unwrap();
+        await dispatch(
+          getProfile()
+        ).unwrap();
 
-    toast.success(
-      "Profile updated successfully"
-    );
+        await dispatch(
+          loadUser(
+            {
+              silent: true,
+            },
+          )
+        ).unwrap();
 
-    navigate("/profile");
+        toast.success(
+          "Profile updated successfully"
+        );
+
+        navigate("/profile");
 
       } catch (err) {
 

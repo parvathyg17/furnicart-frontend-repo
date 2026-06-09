@@ -134,9 +134,7 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // ==========================================
-    // ACCESS TOKEN EXPIRED
-    // ==========================================
+ 
 
     if (
 
@@ -154,9 +152,7 @@ api.interceptors.response.use(
       originalRequest._retry =
         true;
 
-      // ==========================================
-      // WAIT IF REFRESHING
-      // ==========================================
+  
 
       if (isRefreshing) {
 

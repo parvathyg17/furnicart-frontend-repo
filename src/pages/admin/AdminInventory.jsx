@@ -53,19 +53,19 @@ const ORDERING_OPTIONS = [
   },
   {
     value: "sku",
-    label: "SKU (A–Z)",
+    label: "SKU (A-Z)",
   },
   {
     value: "-sku",
-    label: "SKU (Z–A)",
+    label: "SKU (Z-A)",
   },
   {
     value: "product__name",
-    label: "Product name (A–Z)",
+    label: "Product name (A-Z)",
   },
   {
     value: "-product__name",
-    label: "Product name (Z–A)",
+    label: "Product name (Z-A)",
   },
 ];
 

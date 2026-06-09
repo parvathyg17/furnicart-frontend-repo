@@ -212,7 +212,7 @@ export default function AdminLayout() {
               </h2>
 
               <span className="admin-sidebar-tagline">
-                Artisan admin
+                Admin
               </span>
             </div>
           </div>

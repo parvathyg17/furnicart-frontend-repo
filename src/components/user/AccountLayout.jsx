@@ -32,6 +32,10 @@ import {
   logoutUser,
 } from "../../features/auth/authSlice";
 
+import {
+  resolveMediaUrl,
+} from "../../utils/mediaUrl";
+
 export default function AccountLayout({
   children,
 }) {
@@ -157,7 +161,11 @@ export default function AccountLayout({
                   user.profile_image ? (
 
                     <img
-                      src={`http://127.0.0.1:8000${user.profile_image}`}
+                      src={
+                        resolveMediaUrl(
+                          user.profile_image,
+                        ) || ""
+                      }
                       alt="profile"
                       className="nav-profile-image"
                     />

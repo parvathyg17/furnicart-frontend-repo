@@ -29,9 +29,7 @@ import {
 
 export default function AdminDashboard() {
 
-  // ==========================================
-  // LOCAL STATE
-  // ==========================================
+  
 
   const [
     loadingLocal,
@@ -46,11 +44,13 @@ export default function AdminDashboard() {
       active_users: 0,
 
       blocked_users: 0,
+
+      // order_status: {
+      //   order_pending_count: 0,
+      // },
     });
 
-  // ==========================================
-  // FETCH DASHBOARD STATS
-  // ==========================================
+
 
   const lastStatsSigRef =
     useRef(
@@ -142,9 +142,7 @@ export default function AdminDashboard() {
     },
   );
 
-  // ==========================================
-  // LOADING
-  // ==========================================
+
 
   if (loadingLocal) {
 
@@ -159,7 +157,7 @@ export default function AdminDashboard() {
 
     <div>
 
-      {/* HEADER */}
+  
       <div className="dashboard-header">
 
         <div>
@@ -176,10 +174,10 @@ export default function AdminDashboard() {
 
       </div>
 
-      {/* CARDS */}
+  
       <div className="dashboard-cards">
 
-        {/* TOTAL USERS */}
+     
         <div className="dashboard-card">
 
           <div className="dashboard-icon">
@@ -224,6 +222,29 @@ export default function AdminDashboard() {
           </div>
 
         </div>
+        {/* //sample
+
+        <div className="dashboard-card">
+
+          <div className="dashboard-icon green">
+
+            <UserCheck size={28} />
+
+          </div>
+
+          <div>
+
+            <h4>
+              Pending Product
+            </h4>
+
+            <h2>
+              {stats.order_status.order_pending_count}
+            </h2>
+
+          </div>
+
+        </div> */}
 
         {/* BLOCKED USERS */}
         <div className="dashboard-card">
@@ -245,6 +266,8 @@ export default function AdminDashboard() {
             </h2>
 
           </div>
+
+          
 
         </div>
 

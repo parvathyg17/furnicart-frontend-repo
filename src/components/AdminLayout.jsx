@@ -11,6 +11,7 @@ import {
   ClipboardList,
   RotateCcw,
   Warehouse,
+  Star,
 } from "lucide-react";
 
 import {
@@ -123,6 +124,17 @@ const NAV_SECTIONS = [
         ) =>
           pathname.includes(
             "/admin/room-types",
+          ),
+      },
+      {
+        to: "/admin/reviews",
+        label: "Reviews",
+        icon: Star,
+        match: (
+          pathname,
+        ) =>
+          pathname.includes(
+            "/admin/reviews",
           ),
       },
       {

@@ -20,6 +20,10 @@ from "react-router-dom";
 import AccountLayout
 from "../../components/user/AccountLayout";
 
+import {
+  resolveMediaUrl,
+} from "../../utils/mediaUrl";
+
 export default function ProfilePage() {
 
   const dispatch = useDispatch();
@@ -30,8 +34,6 @@ export default function ProfilePage() {
     useSelector(
       (state) => state.profile
     );
-
-  const IMAGE_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
 
@@ -64,7 +66,12 @@ export default function ProfilePage() {
 
               {profile.profile_image ? (
                 <img
-                  src={`${IMAGE_URL}${profile.profile_image}${profile.profile_image.includes("?") ? "&" : "?"}v=${displayRevision}`}
+                  src={
+                    resolveMediaUrl(
+                      profile.profile_image,
+                      displayRevision,
+                    ) || ""
+                  }
                   alt=""
                 />
               ) : (

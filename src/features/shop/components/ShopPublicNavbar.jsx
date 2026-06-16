@@ -9,6 +9,10 @@ import {
 
 import logofc from "../../../assets/images/logofc.png";
 
+import {
+  resolveMediaUrl,
+} from "../../../utils/mediaUrl.js";
+
 export default function ShopPublicNavbar(
   {
     user,
@@ -97,7 +101,11 @@ export default function ShopPublicNavbar(
                 user.profile_image ? (
 
                   <img
-                    src={`http://127.0.0.1:8000${user.profile_image}`}
+                    src={
+                      resolveMediaUrl(
+                        user.profile_image,
+                      ) || ""
+                    }
                     alt="profile"
                     className="nav-profile-image"
                   />

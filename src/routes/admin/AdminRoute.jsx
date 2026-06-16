@@ -36,6 +36,7 @@ from "../../pages/admin/products/AdminProductDetail";
 import AdminOrders from "../../pages/admin/AdminOrders";
 import AdminOrderDetail from "../../pages/admin/AdminOrderDetail";
 import AdminReturns from "../../pages/admin/AdminReturns";
+import AdminReviews from "../../pages/admin/AdminReviews";
 import AdminInventory from "../../pages/admin/AdminInventory";
 
 
@@ -129,6 +130,13 @@ export default function AdminRoutes() {
           path="orders/returns"
           element={
             <AdminReturns />
+          }
+        />
+
+        <Route
+          path="reviews"
+          element={
+            <AdminReviews />
           }
         />
 

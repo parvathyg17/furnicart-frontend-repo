@@ -43,6 +43,10 @@ import {
   shopProductPathFrom,
 } from "../../utils/shopProductPath.js";
 
+import {
+  resolveMediaUrl,
+} from "../../utils/mediaUrl.js";
+
 function featuredProductPrice(product) {
 
   const variants = (product.variants || []).filter(
@@ -320,7 +324,11 @@ export default function Home() {
     user.profile_image ? (
 
       <img
-        src={`http://127.0.0.1:8000${user.profile_image}`}
+        src={
+          resolveMediaUrl(
+            user.profile_image,
+          ) || ""
+        }
         alt="profile"
         className="nav-profile-image"
       />

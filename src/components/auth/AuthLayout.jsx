@@ -16,6 +16,10 @@ import {
   ShoppingCart,
 } from "lucide-react";
 
+import {
+  resolveMediaUrl,
+} from "../../utils/mediaUrl";
+
 
 function AuthLayout({
 
@@ -101,7 +105,11 @@ function AuthLayout({
               user.profile_image ? (
 
                 <img
-                  src={`http://127.0.0.1:8000${user.profile_image}`}
+                  src={
+                    resolveMediaUrl(
+                      user.profile_image,
+                    ) || ""
+                  }
                   alt="profile"
                   className="nav-profile-image"
                 />

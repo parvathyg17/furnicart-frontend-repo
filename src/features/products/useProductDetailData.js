@@ -549,12 +549,47 @@ export default function useProductDetailData() {
     !selectedVariant.is_active ||
     (selectedVariant.stock || 0) < 1;
 
+  const refreshProduct =
+    useCallback(
+      async () => {
+
+        const ref =
+          productSlugRef.current;
+
+        if (!ref)
+          return;
+
+        try {
+
+          const data =
+            await fetchUserProduct(
+              ref,
+            );
+
+          lastProductSigRef.current =
+            stableStringify(
+              data,
+            );
+
+          setProduct(
+            data,
+          );
+        } catch {
+
+          /* keep last good product payload */
+        }
+      },
+
+      [],
+    );
+
   return {
     user,
     checkingAuth,
     product,
     loading,
     error,
+    refreshProduct,
     selectedVariantId,
     setSelectedVariantId,
     galleryIndex,

@@ -277,3 +277,62 @@ export async function patchAdminReturn(
   return res.data;
 }
 
+
+export async function fetchAdminReviews(
+  {
+    page = 1,
+    pageSize = 10,
+    status = "",
+    search = "",
+  } = {},
+) {
+
+  const params = new URLSearchParams();
+
+  params.set(
+    "page",
+    String(page),
+  );
+
+  params.set(
+    "page_size",
+    String(pageSize),
+  );
+
+  if (status.trim()) {
+
+    params.set(
+      "status",
+      status.trim(),
+    );
+  }
+
+  if (search.trim()) {
+
+    params.set(
+      "search",
+      search.trim(),
+    );
+  }
+
+  const res = await api.get(
+    `admin/reviews/?${params.toString()}`,
+  );
+
+  return res.data;
+}
+
+
+export async function patchAdminReview(
+  reviewId,
+  body,
+) {
+
+  const res = await api.patch(
+    `admin/reviews/${reviewId}/`,
+    body,
+  );
+
+  return res.data;
+}
+

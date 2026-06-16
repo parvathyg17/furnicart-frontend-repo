@@ -3,6 +3,10 @@ import {
 } from "lucide-react";
 
 import {
+  Link,
+} from "react-router-dom";
+
+import {
   formatMoney,
 } from "../../../utils/currency.js";
 
@@ -46,6 +50,12 @@ export default function OrderItemsList(
               line.status === "active" &&
               fs === "delivered" &&
               !line.has_return_request;
+
+            const canReview =
+              !lineCancelled &&
+              line.status === "active" &&
+              fs === "delivered" &&
+              line.product_slug;
 
             const img = resolveMediaUrl(line.image_url);
 
@@ -199,6 +209,25 @@ export default function OrderItemsList(
                           >
                             Request return
                           </button>
+                        )
+                      }
+
+                      {
+                        canReview && (
+
+                          <Link
+                            className="checkout-btn-secondary"
+                            style={{
+                              fontSize: "0.78rem",
+                              textDecoration: "none",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                            to={`/shop/product/${encodeURIComponent(line.product_slug)}?writeReview=1`}
+                          >
+                            Write a review
+                          </Link>
                         )
                       }
                     </div>

@@ -98,6 +98,8 @@ export default function Cart() {
 
   const navigate = useNavigate();
 
+  
+
   const [
     data,
     setData,
@@ -214,17 +216,26 @@ export default function Cart() {
   const changeQty =
     async (
       itemId,
-      nextQty
+      nextQty,
+      maxQ,
     ) => {
 
       setCheckoutErr(null);
 
       try {
 
+        // if (nextQty >= maxQ) {
+
+        //   await removeCartItemApi(itemId);
+
+        // } else{
+
         await updateCartItemApi(
           itemId,
           nextQty
         );
+      
+      
 
         setError(null);
 
@@ -567,10 +578,11 @@ export default function Cart() {
                                         row.id,
 
                                         row.quantity - 1
+                                        
                                       )
                                     }
                                   >
-                                    −
+                                    -
                                   </button>
 
                                   <span className="cart-bag-qty-val">

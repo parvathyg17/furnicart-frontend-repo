@@ -1,7 +1,3 @@
-// ==========================================
-// src/pages/user/ChangePasswordPage.jsx
-// ==========================================
-
 import "../../styles/account.css";
 
 import {
@@ -26,9 +22,7 @@ export default function ChangePasswordPage() {
 
   const dispatch = useDispatch();
 
-  // ==========================================
-  // LOCAL STATES
-  // ==========================================
+  
 
   const [loadingLocal, setLoadingLocal] =
     useState(false);
@@ -40,13 +34,9 @@ export default function ChangePasswordPage() {
   });
 
 
-  // ==========================================
-  // SUBMIT
-  // ==========================================
 
   const handleSubmit = async () => {
 
-    // OLD PASSWORD REQUIRED
     if (
       !form.old_password.trim()
     ) {
@@ -58,7 +48,6 @@ export default function ChangePasswordPage() {
       return;
     }
 
-    // NEW PASSWORD REQUIRED
     if (
       !form.new_password.trim()
     ) {
@@ -82,7 +71,7 @@ export default function ChangePasswordPage() {
       return;
     }
 
-    // PASSWORD MATCH
+    
     if (
       form.new_password !==
       form.confirm_password
@@ -114,7 +103,7 @@ export default function ChangePasswordPage() {
         "Password updated successfully"
       );
 
-      // CLEAR FORM
+    
       setForm({
         old_password: "",
         new_password: "",
@@ -156,7 +145,6 @@ export default function ChangePasswordPage() {
           remains secure.
         </div>
 
-        {/* CURRENT PASSWORD */}
         <div className="settings-field">
 
           <label>

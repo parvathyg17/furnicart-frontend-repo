@@ -6,6 +6,8 @@ import {
   formatMoney,
 } from "../../../utils/currency.js";
 
+import StarRating from "../../catalog/reviews/components/StarRating.jsx";
+
 export default function ProductDetailBuyBox(
   {
     product,
@@ -91,6 +93,32 @@ export default function ProductDetailBuyBox(
       <h1 className="pd-user-title artisan-font-serif pd-user-pdp-title">
         {product.name}
       </h1>
+
+      {
+        (product.review_count || 0) > 0 && (
+
+          <div className="pd-rating fc-reviews-summary">
+
+            <StarRating
+              value={product.average_rating}
+              size={16}
+            />
+
+            <span>
+              {product.average_rating}
+              {" "}
+              ·
+              {" "}
+              {product.review_count}
+              {" "}
+              review
+              {product.review_count === 1
+                ? ""
+                : "s"}
+            </span>
+          </div>
+        )
+      }
 
       {
         displayPrice !== null && (

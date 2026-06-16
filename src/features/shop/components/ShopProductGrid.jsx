@@ -23,6 +23,8 @@ import {
   shopProductPathFrom,
 } from "../../../utils/shopProductPath.js";
 
+import StarRating from "../../catalog/reviews/components/StarRating.jsx";
+
 export default function ShopProductGrid(
   {
     loading,
@@ -165,6 +167,25 @@ export default function ShopProductGrid(
                     >
                       {p.name}
                     </Link>
+
+                    {
+                      (p.review_count || 0) > 0 && (
+
+                        <div className="fc-shop-card-rating">
+
+                          <StarRating
+                            value={p.average_rating}
+                            size={13}
+                          />
+
+                          <span>
+                            (
+                            {p.review_count}
+                            )
+                          </span>
+                        </div>
+                      )
+                    }
 
                     {
                       price !== null && (

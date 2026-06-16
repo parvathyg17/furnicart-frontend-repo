@@ -3,6 +3,7 @@ import "../../styles/shop.css";
 import {
   Link,
   useNavigate,
+  useSearchParams,
 } from "react-router-dom";
 
 import toast from "react-hot-toast";
@@ -29,10 +30,16 @@ import ProductDetailBuyBox from "../../features/products/components/ProductDetai
 import ProductDetailAccordions from "../../features/products/components/ProductDetailAccordions.jsx";
 import ProductRelatedGrid from "../../features/products/components/ProductRelatedGrid.jsx";
 import ProductDetailFooter from "../../features/products/components/ProductDetailFooter.jsx";
+import ProductDetailReviews from "../../features/catalog/reviews/components/ProductDetailReviews.jsx";
 
 export default function ProductDetail() {
 
   const navigate = useNavigate();
+
+  const [searchParams] = useSearchParams();
+
+  const openReviewOnLoad =
+    searchParams.get("writeReview") === "1";
 
   const {
     user,
@@ -40,6 +47,7 @@ export default function ProductDetail() {
     product,
     loading,
     error,
+    refreshProduct,
     selectedVariantId,
     setSelectedVariantId,
     galleryIndex,
@@ -355,6 +363,13 @@ export default function ProductDetail() {
             />
           </div>
         </div>
+
+        <ProductDetailReviews
+          product={product}
+          user={user}
+          onProductRefresh={refreshProduct}
+          openReviewOnLoad={openReviewOnLoad}
+        />
 
         <ProductRelatedGrid relatedProducts={product.related_products} />
       </main>

@@ -7,10 +7,12 @@ const IMAGE_BASE = (
 
 /**
  * @param {string | null | undefined} imageUrl
+ * @param {string | number | null | undefined} [cacheRevision] Appended as `?v=` / `&v=` for cache busting
  * @returns {string | null}
  */
 export function resolveMediaUrl(
   imageUrl,
+  cacheRevision,
 ) {
 
   if (
@@ -20,20 +22,38 @@ export function resolveMediaUrl(
     return null;
   }
 
+  let resolved;
+
   if (
     imageUrl.startsWith(
       "http",
     )
   ) {
 
-    return imageUrl;
+    resolved = imageUrl;
+  } else {
+
+    const path = imageUrl.startsWith(
+      "/",
+    )
+      ? imageUrl
+      : `/${imageUrl}`;
+
+    resolved = `${IMAGE_BASE}${path}`;
   }
 
-  const path = imageUrl.startsWith(
-    "/",
-  )
-    ? imageUrl
-    : `/${imageUrl}`;
+  if (
+    cacheRevision === undefined
+    ||
+    cacheRevision === null
+    ||
+    cacheRevision === ""
+  ) {
 
-  return `${IMAGE_BASE}${path}`;
+    return resolved;
+  }
+
+  const sep = resolved.includes("?") ? "&" : "?";
+
+  return `${resolved}${sep}v=${encodeURIComponent(String(cacheRevision))}`;
 }

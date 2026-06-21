@@ -194,6 +194,11 @@ export default function PlaceOrderConfirmModal(
 
               <span>
                 Discounts
+                {
+                  pricingPreview?.coupon?.code
+                    ? ` (${pricingPreview.coupon.code})`
+                    : ""
+                }
               </span>
 
               <span>

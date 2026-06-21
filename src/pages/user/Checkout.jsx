@@ -11,6 +11,7 @@ import CheckoutPageHeader from "../../features/checkout/components/CheckoutPageH
 import CheckoutDeliverySection from "../../features/checkout/components/CheckoutDeliverySection.jsx";
 import CheckoutLineItems from "../../features/checkout/components/CheckoutLineItems.jsx";
 import CheckoutSummaryAside from "../../features/checkout/components/CheckoutSummaryAside.jsx";
+import CheckoutActiveCoupons from "../../features/checkout/components/CheckoutActiveCoupons.jsx";
 import PlaceOrderConfirmModal from "../../features/checkout/components/PlaceOrderConfirmModal.jsx";
 
 export default function Checkout() {
@@ -39,6 +40,12 @@ export default function Checkout() {
     canPlace,
     openPlaceConfirm,
     runPlaceOrder,
+    couponInput,
+    setCouponInput,
+    couponBusy,
+    applyCoupon,
+    removeCoupon,
+    availableCoupons,
   } = useCheckout();
 
   return (
@@ -119,6 +126,28 @@ export default function Checkout() {
                   onSelectAddress={setSelectedAddressId}
                 />
 
+                <CheckoutActiveCoupons
+                  activeCoupons={
+                    availableCoupons
+                  }
+                  loaded={
+                    !cartLoading &&
+                    Boolean(
+                      cartData?.items?.length,
+                    )
+                  }
+                  appliedCode={
+                    pricingPreview?.coupon?.code
+                  }
+                  couponBusy={couponBusy}
+                  onApplyCode={(code) => {
+
+                    applyCoupon(
+                      code,
+                    );
+                  }}
+                />
+
                 <CheckoutLineItems items={cartData.items} />
               </div>
 
@@ -136,6 +165,14 @@ export default function Checkout() {
                 canPlace={canPlace}
                 placeBusy={placeBusy}
                 onPlaceClick={openPlaceConfirm}
+                couponInput={couponInput}
+                onCouponInputChange={setCouponInput}
+                couponBusy={couponBusy}
+                onApplyCoupon={() => {
+
+                  applyCoupon();
+                }}
+                onRemoveCoupon={removeCoupon}
               />
             </div>
           )

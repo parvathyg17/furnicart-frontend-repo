@@ -2,6 +2,8 @@ import {
   formatMoney,
 } from "../../../utils/currency.js";
 
+import CheckoutCouponSection from "./CheckoutCouponSection.jsx";
+
 export default function CheckoutSummaryAside(
   {
     cartData,
@@ -17,6 +19,11 @@ export default function CheckoutSummaryAside(
     canPlace,
     placeBusy,
     onPlaceClick,
+    couponInput,
+    onCouponInputChange,
+    couponBusy,
+    onApplyCoupon,
+    onRemoveCoupon,
   },
 ) {
 
@@ -27,6 +34,16 @@ export default function CheckoutSummaryAside(
       <h2 className="checkout-panel-title artisan-font-serif">
         Summary
       </h2>
+
+      <CheckoutCouponSection
+        pricingPreview={pricingPreview}
+        discountNum={discountNum}
+        couponInput={couponInput}
+        onCouponInputChange={onCouponInputChange}
+        couponBusy={couponBusy}
+        onApply={onApplyCoupon}
+        onRemove={onRemoveCoupon}
+      />
 
       <dl className="checkout-summary-lines">
 
@@ -110,16 +127,35 @@ export default function CheckoutSummaryAside(
           </dt>
 
           <dd>
-            ₹
-            {formatMoney(
-              discountNum,
-            )}
-
-            {" "}
-
-            <span className="checkout-summary-muted">
-              (coupons coming later)
-            </span>
+            {
+              discountNum > 0
+                ? (
+                  <>
+                    −₹
+                    {formatMoney(
+                      discountNum,
+                    )}
+                    {
+                      pricingPreview?.coupon?.code && (
+                        <span className="checkout-summary-muted">
+                          {" "}
+                          (
+                          {pricingPreview.coupon.code}
+                          )
+                        </span>
+                      )
+                    }
+                  </>
+                )
+                : (
+                  <>
+                    ₹
+                    {formatMoney(
+                      0,
+                    )}
+                  </>
+                )
+            }
           </dd>
         </div>
       </dl>

@@ -24,6 +24,10 @@ import {
 } from "../cart/cartAPI";
 
 import {
+  fetchAvailableCoupons,
+} from "../promotions/couponAPI";
+
+import {
   createOrderApi,
 } from "../orders/orderAPI";
 
@@ -42,6 +46,8 @@ import {
 import {
   gstPercentLabel,
 } from "./checkoutUtils.js";
+
+import useCheckoutCoupon from "./useCheckoutCoupon.js";
 
 export default function useCheckout() {
 
@@ -82,6 +88,13 @@ export default function useCheckout() {
     pricingError,
     setPricingError,
   ] = useState(null);
+
+  const [
+    availableCoupons,
+    setAvailableCoupons,
+  ] = useState(
+    [],
+  );
 
   const [
     selectedPaymentMethod,
@@ -172,6 +185,33 @@ export default function useCheckout() {
 
           try {
 
+            const couponsRes =
+              await fetchAvailableCoupons();
+
+            if (
+              !isCancelled()
+            ) {
+
+              setAvailableCoupons(
+                couponsRes.coupons ||
+                  [],
+              );
+            }
+          } catch {
+
+            if (
+              !isCancelled() &&
+              !silent
+            ) {
+
+              setAvailableCoupons(
+                [],
+              );
+            }
+          }
+
+          try {
+
             const preview =
               await fetchCheckoutPreview();
 
@@ -201,6 +241,17 @@ export default function useCheckout() {
               setPricingPreview(
                 preview,
               );
+
+              if (
+                Array.isArray(
+                  preview.active_coupons,
+                )
+              ) {
+
+                setAvailableCoupons(
+                  preview.active_coupons,
+                );
+              }
 
               setPricingError(
                 null,
@@ -273,6 +324,21 @@ export default function useCheckout() {
 
       [],
     );
+
+  const {
+    couponInput,
+    setCouponInput,
+    couponBusy,
+    applyCoupon,
+    removeCoupon,
+  } = useCheckoutCoupon(
+    {
+      setPricingPreview,
+      setAvailableCoupons,
+      lastPreviewSigRef,
+      reloadCheckoutData,
+    },
+  );
 
   useEffect(() => {
 
@@ -475,5 +541,11 @@ export default function useCheckout() {
     canPlace,
     openPlaceConfirm,
     runPlaceOrder,
+    couponInput,
+    setCouponInput,
+    couponBusy,
+    applyCoupon,
+    removeCoupon,
+    availableCoupons,
   };
 }

@@ -12,6 +12,7 @@ import {
   RotateCcw,
   Warehouse,
   Star,
+  Tag,
 } from "lucide-react";
 
 import {
@@ -135,6 +136,17 @@ const NAV_SECTIONS = [
         ) =>
           pathname.includes(
             "/admin/reviews",
+          ),
+      },
+      {
+        to: "/admin/coupons",
+        label: "Coupons",
+        icon: Tag,
+        match: (
+          pathname,
+        ) =>
+          pathname.includes(
+            "/admin/coupons",
           ),
       },
       {

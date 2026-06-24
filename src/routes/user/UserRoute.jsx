@@ -22,6 +22,7 @@ import Cart from "../../pages/user/Cart";
 import Wishlist from "../../pages/user/Wishlist";
 
 import ProfilePage from "../../pages/user/ProfilePage";
+import WalletPage from "../../pages/user/WalletPage";
 import EditProfile from "../../pages/user/EditProfile";
 import ChangePasswordPage from "../../pages/user/ChangePassword";
 import AddressPage from "../../pages/user/AddressPage";
@@ -29,6 +30,7 @@ import EditEmailPage from "../../pages/user/EditEmailPage";
 
 import Checkout from "../../pages/user/Checkout";
 import OrderSuccess from "../../pages/user/OrderSuccess";
+import PaymentFailed from "../../pages/user/PaymentFailed";
 import OrdersList from "../../pages/user/OrderList";
 import OrderDetail from "../../pages/user/OrderDetail";
 import Purchases from "../../pages/user/Purchases";
@@ -80,6 +82,15 @@ export default function UserRoutes() {
         element={
           <PrivateRoute>
             <OrderSuccess />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/checkout/payment-failed"
+        element={
+          <PrivateRoute>
+            <PaymentFailed />
           </PrivateRoute>
         }
       />
@@ -208,6 +219,15 @@ export default function UserRoutes() {
         element={
           <PrivateRoute>
             <AddressPage />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/profile/wallet"
+        element={
+          <PrivateRoute>
+            <WalletPage />
           </PrivateRoute>
         }
       />

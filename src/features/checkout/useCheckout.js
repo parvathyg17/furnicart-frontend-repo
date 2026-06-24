@@ -28,8 +28,22 @@ import {
 } from "../promotions/couponAPI";
 
 import {
+  fetchWalletApi,
+} from "../wallet/walletAPI";
+
+import {
   createOrderApi,
 } from "../orders/orderAPI";
+
+import {
+  initiateRazorpayCheckoutApi,
+  verifyRazorpayPaymentApi,
+} from "../payments/razorpayAPI";
+
+import {
+  loadRazorpayCheckoutScript,
+  openRazorpayCheckout,
+} from "../payments/razorpayCheckout";
 
 import {
   formatProductApiError,
@@ -118,6 +132,13 @@ export default function useCheckout() {
     setConfirmPlaceOpen,
   ] = useState(false);
 
+  const [
+    walletBalance,
+    setWalletBalance,
+  ] = useState(
+    null,
+  );
+
   const lastCartSigRef =
     useRef(
       null,
@@ -126,6 +147,16 @@ export default function useCheckout() {
   const lastPreviewSigRef =
     useRef(
       null,
+    );
+
+  const paymentCompletedRef =
+    useRef(
+      false,
+    );
+
+  const razorpayAttemptRef =
+    useRef(
+      0,
     );
 
   const reloadCheckoutData =
@@ -285,6 +316,33 @@ export default function useCheckout() {
               );
             }
           }
+
+          try {
+
+            const walletRes =
+              await fetchWalletApi();
+
+            if (
+              !isCancelled()
+            ) {
+
+              setWalletBalance(
+                Number(
+                  walletRes.balance ?? 0,
+                ),
+              );
+            }
+          } catch {
+
+            if (
+              !isCancelled()
+            ) {
+
+              setWalletBalance(
+                0,
+              );
+            }
+          }
         } catch (err) {
 
           if (
@@ -346,6 +404,16 @@ export default function useCheckout() {
       getAddresses(),
     );
   }, [dispatch]);
+
+  useEffect(() => {
+
+    setPlaceError(
+      null,
+    );
+
+    paymentCompletedRef.current =
+      false;
+  }, []);
 
   useEffect(() => {
 
@@ -419,6 +487,10 @@ export default function useCheckout() {
     pricingPreview?.discount_total ?? 0,
   );
 
+  const offerDiscountNum = Number(
+    pricingPreview?.offer_discount_total ?? 0,
+  );
+
   const grandNum = Number(
     pricingPreview?.grand_total ??
       (
@@ -432,6 +504,11 @@ export default function useCheckout() {
 
   const freeShipMin = pricingPreview?.free_shipping_min_subtotal;
 
+  const walletCanPay =
+    walletBalance != null &&
+    walletBalance >= grandNum &&
+    grandNum > 0;
+
   const orderReady =
     Boolean(
       cartData?.items?.length &&
@@ -439,7 +516,14 @@ export default function useCheckout() {
       pricingPreview &&
       !pricingError &&
       selectedAddressId &&
-      selectedPaymentMethod === "cod",
+      (
+        selectedPaymentMethod === "cod" ||
+        selectedPaymentMethod === "razorpay" ||
+        (
+          selectedPaymentMethod === "wallet" &&
+          walletCanPay
+        )
+      ),
     );
 
   const canPlace =
@@ -447,6 +531,24 @@ export default function useCheckout() {
       orderReady &&
       !placeBusy,
     );
+
+  useEffect(() => {
+
+    if (
+      selectedPaymentMethod === "wallet" &&
+      walletBalance != null &&
+      !walletCanPay
+    ) {
+
+      setSelectedPaymentMethod(
+        "cod",
+      );
+    }
+  }, [
+    selectedPaymentMethod,
+    walletBalance,
+    walletCanPay,
+  ]);
 
   const openPlaceConfirm = () => {
 
@@ -467,6 +569,34 @@ export default function useCheckout() {
     );
   };
 
+  const goToPaymentFailed = (
+    reason,
+    message,
+  ) => {
+
+    if (
+      paymentCompletedRef.current
+    ) {
+
+      return;
+    }
+
+    setConfirmPlaceOpen(
+      false,
+    );
+
+    navigate(
+      "/checkout/payment-failed",
+      {
+        replace: true,
+        state: {
+          reason,
+          message,
+        },
+      },
+    );
+  };
+
   const runPlaceOrder = async () => {
 
     setPlaceError(
@@ -479,31 +609,264 @@ export default function useCheckout() {
 
     try {
 
-      const order = await createOrderApi(
-        {
-          address_id: selectedAddressId,
+      if (
+        selectedPaymentMethod === "cod" ||
+        selectedPaymentMethod === "wallet"
+      ) {
 
-          payment_method: selectedPaymentMethod,
-        },
-      );
+        const order = await createOrderApi(
+          {
+            address_id: selectedAddressId,
 
-      setConfirmPlaceOpen(
-        false,
-      );
+            payment_method: selectedPaymentMethod,
+          },
+        );
 
-      navigate(
-        `/checkout/success/${encodeURIComponent(order.order_number)}`,
-        {
-          replace: true,
-        },
+        setConfirmPlaceOpen(
+          false,
+        );
+
+        navigate(
+          `/checkout/success/${encodeURIComponent(order.order_number)}`,
+          {
+            replace: true,
+          },
+        );
+
+        return;
+      }
+
+      if (
+        selectedPaymentMethod === "razorpay"
+      ) {
+
+        paymentCompletedRef.current =
+          false;
+
+        const attemptId =
+          razorpayAttemptRef.current
+          + 1;
+
+        razorpayAttemptRef.current =
+          attemptId;
+
+        await loadRazorpayCheckoutScript();
+
+        const checkout =
+          await initiateRazorpayCheckoutApi(
+            {
+              address_id: selectedAddressId,
+            },
+          );
+
+        await new Promise(
+          (
+            resolve,
+            reject,
+          ) => {
+
+            openRazorpayCheckout(
+              {
+                checkout,
+
+                onSuccess:
+                  async (
+                    response,
+                  ) => {
+
+                    if (
+                      attemptId
+                        !== razorpayAttemptRef.current
+                    ) {
+
+                      return;
+                    }
+
+                    try {
+
+                      const order =
+                        await verifyRazorpayPaymentApi(
+                          {
+                            razorpay_order_id:
+                              response.razorpay_order_id,
+
+                            razorpay_payment_id:
+                              response.razorpay_payment_id,
+
+                            razorpay_signature:
+                              response.razorpay_signature,
+                          },
+                        );
+
+                      if (
+                        attemptId
+                          !== razorpayAttemptRef.current
+                      ) {
+
+                        return;
+                      }
+
+                      resolve(
+                        order,
+                      );
+                    } catch (
+                      verifyErr
+                    ) {
+
+                      if (
+                        attemptId
+                          !== razorpayAttemptRef.current
+                      ) {
+
+                        return;
+                      }
+
+                      reject(
+                        verifyErr,
+                      );
+                    }
+                  },
+
+                onDismiss:
+                  () => {
+
+                    if (
+                      attemptId
+                        !== razorpayAttemptRef.current
+                    ) {
+
+                      return;
+                    }
+
+                    goToPaymentFailed(
+                      "cancelled",
+                      "Payment was cancelled. No order was placed.",
+                    );
+
+                    reject(
+                      new Error(
+                        "payment_cancelled",
+                      ),
+                    );
+                  },
+
+                onFailure:
+                  (
+                    response,
+                  ) => {
+
+                    if (
+                      attemptId
+                        !== razorpayAttemptRef.current
+                    ) {
+
+                      return;
+                    }
+
+                    goToPaymentFailed(
+                      "failed",
+                      response?.error?.description ||
+
+                        "Payment failed. No order was placed.",
+                    );
+
+                    reject(
+                      new Error(
+                        "payment_failed",
+                      ),
+                    );
+                  },
+              },
+            );
+          },
+        ).then(
+          (
+            order,
+          ) => {
+
+            paymentCompletedRef.current =
+              true;
+
+            setConfirmPlaceOpen(
+              false,
+            );
+
+            setPlaceError(
+              null,
+            );
+
+            navigate(
+              `/checkout/success/${encodeURIComponent(order.order_number)}`,
+              {
+                replace: true,
+              },
+            );
+          },
+        ).catch(
+          (
+            razorpayErr,
+          ) => {
+
+            if (
+              paymentCompletedRef.current
+            ) {
+
+              return;
+            }
+
+            if (
+              razorpayErr?.message ===
+                "payment_cancelled" ||
+
+              razorpayErr?.message ===
+                "payment_failed"
+            ) {
+
+              return;
+            }
+
+            goToPaymentFailed(
+              "verify_failed",
+
+              formatProductApiError(
+                razorpayErr.response?.data,
+              ) ||
+
+                razorpayErr.message ||
+
+                "Payment could not be confirmed.",
+            );
+          },
+        );
+
+        return;
+      }
+
+      throw new Error(
+        "Unsupported payment method.",
       );
     } catch (err) {
 
+      if (
+        paymentCompletedRef.current ||
+
+        err?.message ===
+          "payment_cancelled" ||
+
+        err?.message ===
+          "payment_failed"
+      ) {
+
+        return;
+      }
+
       setPlaceError(
 
-        formatProductApiError(
-          err.response?.data,
-        ) ||
+        err.message ||
+
+          formatProductApiError(
+            err.response?.data,
+          ) ||
 
           "Could not place order. Please try again.",
       );
@@ -534,6 +897,7 @@ export default function useCheckout() {
     taxNum,
     shipNum,
     discountNum,
+    offerDiscountNum,
     grandNum,
     gstPct,
     freeShipMin,
@@ -547,5 +911,7 @@ export default function useCheckout() {
     applyCoupon,
     removeCoupon,
     availableCoupons,
+    walletBalance,
+    walletCanPay,
   };
 }

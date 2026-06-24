@@ -289,6 +289,25 @@ body {
   pointer-events: none;
 }
 
+.fc-offer-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: rgba(75, 45, 29, 0.95);
+  color: #faf8f5;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  z-index: 2;
+  pointer-events: none;
+  max-width: calc(100% - 28px);
+  text-align: center;
+  line-height: 1.2;
+}
+
 a.collection-card {
   text-decoration: none;
   color: inherit;

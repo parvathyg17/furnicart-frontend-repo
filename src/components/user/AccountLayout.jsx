@@ -11,6 +11,7 @@ import {
   Heart,
   Package,
   ShoppingBag,
+  Wallet,
 } from "lucide-react";
 
 import {
@@ -259,6 +260,20 @@ export default function AccountLayout({
             >
               <Package size={18} />
               My orders
+            </NavLink>
+
+            <NavLink
+              to="/profile/wallet"
+              className={({
+                isActive,
+              }) =>
+                isActive
+                  ? "account-menu active"
+                  : "account-menu"
+              }
+            >
+              <Wallet size={18} />
+              Wallet
             </NavLink>
 
             <NavLink

@@ -16,6 +16,8 @@ import {
   downloadOrderInvoicePdf,
 } from "../../features/orders/orderAPI";
 
+import OrderSuccessSummary from "../../features/orders/components/OrderSuccessSummary.jsx";
+
 import {
   formatProductApiError,
 } from "../../utils/productApiErrors.js";
@@ -278,8 +280,17 @@ export default function OrderSuccess() {
 
               <p className="checkout-success-lead">
 
-                We are preparing your pieces with care. You will pay by cash on
-                delivery when your shipment arrives.
+                {
+                  order.payment_method === "razorpay"
+                    ? (
+                      order.payment_status === "paid"
+                        ? "Your payment was successful. We are preparing your pieces with care."
+                        : "We are confirming your payment. This usually takes a moment."
+                    )
+                    : order.payment_method === "wallet"
+                      ? "Your wallet payment was successful. We are preparing your pieces with care."
+                      : "We are preparing your pieces with care. You will pay by cash on delivery when your shipment arrives."
+                }
               </p>
 
               <p className="checkout-success-order">
@@ -293,6 +304,10 @@ export default function OrderSuccess() {
                 </code>
 
               </p>
+
+              <OrderSuccessSummary
+                order={order}
+              />
 
               {
                 invoiceError && (

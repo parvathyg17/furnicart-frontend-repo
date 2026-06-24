@@ -34,6 +34,7 @@ export default function Checkout() {
     taxNum,
     shipNum,
     discountNum,
+    offerDiscountNum,
     grandNum,
     gstPct,
     freeShipMin,
@@ -46,6 +47,8 @@ export default function Checkout() {
     applyCoupon,
     removeCoupon,
     availableCoupons,
+    walletBalance,
+    walletCanPay,
   } = useCheckout();
 
   return (
@@ -157,6 +160,7 @@ export default function Checkout() {
                 taxNum={taxNum}
                 shipNum={shipNum}
                 discountNum={discountNum}
+                offerDiscountNum={offerDiscountNum}
                 grandNum={grandNum}
                 gstPct={gstPct}
                 freeShipMin={freeShipMin}
@@ -173,6 +177,8 @@ export default function Checkout() {
                   applyCoupon();
                 }}
                 onRemoveCoupon={removeCoupon}
+                walletBalance={walletBalance}
+                walletCanPay={walletCanPay}
               />
             </div>
           )
@@ -192,6 +198,7 @@ export default function Checkout() {
         gstPct={gstPct}
         placeBusy={placeBusy}
         placeError={placeError}
+        selectedPaymentMethod={selectedPaymentMethod}
         onClose={() => {
 
           setConfirmPlaceOpen(

@@ -8,6 +8,14 @@ export default function OrderPricing(
   },
 ) {
 
+  const offerDiscountNum = Number(
+    order.offer_discount_total ?? 0,
+  );
+
+  const couponDiscountNum = Number(
+    order.discount_total ?? 0,
+  );
+
   return (
 
     <div className="odl-totals">
@@ -17,14 +25,63 @@ export default function OrderPricing(
         <div className="odl-total-row">
 
           <span>
-            Subtotal
+            {
+              offerDiscountNum > 0
+                ? "Items"
+                : "Subtotal"
+            }
           </span>
 
           <span>
             ₹
-            {formatMoney(order.subtotal)}
+            {formatMoney(
+              offerDiscountNum > 0
+                ? (
+                    order.subtotal_gross
+                    ?? order.subtotal
+                  )
+                : order.subtotal,
+            )}
           </span>
         </div>
+
+        {
+          offerDiscountNum > 0 && (
+
+            <div className="odl-total-row">
+
+              <span>
+                Offer savings
+              </span>
+
+              <span>
+                −₹
+                {formatMoney(
+                  offerDiscountNum,
+                )}
+              </span>
+            </div>
+          )
+        }
+
+        {
+          offerDiscountNum > 0 && (
+
+            <div className="odl-total-row">
+
+              <span>
+                Subtotal
+              </span>
+
+              <span>
+                ₹
+                {formatMoney(
+                  order.subtotal,
+                )}
+              </span>
+            </div>
+          )
+        }
 
         <div className="odl-total-row">
 
@@ -51,17 +108,48 @@ export default function OrderPricing(
           </span>
         </div>
 
-        <div className="odl-total-row">
+        {
+          couponDiscountNum > 0 && (
 
-          <span>
-            Discounts
-          </span>
+            <div className="odl-total-row">
 
-          <span>
-            ₹
-            {formatMoney(order.discount_total)}
-          </span>
-        </div>
+              <span>
+                {
+                  order.coupon_code
+                    ? `Coupon (${order.coupon_code})`
+                    : "Coupon"
+                }
+              </span>
+
+              <span>
+                −₹
+                {formatMoney(
+                  couponDiscountNum,
+                )}
+              </span>
+            </div>
+          )
+        }
+
+        {
+          offerDiscountNum <= 0 &&
+          couponDiscountNum <= 0 && (
+
+            <div className="odl-total-row">
+
+              <span>
+                Discounts
+              </span>
+
+              <span>
+                ₹
+                {formatMoney(
+                  0,
+                )}
+              </span>
+            </div>
+          )
+        }
 
         <div className="odl-total-final">
 

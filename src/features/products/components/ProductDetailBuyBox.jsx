@@ -8,6 +8,8 @@ import {
 
 import StarRating from "../../catalog/reviews/components/StarRating.jsx";
 
+import OfferBadge from "../../promotions/components/OfferBadge.jsx";
+
 export default function ProductDetailBuyBox(
   {
     product,
@@ -123,10 +125,18 @@ export default function ProductDetailBuyBox(
       {
         displayPrice !== null && (
 
-          <p className="pd-user-price artisan-font-serif pd-user-pdp-price">
-            ₹
-            {formatMoney(displayPrice)}
-          </p>
+          <div className="pd-user-pdp-price-row">
+
+            <p className="pd-user-price artisan-font-serif pd-user-pdp-price">
+              ₹
+              {formatMoney(displayPrice)}
+            </p>
+
+            <OfferBadge
+              product={product}
+              className="fc-offer-badge--inline"
+            />
+          </div>
         )
       }
 

@@ -11,6 +11,7 @@ export default function CheckoutSummaryAside(
     taxNum,
     shipNum,
     discountNum,
+    offerDiscountNum,
     grandNum,
     gstPct,
     freeShipMin,
@@ -24,6 +25,8 @@ export default function CheckoutSummaryAside(
     couponBusy,
     onApplyCoupon,
     onRemoveCoupon,
+    walletBalance,
+    walletCanPay,
   },
 ) {
 
@@ -50,16 +53,65 @@ export default function CheckoutSummaryAside(
         <div className="checkout-summary-line">
 
           <dt>
-            Subtotal
+            {
+              offerDiscountNum > 0
+                ? "Items"
+                : "Subtotal"
+            }
           </dt>
 
           <dd>
             ₹
             {formatMoney(
-              cartData.subtotal,
+              offerDiscountNum > 0
+                ? (
+                    pricingPreview?.subtotal_gross
+                    ?? cartData?.subtotal_gross
+                    ?? cartData?.subtotal
+                  )
+                : cartData.subtotal,
             )}
           </dd>
         </div>
+
+        {
+          offerDiscountNum > 0 && (
+
+            <div className="checkout-summary-line">
+
+              <dt>
+                Offer savings
+              </dt>
+
+              <dd>
+                −₹
+                {formatMoney(
+                  offerDiscountNum,
+                )}
+              </dd>
+            </div>
+          )
+        }
+
+        {
+          offerDiscountNum > 0 && (
+
+            <div className="checkout-summary-line">
+
+              <dt>
+                Subtotal
+              </dt>
+
+              <dd>
+                ₹
+                {formatMoney(
+                  pricingPreview?.subtotal
+                    ?? cartData?.subtotal,
+                )}
+              </dd>
+            </div>
+          )
+        }
 
         <div className="checkout-summary-line">
 
@@ -123,7 +175,11 @@ export default function CheckoutSummaryAside(
         <div className="checkout-summary-line">
 
           <dt>
-            Discounts
+            {
+              discountNum > 0
+                ? "Coupon"
+                : "Discounts"
+            }
           </dt>
 
           <dd>
@@ -217,16 +273,22 @@ export default function CheckoutSummaryAside(
           </div>
         </label>
 
-        <div
-          className="checkout-payment-option checkout-payment-option--disabled"
-          aria-disabled
-        >
+        <label className="checkout-payment-option">
 
           <input
             type="radio"
             name="pay-method"
             value="razorpay"
-            disabled
+            checked={
+              selectedPaymentMethod ===
+              "razorpay"
+            }
+            onChange={() => {
+
+              onPaymentMethodChange(
+                "razorpay",
+              );
+            }}
           />
 
           <div>
@@ -236,28 +298,45 @@ export default function CheckoutSummaryAside(
               <strong>
                 Razorpay
               </strong>
-
-              <span className="checkout-payment-soon">
-                Coming soon
-              </span>
             </div>
 
             <p className="checkout-payment-option-desc">
-              Card, UPI, and net banking — not available yet.
+              Pay now with UPI, card, or net banking. Your order is placed only
+              after successful payment.
             </p>
           </div>
-        </div>
+        </label>
 
-        <div
-          className="checkout-payment-option checkout-payment-option--disabled"
-          aria-disabled
+        <label
+          className={
+            walletCanPay
+              ? "checkout-payment-option"
+              : "checkout-payment-option checkout-payment-option--disabled"
+          }
         >
 
           <input
             type="radio"
             name="pay-method"
             value="wallet"
-            disabled
+            checked={
+              selectedPaymentMethod ===
+              "wallet"
+            }
+            disabled={
+              !walletCanPay
+            }
+            onChange={() => {
+
+              if (
+                walletCanPay
+              ) {
+
+                onPaymentMethodChange(
+                  "wallet",
+                );
+              }
+            }}
           />
 
           <div>
@@ -268,16 +347,41 @@ export default function CheckoutSummaryAside(
                 Wallet
               </strong>
 
-              <span className="checkout-payment-soon">
-                Coming soon
-              </span>
+              {
+                walletBalance != null && (
+
+                  <span className="checkout-payment-wallet-balance">
+                    Balance ₹
+                    {formatMoney(
+                      walletBalance,
+                    )}
+                  </span>
+                )
+              }
+
             </div>
 
             <p className="checkout-payment-option-desc">
-              Pay with your Furnicart wallet — not available yet.
+              {
+                walletCanPay
+                  ? "Pay now using your FurniCart wallet balance."
+                  : walletBalance == null
+                    ? "Loading wallet balance…"
+                    : (
+                      <>
+                        Insufficient balance for this order (₹
+                        {formatMoney(
+                          grandNum,
+                        )}
+                        {" "}
+                        required). Refunds from cancellations and returns are
+                        added to your wallet.
+                      </>
+                    )
+              }
             </p>
           </div>
-        </div>
+        </label>
       </section>
 
       <button
@@ -288,8 +392,20 @@ export default function CheckoutSummaryAside(
       >
         {
           placeBusy
-            ? "Placing order…"
-            : "Place order"
+            ? (
+              selectedPaymentMethod === "razorpay"
+                ? "Opening payment…"
+                : selectedPaymentMethod === "wallet"
+                  ? "Paying with wallet…"
+                  : "Placing order…"
+            )
+            : (
+              selectedPaymentMethod === "razorpay"
+                ? "Pay now"
+                : selectedPaymentMethod === "wallet"
+                  ? "Pay with wallet"
+                  : "Place order"
+            )
         }
       </button>
 

@@ -25,6 +25,8 @@ import {
 
 import StarRating from "../../catalog/reviews/components/StarRating.jsx";
 
+import OfferBadge from "../../promotions/components/OfferBadge.jsx";
+
 export default function ShopProductGrid(
   {
     loading,
@@ -123,6 +125,10 @@ export default function ShopProductGrid(
                         </span>
                       )
                     }
+
+                    <OfferBadge
+                      product={p}
+                    />
 
                     {
                       p.thumbnail ? (

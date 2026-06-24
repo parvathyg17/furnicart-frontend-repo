@@ -610,6 +610,26 @@
   font-size: 0.9rem;
 }
 
+.checkout-success-summary {
+  text-align: left;
+  margin: 0 auto 1.75rem;
+  max-width: 22rem;
+}
+
+.checkout-success-summary-title {
+  margin: 0 0 1rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #2c241c;
+}
+
+.checkout-success-payment-line {
+  margin: 1rem 0 0;
+  font-size: 0.88rem;
+  color: #5c534a;
+  line-height: 1.45;
+}
+
 .checkout-success-invoice-err {
   margin: -1rem auto 1rem;
   max-width: 24rem;
@@ -660,6 +680,17 @@
 .checkout-btn-primary:hover,
 .checkout-btn-secondary:hover {
   filter: brightness(1.06);
+}
+
+.checkout-payment-failed-title {
+  color: #7a3d3d;
+}
+
+.checkout-payment-failed-note {
+  margin: -0.75rem 0 1.75rem;
+  font-size: 0.88rem;
+  color: #6b635c;
+  line-height: 1.45;
 }
 
 /* Checkout payment (COD + future methods) */
@@ -722,6 +753,12 @@
   padding: 0.12rem 0.45rem;
   border-radius: 6px;
   background: #faf8f5;
+}
+
+.checkout-payment-wallet-balance {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #3d6b4a;
 }
 
 .checkout-pricing-note {

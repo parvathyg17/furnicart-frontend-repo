@@ -13,6 +13,7 @@ import {
   Warehouse,
   Star,
   Tag,
+  Percent,
 } from "lucide-react";
 
 import {
@@ -147,6 +148,17 @@ const NAV_SECTIONS = [
         ) =>
           pathname.includes(
             "/admin/coupons",
+          ),
+      },
+      {
+        to: "/admin/offers",
+        label: "Offers",
+        icon: Percent,
+        match: (
+          pathname,
+        ) =>
+          pathname.includes(
+            "/admin/offers",
           ),
       },
       {

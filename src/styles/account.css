@@ -1186,3 +1186,240 @@ body {
   border: 1px solid #dc2626 !important;
   background: #fff5f5;
 }
+
+/* Wallet */
+.wallet-page {
+  width: 100%;
+  max-width: 720px;
+}
+
+.wallet-page-header {
+  margin-bottom: 1.5rem;
+}
+
+.wallet-page-title {
+  font-family: "Playfair Display", serif;
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  margin-bottom: 0.35rem;
+}
+
+.wallet-page-lead {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.wallet-banner {
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.wallet-banner--error {
+  background: #fff5f5;
+  border: 1px solid #f0c4c4;
+  color: #8b2e2e;
+}
+
+.wallet-muted {
+  color: var(--muted);
+}
+
+.wallet-balance-card {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.5rem 1.75rem;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #4a2b1a 0%, #6b4428 100%);
+  color: #faf8f5;
+  margin-bottom: 2rem;
+  box-shadow: 0 12px 32px rgba(74, 43, 26, 0.18);
+}
+
+.wallet-balance-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.wallet-balance-label {
+  font-size: 0.85rem;
+  opacity: 0.85;
+  margin-bottom: 0.25rem;
+}
+
+.wallet-balance-amount {
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.wallet-balance-updated {
+  margin-top: 0.5rem;
+  font-size: 0.78rem;
+  opacity: 0.75;
+}
+
+.wallet-txn-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 1.25rem 1.5rem;
+}
+
+.wallet-txn-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.wallet-txn-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.wallet-txn-filters {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.wallet-filter-btn {
+  font: inherit;
+  font-size: 0.82rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #faf8f5;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.wallet-filter-btn--active {
+  background: var(--brown);
+  border-color: var(--brown);
+  color: #fff;
+}
+
+.wallet-empty {
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.5;
+  padding: 1rem 0;
+}
+
+.wallet-txn-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.wallet-txn-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.wallet-txn-item:last-child {
+  border-bottom: none;
+}
+
+.wallet-txn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.wallet-txn-icon--credit {
+  background: #e8f5ec;
+  color: #2d6b3f;
+}
+
+.wallet-txn-icon--debit {
+  background: #faf0f0;
+  color: #8b4545;
+}
+
+.wallet-txn-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.wallet-txn-reason {
+  font-weight: 600;
+  font-size: 0.92rem;
+  margin-bottom: 0.2rem;
+}
+
+.wallet-txn-meta,
+.wallet-txn-date {
+  font-size: 0.8rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.wallet-txn-amounts {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.wallet-txn-amount {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.wallet-txn-amount--credit {
+  color: #2d6b3f;
+}
+
+.wallet-txn-amount--debit {
+  color: #8b4545;
+}
+
+.wallet-txn-balance-after {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-top: 0.15rem;
+}
+
+.wallet-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.25rem;
+  padding-top: 0.5rem;
+}
+
+.wallet-page-btn {
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #fff;
+  cursor: pointer;
+}
+
+.wallet-page-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.wallet-page-info {
+  font-size: 0.85rem;
+  color: var(--muted);
+}

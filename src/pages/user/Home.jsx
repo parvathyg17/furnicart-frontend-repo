@@ -43,6 +43,8 @@ import {
   shopProductPathFrom,
 } from "../../utils/shopProductPath.js";
 
+import OfferBadge from "../../features/promotions/components/OfferBadge.jsx";
+
 import {
   resolveMediaUrl,
 } from "../../utils/mediaUrl.js";
@@ -596,6 +598,10 @@ export default function Home() {
                           </span>
                         )
                       }
+
+                      <OfferBadge
+                        product={p}
+                      />
 
                       {
                         p.thumbnail ? (

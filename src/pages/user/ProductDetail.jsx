@@ -292,6 +292,7 @@ export default function ProductDetail() {
             galleryIndex={galleryIndex}
             onSelectThumb={setGalleryIndex}
             isOutOfStock={isOutOfStock}
+            offerBadge={product.offer_badge}
             zoomViewportRef={zoomViewportRef}
             imageZoom={imageZoom}
             onImagePointerDown={onImagePointerDown}

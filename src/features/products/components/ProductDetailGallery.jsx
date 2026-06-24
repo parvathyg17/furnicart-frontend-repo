@@ -2,6 +2,8 @@ import {
   ZoomIn,
 } from "lucide-react";
 
+import OfferBadge from "../../promotions/components/OfferBadge.jsx";
+
 export default function ProductDetailGallery(
   {
     productName,
@@ -10,6 +12,7 @@ export default function ProductDetailGallery(
     galleryIndex,
     onSelectThumb,
     isOutOfStock,
+    offerBadge,
     zoomViewportRef,
     imageZoom,
     onImagePointerDown,
@@ -57,6 +60,10 @@ export default function ProductDetailGallery(
                 )
               }
 
+              <OfferBadge
+                label={offerBadge?.label}
+              />
+
               <div
                 className="pd-interactive-zoom-track"
                 style={{
@@ -99,6 +106,10 @@ export default function ProductDetailGallery(
                   </span>
                 )
               }
+
+              <OfferBadge
+                label={offerBadge?.label}
+              />
 
               <div className="artisan-card-ph pd-user-ph">
                 No image

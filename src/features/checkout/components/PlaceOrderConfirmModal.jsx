@@ -18,6 +18,7 @@ export default function PlaceOrderConfirmModal(
     gstPct,
     placeBusy,
     placeError,
+    selectedPaymentMethod,
     onClose,
     onConfirm,
   },
@@ -60,8 +61,13 @@ export default function PlaceOrderConfirmModal(
       </h2>
 
       <p className="order-cancel-dialog-hint">
-        Are you sure you want to place this order? You will pay cash on delivery
-        when your furniture arrives.
+        {
+          selectedPaymentMethod === "razorpay"
+            ? "Are you sure you want to pay now? Your FurniCart order is created only after Razorpay confirms payment."
+            : selectedPaymentMethod === "wallet"
+              ? "Are you sure you want to pay with your wallet? The order total will be deducted from your balance immediately."
+              : "Are you sure you want to place this order? You will pay cash on delivery when your furniture arrives."
+        }
       </p>
 
       {
@@ -256,7 +262,23 @@ export default function PlaceOrderConfirmModal(
           disabled={placeBusy}
           onClick={onConfirm}
         >
-          {placeBusy ? "Placing order…" : "Yes, place order"}
+          {
+            placeBusy
+              ? (
+                selectedPaymentMethod === "razorpay"
+                  ? "Opening payment…"
+                  : selectedPaymentMethod === "wallet"
+                    ? "Paying with wallet…"
+                    : "Placing order…"
+              )
+              : (
+                selectedPaymentMethod === "razorpay"
+                  ? "Yes, pay now"
+                  : selectedPaymentMethod === "wallet"
+                    ? "Yes, pay with wallet"
+                    : "Yes, place order"
+              )
+          }
         </button>
       </div>
     </Modal>

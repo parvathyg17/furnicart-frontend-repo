@@ -15,6 +15,8 @@ import {
   shopProductPathFrom,
 } from "../../../utils/shopProductPath.js";
 
+import OfferBadge from "../../promotions/components/OfferBadge.jsx";
+
 export default function ProductRelatedGrid(
   {
     relatedProducts,
@@ -91,6 +93,10 @@ export default function ProductRelatedGrid(
                           </span>
                         )
                       }
+
+                      <OfferBadge
+                        product={rp}
+                      />
 
                       {
                         rp.thumbnail ? (

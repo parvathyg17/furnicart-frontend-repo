@@ -14,6 +14,7 @@ import {
   Star,
   Tag,
   Percent,
+  BarChart3,
 } from "lucide-react";
 
 import {
@@ -56,6 +57,17 @@ const NAV_SECTIONS = [
         ) =>
           pathname.includes(
             "/admin/dashboard",
+          ),
+      },
+      {
+        to: "/admin/reports/sales",
+        label: "Sales reports",
+        icon: BarChart3,
+        match: (
+          pathname,
+        ) =>
+          pathname.includes(
+            "/admin/reports",
           ),
       },
     ],

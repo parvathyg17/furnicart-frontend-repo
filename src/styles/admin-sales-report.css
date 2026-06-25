@@ -1,0 +1,208 @@
+/* Admin sales reports */
+
+.asr-page {
+  padding: 0 1rem 2.5rem;
+}
+
+.asr-lead {
+  margin: -0.75rem 0 1.25rem;
+  color: #78716c;
+  font-size: 0.95rem;
+}
+
+.asr-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+  margin-bottom: 1rem;
+}
+
+.asr-period-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.asr-period-tabs button {
+  padding: 0.45rem 0.95rem;
+  border-radius: 999px;
+  border: 1px solid #e7e2dc;
+  background: #fff;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.asr-period-tabs button.is-active {
+  background: #4b2d1d;
+  border-color: #4b2d1d;
+  color: #faf8f5;
+}
+
+.asr-custom-range {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-end;
+}
+
+.asr-custom-range label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  color: #78716c;
+}
+
+.asr-custom-range input[type="date"] {
+  padding: 0.45rem 0.65rem;
+  border: 1px solid #e7e2dc;
+  border-radius: 8px;
+  font: inherit;
+}
+
+.asr-apply-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  border: none;
+  background: #4b2d1d;
+  color: #faf8f5;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.asr-range-label {
+  margin: 0 0 1.25rem;
+  color: #57534e;
+  font-size: 0.9rem;
+}
+
+.asr-error {
+  color: #b91c1c;
+}
+
+.asr-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(160px, 1fr)
+  );
+  gap: 0.85rem;
+  margin-bottom: 1.75rem;
+}
+
+.asr-summary-card {
+  background: #fff;
+  border: 1px solid #e7e2dc;
+  border-radius: 14px;
+  padding: 1rem 1.05rem;
+}
+
+.asr-summary-label {
+  margin: 0 0 0.35rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #78716c;
+}
+
+.asr-summary-value {
+  margin: 0;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.65rem;
+  font-weight: 600;
+  color: #1c1917;
+}
+
+.asr-summary-hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.75rem;
+  color: #a8a29e;
+}
+
+.asr-section {
+  margin-bottom: 2rem;
+}
+
+.asr-section-title {
+  font-size: 1.45rem;
+  margin: 0 0 0.85rem;
+}
+
+.asr-table-wrap {
+  overflow-x: auto;
+  border: 1px solid #e7e2dc;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.asr-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.asr-table th,
+.asr-table td {
+  padding: 0.7rem 0.85rem;
+  text-align: left;
+  border-bottom: 1px solid #f0ebe4;
+  white-space: nowrap;
+}
+
+.asr-table th {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #78716c;
+  background: #faf8f5;
+}
+
+.asr-order-link {
+  color: #4b2d1d;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.asr-order-link:hover {
+  text-decoration: underline;
+}
+
+.asr-coupon-code {
+  color: #78716c;
+  font-size: 0.8rem;
+}
+
+.asr-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.asr-pagination button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid #e7e2dc;
+  border-radius: 999px;
+  background: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.asr-pagination button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.artisan-font-serif {
+  font-family: "Cormorant Garamond", Georgia, serif;
+}
+
+.ao-muted {
+  color: #78716c;
+}

@@ -202,7 +202,7 @@ export default function useCheckout() {
             !(
               silent &&
               lastCartSigRef.current ===
-                cartSnap
+              cartSnap
             )
           ) {
 
@@ -225,7 +225,7 @@ export default function useCheckout() {
 
               setAvailableCoupons(
                 couponsRes.coupons ||
-                  [],
+                [],
               );
             }
           } catch {
@@ -262,7 +262,7 @@ export default function useCheckout() {
               !(
                 silent &&
                 lastPreviewSigRef.current ===
-                  previewSnap
+                previewSnap
               )
             ) {
 
@@ -312,7 +312,7 @@ export default function useCheckout() {
                   prevErr.response?.data,
                 ) ||
 
-                  "Could not load checkout totals.",
+                "Could not load checkout totals.",
               );
             }
           }
@@ -363,7 +363,7 @@ export default function useCheckout() {
                 err.response?.data,
               ) ||
 
-                "Could not load cart.",
+              "Could not load cart.",
             );
           }
         } finally {
@@ -471,8 +471,8 @@ export default function useCheckout() {
 
   const subtotalNum = Number(
     pricingPreview?.subtotal ??
-      cartData?.subtotal ??
-      0,
+    cartData?.subtotal ??
+    0,
   );
 
   const taxNum = Number(
@@ -493,9 +493,9 @@ export default function useCheckout() {
 
   const grandNum = Number(
     pricingPreview?.grand_total ??
-      (
-        subtotalNum + taxNum + shipNum - discountNum
-      ),
+    (
+      subtotalNum + taxNum + shipNum - discountNum
+    ),
   );
 
   const gstPct = gstPercentLabel(
@@ -665,6 +665,12 @@ export default function useCheckout() {
             reject,
           ) => {
 
+            let hadPaymentFailure =
+              false;
+
+            let lastFailureMessage =
+              null;
+
             openRazorpayCheckout(
               {
                 checkout,
@@ -676,7 +682,7 @@ export default function useCheckout() {
 
                     if (
                       attemptId
-                        !== razorpayAttemptRef.current
+                      !== razorpayAttemptRef.current
                     ) {
 
                       return;
@@ -700,7 +706,7 @@ export default function useCheckout() {
 
                       if (
                         attemptId
-                          !== razorpayAttemptRef.current
+                        !== razorpayAttemptRef.current
                       ) {
 
                         return;
@@ -710,12 +716,12 @@ export default function useCheckout() {
                         order,
                       );
                     } catch (
-                      verifyErr
+                    verifyErr
                     ) {
 
                       if (
                         attemptId
-                          !== razorpayAttemptRef.current
+                        !== razorpayAttemptRef.current
                       ) {
 
                         return;
@@ -732,8 +738,28 @@ export default function useCheckout() {
 
                     if (
                       attemptId
-                        !== razorpayAttemptRef.current
+                      !== razorpayAttemptRef.current
                     ) {
+
+                      return;
+                    }
+
+                    if (
+                      hadPaymentFailure
+                    ) {
+
+                      goToPaymentFailed(
+                        "failed",
+                        lastFailureMessage ||
+
+                        "Payment failed. No order was placed.",
+                      );
+
+                      reject(
+                        new Error(
+                          "payment_failed",
+                        ),
+                      );
 
                       return;
                     }
@@ -757,23 +783,22 @@ export default function useCheckout() {
 
                     if (
                       attemptId
-                        !== razorpayAttemptRef.current
+                      !== razorpayAttemptRef.current
                     ) {
 
                       return;
                     }
 
-                    goToPaymentFailed(
-                      "failed",
+                    hadPaymentFailure =
+                      true;
+
+                    lastFailureMessage =
                       response?.error?.description ||
 
-                        "Payment failed. No order was placed.",
-                    );
+                      "Payment failed. Please try again in the payment window.";
 
-                    reject(
-                      new Error(
-                        "payment_failed",
-                      ),
+                    setPlaceError(
+                      lastFailureMessage,
                     );
                   },
               },
@@ -816,10 +841,10 @@ export default function useCheckout() {
 
             if (
               razorpayErr?.message ===
-                "payment_cancelled" ||
+              "payment_cancelled" ||
 
               razorpayErr?.message ===
-                "payment_failed"
+              "payment_failed"
             ) {
 
               return;
@@ -832,9 +857,9 @@ export default function useCheckout() {
                 razorpayErr.response?.data,
               ) ||
 
-                razorpayErr.message ||
+              razorpayErr.message ||
 
-                "Payment could not be confirmed.",
+              "Payment could not be confirmed.",
             );
           },
         );
@@ -851,10 +876,10 @@ export default function useCheckout() {
         paymentCompletedRef.current ||
 
         err?.message ===
-          "payment_cancelled" ||
+        "payment_cancelled" ||
 
         err?.message ===
-          "payment_failed"
+        "payment_failed"
       ) {
 
         return;
@@ -864,11 +889,11 @@ export default function useCheckout() {
 
         err.message ||
 
-          formatProductApiError(
-            err.response?.data,
-          ) ||
+        formatProductApiError(
+          err.response?.data,
+        ) ||
 
-          "Could not place order. Please try again.",
+        "Could not place order. Please try again.",
       );
     } finally {
 

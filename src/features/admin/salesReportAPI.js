@@ -11,7 +11,7 @@ function buildReportQueryParams(
     dateTo = "",
     page,
     pageSize,
-    format,
+    exportFormat,
     exportType,
   } = {},
 ) {
@@ -73,12 +73,12 @@ function buildReportQueryParams(
   }
 
   if (
-    format
+    exportFormat
   ) {
 
     params.set(
       "export_format",
-      format,
+      exportFormat,
     );
   }
 
@@ -236,7 +236,7 @@ export async function downloadAdminSalesReportExport(
       period,
       dateFrom,
       dateTo,
-      format,
+      exportFormat: format,
     },
   );
 
@@ -265,7 +265,7 @@ export async function downloadAdminLedgerExport(
       period,
       dateFrom,
       dateTo,
-      format,
+      exportFormat: format,
       exportType: "ledger",
     },
   );

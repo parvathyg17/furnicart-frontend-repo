@@ -21,6 +21,7 @@ import {
 
 import {
   useSelector,
+  useDispatch,
 } from "react-redux";
 
 import {
@@ -32,6 +33,10 @@ import {
 import {
   addToCartApi,
 } from "../cart/cartAPI.js";
+
+import {
+  setCartItemCount,
+} from "../cart/cartSlice.js";
 
 import {
   toggleWishlistApi,
@@ -47,6 +52,8 @@ import {
 } from "./shopListUtils.js";
 
 export default function useShopCatalog() {
+
+  const dispatch = useDispatch();
 
   const {
     user,
@@ -508,12 +515,19 @@ export default function useShopCatalog() {
 
       try {
 
-        await addToCartApi({
+        const res =
+          await addToCartApi({
 
           variantId: variant.id,
 
           quantity: 1,
         });
+
+        dispatch(
+          setCartItemCount(
+            res.item_count,
+          ),
+        );
 
         setToast(
           "Added to cart."

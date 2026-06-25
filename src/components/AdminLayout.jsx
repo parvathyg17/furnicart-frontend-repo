@@ -40,7 +40,7 @@ import {
 const ICON_PROPS = {
   size: 20,
   strokeWidth: 1.75,
-  ariaHidden: true,
+  "aria-hidden": true,
 };
 
 const NAV_SECTIONS = [

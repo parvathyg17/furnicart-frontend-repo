@@ -16,6 +16,10 @@ import {
   loadUser,
 } from "./features/auth/authSlice";
 
+import {
+  loadCartCount,
+} from "./features/cart/cartSlice";
+
 function App() {
 
   const dispatch =
@@ -37,9 +41,22 @@ function App() {
 
         
 
-          await dispatch(
-            loadUser()
-          );
+          const authResult =
+            await dispatch(
+              loadUser(),
+            );
+
+          if (
+            loadUser.fulfilled.match(
+              authResult,
+            ) &&
+            authResult.payload
+          ) {
+
+            await dispatch(
+              loadCartCount(),
+            );
+          }
 
         } catch (err) {
 

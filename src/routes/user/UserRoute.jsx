@@ -37,6 +37,7 @@ import Purchases from "../../pages/user/Purchases";
 
 import PrivateRoute from "../user/PrivateRoute";
 import PublicRoute from "../user/PublicRoute";
+import Sample from "../../pages/user/Sample";
 
 export default function UserRoutes() {
 
@@ -228,6 +229,15 @@ export default function UserRoutes() {
         element={
           <PrivateRoute>
             <WalletPage />
+          </PrivateRoute>
+        }
+      />
+
+        <Route
+        path="/profile/sample"
+        element={
+          <PrivateRoute>
+            <Sample />
           </PrivateRoute>
         }
       />

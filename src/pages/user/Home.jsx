@@ -1,7 +1,6 @@
 
 
 import "../../styles/home.css";
-import logofc from "../../assets/images/logofc.png";
 
 import {
   useCallback,
@@ -12,11 +11,9 @@ import {
 
 import {
   ArrowRight,
-  ShoppingCart,
   Star,
   Truck,
   ShieldCheck,
-  Heart,
 } from "lucide-react";
 
 import {
@@ -45,9 +42,7 @@ import {
 
 import OfferBadge from "../../features/promotions/components/OfferBadge.jsx";
 
-import {
-  resolveMediaUrl,
-} from "../../utils/mediaUrl.js";
+import PublicNavbar from "../../components/common/PublicNavbar.jsx";
 
 function featuredProductPrice(product) {
 
@@ -115,10 +110,9 @@ function featuredProductSoldOut(product) {
 export default function Home() {
 
   const {
-    user,
     checkingAuth,
   } = useSelector(
-    (state) => state.auth
+    (state) => state.auth,
   );
 
   const [
@@ -248,123 +242,9 @@ export default function Home() {
   return (
     <div className="home-page">
 
-      {/* =====================================
-          NAVBAR
-      ===================================== */}
+      <PublicNavbar />
 
-      <header className="home-navbar">
-
-        <div className="home-nav-inner">
-
-          <Link
-            to="/"
-            className="home-logo"
-          >
-            
-             <div className="auth-logo">
-                      <img src={logofc} alt="logo" />
-                    </div>
-          </Link>
-
-          <nav className="home-nav-links">
-
-            <Link to="/">
-              Home
-            </Link>
-
-            <Link to="/shop">
-              Shop
-            </Link>
-
-            <Link to="/about">
-              About
-            </Link>
-
-            <Link to="/contact">
-              Contact
-            </Link>
-
-          </nav>
-
-          <div className="home-nav-icons">
-
-            <Link
-              to={
-                user
-                  ? "/wishlist"
-                  : "/login"
-              }
-              className="profile-nav-link"
-              aria-label="Wishlist"
-            >
-              <Heart size={20} />
-            </Link>
-
-            <Link
-              to={
-                user
-                  ? "/cart"
-                  : "/login"
-              }
-              className="profile-nav-link"
-              aria-label="Cart"
-            >
-              <ShoppingCart size={20} />
-            </Link>
-
-            <Link
-  to={
-    user
-      ? "/profile"
-      : "/login"
-  }
-  className="profile-nav-link"
->
-
-  {user ? (
-
-    user.profile_image ? (
-
-      <img
-        src={
-          resolveMediaUrl(
-            user.profile_image,
-          ) || ""
-        }
-        alt="profile"
-        className="nav-profile-image"
-      />
-
-    ) : (
-
-      <div className="nav-profile-avatar">
-
-        {user.username?.charAt(0).toUpperCase()}
-
-      </div>
-    )
-
-  ) : (
-
-    <button className="login-nav-btn">
-
-      Login
-
-    </button>
-
-  )}
-
-</Link>
-
-          </div>
-
-        </div>
-
-      </header>
-
-      {/* =====================================
-          HERO
-      ===================================== */}
+    
 
       <section className="hero-section">
 
@@ -422,9 +302,6 @@ export default function Home() {
 
       </section>
 
-      {/* =====================================
-          FEATURES
-      ===================================== */}
 
       <section className="features-section">
 
@@ -475,9 +352,7 @@ export default function Home() {
 
       </section>
 
-      {/* =====================================
-          FEATURED PRODUCTS
-      ===================================== */}
+ 
 
       <section className="collection-section">
 
@@ -667,9 +542,7 @@ export default function Home() {
 
       </section>
 
-      {/* =====================================
-          CTA
-      ===================================== */}
+  
 
       <section className="cta-section">
 
@@ -695,10 +568,7 @@ export default function Home() {
 
       </section>
 
-      {/* =====================================
-          FOOTER
-      ===================================== */}
-
+      
       <footer className="home-footer">
 
         <div className="home-footer-inner">

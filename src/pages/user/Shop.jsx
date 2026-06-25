@@ -4,7 +4,7 @@ import "../../styles/home.css";
 
 import useShopCatalog from "../../features/shop/useShopCatalog.js";
 
-import ShopPublicNavbar from "../../features/shop/components/ShopPublicNavbar.jsx";
+import PublicNavbar from "../../components/common/PublicNavbar.jsx";
 import ShopFiltersSidebar from "../../features/shop/components/ShopFiltersSidebar.jsx";
 import ShopProductGrid from "../../features/shop/components/ShopProductGrid.jsx";
 import ShopPageFooter from "../../features/shop/components/ShopPageFooter.jsx";
@@ -31,7 +31,6 @@ export default function Shop() {
     error,
     toast,
     checkingAuth,
-    user,
     handleAddToCart,
     handleWishlist,
   } = useShopCatalog();
@@ -50,7 +49,7 @@ export default function Shop() {
 
     <div className="artisan-shop">
 
-      <ShopPublicNavbar user={user} />
+      <PublicNavbar />
 
       <main className="artisan-main-wrap">
 

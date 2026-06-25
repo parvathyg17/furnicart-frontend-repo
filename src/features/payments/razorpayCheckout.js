@@ -143,8 +143,7 @@ export function openRazorpayCheckout(
         return;
       }
 
-      settled = true;
-
+      // Do not mark settled — Razorpay keeps the modal open for retry.
       onFailure(
         response,
       );

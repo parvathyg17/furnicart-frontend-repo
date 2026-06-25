@@ -3,22 +3,28 @@ import {
 } from "react-router-dom";
 
 import {
+  useSelector,
+} from "react-redux";
+
+import {
   Heart,
 } from "lucide-react";
 
-import logofc from "../../../assets/images/logofc.png";
+import logofc from "../../assets/images/logofc.png";
 
-import NavCartLink from "../../../components/common/NavCartLink.jsx";
+import NavCartLink from "./NavCartLink.jsx";
 
 import {
   resolveMediaUrl,
-} from "../../../utils/mediaUrl.js";
+} from "../../utils/mediaUrl.js";
 
-export default function ShopPublicNavbar(
-  {
+export default function PublicNavbar() {
+
+  const {
     user,
-  },
-) {
+  } = useSelector(
+    (state) => state.auth,
+  );
 
   return (
 
@@ -102,12 +108,16 @@ export default function ShopPublicNavbar(
                 ) : (
 
                   <div className="nav-profile-avatar">
+
                     {user.username?.charAt(0).toUpperCase()}
                   </div>
                 )
               ) : (
 
-                <button className="login-nav-btn">
+                <button
+                  type="button"
+                  className="login-nav-btn"
+                >
                   Login
                 </button>
               )

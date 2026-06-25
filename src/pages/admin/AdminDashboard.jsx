@@ -3,12 +3,13 @@ import "../../styles/admin-dashboard-analytics.css";
 
 import {
   BarChart3,
+  Ban,
   Download,
+  FolderKanban,
   IndianRupee,
   ShoppingBag,
   UserCheck,
   Users,
-  UserX,
 } from "lucide-react";
 
 import {
@@ -138,6 +139,32 @@ function formatChartLabel(
   );
 }
 
+function formatReportDate(
+  iso,
+) {
+
+  if (!iso) {
+    return "—";
+  }
+
+  const d = new Date(
+    `${iso}T12:00:00`,
+  );
+
+  if (Number.isNaN(d.getTime())) {
+    return iso;
+  }
+
+  return d.toLocaleDateString(
+    undefined,
+    {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    },
+  );
+}
+
 function SalesChart(
   {
     breakdown,
@@ -157,17 +184,50 @@ function SalesChart(
     );
   }
 
+  const revenues = breakdown.map(
+    (row) =>
+      Number(
+        row.grand_total ?? 0,
+      ),
+  );
+
   const maxRevenue = Math.max(
-    ...breakdown.map(
-      (
-        row,
-      ) =>
-        Number(
-          row.grand_total ?? 0,
-        ),
-    ),
+    ...revenues,
     1,
   );
+
+  let peakIndex = 0;
+
+  revenues.forEach(
+    (value, index) => {
+
+      if (
+        value >= revenues[peakIndex]
+      ) {
+
+        peakIndex = index;
+      }
+    },
+  );
+
+  let highlightIndex = -1;
+
+  for (
+    let i = breakdown.length - 1;
+    i >= 0;
+    i -= 1
+  ) {
+
+    if (
+      revenues[i] > 0 &&
+      i !== peakIndex
+    ) {
+
+      highlightIndex = i;
+
+      break;
+    }
+  }
 
   return (
 
@@ -181,21 +241,27 @@ function SalesChart(
         breakdown.map(
           (
             row,
+            index,
           ) => {
 
-            const revenue = Number(
-              row.grand_total ?? 0,
+            const revenue = revenues[index];
+
+            const barHeightPx = Math.max(
+              Math.round(
+                (revenue / maxRevenue) * 180,
+              ),
+              revenue > 0 ? 12 : 0,
             );
 
-            const heightPct = Math.max(
-              (
-                revenue /
-                maxRevenue
-              ) * 100,
-              revenue > 0
-                ? 6
-                : 0,
-            );
+            const barClass = [
+              "da-chart-bar",
+              index === peakIndex
+                ? "is-peak"
+                : "",
+              index === highlightIndex
+                ? "is-peach"
+                : "",
+            ].filter(Boolean).join(" ");
 
             return (
 
@@ -207,9 +273,9 @@ function SalesChart(
                 <div className="da-chart-bar-wrap">
 
                   <div
-                    className="da-chart-bar"
+                    className={barClass}
                     style={{
-                      height: `${heightPct}%`,
+                      height: `${barHeightPx}px`,
                     }}
                     title={`INR ${formatMoney(revenue)}`}
                   />
@@ -232,11 +298,42 @@ function SalesChart(
   );
 }
 
-function TopList(
+function MetricCard(
   {
-    title,
+    label,
+    value,
+    icon: Icon,
+    tone = "default",
+  },
+) {
+
+  return (
+
+    <article className="da-metric-card">
+
+      <div className={`da-metric-icon ${tone !== "default" ? `is-${tone}` : ""}`}>
+
+        <Icon size={20} strokeWidth={1.75} />
+      </div>
+
+      <div className="da-metric-body">
+
+        <h4>
+          {label}
+        </h4>
+
+        <strong>
+          {value}
+        </strong>
+
+      </div>
+    </article>
+  );
+}
+
+function TopProductsPanel(
+  {
     rows,
-    emptyText,
   },
 ) {
 
@@ -244,19 +341,27 @@ function TopList(
 
     <section className="da-top-card">
 
-      <h3>
-        {title}
-      </h3>
+      <div className="da-top-card-head">
+
+        <h3>
+          Top Products
+        </h3>
+
+        <span className="da-top-pill">
+          Sorted by sales
+        </span>
+
+      </div>
 
       {
         !rows?.length ? (
 
           <p className="da-muted">
-            {emptyText}
+            No product sales in this window.
           </p>
         ) : (
 
-          <ol className="da-top-list">
+          <ol className="da-product-list">
 
             {
               rows.map(
@@ -267,11 +372,12 @@ function TopList(
 
                   <li key={`${row.id || row.name}-${index}`}>
 
-                    <span className="da-top-rank">
-                      {index + 1}
-                    </span>
+                    <div className="da-product-thumb" aria-hidden>
 
-                    <div className="da-top-info">
+                      {(row.name || "?").charAt(0).toUpperCase()}
+                    </div>
+
+                    <div className="da-product-info">
 
                       <strong>
                         {row.name}
@@ -285,7 +391,7 @@ function TopList(
 
                     </div>
 
-                    <span className="da-top-revenue">
+                    <span className="da-product-revenue">
                       ₹
                       {formatMoney(
                         row.revenue,
@@ -299,6 +405,108 @@ function TopList(
           </ol>
         )
       }
+    </section>
+  );
+}
+
+function TopCategoriesPanel(
+  {
+    rows,
+  },
+) {
+
+  const maxRevenue = Math.max(
+    ...(
+      rows || []
+    ).map(
+      (row) =>
+        Number(
+          row.revenue ?? 0,
+        ),
+    ),
+    1,
+  );
+
+  return (
+
+    <section className="da-top-card">
+
+      <div className="da-top-card-head">
+
+        <h3>
+          Top Categories
+        </h3>
+
+      </div>
+
+      {
+        !rows?.length ? (
+
+          <p className="da-muted">
+            No category sales in this window.
+          </p>
+        ) : (
+
+          <ul className="da-category-list">
+
+            {
+              rows.map(
+                (
+                  row,
+                  index,
+                ) => {
+
+                  const revenue = Number(
+                    row.revenue ?? 0,
+                  );
+
+                  const widthPct = Math.max(
+                    (revenue / maxRevenue) * 100,
+                    revenue > 0 ? 8 : 0,
+                  );
+
+                  return (
+
+                    <li key={`${row.id || row.name}-${index}`}>
+
+                      <div className="da-category-row">
+
+                        <span className="da-category-icon" aria-hidden>
+
+                          <FolderKanban size={16} />
+                        </span>
+
+                        <span className="da-category-name">
+                          {row.name}
+                        </span>
+
+                        <span className="da-category-meta">
+                          ₹
+                          {formatMoney(revenue)}
+                          {" "}
+                          (
+                          {row.quantity_sold}
+                          {" "}
+                          sold)
+                        </span>
+
+                      </div>
+
+                      <div className="da-category-bar">
+
+                        <span style={{ width: `${widthPct}%` }} />
+
+                      </div>
+
+                    </li>
+                  );
+                },
+              )
+            }
+          </ul>
+        )
+      }
+
     </section>
   );
 }
@@ -519,8 +727,8 @@ export default function AdminDashboard() {
 
         <div>
 
-          <span>
-            OVERVIEW
+          <span className="da-header-eyebrow">
+            Overview
           </span>
 
           <h2>
@@ -559,149 +767,46 @@ export default function AdminDashboard() {
 
       </div>
 
-      <div className="dashboard-cards da-user-cards">
+      <div className="da-metrics-grid">
 
-        <div className="dashboard-card">
+        <MetricCard
+          label="Total Users"
+          value={String(userStats.total_users)}
+          icon={Users}
+        />
 
-          <div className="dashboard-icon">
+        <MetricCard
+          label="Active Users"
+          value={String(userStats.active_users)}
+          icon={UserCheck}
+          tone="green"
+        />
 
-            <Users size={28} />
+        <MetricCard
+          label="Blocked Users"
+          value={String(userStats.blocked_users)}
+          icon={Ban}
+          tone="red"
+        />
 
-          </div>
+        <MetricCard
+          label="Orders"
+          value={String(salesSummary.order_count)}
+          icon={ShoppingBag}
+          tone="peach"
+        />
 
-          <div>
+        <MetricCard
+          label="Gross Sales"
+          value={`₹${formatMoney(salesSummary.subtotal_gross)}`}
+          icon={IndianRupee}
+        />
 
-            <h4>
-              Total Users
-            </h4>
-
-            <h2>
-              {userStats.total_users}
-            </h2>
-
-          </div>
-
-        </div>
-
-        <div className="dashboard-card">
-
-          <div className="dashboard-icon green">
-
-            <UserCheck size={28} />
-
-          </div>
-
-          <div>
-
-            <h4>
-              Active Users
-            </h4>
-
-            <h2>
-              {userStats.active_users}
-            </h2>
-
-          </div>
-
-        </div>
-
-        <div className="dashboard-card">
-
-          <div className="dashboard-icon red">
-
-            <UserX size={28} />
-
-          </div>
-
-          <div>
-
-            <h4>
-              Blocked Users
-            </h4>
-
-            <h2>
-              {userStats.blocked_users}
-            </h2>
-
-          </div>
-
-        </div>
-
-      </div>
-
-      <div className="dashboard-cards da-sales-cards">
-
-        <div className="dashboard-card">
-
-          <div className="dashboard-icon">
-
-            <ShoppingBag size={28} />
-
-          </div>
-
-          <div>
-
-            <h4>
-              Orders
-            </h4>
-
-            <h2>
-              {salesSummary.order_count}
-            </h2>
-
-          </div>
-
-        </div>
-
-        <div className="dashboard-card">
-
-          <div className="dashboard-icon green">
-
-            <IndianRupee size={28} />
-
-          </div>
-
-          <div>
-
-            <h4>
-              Gross sales
-            </h4>
-
-            <h2>
-              ₹
-              {formatMoney(
-                salesSummary.subtotal_gross,
-              )}
-            </h2>
-
-          </div>
-
-        </div>
-
-        <div className="dashboard-card">
-
-          <div className="dashboard-icon">
-
-            <BarChart3 size={28} />
-
-          </div>
-
-          <div>
-
-            <h4>
-              Net revenue
-            </h4>
-
-            <h2>
-              ₹
-              {formatMoney(
-                salesSummary.grand_total,
-              )}
-            </h2>
-
-          </div>
-
-        </div>
+        <MetricCard
+          label="Net Revenue"
+          value={`₹${formatMoney(salesSummary.grand_total)}`}
+          icon={BarChart3}
+        />
 
       </div>
 
@@ -712,18 +817,20 @@ export default function AdminDashboard() {
           <div>
 
             <h3>
-              Sales trend
+              Sales Trend
             </h3>
 
             {
               analytics?.date_from && (
 
                 <p className="da-muted">
-                  {analytics.date_from}
+                  Report period:
+                  {" "}
+                  {formatReportDate(analytics.date_from)}
                   {" "}
                   –
                   {" "}
-                  {analytics.date_to}
+                  {formatReportDate(analytics.date_to)}
                 </p>
               )
             }
@@ -782,28 +889,16 @@ export default function AdminDashboard() {
 
       <div className="da-top-grid">
 
-        <TopList
-          title="Top products"
+        <TopProductsPanel
           rows={
             analytics?.top_products
           }
-          emptyText="No product sales in this window."
         />
 
-        <TopList
-          title="Top categories"
+        <TopCategoriesPanel
           rows={
             analytics?.top_categories
           }
-          emptyText="No category sales in this window."
-        />
-
-        <TopList
-          title="Top brands"
-          rows={
-            analytics?.top_brands
-          }
-          emptyText="No brand sales in this window."
         />
 
       </div>

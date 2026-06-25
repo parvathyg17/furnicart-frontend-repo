@@ -1,4 +1,5 @@
 import "../../styles/shop.css";
+import "../../styles/home.css";
 
 import {
   useCallback,
@@ -13,11 +14,19 @@ import {
 } from "react-router-dom";
 
 import {
+  useDispatch,
+} from "react-redux";
+
+import {
   fetchCart,
   updateCartItemApi,
   removeCartItemApi,
   validateCheckoutApi,
 } from "../../features/cart/cartAPI";
+
+import {
+  setCartItemCount,
+} from "../../features/cart/cartSlice";
 
 import {
   useBackgroundServerSync,
@@ -35,6 +44,8 @@ import {
 import {
   Trash2,
 } from "lucide-react";
+
+import PublicNavbar from "../../components/common/PublicNavbar.jsx";
 
 function formatCartMoney(
   value,
@@ -98,7 +109,7 @@ export default function Cart() {
 
   const navigate = useNavigate();
 
-  
+  const dispatch = useDispatch();
 
   const [
     data,
@@ -153,6 +164,12 @@ export default function Cart() {
               res,
             );
 
+          dispatch(
+            setCartItemCount(
+              res.item_count,
+            ),
+          );
+
           if (
             silent &&
             lastCartSigRef.current ===
@@ -188,7 +205,7 @@ export default function Cart() {
         }
       },
 
-      []
+      [dispatch],
     );
 
   useEffect(() => {
@@ -262,12 +279,22 @@ export default function Cart() {
 
       try {
 
-        await removeCartItemApi(
-          itemId
-        );
+        const res =
+          await removeCartItemApi(
+            itemId,
+          );
 
-        await load(
-          { silent: true },
+        lastCartSigRef.current =
+          stableStringify(
+            res,
+          );
+
+        setData(res);
+
+        dispatch(
+          setCartItemCount(
+            res.item_count,
+          ),
         );
       } catch (err) {
 
@@ -334,6 +361,8 @@ export default function Cart() {
   return (
 
     <div className="artisan-shop cart-bag-shell">
+
+      <PublicNavbar />
 
       <main className="artisan-main-wrap cart-bag-main">
 

@@ -9,6 +9,7 @@ import roomTypeReducer
 from "../features/catalog/roomType/roomTypeSlice";
 import productReducer
 from "../features/catalog/product/productSlice";
+import cartReducer from "../features/cart/cartSlice";
 
 export const store = configureStore({
   reducer: {
@@ -19,6 +20,6 @@ export const store = configureStore({
     category: categoryReducer,
     roomType: roomTypeReducer,
     product: productReducer,
-    
+    cart: cartReducer,
   },
 });

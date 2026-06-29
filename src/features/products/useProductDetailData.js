@@ -324,7 +324,12 @@ export default function useProductDetailData() {
         try {
 
           const data =
-            await fetchWishlist();
+            await fetchWishlist(
+              {
+                page: 1,
+                pageSize: 100,
+              },
+            );
 
           if (cancelled)
             return;
@@ -391,7 +396,12 @@ export default function useProductDetailData() {
         try {
 
           const data =
-            await fetchWishlist();
+            await fetchWishlist(
+              {
+                page: 1,
+                pageSize: 100,
+              },
+            );
 
           const ids =
 

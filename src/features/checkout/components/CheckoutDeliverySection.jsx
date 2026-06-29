@@ -2,6 +2,19 @@ import {
   Link,
 } from "react-router-dom";
 
+function checkoutAddressHref(editId = null) {
+
+  const params = new URLSearchParams({
+    from: "checkout",
+  });
+
+  if (editId != null) {
+    params.set("edit", String(editId));
+  }
+
+  return `/profile/addresses?${params.toString()}`;
+}
+
 export default function CheckoutDeliverySection(
   {
     addresses,
@@ -30,7 +43,7 @@ export default function CheckoutDeliverySection(
             <div className="checkout-address-actions">
 
               <Link
-                to="/profile/addresses"
+                to={checkoutAddressHref()}
                 className="cart-bag-empty-cta"
                 style={{ display: "inline-block" }}
               >
@@ -105,6 +118,17 @@ export default function CheckoutDeliverySection(
                             </span>
                           )
                         }
+
+                        <Link
+                          to={checkoutAddressHref(addr.id)}
+                          className="checkout-address-edit-link"
+                          onClick={(e) => {
+
+                            e.stopPropagation();
+                          }}
+                        >
+                          Edit
+                        </Link>
                       </div>
                     </label>
                   );
@@ -114,7 +138,7 @@ export default function CheckoutDeliverySection(
 
             <div className="checkout-address-actions">
 
-              <Link to="/profile/addresses">
+              <Link to={checkoutAddressHref()}>
                 Add or edit addresses
               </Link>
             </div>

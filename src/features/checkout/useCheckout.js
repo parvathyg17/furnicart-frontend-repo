@@ -7,6 +7,7 @@ import {
 
 import {
   useNavigate,
+  useLocation,
 } from "react-router-dom";
 
 import {
@@ -68,6 +69,8 @@ export default function useCheckout() {
   const dispatch = useDispatch();
 
   const navigate = useNavigate();
+
+  const location = useLocation();
 
   const { addresses } = useSelector(
     (state) => state.address,
@@ -455,7 +458,35 @@ export default function useCheckout() {
 
   useEffect(() => {
 
-    if (!addresses.length || selectedAddressId != null) {
+    const preferredId =
+      location.state?.selectAddressId;
+
+    if (preferredId != null) {
+
+      if (
+        addresses.some(
+          (a) => a.id === preferredId,
+        )
+      ) {
+
+        setSelectedAddressId(preferredId);
+      }
+
+      return;
+    }
+
+    if (!addresses.length) {
+
+      return;
+    }
+
+    const validSelected =
+      selectedAddressId != null &&
+      addresses.some(
+        (a) => a.id === selectedAddressId,
+      );
+
+    if (validSelected) {
 
       return;
     }
@@ -467,7 +498,11 @@ export default function useCheckout() {
     setSelectedAddressId(
       def?.id ?? addresses[0].id,
     );
-  }, [addresses, selectedAddressId]);
+  }, [
+    addresses,
+    selectedAddressId,
+    location.state?.selectAddressId,
+  ]);
 
   const subtotalNum = Number(
     pricingPreview?.subtotal ??

@@ -40,38 +40,15 @@ import {
   shopProductPathFrom,
 } from "../../utils/shopProductPath.js";
 
-import OfferBadge from "../../features/promotions/components/OfferBadge.jsx";
+import OfferBadge, {
+  ProductPriceDisplay,
+} from "../../features/promotions/components/OfferBadge.jsx";
+
+import {
+  catalogVariantForSort,
+} from "../../features/shop/shopListUtils.js";
 
 import PublicNavbar from "../../components/common/PublicNavbar.jsx";
-
-function featuredProductPrice(product) {
-
-  const variants = (product.variants || []).filter(
-    (v) => v.is_active
-  );
-
-  if (!variants.length)
-    return null;
-
-  const n = Math.min(
-    ...variants.map(
-      (v) => Number(v.price)
-    )
-  );
-
-  if (Number.isNaN(n))
-    return null;
-
-  return n.toLocaleString(
-    undefined,
-    {
-
-      minimumFractionDigits: 2,
-
-      maximumFractionDigits: 2,
-    }
-  );
-}
 
 function featuredProductBlurb(product) {
 
@@ -438,9 +415,11 @@ export default function Home() {
             featuredProducts.map(
               (p) => {
 
-                const price = featuredProductPrice(
-                  p
-                );
+                const featuredVariant =
+                  catalogVariantForSort(
+                    p,
+                    "price_low",
+                  );
 
                 const soldOut =
                   featuredProductSoldOut(
@@ -508,13 +487,18 @@ export default function Home() {
                       </p>
 
                       {
-                        price && (
+                        featuredVariant && (
 
-                          <span className="collection-price">
-
-                          ₹ 
-                            {price}
-                          </span>
+                          <ProductPriceDisplay
+                            variant={
+                              featuredVariant
+                            }
+                            product={p}
+                            className="collection-price"
+                            as="span"
+                            minFractionDigits={2}
+                            maxFractionDigits={2}
+                          />
                         )
                       }
 

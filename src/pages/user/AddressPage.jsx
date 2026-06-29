@@ -1,11 +1,17 @@
 
 
 import "../../styles/account.css";
+import "../../styles/checkout.css";
 
 import {
   useEffect,
   useState,
 } from "react";
+
+import {
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 
 import toast from "react-hot-toast";
 
@@ -24,10 +30,21 @@ import {
 
 import AccountLayout from "../../components/user/AccountLayout";
 
+import ConfirmDialog from "../../components/common/ConfirmDialog.jsx";
+
 
 export default function AddressPage() {
 
   const dispatch = useDispatch();
+
+  const navigate = useNavigate();
+
+  const [searchParams] = useSearchParams();
+
+  const fromCheckout =
+    searchParams.get("from") === "checkout";
+
+  const editParam = searchParams.get("edit");
 
   const { addresses } =
     useSelector(
@@ -65,6 +82,16 @@ export default function AddressPage() {
   const [errors, setErrors] =
     useState({});
 
+  const [
+    addressPendingDelete,
+    setAddressPendingDelete,
+  ] = useState(null);
+
+  const [
+    deleteBusy,
+    setDeleteBusy,
+  ] = useState(false);
+
 
   
 
@@ -82,6 +109,21 @@ export default function AddressPage() {
     dispatch,
     addresses.length,
   ]);
+
+
+  const returnToCheckout = (addressId = null) => {
+
+    navigate(
+      "/checkout",
+      addressId != null
+        ? {
+          state: {
+            selectAddressId: addressId,
+          },
+        }
+        : undefined,
+    );
+  };
 
 
   
@@ -114,88 +156,39 @@ export default function AddressPage() {
 
     const newErrors = {};
 
-    
     if (!form.name.trim()) {
-
-      newErrors.name =
-        "Full name is required";
-
+      newErrors.name = "Full name is required";
     }
 
-    
     if (!form.phone.trim()) {
-
-      newErrors.phone =
-        "Phone number is required";
-
-    } else if (
-      !/^[6-9]\d{9}$/.test(
-        form.phone
-      )
-    ) {
-
-      newErrors.phone =
-        "Enter valid 10 digit phone number";
-
+      newErrors.phone = "Phone number is required";
+    } else if (!/^[6-9]\d{9}$/.test(form.phone)) {
+      newErrors.phone = "Enter valid 10 digit phone number";
     }
 
-    
-    if (
-      !form.address_line.trim()
-    ) {
-
-      newErrors.address_line =
-        "Address is required";
-
-    } else if (
-      form.address_line.length <
-      10
-    ) {
-
-      newErrors.address_line =
-        "Address should be at least 10 characters";
-
+    if (!form.address_line.trim()) {
+      newErrors.address_line = "Address is required";
+    } else if (form.address_line.trim().length < 10) {
+      newErrors.address_line = "Address should be at least 10 characters";
     }
 
-    
     if (!form.city.trim()) {
-
-      newErrors.city =
-        "City is required";
-
+      newErrors.city = "City is required";
     }
 
-    
     if (!form.state.trim()) {
-
-      newErrors.state =
-        "State is required";
-
+      newErrors.state = "State is required";
     }
 
-    
     if (!form.pincode.trim()) {
-
-      newErrors.pincode =
-        "Pincode is required";
-
-    } else if (
-      !/^\d{6}$/.test(
-        form.pincode
-      )
-    ) {
-
-      newErrors.pincode =
-        "Enter valid 6 digit pincode";
-
+      newErrors.pincode = "Pincode is required";
+    } else if (!/^\d{6}$/.test(form.pincode)) {
+      newErrors.pincode = "Enter valid 6 digit pincode";
     }
 
     setErrors(newErrors);
 
-    return (
-      Object.keys(newErrors)
-        .length === 0
-    );
+    return Object.keys(newErrors).length === 0;
   };
 
 
@@ -222,25 +215,35 @@ export default function AddressPage() {
             })
           ).unwrap();
 
+          toast.success("Address updated");
+
+          const savedId = editId;
+
+          resetForm();
+
+          setShowForm(false);
+
+          if (fromCheckout) {
+            returnToCheckout(savedId);
+          }
+
         } else {
 
-          await dispatch(
+          const created = await dispatch(
             addAddress(form)
           ).unwrap();
 
+          toast.success("Address added");
+
+          resetForm();
+
+          setShowForm(false);
+
+          if (fromCheckout) {
+            returnToCheckout(created?.id);
+          }
+
         }
-
-        toast.success(
-
-          editId
-            ? "Address updated"
-            : "Address added"
-
-        );
-
-        resetForm();
-
-        setShowForm(false);
 
       } catch (err) {
 
@@ -289,6 +292,39 @@ export default function AddressPage() {
     };
 
 
+  useEffect(() => {
+
+    if (
+      !fromCheckout ||
+      !editParam ||
+      !addresses.length
+    ) {
+
+      return;
+    }
+
+    const addressId = Number(editParam);
+
+    if (Number.isNaN(addressId)) {
+      return;
+    }
+
+    const address = addresses.find(
+      (a) => a.id === addressId,
+    );
+
+    if (address) {
+      handleEdit(address);
+    }
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- open once when edit param + addresses load
+  }, [
+    fromCheckout,
+    editParam,
+    addresses.length,
+  ]);
+
+
 
   const resetForm = () => {
 
@@ -317,7 +353,50 @@ export default function AddressPage() {
 
       setShowForm(false);
 
+      if (fromCheckout) {
+        returnToCheckout();
+      }
+
     };
+
+
+  const handleConfirmDelete = async () => {
+
+    if (!addressPendingDelete) {
+      return;
+    }
+
+    setDeleteBusy(true);
+
+    try {
+
+      await dispatch(
+        deleteAddress(
+          addressPendingDelete.id,
+        ),
+      ).unwrap();
+
+      toast.success("Address removed");
+
+      setAddressPendingDelete(null);
+
+      if (fromCheckout) {
+        returnToCheckout();
+      }
+
+    } catch (err) {
+
+      toast.error(
+        err?.error ||
+        "Failed to remove address",
+      );
+
+    } finally {
+
+      setDeleteBusy(false);
+
+    }
+  };
 
 
  
@@ -348,6 +427,14 @@ export default function AddressPage() {
           <div className="page-desc">
             Manage your delivery
             locations.
+            {
+              fromCheckout && (
+                <>
+                  {" "}
+                  Add or edit an address, then you will return to checkout.
+                </>
+              )
+            }
           </div>
 
         </div>
@@ -666,30 +753,11 @@ export default function AddressPage() {
                 {/* DELETE */}
                 <button
                   className="danger-btn"
-                  onClick={async () => {
+                  onClick={() => {
 
-                    try {
-
-                      await dispatch(
-                        deleteAddress(
-                          address.id
-                        )
-                      ).unwrap();
-
-                      toast.success(
-                        "Address removed"
-                      );
-
-                    } catch (err) {
-
-                      toast.error(
-
-                        err?.error ||
-                        "Failed to remove address"
-
-                      );
-
-                    }
+                    setAddressPendingDelete(
+                      address,
+                    );
                   }}
                 >
                   Remove
@@ -739,6 +807,27 @@ export default function AddressPage() {
         )}
 
       </div>
+
+      <ConfirmDialog
+        open={Boolean(addressPendingDelete)}
+        titleId="address-delete-title"
+        title="Remove this address?"
+        hint={
+          addressPendingDelete
+            ? `This will remove the address for ${addressPendingDelete.name}. You can add it again later if needed.`
+            : ""
+        }
+        confirmLabel="Remove address"
+        cancelLabel="Keep address"
+        busy={deleteBusy}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => {
+
+          if (!deleteBusy) {
+            setAddressPendingDelete(null);
+          }
+        }}
+      />
 
     </AccountLayout>
   );

@@ -15,7 +15,7 @@ export async function fetchUserProducts(params = {}) {
 }
 
 export async function fetchFeaturedProducts(
-  pageSize = 8
+  pageSize = 5
 ) {
 
   return fetchUserProducts(

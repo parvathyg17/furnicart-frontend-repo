@@ -109,6 +109,11 @@ export function formatProductApiError(payload) {
     return payload.error;
   }
 
+  if (typeof payload.message === "string") {
+
+    return payload.message.trim();
+  }
+
   if (typeof payload.detail === "string") {
 
     return payload.detail;
@@ -178,6 +183,10 @@ export function formatProductApiError(payload) {
 
         "detail",
 
+        "status",
+
+        "message",
+
       ].includes(key)
     ) {
 
@@ -239,6 +248,8 @@ export function mapPayloadToFormErrors(payload) {
 
         "detail",
 
+        "status",
+
       ].includes(key)
     ) {
 
@@ -251,6 +262,17 @@ export function mapPayloadToFormErrors(payload) {
 
         next._general = val.join(" ");
       }
+
+      continue;
+    }
+
+    if (
+      key === "message" &&
+      typeof val === "string" &&
+      val.trim()
+    ) {
+
+      next._general = val.trim();
 
       continue;
     }

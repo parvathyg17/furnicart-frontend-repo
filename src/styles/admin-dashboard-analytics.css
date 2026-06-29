@@ -60,7 +60,7 @@
 
 .da-metrics-grid {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
 }
 
@@ -105,6 +105,7 @@
 
 .da-metric-body {
   min-width: 0;
+  flex: 1;
 }
 
 .da-metric-body h4 {
@@ -112,17 +113,19 @@
   color: var(--muted);
   font-size: 0.78rem;
   font-weight: 600;
+  line-height: 1.3;
 }
 
-.da-metric-body strong {
+.da-metric-body strong,
+.da-metric-value {
   display: block;
-  font-size: clamp(1.15rem, 1.6vw, 1.55rem);
+  font-size: clamp(1.05rem, 1.8vw, 1.45rem);
   font-weight: 700;
   color: var(--text);
-  line-height: 1.15;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
 
 .da-chart-panel {
@@ -390,7 +393,7 @@
 
 @media (max-width: 1280px) {
   .da-metrics-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -403,6 +406,11 @@
 @media (max-width: 768px) {
   .da-metrics-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .da-metric-body strong,
+  .da-metric-value {
+    font-size: clamp(0.98rem, 4vw, 1.25rem);
   }
 
   .da-header {

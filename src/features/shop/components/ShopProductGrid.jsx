@@ -6,17 +6,19 @@ import {
   Link,
 } from "react-router-dom";
 
-import {
-  formatMoney,
-} from "../../../utils/currency.js";
+import OfferBadge, {
+  ProductPriceDisplay,
+} from "../../promotions/components/OfferBadge.jsx";
 
 import Pagination from "../../../components/common/Pagination.jsx";
 
 import EmptyState from "../../../components/common/EmptyState.jsx";
 
 import {
-  displayPrice,
-  firstListableVariant,
+  catalogVariantForSort,
+  productIsWishlisted,
+  variantDisplayLabel,
+  variantImageUrl,
 } from "../shopListUtils.js";
 
 import {
@@ -25,17 +27,19 @@ import {
 
 import StarRating from "../../catalog/reviews/components/StarRating.jsx";
 
-import OfferBadge from "../../promotions/components/OfferBadge.jsx";
-
 export default function ShopProductGrid(
   {
     loading,
     products,
     pagination,
     pageNumbers,
+    sort = "latest",
+    minPrice = "",
+    maxPrice = "",
     onPageChange,
     onAddToCart,
     onWishlist,
+    wishlistedVariantIds = [],
   },
 ) {
 
@@ -70,8 +74,29 @@ export default function ShopProductGrid(
           products.map(
             (p) => {
 
-              const price =
-                displayPrice(p);
+              const variantOptions =
+                {
+                  minPrice,
+                  maxPrice,
+                };
+
+              const variant =
+                catalogVariantForSort(
+                  p,
+                  sort,
+                  variantOptions,
+                );
+
+              const variantLabel =
+                variantDisplayLabel(
+                  variant,
+                );
+
+              const cardImage =
+                variantImageUrl(
+                  variant,
+                ) ||
+                p.thumbnail;
 
               const roomTag =
                 p.room_types?.[0]
@@ -80,11 +105,6 @@ export default function ShopProductGrid(
               const catTag =
                 p.category_name ||
                 "Furniture";
-
-              const variant =
-                firstListableVariant(
-                  p,
-                );
 
               const canBuy =
                 variant &&
@@ -100,6 +120,12 @@ export default function ShopProductGrid(
               const productPath =
                 shopProductPathFrom(
                   p,
+                );
+
+              const isWishlisted =
+                productIsWishlisted(
+                  p,
+                  wishlistedVariantIds,
                 );
 
               return (
@@ -131,10 +157,10 @@ export default function ShopProductGrid(
                     />
 
                     {
-                      p.thumbnail ? (
+                      cardImage ? (
 
                         <img
-                          src={p.thumbnail}
+                          src={cardImage}
                           alt=""
                         />
                       ) : (
@@ -193,18 +219,18 @@ export default function ShopProductGrid(
                       )
                     }
 
-                    {
-                      price !== null && (
+                    <ProductPriceDisplay
+                      variant={variant}
+                      product={p}
+                      className="artisan-card-price"
+                      priceClassName="artisan-card-price-value"
+                    />
 
-                        <p className="artisan-card-price">
-                          ₹
-                          {formatMoney(
-                            price,
-                            {
-                              minFractionDigits: 0,
-                              maxFractionDigits: 2,
-                            },
-                          )}
+                    {
+                      variantLabel && (
+
+                        <p className="artisan-card-variant">
+                          {variantLabel}
                         </p>
                       )
                     }
@@ -228,8 +254,19 @@ export default function ShopProductGrid(
 
                       <button
                         type="button"
-                        className="artisan-btn-wish"
-                        aria-label="Add to wishlist"
+                        className={
+                          isWishlisted
+                            ? "artisan-btn-wish is-wishlisted"
+                            : "artisan-btn-wish"
+                        }
+                        aria-label={
+                          isWishlisted
+                            ? "Remove from wishlist"
+                            : "Add to wishlist"
+                        }
+                        aria-pressed={
+                          isWishlisted
+                        }
                         onClick={(e) => {
 
                           onWishlist(

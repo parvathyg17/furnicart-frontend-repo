@@ -33,6 +33,7 @@ export default function Shop() {
     checkingAuth,
     handleAddToCart,
     handleWishlist,
+    wishlistedVariantIds,
   } = useShopCatalog();
 
   if (checkingAuth) {
@@ -144,6 +145,9 @@ export default function Shop() {
               products={products}
               pagination={pagination}
               pageNumbers={pageNumbers}
+              sort={sort}
+              minPrice={minPrice}
+              maxPrice={maxPrice}
               onPageChange={(nextPage) => {
 
                 patchParams({
@@ -152,6 +156,9 @@ export default function Shop() {
               }}
               onAddToCart={handleAddToCart}
               onWishlist={handleWishlist}
+              wishlistedVariantIds={
+                wishlistedVariantIds
+              }
             />
           </section>
         </div>

@@ -3,19 +3,17 @@ import {
 } from "react-router-dom";
 
 import {
-  formatMoney,
-} from "../../../utils/currency.js";
-
-import {
   isProductCardSoldOut,
-  relatedDisplayPrice,
+  relatedDisplayVariant,
 } from "../productDetailUtils.js";
+
+import OfferBadge, {
+  ProductPriceDisplay,
+} from "../../promotions/components/OfferBadge.jsx";
 
 import {
   shopProductPathFrom,
 } from "../../../utils/shopProductPath.js";
-
-import OfferBadge from "../../promotions/components/OfferBadge.jsx";
 
 export default function ProductRelatedGrid(
   {
@@ -60,8 +58,8 @@ export default function ProductRelatedGrid(
                     rp,
                   );
 
-                const rpPrice =
-                  relatedDisplayPrice(
+                const rpVariant =
+                  relatedDisplayVariant(
                     rp,
                   );
 
@@ -129,12 +127,15 @@ export default function ProductRelatedGrid(
                         </h3>
 
                         {
-                          rpPrice !== null && (
+                          rpVariant && (
 
-                            <p className="pd-user-pdp-related-price">
-                              ₹
-                              {formatMoney(rpPrice)}
-                            </p>
+                            <ProductPriceDisplay
+                              variant={
+                                rpVariant
+                              }
+                              product={rp}
+                              className="pd-user-pdp-related-price"
+                            />
                           )
                         }
                       </Link>

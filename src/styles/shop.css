@@ -513,6 +513,10 @@
   padding: 1.5rem 1.25rem 3rem;
 }
 
+.artisan-shop > .home-navbar + .artisan-main-wrap {
+  padding-top: calc(84px + 1.25rem);
+}
+
 .artisan-title {
   font-size: clamp(2.25rem, 4vw, 3rem);
   font-weight: 600;
@@ -923,6 +927,69 @@
     sans-serif;
 }
 
+.fc-price-display {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.45rem;
+}
+
+.fc-price-original {
+  color: var(--artisan-muted, #78716c);
+  font-size: 0.88em;
+  font-weight: 500;
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+.fc-price-sale {
+  color: #b45309;
+  font-weight: 700;
+}
+
+.artisan-card-price.fc-price-display {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin: 0;
+}
+
+.artisan-card-price-value {
+  font-size: 1.05rem;
+  font-weight: 700;
+  font-family:
+    "DM Sans",
+    system-ui,
+    sans-serif;
+}
+
+.collection-price.fc-price-display {
+  margin-top: 0.35rem;
+}
+
+.pd-user-pdp-price.fc-price-display {
+  margin: 0;
+}
+
+.pd-user-variant-pill-meta .fc-price-original {
+  font-size: 0.72rem;
+}
+
+.pd-user-variant-pill-meta .fc-price-sale {
+  font-size: 0.78rem;
+}
+
+.wishlist-card-price.fc-price-display {
+  margin: 0.35rem 0 0;
+}
+
+.artisan-card-variant {
+  margin: 0.2rem 0 0;
+  font-size: 0.78rem;
+  color: var(--artisan-muted, #78716c);
+}
+
 .artisan-card-actions {
   display: flex;
   gap: 0.5rem;
@@ -968,6 +1035,25 @@
 
 .artisan-btn-wish:hover {
   border-color: var(--artisan-ink);
+}
+
+.artisan-btn-wish.is-wishlisted {
+  color: #dc2626;
+  border-color: rgba(220, 38, 38, 0.45);
+  background: #fff1f2;
+}
+
+.artisan-btn-wish.is-wishlisted:hover {
+  border-color: #dc2626;
+  background: #ffe4e6;
+}
+
+.artisan-btn-wish.is-wishlisted svg {
+  fill: currentColor;
+}
+
+.artisan-btn-wish:not(.is-wishlisted) svg {
+  fill: none;
 }
 
 .artisan-pagination {
@@ -1459,8 +1545,57 @@
 
 .artisan-shop.pd-user-pdp-shell .artisan-main-wrap.pd-user-pdp {
   max-width: 1200px;
-  padding-top: 2rem;
+  padding-top: calc(84px + 1.25rem);
   padding-bottom: 3rem;
+}
+
+@media (max-width: 768px) {
+  .artisan-shop.pd-user-pdp-shell .artisan-main-wrap.pd-user-pdp {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: calc(84px + 0.85rem);
+  }
+
+  .artisan-shop.pd-user-pdp-shell .pd-user-pdp-title {
+    font-size: clamp(1.65rem, 7vw, 2.25rem);
+  }
+
+  .artisan-shop .pd-user-pdp-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .artisan-shop .pd-user-pdp-actions .pd-user-btn-cart {
+    width: 100%;
+  }
+
+  .artisan-shop .pd-user-pdp-actions .pd-user-btn-wish {
+    width: 100%;
+    height: 2.85rem;
+  }
+
+  .artisan-shop .pd-user-pdp-spec-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .artisan-shop .pd-user-pdp-spec-grid > div:last-child:nth-child(odd) {
+    grid-column: auto;
+  }
+
+  .artisan-shop .pd-user-variant-pills {
+    gap: 0.5rem;
+  }
+
+  .artisan-shop .pd-user-variant-pill {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .artisan-shop .pd-user-pdp-price-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
 }
 
 .artisan-shop .pd-user-pdp-info {
@@ -1677,7 +1812,13 @@
   margin-top: 2rem;
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.75rem;
+}
+
+.artisan-shop .pd-user-pdp-accordions > .pd-user-accordion {
+  margin-top: 0;
+  border-top: none;
+  padding-top: 0;
 }
 
 .artisan-shop .pd-user-pdp-accordion {
@@ -1692,10 +1833,52 @@
   padding: 0.95rem 1rem;
   font-size: 0.88rem;
   font-weight: 600;
+  border-bottom: none;
+}
+
+.artisan-shop .pd-user-pdp-accordion:has(.pd-user-acc-body) .pd-user-acc-head {
+  border-bottom: 1px solid var(--artisan-line);
+}
+
+.artisan-shop .pd-user-pdp-accordion .pd-user-acc-body {
+  padding: 1rem;
+  background: #faf8f4;
 }
 
 .artisan-shop .pd-user-pdp-spec-grid {
-  grid-template-columns: 1fr 1fr;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 1rem;
+}
+
+.artisan-shop .pd-user-pdp-spec-grid > div {
+  min-width: 0;
+  padding: 0.75rem 0.9rem;
+  background: #fff;
+  border: 1px solid var(--artisan-line);
+  border-radius: 8px;
+}
+
+.artisan-shop .pd-user-pdp-spec-grid strong {
+  display: block;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--artisan-ink-muted);
+  margin-bottom: 0.35rem;
+  font-weight: 700;
+}
+
+.artisan-shop .pd-user-pdp-spec-grid p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--artisan-ink);
+  word-break: break-word;
+}
+
+.artisan-shop .pd-user-pdp-spec-grid > div:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
 }
 
 .artisan-shop .pd-user-pdp-shipping-copy {
@@ -2275,6 +2458,10 @@
   margin: 0.35rem 0 0.75rem;
   font-size: 0.92rem;
   color: #5c534a;
+}
+
+.artisan-shop .pd-user-pdp-info .fc-reviews-summary {
+  margin: 0.15rem 0 1rem;
 }
 
 .fc-shop-card-rating {

@@ -1,5 +1,7 @@
 import "../../styles/shop.css";
 
+import "../../styles/home.css";
+
 import {
   Link,
   useNavigate,
@@ -31,6 +33,8 @@ import ProductDetailAccordions from "../../features/products/components/ProductD
 import ProductRelatedGrid from "../../features/products/components/ProductRelatedGrid.jsx";
 import ProductDetailFooter from "../../features/products/components/ProductDetailFooter.jsx";
 import ProductDetailReviews from "../../features/catalog/reviews/components/ProductDetailReviews.jsx";
+
+import PublicNavbar from "../../components/common/PublicNavbar.jsx";
 
 export default function ProductDetail() {
 
@@ -83,6 +87,9 @@ export default function ProductDetail() {
   const shell = (children) => (
 
     <div className="artisan-shop pd-user-pdp-shell">
+
+      <PublicNavbar />
+
       {children}
     </div>
   );
@@ -219,17 +226,14 @@ export default function ProductDetail() {
 
   if (checkingAuth) {
 
-    return (
+    return shell(
 
-      <div className="artisan-shop pd-user-pdp-shell">
+      <main className="artisan-main-wrap pd-user-main">
 
-        <main className="artisan-main-wrap pd-user-main">
-
-          <p className="artisan-muted">
-            Loading…
-          </p>
-        </main>
-      </div>
+        <p className="artisan-muted">
+          Loading…
+        </p>
+      </main>
     );
   }
 

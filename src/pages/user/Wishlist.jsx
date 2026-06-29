@@ -1,5 +1,4 @@
 import "../../styles/home.css";
-
 import "../../styles/shop.css";
 
 import {
@@ -15,9 +14,15 @@ import {
 } from "react-router-dom";
 
 import {
-  useSelector,
   useDispatch,
+  useSelector,
 } from "react-redux";
+
+import Pagination from "../../components/common/Pagination.jsx";
+
+import {
+  buildShopPageNumbers,
+} from "../../features/shop/shopListUtils.js";
 
 import {
   fetchWishlist,
@@ -33,12 +38,18 @@ import {
 } from "../../features/cart/cartSlice";
 
 import {
+  lineImageUrl,
+} from "../../features/checkout/checkoutUtils.js";
+
+import {
+  ProductPriceDisplay,
+} from "../../features/promotions/components/OfferBadge.jsx";
+
+import {
   useBackgroundServerSync,
 } from "../../hooks/useBackgroundServerSync.js";
 
-import {
-  stableStringify,
-} from "../../utils/stableStringify.js";
+import PublicNavbar from "../../components/common/PublicNavbar.jsx";
 
 import {
   formatProductApiError,
@@ -48,136 +59,73 @@ import {
   shopProductPathFrom,
 } from "../../utils/shopProductPath.js";
 
-import PublicNavbar from "../../components/common/PublicNavbar.jsx";
-
-function formatWishlistMoney(
-  value,
-) {
-
-  const n =
-    Number(value);
-
-  if (
-    Number.isNaN(
-      n,
-    )
-  ) {
-
-    return String(
-      value ?? "—",
-    );
-  }
-
-  return n.toLocaleString(
-    undefined,
-    {
-
-      minimumFractionDigits: 2,
-
-      maximumFractionDigits: 2,
-    },
-  );
-}
-
-function wishlistVariantImage(
-  variant,
-) {
-
-  if (!variant)
-    return null;
-
-  const imgs =
-    variant.images || [];
-
-  const primary =
-    imgs.find(
-      (i) =>
-        i.is_primary,
-    );
-
-  const pick =
-    primary || imgs[0];
-
-  if (!pick)
-    return null;
-
-  return (
-    pick.image_url ||
-    pick.image ||
-    null
-  );
-}
+import {
+  stableStringify,
+} from "../../utils/stableStringify.js";
 
 function wishlistVariantCanAddToBag(
   variant,
 ) {
 
-  if (!variant)
-    return false;
-
-  if (!variant.is_active)
-    return false;
-
   if (
-    (Number(variant.stock) || 0) <
-    1
+    !variant ||
+    !variant.is_active
   ) {
 
     return false;
   }
 
-  return true;
+  return (
+    (Number(variant.stock) || 0) >= 1
+  );
 }
 
 function wishlistVariantSubtitle(
   variant,
 ) {
 
-  if (!variant)
+  if (
+    !variant
+  ) {
+
     return "";
+  }
 
   const parts =
     [
-
       variant.material,
-
       variant.color,
-
       variant.size,
     ]
-
       .map(
         (s) =>
-          (s || "")
-            .trim(),
+          (s || "").trim(),
       )
-
       .filter(Boolean);
 
-  if (parts.length)
-    return parts.join(
-      " / ",
-    );
+  if (
+    parts.length
+  ) {
+
+    return parts.join(" / ");
+  }
 
   return (
-    (variant.variant_name || "")
-      .trim()
-  );
+    variant.variant_name || ""
+  ).trim();
 }
+
+const PAGE_SIZE = 5;
 
 export default function Wishlist() {
 
-  const navigate =
-    useNavigate();
-
+  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const {
-    user,
     checkingAuth,
   } = useSelector(
-    (state) =>
-      state.auth,
+    (state) => state.auth,
   );
 
   const [
@@ -195,173 +143,259 @@ export default function Wishlist() {
     setError,
   ] = useState(null);
 
+  const [
+    page,
+    setPage,
+  ] = useState(1);
+
+  const [
+    pagination,
+    setPagination,
+  ] = useState({
+
+    count: 0,
+
+    totalPages: 1,
+
+    currentPage: 1,
+
+    next: null,
+
+    previous: null,
+  });
+
   const lastWishlistSigRef =
-    useRef(
-      null,
-    );
+    useRef(null);
 
-  const load =
-    useCallback(
-      async (
-        { silent = false } = {},
-      ) => {
+  const pageRef = useRef(page);
 
-        if (!silent) {
+  pageRef.current = page;
 
-          setLoading(true);
-
-          setError(null);
-        }
-
-        try {
-
-          const res =
-            await fetchWishlist();
-
-          const rows =
-            res.results || [];
-
-          const snap =
-            stableStringify(
-              rows,
-            );
-
-          if (
-            silent &&
-            lastWishlistSigRef.current ===
-              snap
-          ) {
-
-            return;
-          }
-
-          lastWishlistSigRef.current =
-            snap;
-
-          setItems(
-            rows,
-          );
-        } catch (err) {
-
-          if (
-            err.response?.status ===
-            401
-          ) {
-
-            navigate(
-              "/login",
-            );
-
-            return;
-          }
-
-          if (!silent) {
-
-            setError(
-
-              formatProductApiError(
-                err.response?.data,
-              ) ||
-
-                "Could not load wishlist.",
-            );
-          }
-        } finally {
-
-          if (!silent) {
-
-            setLoading(false);
-          }
-        }
-      },
-
-      [
-        navigate,
-      ],
-    );
-
-  useEffect(() => {
-
-    load();
-  }, [load]);
-
-  useBackgroundServerSync(
-    {
-
-      enabled: true,
-
-      pollIntervalMs: 90_000,
-
-      onRefresh:
-        () =>
-          load(
-            {
-              silent: true,
-            },
-          ),
-    },
-  );
-
-  const remove =
-    async (variantId) => {
-
-      try {
-
-        await toggleWishlistApi(
-          variantId,
-        );
-
-        await load();
-      } catch (err) {
-
-        setError(
-
-          formatProductApiError(
-            err.response?.data,
-          ) ||
-
-            "Could not update wishlist.",
-        );
-      }
-    };
-
-  const moveToCart =
+  const load = useCallback(
     async (
-      variantId,
+      {
+        silent = false,
+        pageNum = pageRef.current,
+      } = {},
     ) => {
 
-      setError(null);
+      if (
+        !silent
+      ) {
+
+        setLoading(true);
+        setError(null);
+      }
 
       try {
 
         const res =
-          await addToCartApi({
-          variantId,
+          await fetchWishlist(
+            {
+              page: pageNum,
+              pageSize: PAGE_SIZE,
+            },
+          );
 
+        const rows =
+          res.results || [];
+
+        const nextPagination =
+          {
+
+            count:
+              res.count ?? 0,
+
+            totalPages:
+              res.total_pages || 1,
+
+            currentPage:
+              res.current_page || pageNum,
+
+            next:
+              res.next,
+
+            previous:
+              res.previous,
+          };
+
+        const snap =
+          stableStringify(
+            {
+              results: rows,
+              pagination: nextPagination,
+            },
+          );
+
+        if (
+          silent &&
+          lastWishlistSigRef.current === snap
+        ) {
+
+          return;
+        }
+
+        lastWishlistSigRef.current =
+          snap;
+
+        setItems(rows);
+        setPagination(
+          nextPagination,
+        );
+      } catch (err) {
+
+        if (
+          err.response?.status === 401
+        ) {
+
+          navigate("/login");
+          return;
+        }
+
+        if (
+          !silent
+        ) {
+
+          setError(
+            formatProductApiError(
+              err.response?.data,
+            ) ||
+              "Could not load wishlist.",
+          );
+        }
+      } finally {
+
+        if (
+          !silent
+        ) {
+
+          setLoading(false);
+        }
+      }
+    },
+
+    [navigate],
+  );
+
+  useEffect(
+    () => {
+
+      load(
+        {
+          pageNum: page,
+        },
+      );
+    },
+
+    [page, load],
+  );
+
+  useBackgroundServerSync(
+    {
+      enabled: true,
+      pollIntervalMs: 90_000,
+      onRefresh: () =>
+        load(
+          {
+            silent: true,
+            pageNum: pageRef.current,
+          },
+        ),
+    },
+  );
+
+  const reloadAfterChange = async () => {
+
+    const nextPage =
+      items.length === 1 &&
+      page > 1
+        ? page - 1
+        : page;
+
+    if (
+      nextPage !== page
+    ) {
+
+      setPage(nextPage);
+      return;
+    }
+
+    await load(
+      {
+        pageNum: page,
+      },
+    );
+  };
+
+  const remove = async (
+    variantId,
+  ) => {
+
+    try {
+
+      await toggleWishlistApi(
+        variantId,
+      );
+
+      await reloadAfterChange();
+    } catch (err) {
+
+      setError(
+        formatProductApiError(
+          err.response?.data,
+        ) ||
+          "Could not update wishlist.",
+      );
+    }
+  };
+
+  const moveToCart = async (
+    variantId,
+  ) => {
+
+    setError(null);
+
+    try {
+
+      const res =
+        await addToCartApi({
+          variantId,
           quantity: 1,
         });
 
-        dispatch(
-          setCartItemCount(
-            res.item_count,
-          ),
-        );
+      dispatch(
+        setCartItemCount(
+          res.item_count,
+        ),
+      );
 
-        await load();
-      } catch (err) {
+      await toggleWishlistApi(
+        variantId,
+      );
 
-        setError(
+      await reloadAfterChange();
+    } catch (err) {
 
-          formatProductApiError(
-            err.response?.data,
-          ) ||
+      setError(
+        formatProductApiError(
+          err.response?.data,
+        ) ||
+          "Could not add to cart.",
+      );
+    }
+  };
 
-            "Could not add to cart.",
-        );
-      }
-    };
+  const pageNumbers =
+    buildShopPageNumbers(
+      {
+        totalPages: pagination.totalPages,
+        currentPage: pagination.currentPage,
+      },
+    );
 
-  if (checkingAuth) {
+  if (
+    checkingAuth
+  ) {
 
     return (
 
@@ -372,7 +406,7 @@ export default function Wishlist() {
   }
 
   const count =
-    items.length;
+    pagination.count;
 
   const countLabel =
     count === 1
@@ -420,11 +454,9 @@ export default function Wishlist() {
           >
             Wishlist
           </span>
-
         </nav>
 
         <h1 className="wishlist-title">
-
           My Wishlist
         </h1>
 
@@ -432,13 +464,11 @@ export default function Wishlist() {
           !loading && (
 
             <p className="wishlist-lead">
-
               {
                 count === 0
                   ? "Save pieces you love — they will appear here."
                   : `You have ${countLabel} curated for your home.`
               }
-
             </p>
           )
         }
@@ -450,7 +480,6 @@ export default function Wishlist() {
               className="shop-banner error wishlist-banner"
               role="alert"
             >
-
               {error}
             </div>
           )
@@ -467,7 +496,6 @@ export default function Wishlist() {
             <div className="wishlist-empty">
 
               <p className="wishlist-muted">
-
                 Your wishlist is empty.
               </p>
 
@@ -477,9 +505,10 @@ export default function Wishlist() {
               >
                 Browse shop
               </Link>
-
             </div>
           ) : (
+
+            <>
 
             <ul className="wishlist-grid">
 
@@ -487,30 +516,30 @@ export default function Wishlist() {
                 items.map(
                   (row) => {
 
-                    const v =
+                    const variant =
                       row.variant;
 
-                    const p =
-                      v?.product;
+                    const product =
+                      variant?.product;
 
                     const imgUrl =
-                      wishlistVariantImage(
-                        v,
+                      lineImageUrl(
+                        variant,
                       );
 
-                    const sub =
+                    const subtitle =
                       wishlistVariantSubtitle(
-                        v,
+                        variant,
                       );
 
                     const productPath =
                       shopProductPathFrom(
-                        p,
+                        product,
                       );
 
                     const canMoveToBag =
                       wishlistVariantCanAddToBag(
-                        v,
+                        variant,
                       );
 
                     return (
@@ -552,14 +581,13 @@ export default function Wishlist() {
                                 role="status"
                               >
                                 {
-                                  v?.is_active === false
+                                  variant?.is_active === false
                                     ? "Unavailable"
                                     : "Out of stock"
                                 }
                               </span>
                             )
                           }
-
                         </Link>
 
                         <div className="wishlist-card-body">
@@ -573,33 +601,27 @@ export default function Wishlist() {
                           >
 
                             <h2 className="wishlist-card-title">
-
                               {
-                                p?.name ||
+                                product?.name ||
                                 "Product"
                               }
-
                             </h2>
-
                           </Link>
 
                           {
-                            sub && (
+                            subtitle && (
 
                               <p className="wishlist-card-meta">
-
-                                {sub}
+                                {subtitle}
                               </p>
                             )
                           }
 
-                          <p className="wishlist-card-price">
-
-                            ₹
-                            {formatWishlistMoney(
-                              v?.price,
-                            )}
-                          </p>
+                          <ProductPriceDisplay
+                            variant={variant}
+                            product={product}
+                            className="wishlist-card-price"
+                          />
 
                           {
                             !canMoveToBag && (
@@ -608,9 +630,8 @@ export default function Wishlist() {
                                 className="wishlist-card-stock-note"
                                 role="status"
                               >
-
                                 {
-                                  v?.is_active === false
+                                  variant?.is_active === false
                                     ? (
                                       "This option is no longer available. "
                                       + "Remove it or pick another variant on the product page."
@@ -620,7 +641,6 @@ export default function Wishlist() {
                                       + "You can keep it here and try again later."
                                     )
                                 }
-
                               </p>
                             )
                           }
@@ -628,21 +648,19 @@ export default function Wishlist() {
                           <button
                             type="button"
                             className="wishlist-move-btn"
-                            disabled={
-                              !canMoveToBag
-                            }
+                            disabled={!canMoveToBag}
                             aria-label={
                               canMoveToBag
                                 ? "Move to bag"
                                 : (
-                                  v?.is_active === false
+                                  variant?.is_active === false
                                     ? "Unavailable — cannot add to bag"
                                     : "Out of stock — cannot add to bag"
                                 )
                             }
                             onClick={() =>
                               moveToCart(
-                                v.id,
+                                variant.id,
                               )
                             }
                           >
@@ -654,25 +672,32 @@ export default function Wishlist() {
                             className="wishlist-remove-link"
                             onClick={() =>
                               remove(
-                                v.id,
+                                variant.id,
                               )
                             }
                           >
                             Remove from wishlist
                           </button>
-
                         </div>
-
                       </li>
                     );
                   },
                 )
               }
-
             </ul>
+
+            <Pagination
+              currentPage={pagination.currentPage}
+              totalPages={pagination.totalPages}
+              pageNumbers={pageNumbers}
+              hasPrevious={Boolean(pagination.previous)}
+              hasNext={Boolean(pagination.next)}
+              onPageChange={setPage}
+              className="artisan-pagination wishlist-pagination"
+            />
+          </>
           )
         }
-
       </main>
 
       <footer className="home-footer">
@@ -700,18 +725,14 @@ export default function Wishlist() {
             <Link to="/">
               Return Policy
             </Link>
-
           </div>
 
           <div className="footer-copy">
             © 2026 Furnicart.
             All rights reserved.
           </div>
-
         </div>
-
       </footer>
-
     </div>
   );
 }

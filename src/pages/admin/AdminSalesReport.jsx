@@ -12,8 +12,6 @@ import {
 } from "react-router-dom";
 
 import {
-  ChevronLeft,
-  ChevronRight,
   Download,
 } from "lucide-react";
 
@@ -161,8 +159,8 @@ export default function AdminSalesReports() {
   );
 
   const [
-    page,
-    setPage,
+    ordersPage,
+    setOrdersPage,
   ] = useState(
     1,
   );
@@ -172,6 +170,13 @@ export default function AdminSalesReports() {
     setLoading,
   ] = useState(
     true,
+  );
+
+  const [
+    loadingMore,
+    setLoadingMore,
+  ] = useState(
+    false,
   );
 
   const [
@@ -211,6 +216,7 @@ export default function AdminSalesReports() {
       date_to: "",
       breakdown_granularity: "day",
       total_pages: 1,
+      total_count: 0,
     },
   );
 
@@ -221,8 +227,92 @@ export default function AdminSalesReports() {
     "",
   );
 
-  const load = useCallback(
-    async () => {
+  const applyReportPayload = useCallback(
+    (
+      data,
+      {
+        appendOrders = false,
+      } = {},
+    ) => {
+
+      setSummary(
+        data.summary || null,
+      );
+
+      setBreakdown(
+        data.breakdown || [],
+      );
+
+      const nextOrders = data.results || data.orders || [];
+
+      setOrders(
+        (
+          prev,
+        ) => {
+
+          if (
+            !appendOrders
+          ) {
+
+            return nextOrders;
+          }
+
+          const seen = new Set(
+            prev.map(
+              (
+                order,
+              ) => order.id,
+            ),
+          );
+
+          const merged = [
+            ...prev,
+          ];
+
+          nextOrders.forEach(
+            (
+              order,
+            ) => {
+
+              if (
+                !seen.has(
+                  order.id,
+                )
+              ) {
+
+                merged.push(
+                  order,
+                );
+              }
+            },
+          );
+
+          return merged;
+        },
+      );
+
+      setMeta(
+        {
+          date_from: data.date_from || "",
+          date_to: data.date_to || "",
+          breakdown_granularity:
+            data.breakdown_granularity || "day",
+          total_pages: data.total_pages || 1,
+          total_count: data.count ?? nextOrders.length,
+        },
+      );
+    },
+
+    [],
+  );
+
+  const loadReport = useCallback(
+    async (
+      pageNum = 1,
+      {
+        appendOrders = false,
+      } = {},
+    ) => {
 
       if (
         period === "custom" &&
@@ -233,6 +323,10 @@ export default function AdminSalesReports() {
       ) {
 
         setLoading(
+          false,
+        );
+
+        setLoadingMore(
           false,
         );
 
@@ -252,12 +346,36 @@ export default function AdminSalesReports() {
           [],
         );
 
+        setOrdersPage(
+          1,
+        );
+
+        setMeta(
+          {
+            date_from: "",
+            date_to: "",
+            breakdown_granularity: "day",
+            total_pages: 1,
+            total_count: 0,
+          },
+        );
+
         return;
       }
 
-      setLoading(
-        true,
-      );
+      if (
+        appendOrders
+      ) {
+
+        setLoadingMore(
+          true,
+        );
+      } else {
+
+        setLoading(
+          true,
+        );
+      }
 
       setError(
         "",
@@ -270,42 +388,43 @@ export default function AdminSalesReports() {
             period,
             dateFrom,
             dateTo,
-            page,
+            page: pageNum,
             pageSize: PAGE_SIZE,
           },
         );
 
-        setSummary(
-          data.summary || null,
-        );
-
-        setBreakdown(
-          data.breakdown || [],
-        );
-
-        setOrders(
-          data.results || data.orders || [],
-        );
-
-        setMeta(
+        applyReportPayload(
+          data,
           {
-            date_from: data.date_from || "",
-            date_to: data.date_to || "",
-            breakdown_granularity:
-              data.breakdown_granularity || "day",
-            total_pages: data.total_pages || 1,
+            appendOrders,
           },
+        );
+
+        setOrdersPage(
+          pageNum,
         );
       } catch {
 
         setError(
-          "Could not load sales report.",
+          appendOrders
+            ? "Could not load more orders."
+            : "Could not load sales report.",
         );
       } finally {
 
-        setLoading(
-          false,
-        );
+        if (
+          appendOrders
+        ) {
+
+          setLoadingMore(
+            false,
+          );
+        } else {
+
+          setLoading(
+            false,
+          );
+        }
       }
     },
 
@@ -313,27 +432,100 @@ export default function AdminSalesReports() {
       period,
       dateFrom,
       dateTo,
-      page,
+      applyReportPayload,
     ],
   );
 
   useEffect(
     () => {
 
-      load();
+      setOrdersPage(
+        1,
+      );
+
+      if (
+        period === "custom"
+      ) {
+
+        setLoading(
+          false,
+        );
+
+        setLoadingMore(
+          false,
+        );
+
+        setError(
+          "",
+        );
+
+        setSummary(
+          null,
+        );
+
+        setBreakdown(
+          [],
+        );
+
+        setOrders(
+          [],
+        );
+
+        setMeta(
+          {
+            date_from: "",
+            date_to: "",
+            breakdown_granularity: "day",
+            total_pages: 1,
+            total_count: 0,
+          },
+        );
+
+        return;
+      }
+
+      loadReport(
+        1,
+      );
     },
 
-    [load],
+    [
+      period,
+      loadReport,
+    ],
   );
 
   const applyCustomRange = () => {
 
-    setPage(
+    setOrdersPage(
       1,
     );
 
-    load();
+    loadReport(
+      1,
+    );
   };
+
+  const handleSeeMore = () => {
+
+    if (
+      loadingMore ||
+      ordersPage >= meta.total_pages
+    ) {
+
+      return;
+    }
+
+    loadReport(
+      ordersPage + 1,
+      {
+        appendOrders: true,
+      },
+    );
+  };
+
+  const hasMoreOrders =
+    ordersPage < meta.total_pages;
 
   const handleExport = async (
     format,
@@ -427,10 +619,6 @@ export default function AdminSalesReports() {
                       : ""
                   }
                   onClick={() => {
-
-                    setPage(
-                      1,
-                    );
 
                     setPeriod(
                       tab.id,
@@ -906,56 +1094,39 @@ export default function AdminSalesReports() {
                     </div>
 
                     {
-                      meta.total_pages > 1 && (
+                      meta.total_count > 0 && (
 
-                        <div className="asr-pagination">
+                        <p className="asr-orders-count">
+                          Showing
+                          {" "}
+                          {orders.length}
+                          {" "}
+                          of
+                          {" "}
+                          {meta.total_count}
+                          {" "}
+                          order
+                          {meta.total_count === 1 ? "" : "s"}
+                        </p>
+                      )
+                    }
 
-                          <button
-                            type="button"
-                            disabled={
-                              page <= 1 ||
-                              loading
-                            }
-                            onClick={() =>
-                              setPage(
-                                (
-                                  p,
-                                ) =>
-                                  p - 1,
-                              )}
-                          >
+                    {
+                      hasMoreOrders && (
 
-                            <ChevronLeft size={16} />
-                            Previous
-                          </button>
-
-                          <span>
-                            Page
-                            {" "}
-                            {page}
-                            {" "}
-                            of
-                            {" "}
-                            {meta.total_pages}
-                          </span>
+                        <div className="asr-see-more-wrap">
 
                           <button
                             type="button"
-                            disabled={
-                              page >= meta.total_pages ||
-                              loading
-                            }
-                            onClick={() =>
-                              setPage(
-                                (
-                                  p,
-                                ) =>
-                                  p + 1,
-                              )}
+                            className="asr-see-more-btn"
+                            disabled={loadingMore}
+                            onClick={handleSeeMore}
                           >
-
-                            Next
-                            <ChevronRight size={16} />
+                            {
+                              loadingMore
+                                ? "Loading…"
+                                : "See more"
+                            }
                           </button>
                         </div>
                       )

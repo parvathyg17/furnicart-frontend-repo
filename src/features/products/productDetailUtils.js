@@ -66,27 +66,47 @@ export function isProductCardSoldOut(p) {
   );
 }
 
-export function relatedDisplayPrice(product) {
+export function relatedDisplayVariant(
+  product,
+) {
 
   const list =
     product?.variants?.filter(
       (v) =>
-        v.is_active
+        v.is_active,
     ) || [];
 
   const inStock =
     list.find(
       (v) =>
-        (v.stock || 0) > 0
+        (v.stock || 0) > 0,
     );
 
-  const v =
+  return (
     inStock ||
     list[0] ||
-    product?.variants?.[0];
+    product?.variants?.[0] ||
+    null
+  );
+}
 
-  if (!v)
+export function relatedDisplayPrice(
+  product,
+) {
+
+  const v =
+    relatedDisplayVariant(
+      product,
+    );
+
+  if (
+    !v
+  ) {
+
     return null;
+  }
 
-  return Number(v.price);
+  return Number(
+    v.price,
+  );
 }

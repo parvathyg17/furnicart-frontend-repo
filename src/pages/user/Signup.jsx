@@ -26,6 +26,84 @@ import {
 
 import AuthLayout from "../../components/auth/AuthLayout";
 
+import {
+  formatProductApiError,
+  mapPayloadToFormErrors,
+} from "../../utils/productApiErrors.js";
+
+
+const BLOCKED_USERNAMES = [
+  "admin",
+  "administrator",
+  "root",
+  "superuser",
+  "staff",
+  "support",
+  "owner",
+  "furnicart",
+];
+
+function normalizeUsername(value) {
+  return String(value || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .join(" ");
+}
+
+function normalizeEmail(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function validateSignupFields(form) {
+  const errors = {};
+  const username = normalizeUsername(form.username);
+
+  if (!username) {
+    errors.username = "Username is required";
+  } else if (username.length < 3) {
+    errors.username = "Username must be at least 3 characters";
+  } else if (username.length > 20) {
+    errors.username = "Username cannot exceed 20 characters";
+  } else if (!/^[A-Za-z0-9 ]+$/.test(username)) {
+    errors.username = "Username can contain only letters, numbers and spaces";
+  } else if (username.replace(/ /g, "").match(/^\d+$/)) {
+    errors.username = "Username cannot contain only numbers";
+  } else if (BLOCKED_USERNAMES.includes(username.toLowerCase())) {
+    errors.username = "This username is not allowed";
+  }
+
+  const email = normalizeEmail(form.email);
+
+  if (!email) {
+    errors.email = "Email is required";
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    errors.email = "Enter a valid email address";
+  }
+
+  const password = String(form.password || "");
+
+  if (!password) {
+    errors.password = "Password is required";
+  } else if (password.length < 8) {
+    errors.password = "Password must be at least 8 characters";
+  } else if (!/[A-Z]/.test(password)) {
+    errors.password = "Password must contain at least one uppercase letter";
+  } else if (!/[a-z]/.test(password)) {
+    errors.password = "Password must contain at least one lowercase letter";
+  } else if (!/[0-9]/.test(password)) {
+    errors.password = "Password must contain at least one number";
+  }
+
+  if (!form.confirmPassword) {
+    errors.confirmPassword = "Please confirm your password";
+  } else if (password !== form.confirmPassword) {
+    errors.confirmPassword = "Passwords do not match";
+  }
+
+  return errors;
+}
+
 
 export default function Signup() {
 
@@ -49,8 +127,8 @@ export default function Signup() {
     setShowConfirmPassword,
   ] = useState(false);
 
-  const [formError, setFormError] =
-    useState("");
+  const [fieldErrors, setFieldErrors] =
+    useState({});
 
   const [backendError, setBackendError] =
     useState("");
@@ -77,41 +155,14 @@ export default function Signup() {
 
     e.preventDefault();
 
-    setFormError("");
+    setFieldErrors({});
     setBackendError("");
 
-    // VALIDATION
-    if (
-      !form.username ||
-      !form.email ||
-      !form.password ||
-      !form.confirmPassword
-    ) {
+    const errors = validateSignupFields(form);
 
-      return setFormError(
-        "All fields are required"
-      );
-    }
-
-    // PASSWORD MATCH
-    if (
-      form.password !==
-      form.confirmPassword
-    ) {
-
-      return setFormError(
-        "Passwords do not match"
-      );
-    }
-
-    // PASSWORD LENGTH
-    if (
-      form.password.length < 8
-    ) {
-
-      return setFormError(
-        "Password must be at least 8 characters"
-      );
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      return;
     }
 
     try {
@@ -120,8 +171,8 @@ export default function Signup() {
 
       const result = await dispatch(
         signupUser({
-          username: form.username,
-          email: form.email,
+          username: normalizeUsername(form.username),
+          email: normalizeEmail(form.email),
           password: form.password,
         })
       ).unwrap();
@@ -130,15 +181,41 @@ export default function Signup() {
 
     } catch (err) {
 
-      setBackendError(
+      const mapped = mapPayloadToFormErrors(err);
+      const general = mapped._general;
 
-        err.username?.[0] ||
-        err.email?.[0] ||
-        err.password?.[0] ||
-        err.error ||
-        "Something went wrong"
+      delete mapped._general;
 
-      );
+      if (
+        err?.status === "already_verified" &&
+        typeof err?.message === "string"
+      ) {
+
+        mapped.email = err.message;
+      } else if (
+        general &&
+        !mapped.email &&
+        general.toLowerCase().includes("email")
+      ) {
+
+        mapped.email = general;
+      }
+
+      if (Object.keys(mapped).length > 0) {
+
+        setFieldErrors(mapped);
+        setBackendError("");
+      } else {
+
+        setBackendError(
+
+          general ||
+          err?.message ||
+          err?.error ||
+          formatProductApiError(err),
+
+        );
+      }
 
     } finally {
 
@@ -298,19 +375,31 @@ export default function Signup() {
         {/* USERNAME */}
         <div className="auth-group">
 
-          <label>Full Name</label>
+          <label>Username</label>
 
           <input
             type="text"
-            placeholder="Julian Thorne"
+            placeholder="julian99"
             value={form.username}
-            onChange={(e) =>
+            onChange={(e) => {
               setForm({
                 ...form,
                 username: e.target.value,
-              })
-            }
+              });
+              setFieldErrors({
+                ...fieldErrors,
+                username: "",
+              });
+            }}
           />
+
+          {
+            fieldErrors.username && (
+              <p className="error-text">
+                {fieldErrors.username}
+              </p>
+            )
+          }
 
         </div>
 
@@ -323,13 +412,25 @@ export default function Signup() {
             type="email"
             placeholder="julian@example.com"
             value={form.email}
-            onChange={(e) =>
+            onChange={(e) => {
               setForm({
                 ...form,
                 email: e.target.value,
-              })
-            }
+              });
+              setFieldErrors({
+                ...fieldErrors,
+                email: "",
+              });
+            }}
           />
+
+          {
+            fieldErrors.email && (
+              <p className="error-text">
+                {fieldErrors.email}
+              </p>
+            )
+          }
 
         </div>
 
@@ -350,15 +451,27 @@ export default function Signup() {
                 }
                 placeholder="••••••••"
                 value={form.password}
-                onChange={(e) =>
+                onChange={(e) => {
                   setForm({
                     ...form,
                     password: e.target.value,
-                  })
-                }
+                  });
+                  setFieldErrors({
+                    ...fieldErrors,
+                    password: "",
+                  });
+                }}
               />
 
             </div>
+
+            {
+              fieldErrors.password && (
+                <p className="error-text">
+                  {fieldErrors.password}
+                </p>
+              )
+            }
 
           </div>
 
@@ -378,27 +491,36 @@ export default function Signup() {
                 value={
                   form.confirmPassword
                 }
-                onChange={(e) =>
+                onChange={(e) => {
                   setForm({
                     ...form,
                     confirmPassword:
                       e.target.value,
-                  })
-                }
+                  });
+                  setFieldErrors({
+                    ...fieldErrors,
+                    confirmPassword: "",
+                  });
+                }}
               />
 
             </div>
+
+            {
+              fieldErrors.confirmPassword && (
+                <p className="error-text">
+                  {fieldErrors.confirmPassword}
+                </p>
+              )
+            }
 
           </div>
 
         </div>
 
-        {/* FORM ERROR */}
-        {formError && (
-          <p className="error-text">
-            {formError}
-          </p>
-        )}
+        <p className="auth-subtitle" style={{ marginTop: "0.5rem", fontSize: "0.85rem" }}>
+          Password must be at least 8 characters with uppercase, lowercase, and a number.
+        </p>
 
         {/* BACKEND ERROR */}
         {backendError && (

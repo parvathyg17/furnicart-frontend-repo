@@ -322,7 +322,10 @@ function MetricCard(
           {label}
         </h4>
 
-        <strong>
+        <strong
+          className="da-metric-value"
+          title={value}
+        >
           {value}
         </strong>
 

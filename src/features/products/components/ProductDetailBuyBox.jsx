@@ -2,13 +2,19 @@ import {
   Heart,
 } from "lucide-react";
 
+import OfferBadge, {
+  ProductPriceDisplay,
+} from "../../promotions/components/OfferBadge.jsx";
+
 import {
   formatMoney,
 } from "../../../utils/currency.js";
 
 import StarRating from "../../catalog/reviews/components/StarRating.jsx";
 
-import OfferBadge from "../../promotions/components/OfferBadge.jsx";
+import {
+  resolveVariantPrices,
+} from "../../promotions/offerBadgeUtlis.js";
 
 export default function ProductDetailBuyBox(
   {
@@ -123,14 +129,18 @@ export default function ProductDetailBuyBox(
       }
 
       {
-        displayPrice !== null && (
+        selectedVariant && (
 
           <div className="pd-user-pdp-price-row">
 
-            <p className="pd-user-price artisan-font-serif pd-user-pdp-price">
-              ₹
-              {formatMoney(displayPrice)}
-            </p>
+            <ProductPriceDisplay
+              variant={selectedVariant}
+              product={product}
+              className="pd-user-price artisan-font-serif pd-user-pdp-price"
+              priceClassName="pd-user-pdp-price-value"
+              minFractionDigits={2}
+              maxFractionDigits={2}
+            />
 
             <OfferBadge
               product={product}
@@ -195,6 +205,15 @@ export default function ProductDetailBuyBox(
                   v.id ===
                   selectedVariantId;
 
+                const {
+                  original,
+                  sale,
+                  hasDiscount,
+                } = resolveVariantPrices(
+                  v,
+                  product,
+                );
+
                 return (
 
                   <button
@@ -229,8 +248,32 @@ export default function ProductDetailBuyBox(
                     </span>
 
                     <span className="pd-user-variant-pill-meta">
-                      ₹
-                      {formatMoney(v.price)}
+                      {
+                        hasDiscount ? (
+                          <>
+                            <span className="fc-price-original">
+                              ₹
+                              {formatMoney(
+                                original,
+                              )}
+                            </span>
+                            {" "}
+                            <span className="fc-price-sale">
+                              ₹
+                              {formatMoney(
+                                sale,
+                              )}
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            ₹
+                            {formatMoney(
+                              sale,
+                            )}
+                          </>
+                        )
+                      }
 
                       {variantSoldOut && (
                         <>

@@ -962,19 +962,10 @@ export default function OrdersList() {
                                         returnLabel && (
 
                                           <div
-                                            className="orders-artisan-line-sub"
-                                            style={
+                                            className={
                                               line.last_return?.status === "rejected"
-                                                ? {
-                                                  color: "#991b1b",
-                                                  marginTop: "0.25rem",
-                                                  fontSize: "0.85rem",
-                                                }
-                                                : {
-                                                  color: "#6b635c",
-                                                  marginTop: "0.25rem",
-                                                  fontSize: "0.85rem",
-                                                }
+                                                ? "orders-artisan-line-sub orders-artisan-line-sub--return-rejected"
+                                                : "orders-artisan-line-sub orders-artisan-line-sub--return-note"
                                             }
                                           >
                                             {returnLabel}

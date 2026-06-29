@@ -40,6 +40,7 @@ import {
 
 import {
   toggleWishlistApi,
+  fetchWishlist,
 } from "../wishlist/wishlistAPI.js";
 
 import {
@@ -48,7 +49,8 @@ import {
 
 import {
   buildShopPageNumbers,
-  firstListableVariant,
+  catalogVariantForSort,
+  wishlistedVariantForProduct,
 } from "./shopListUtils.js";
 
 export default function useShopCatalog() {
@@ -116,6 +118,14 @@ export default function useShopCatalog() {
   ] = useState(null);
 
   const [
+    wishlistedVariantIds,
+    setWishlistedVariantIds,
+  ] = useState([]);
+
+  const lastWishlistSigRef =
+    useRef("");
+
+  const [
     draftSearch,
     setDraftSearch,
   ] = useState(
@@ -138,7 +148,7 @@ export default function useShopCatalog() {
   const maxPrice = searchParams.get("max_price") || "";
 
   const pageSize = Number(
-    searchParams.get("page_size") || 12
+    searchParams.get("page_size") || 5
   );
 
   const loadFilters =
@@ -178,6 +188,86 @@ export default function useShopCatalog() {
 
     loadFilters();
   }, [loadFilters]);
+
+  const refreshWishlistSilently =
+    useCallback(
+      async () => {
+
+        if (!user) {
+
+          setWishlistedVariantIds(
+            [],
+          );
+
+          lastWishlistSigRef.current =
+            "";
+
+          return;
+        }
+
+        try {
+
+          const data =
+            await fetchWishlist(
+              {
+                page: 1,
+                pageSize: 100,
+              },
+            );
+
+          const ids =
+            (data.results || [])
+
+              .map(
+                (row) =>
+                  row.variant?.id,
+              )
+
+              .filter(
+                (id) =>
+                  id != null,
+              )
+
+              .map(
+                (id) =>
+                  Number(id),
+              );
+
+          const sig =
+            ids.join(",");
+
+          if (
+            lastWishlistSigRef.current ===
+            sig
+          ) {
+
+            return;
+          }
+
+          lastWishlistSigRef.current =
+            sig;
+
+          setWishlistedVariantIds(
+            ids,
+          );
+        } catch {
+
+          /* keep current wishlist ids */
+        }
+      },
+
+      [user],
+    );
+
+  useEffect(() => {
+
+    lastWishlistSigRef.current =
+      "";
+
+    refreshWishlistSilently();
+  }, [
+    refreshWishlistSilently,
+  ]);
 
   useEffect(() => {
 
@@ -417,7 +507,13 @@ export default function useShopCatalog() {
       pollIntervalMs: 90_000,
 
       onRefresh:
-        refreshListingSilently,
+        async () => {
+
+          await Promise.all([
+            refreshListingSilently(),
+            refreshWishlistSilently(),
+          ]);
+        },
     },
   );
 
@@ -473,6 +569,21 @@ export default function useShopCatalog() {
     });
   };
 
+  const variantOptions =
+    useMemo(
+      () => ({
+
+        minPrice,
+
+        maxPrice,
+      }),
+
+      [
+        minPrice,
+        maxPrice,
+      ],
+    );
+
   const requireAuth = () => {
 
     navigate(
@@ -498,7 +609,11 @@ export default function useShopCatalog() {
       }
 
       const variant =
-        firstListableVariant(product);
+        catalogVariantForSort(
+          product,
+          sort,
+          variantOptions,
+        );
 
       if (
         !variant ||
@@ -562,8 +677,19 @@ export default function useShopCatalog() {
         return;
       }
 
+      const existing =
+        wishlistedVariantForProduct(
+          product,
+          wishlistedVariantIds,
+        );
+
       const variant =
-        firstListableVariant(product);
+        existing ||
+        catalogVariantForSort(
+          product,
+          sort,
+          variantOptions,
+        );
 
       if (!variant) {
 
@@ -577,12 +703,45 @@ export default function useShopCatalog() {
 
       try {
 
-        await toggleWishlistApi(
-          variant.id
+        const res =
+          await toggleWishlistApi(
+            variant.id,
+          );
+
+        const vid =
+          Number(variant.id);
+
+        setWishlistedVariantIds(
+          (prev) => {
+
+            if (
+              res.is_wishlisted
+            ) {
+
+              if (
+                prev.includes(vid)
+              ) {
+
+                return prev;
+              }
+
+              return [
+                ...prev,
+                vid,
+              ];
+            }
+
+            return prev.filter(
+              (id) =>
+                id !== vid,
+            );
+          },
         );
 
         setToast(
-          "Wishlist updated."
+          res.is_wishlisted
+            ? "Saved to wishlist."
+            : "Removed from wishlist.",
         );
       } catch (err) {
 
@@ -648,6 +807,7 @@ export default function useShopCatalog() {
     requireAuth,
     handleAddToCart,
     handleWishlist,
+    wishlistedVariantIds,
     user,
     checkingAuth,
   };

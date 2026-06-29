@@ -124,9 +124,9 @@ export const resetPassword = createAsyncThunk(
 
 export const googleLogin = createAsyncThunk(
   "auth/googleLogin",
-  async (token, { rejectWithValue }) => {
+  async (payload, { rejectWithValue }) => {
     try {
-      return await googleLoginAPI(token);
+      return await googleLoginAPI(payload);
     } catch (err) {
       return rejectWithValue(
         err.response?.data || {

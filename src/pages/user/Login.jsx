@@ -1,6 +1,4 @@
-// ==========================================
-// src/pages/auth/Login.jsx
-// ==========================================
+
 
 import {
   useEffect,
@@ -28,6 +26,10 @@ import {
 } from "../../features/auth/authSlice";
 
 import AuthLayout from "../../components/auth/AuthLayout";
+
+import {
+  getStoredReferralPayload,
+} from "../../features/referral/referralAPI";
 
 
 export default function Login() {
@@ -145,9 +147,10 @@ export default function Login() {
         setLoadingLocal(true);
 
         await dispatch(
-          googleLogin(
-            credentialResponse.credential
-          )
+          googleLogin({
+            token: credentialResponse.credential,
+            ...getStoredReferralPayload(),
+          })
         ).unwrap();
 
         await dispatch(

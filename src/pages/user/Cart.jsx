@@ -241,16 +241,17 @@ export default function Cart() {
 
       try {
 
-        // if (nextQty >= maxQ) {
+       
+// if (nextQty <=1) {
 
-        //   await removeCartItemApi(itemId);
+//           await removeCartItemApi(itemId);
 
-        // } else{
-
+//         } else{
         await updateCartItemApi(
           itemId,
           nextQty
         );
+      
       
       
 

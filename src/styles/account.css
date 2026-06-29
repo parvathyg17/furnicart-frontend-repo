@@ -1507,3 +1507,90 @@ body {
   font-size: 0.85rem;
   color: var(--muted);
 }
+
+.referral-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.25rem 1.35rem;
+  margin: 0 50px 50px;
+}
+
+.referral-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.referral-lead {
+  margin: 0 0 1rem;
+  color: var(--text);
+  line-height: 1.55;
+  font-size: 0.92rem;
+}
+
+.referral-field {
+  margin-bottom: 1rem;
+}
+
+.referral-field label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
+}
+
+.referral-copy-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #faf9f7;
+}
+
+.referral-copy-row code {
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.referral-link {
+  flex: 1;
+  font-size: 0.82rem;
+  color: var(--text);
+  word-break: break-all;
+}
+
+.referral-copy-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  color: var(--text);
+}
+
+.referral-copy-btn:hover {
+  background: #f3f0eb;
+}
+
+.referral-welcome {
+  margin-top: 0.5rem;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  background: #f0f7f2;
+  border: 1px solid #d4e8da;
+  font-size: 0.88rem;
+}
+
+.referral-welcome p {
+  margin: 0.35rem 0 0;
+}

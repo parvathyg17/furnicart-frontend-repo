@@ -15,6 +15,7 @@ import {
   Tag,
   Percent,
   BarChart3,
+  Gift,
 } from "lucide-react";
 
 import {
@@ -171,6 +172,17 @@ const NAV_SECTIONS = [
         ) =>
           pathname.includes(
             "/admin/offers",
+          ),
+      },
+      {
+        to: "/admin/referral",
+        label: "Refer & Earn",
+        icon: Gift,
+        match: (
+          pathname,
+        ) =>
+          pathname.includes(
+            "/admin/referral",
           ),
       },
       {

@@ -3,7 +3,14 @@
 import {
   Routes,
   Route,
+  useLocation,
 } from "react-router-dom";
+
+import { useEffect } from "react";
+
+import {
+  captureReferralFromSearch,
+} from "../../features/referral/referralAPI";
 
 import Login from "../../pages/user/Login";
 import Signup from "../../pages/user/Signup";
@@ -40,6 +47,18 @@ import PublicRoute from "../user/PublicRoute";
 import Sample from "../../pages/user/Sample";
 
 export default function UserRoutes() {
+
+  const location = useLocation();
+
+  useEffect(() => {
+
+    captureReferralFromSearch(
+      location.search,
+    );
+
+  }, [
+    location.search,
+  ]);
 
   return (
 

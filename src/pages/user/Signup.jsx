@@ -9,6 +9,7 @@ import {
 import {
   Link,
   useNavigate,
+  useLocation,
 } from "react-router-dom";
 
 import {
@@ -30,6 +31,13 @@ import {
   formatProductApiError,
   mapPayloadToFormErrors,
 } from "../../utils/productApiErrors.js";
+
+import {
+  getStoredReferralPayload,
+  setStoredReferralCode,
+  captureReferralFromSearch,
+  clearStoredReferral,
+} from "../../features/referral/referralAPI";
 
 
 const BLOCKED_USERNAMES = [
@@ -111,6 +119,8 @@ export default function Signup() {
 
   const navigate = useNavigate();
 
+  const location = useLocation();
+
   const { isAuthenticated } = useSelector(
     (state) => state.auth
   );
@@ -144,7 +154,31 @@ export default function Signup() {
     email: "",
     password: "",
     confirmPassword: "",
+    referralCode: "",
   });
+
+
+  useEffect(() => {
+
+    captureReferralFromSearch(
+      location.search,
+    );
+
+    const stored = sessionStorage.getItem(
+      "referral_code",
+    );
+
+    if (stored) {
+
+      setForm((prev) => ({
+        ...prev,
+        referralCode: stored,
+      }));
+    }
+
+  }, [
+    location.search,
+  ]);
 
 
   // ==========================================
@@ -168,6 +202,10 @@ export default function Signup() {
     try {
 
       setLoadingLocal(true);
+
+      setStoredReferralCode(
+        form.referralCode,
+      );
 
       const result = await dispatch(
         signupUser({
@@ -327,8 +365,13 @@ export default function Signup() {
           credentialResponse.credential;
 
         await dispatch(
-          googleLogin(token)
+          googleLogin({
+            token,
+            ...getStoredReferralPayload(),
+          })
         ).unwrap();
+
+        clearStoredReferral();
 
         await dispatch(
           loadUser()
@@ -515,6 +558,32 @@ export default function Signup() {
             }
 
           </div>
+
+        </div>
+
+        <div className="auth-group">
+
+          <label>
+            Referral code (optional)
+          </label>
+
+          <input
+            type="text"
+            placeholder="Enter a friend's code"
+            value={form.referralCode}
+            onChange={(e) => {
+              const value = e.target.value;
+
+              setForm({
+                ...form,
+                referralCode: value,
+              });
+
+              setStoredReferralCode(
+                value,
+              );
+            }}
+          />
 
         </div>
 

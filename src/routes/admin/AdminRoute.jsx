@@ -40,6 +40,7 @@ import AdminReviews from "../../pages/admin/AdminReviews";
 import AdminInventory from "../../pages/admin/AdminInventory";
 import AdminCoupons from "../../pages/admin/AdminCoupons";
 import AdminOffers from "../../pages/admin/AdminOffers";
+import AdminReferral from "../../pages/admin/AdminReferral";
 import AdminSalesReport from "../../pages/admin/AdminSalesReport";
 
 
@@ -161,6 +162,13 @@ export default function AdminRoutes() {
           path="offers"
           element={
             <AdminOffers />
+          }
+        />
+
+        <Route
+          path="referral"
+          element={
+            <AdminReferral />
           }
         />
 

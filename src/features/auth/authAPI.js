@@ -56,13 +56,16 @@ export const logoutAPI = async () => {
 };
 
 
-export const googleLoginAPI = async (token) => {
+export const googleLoginAPI = async (payload) => {
+
+  const body =
+    typeof payload === "string"
+      ? { token: payload }
+      : payload;
 
   const response = await api.post(
     "users/google-login/",
-    {
-      token,
-    }
+    body,
   );
 
   return response.data;

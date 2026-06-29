@@ -1,6 +1,3 @@
-// ==========================================
-// src/pages/auth/OtpVerify.jsx
-// ==========================================
 
 import toast from "react-hot-toast";
 
@@ -17,6 +14,11 @@ import {
   verifyOTP,
   resendOTP,
 } from "../../features/auth/authSlice";
+
+import {
+  getStoredReferralPayload,
+  clearStoredReferral,
+} from "../../features/referral/referralAPI";
 
 import {
   useLocation,
@@ -208,6 +210,7 @@ export default function OtpVerify() {
           email,
           otp,
           purpose,
+          ...getStoredReferralPayload(),
         })
       ).unwrap();
 
@@ -227,6 +230,8 @@ export default function OtpVerify() {
       if (
         purpose === "signup"
       ) {
+
+        clearStoredReferral();
 
         navigate("/login");
 

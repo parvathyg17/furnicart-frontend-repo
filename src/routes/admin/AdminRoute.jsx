@@ -42,6 +42,7 @@ import AdminCoupons from "../../pages/admin/AdminCoupons";
 import AdminOffers from "../../pages/admin/AdminOffers";
 import AdminReferral from "../../pages/admin/AdminReferral";
 import AdminSalesReport from "../../pages/admin/AdminSalesReport";
+import Sample from "../../components/common/Sample";
 
 
 export default function AdminRoutes() {
@@ -228,6 +229,14 @@ export default function AdminRoutes() {
           <h1>
             404 Not Found
           </h1>
+        }
+      />
+
+      <Route
+        path="/sample"
+        element={
+          <Sample />
+          
         }
       />
 

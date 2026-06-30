@@ -9,6 +9,16 @@ export async function fetchCart() {
   return response.data;
 }
 
+// export function getProductCountFromCart(data) {
+//   if (!data?.items?.length) {
+//     return 0;
+//   }
+
+//   return new Set(
+//     data.items.map((row) => row.product_id),
+//   ).size;
+// }
+
 export async function addToCartApi({
   variantId,
   quantity = 1,

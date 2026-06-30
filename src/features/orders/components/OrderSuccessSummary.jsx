@@ -3,9 +3,8 @@ import {
 } from "../../../utils/currency.js";
 
 import {
-  PAYMENT_LABELS,
-  paymentStatusFollowLine,
-} from "../orderUi.js";
+  resolveMediaUrl,
+} from "../../../utils/mediaUrl.js";
 
 export default function OrderSuccessSummary(
   {
@@ -21,31 +20,119 @@ export default function OrderSuccessSummary(
     order.discount_total ?? 0,
   );
 
-  const paymentLabel =
-    PAYMENT_LABELS[
-      order.payment_method
-    ] ||
-    order.payment_method;
-
-  const statusLine =
-    paymentStatusFollowLine(
-      order,
-    );
+  const lines = (
+    order.lines || []
+  ).filter(
+    (line) =>
+      line.status !== "cancelled",
+  );
 
   return (
 
     <section
-      className="checkout-success-summary checkout-panel"
+      className="order-success-card"
       aria-label="Order summary"
     >
 
-      <h2 className="checkout-success-summary-title artisan-font-serif">
-        Order summary
+      <h2 className="order-success-card-title">
+        Order Summary
       </h2>
 
-      <dl className="checkout-summary-lines">
+      {
+        lines.length > 0 && (
 
-        <div className="checkout-summary-line">
+          <div className="order-success-items">
+
+            {
+              lines.map(
+                (line) => {
+
+                  const img =
+                    resolveMediaUrl(
+                      line.image_url,
+                    );
+
+                  const meta =
+                    line.variant_name
+                      ? `Material: ${line.variant_name}`
+                      : line.sku
+                        ? `SKU: ${line.sku}`
+                        : null;
+
+                  return (
+
+                    <div
+                      key={line.id}
+                      className="order-success-item"
+                    >
+
+                      <div className="order-success-item-thumb-wrap">
+
+                        {
+                          img ? (
+
+                            <img
+                              className="order-success-item-thumb"
+                              src={img}
+                              alt=""
+                            />
+                          ) : (
+
+                            <div
+                              className="order-success-item-thumb-ph"
+                              aria-hidden
+                            />
+                          )
+                        }
+
+                      </div>
+
+                      <div>
+
+                        <p className="order-success-item-name">
+                          {line.product_name}
+                        </p>
+
+                        {
+                          meta && (
+
+                            <p className="order-success-item-meta">
+                              {meta}
+                            </p>
+                          )
+                        }
+
+                        {
+                          line.quantity > 1 && (
+
+                            <p className="order-success-item-meta">
+                              Qty: {line.quantity}
+                            </p>
+                          )
+                        }
+
+                      </div>
+
+                      <div className="order-success-item-price">
+                        ₹
+                        {formatMoney(
+                          line.line_total,
+                        )}
+                      </div>
+
+                    </div>
+                  );
+                },
+              )
+            }
+
+          </div>
+        )
+      }
+
+      <dl className="order-success-lines">
+
+        <div className="order-success-line">
 
           <dt>
             {
@@ -66,12 +153,13 @@ export default function OrderSuccessSummary(
                 : order.subtotal,
             )}
           </dd>
+
         </div>
 
         {
           offerDiscountNum > 0 && (
 
-            <div className="checkout-summary-line">
+            <div className="order-success-line order-success-line--savings">
 
               <dt>
                 Offer savings
@@ -83,6 +171,7 @@ export default function OrderSuccessSummary(
                   offerDiscountNum,
                 )}
               </dd>
+
             </div>
           )
         }
@@ -90,7 +179,7 @@ export default function OrderSuccessSummary(
         {
           offerDiscountNum > 0 && (
 
-            <div className="checkout-summary-line">
+            <div className="order-success-line">
 
               <dt>
                 Subtotal
@@ -102,11 +191,12 @@ export default function OrderSuccessSummary(
                   order.subtotal,
                 )}
               </dd>
+
             </div>
           )
         }
 
-        <div className="checkout-summary-line">
+        <div className="order-success-line">
 
           <dt>
             GST
@@ -118,9 +208,10 @@ export default function OrderSuccessSummary(
               order.tax_total,
             )}
           </dd>
+
         </div>
 
-        <div className="checkout-summary-line">
+        <div className="order-success-line">
 
           <dt>
             Shipping
@@ -142,12 +233,13 @@ export default function OrderSuccessSummary(
                 )
             }
           </dd>
+
         </div>
 
         {
           couponDiscountNum > 0 && (
 
-            <div className="checkout-summary-line">
+            <div className="order-success-line order-success-line--savings">
 
               <dt>
                 {
@@ -162,48 +254,20 @@ export default function OrderSuccessSummary(
                 {formatMoney(
                   couponDiscountNum,
                 )}
-                {
-                  order.coupon_code && (
-                    <span className="checkout-summary-muted">
-                      {" "}
-                      (
-                      {order.coupon_code}
-                      )
-                    </span>
-                  )
-                }
               </dd>
+
             </div>
           )
         }
 
-        {
-          offerDiscountNum <= 0 &&
-          couponDiscountNum <= 0 && (
-
-            <div className="checkout-summary-line">
-
-              <dt>
-                Discounts
-              </dt>
-
-              <dd>
-                ₹
-                {formatMoney(
-                  0,
-                )}
-              </dd>
-            </div>
-          )
-        }
       </dl>
 
-      <div className="checkout-summary-divider" />
+      <div className="order-success-divider" />
 
-      <div className="checkout-summary-total">
+      <div className="order-success-grand-total">
 
         <span>
-          Total
+          Grand Total
         </span>
 
         <span>
@@ -212,26 +276,8 @@ export default function OrderSuccessSummary(
             order.grand_total,
           )}
         </span>
+
       </div>
-
-      <p className="checkout-success-payment-line">
-
-        <strong>
-          Payment:
-        </strong>
-        {" "}
-        {paymentLabel}
-        {
-          statusLine && (
-            <>
-              {" "}
-              ·
-              {" "}
-              {statusLine}
-            </>
-          )
-        }
-      </p>
 
     </section>
   );

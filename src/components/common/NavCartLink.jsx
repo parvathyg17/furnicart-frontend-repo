@@ -44,6 +44,7 @@ export default function NavCartLink(
       aria-label={
         badge
           ? `Cart, ${itemCount} items`
+          //  ? `Cart, ${itemCount} products`
           : "Cart"
       }
     >

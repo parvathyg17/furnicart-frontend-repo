@@ -98,7 +98,7 @@ export default function AccountLayout({
               Profile
             </NavLink>
 
-            <NavLink
+            {/* <NavLink
               to="/purchases"
               className={({
                 isActive,
@@ -110,7 +110,7 @@ export default function AccountLayout({
             >
               <ShoppingBag size={18} />
               My purchases
-            </NavLink>
+            </NavLink> */}
 
             <NavLink
               to="/orders"

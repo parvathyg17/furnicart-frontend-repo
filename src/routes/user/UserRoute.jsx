@@ -40,11 +40,12 @@ import OrderSuccess from "../../pages/user/OrderSuccess";
 import PaymentFailed from "../../pages/user/PaymentFailed";
 import OrdersList from "../../pages/user/OrderList";
 import OrderDetail from "../../pages/user/OrderDetail";
-import Purchases from "../../pages/user/Purchases";
+// import Purchases from "../../pages/user/Purchases";
 
 import PrivateRoute from "../user/PrivateRoute";
 import PublicRoute from "../user/PublicRoute";
-import Sample from "../../pages/user/Sample";
+import About from "../../pages/user/About";
+
 
 export default function UserRoutes() {
 
@@ -72,6 +73,11 @@ export default function UserRoutes() {
       <Route
         path="/shop"
         element={<Shop />}
+      />
+
+      <Route
+        path="/about"
+        element={<About />}
       />
 
       <Route
@@ -115,14 +121,15 @@ export default function UserRoutes() {
         }
       />
 
-      <Route
+      {/* <Route
         path="/purchases"
         element={
           <PrivateRoute>
             <Purchases />
           </PrivateRoute>
         }
-      />
+      /> */}
+
 
       <Route
         path="/orders"
@@ -252,14 +259,7 @@ export default function UserRoutes() {
         }
       />
 
-        <Route
-        path="/profile/sample"
-        element={
-          <PrivateRoute>
-            <Sample />
-          </PrivateRoute>
-        }
-      />
+        
 
       <Route
         path="*"

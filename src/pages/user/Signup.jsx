@@ -587,18 +587,18 @@ export default function Signup() {
 
         </div>
 
-        <p className="auth-subtitle" style={{ marginTop: "0.5rem", fontSize: "0.85rem" }}>
+        {/* <p className="auth-subtitle" style={{ marginTop: "0.5rem", fontSize: "0.85rem" }}>
           Password must be at least 8 characters with uppercase, lowercase, and a number.
-        </p>
+        </p> */}
 
-        {/* BACKEND ERROR */}
+        
         {backendError && (
           <p className="error-text">
             {backendError}
           </p>
         )}
 
-        {/* SUBMIT BUTTON */}
+        
         <button
           className="auth-btn"
           type="submit"
@@ -610,12 +610,12 @@ export default function Signup() {
 
         </button>
 
-        {/* DIVIDER */}
+       
         <div className="auth-divider">
           OR CONTINUE WITH
         </div>
 
-        {/* GOOGLE LOGIN */}
+        
         <div className="google-login-wrapper">
 
           <GoogleLogin

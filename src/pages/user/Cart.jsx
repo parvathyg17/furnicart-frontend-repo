@@ -92,6 +92,8 @@ function cartLineImageUrl(
         i.is_primary,
     );
 
+ 
+
   const pick =
     primary || imgs[0];
 
@@ -167,6 +169,7 @@ export default function Cart() {
           dispatch(
             setCartItemCount(
               res.item_count,
+              
             ),
           );
 
@@ -295,6 +298,7 @@ export default function Cart() {
         dispatch(
           setCartItemCount(
             res.item_count,
+            
           ),
         );
       } catch (err) {
@@ -309,6 +313,10 @@ export default function Cart() {
         );
       }
     };
+
+  // const productCount = data?.items
+  // ? new Set(data.items.map((row) => row.product_id)).size
+  // : 0;
 
   const handleCheckout =
     async () => {
@@ -375,6 +383,7 @@ export default function Cart() {
 
               Shopping Bag
             </h1>
+             
 
             <p className="cart-bag-page-sub">
 

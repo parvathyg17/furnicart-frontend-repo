@@ -1,0 +1,466 @@
+/* Order success — FurniCart confirmation page */
+
+.order-success-page {
+  min-height: 100vh;
+  background: #f9f9f7;
+  color: #2c241c;
+  font-family: "DM Sans", system-ui, sans-serif;
+}
+
+.order-success-main {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 2rem;
+}
+
+/* Hero */
+.order-success-hero {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.order-success-check {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 1.25rem;
+  border-radius: 50%;
+  background: #e8f5ec;
+  color: #3d6b4a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.order-success-title {
+  margin: 0 0 0.65rem;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(2rem, 4.5vw, 2.75rem);
+  font-weight: 600;
+  color: #2c241c;
+  letter-spacing: -0.02em;
+}
+
+.order-success-lead {
+  margin: 0 auto 1.25rem;
+  max-width: 32rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #6b635a;
+}
+
+.order-success-order-pill {
+  display: inline-block;
+  margin: 0;
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  background: #eceae4;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #5c534a;
+}
+
+.order-success-order-pill strong {
+  color: #2c241c;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+/* Two-column layout */
+.order-success-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .order-success-grid {
+    grid-template-columns: 1.35fr 1fr;
+    gap: 2rem;
+  }
+}
+
+.order-success-card {
+  background: #fff;
+  border: 1px solid #e7e2dc;
+  border-radius: 14px;
+  padding: 1.35rem 1.5rem;
+  box-shadow: 0 4px 24px rgba(44, 36, 28, 0.04);
+}
+
+.order-success-card-title {
+  margin: 0 0 1.15rem;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #2c241c;
+}
+
+/* Product rows */
+.order-success-items {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid #f0ebe4;
+}
+
+.order-success-item {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: start;
+}
+
+.order-success-item-thumb-wrap {
+  width: 72px;
+  height: 72px;
+  min-width: 72px;
+  max-width: 72px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f0ebe4;
+  border: 1px solid #ebe5dd;
+}
+
+.order-success-item-thumb {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 72px;
+  max-height: 72px;
+  object-fit: cover;
+  object-position: center;
+}
+
+.order-success-page img.order-success-item-thumb {
+  width: 100%;
+  height: 100%;
+  max-width: 72px;
+  max-height: 72px;
+}
+
+.order-success-item-thumb-ph {
+  width: 100%;
+  height: 100%;
+  min-height: 72px;
+  background: linear-gradient(135deg, #efe9e2, #e4dcd4);
+}
+
+.order-success-item-name {
+  margin: 0 0 0.25rem;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c241c;
+  line-height: 1.3;
+}
+
+.order-success-item-meta {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #8a8178;
+  line-height: 1.45;
+}
+
+.order-success-item-price {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #2c241c;
+  white-space: nowrap;
+}
+
+/* Pricing lines */
+.order-success-lines {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.order-success-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  font-size: 0.9rem;
+}
+
+.order-success-line dt {
+  margin: 0;
+  color: #6b635a;
+  font-weight: 400;
+}
+
+.order-success-line dd {
+  margin: 0;
+  font-weight: 500;
+  color: #2c241c;
+}
+
+.order-success-line--savings dd {
+  color: #3d6b4a;
+}
+
+.order-success-divider {
+  height: 1px;
+  background: #f0ebe4;
+  margin: 1rem 0;
+}
+
+.order-success-grand-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.order-success-grand-total span:first-child {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2c241c;
+}
+
+.order-success-grand-total span:last-child {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: #2c241c;
+}
+
+/* Right column */
+.order-success-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.order-success-status-card {
+  background: #eceae4;
+  border: none;
+  border-radius: 12px;
+  padding: 1rem 1.15rem;
+}
+
+.order-success-status-label {
+  margin: 0 0 0.35rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #8a8178;
+}
+
+.order-success-status-value {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #2c241c;
+}
+
+.order-success-status-value svg {
+  color: #3d6b4a;
+  flex-shrink: 0;
+}
+
+.order-success-address-card {
+  padding: 1.15rem 1.25rem;
+}
+
+.order-success-address-label {
+  margin: 0 0 0.5rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #8a8178;
+}
+
+.order-success-address-text {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: #4a423a;
+  font-style: normal;
+}
+
+.order-success-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 0.25rem;
+}
+
+.order-success-btn-primary,
+.order-success-btn-secondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.8rem 1.25rem;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  transition: filter 0.15s ease;
+}
+
+.order-success-btn-primary {
+  background: #3d2b1d;
+  color: #faf8f5;
+}
+
+.order-success-btn-secondary {
+  background: #fff;
+  color: #3d2b1d;
+  border: 1px solid #d4c9bc;
+}
+
+.order-success-btn-primary:hover,
+.order-success-btn-secondary:hover {
+  filter: brightness(1.06);
+}
+
+.order-success-btn-primary:disabled,
+.order-success-btn-secondary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.order-success-continue {
+  display: block;
+  margin-top: 0.5rem;
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6b635a;
+  text-decoration: none;
+}
+
+.order-success-continue:hover {
+  color: #2c241c;
+}
+
+.order-success-invoice-err {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #8b2e2e;
+  text-align: center;
+}
+
+/* Estimated delivery */
+.order-success-delivery {
+  margin-top: 2rem;
+  padding: 1.35rem 1.5rem;
+  border: 2px dashed #d4c9bc;
+  border-radius: 14px;
+  background: #f3f1ec;
+  text-align: center;
+}
+
+.order-success-delivery-icon {
+  color: #8a8178;
+  margin-bottom: 0.5rem;
+}
+
+.order-success-delivery-title {
+  margin: 0 0 0.35rem;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #2c241c;
+}
+
+.order-success-delivery-dates {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #4a423a;
+}
+
+.order-success-delivery-note {
+  margin: 0;
+  font-size: 0.82rem;
+  font-style: italic;
+  color: #8a8178;
+  line-height: 1.5;
+}
+
+/* Footer */
+.order-success-footer {
+  margin-top: 3rem;
+  padding: 2.5rem 1.25rem 2rem;
+  background: #ece8e0;
+  border-top: 1px solid #e0dbd3;
+  text-align: center;
+}
+
+.order-success-footer-brand {
+  margin: 0 0 1rem;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #2c241c;
+}
+
+.order-success-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.25rem 1.75rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6b635a;
+}
+
+.order-success-footer-links a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.order-success-footer-links a:hover {
+  color: #2c241c;
+}
+
+.order-success-footer-copy {
+  margin: 0;
+  font-size: 0.78rem;
+  color: #8a8178;
+}
+
+/* Loading / error */
+.order-success-muted {
+  text-align: center;
+  color: #8a8178;
+  font-size: 0.95rem;
+}
+
+.order-success-error-title {
+  text-align: center;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.75rem;
+  margin: 0 0 0.5rem;
+}
+
+.order-success-error-lead {
+  text-align: center;
+  color: #6b635a;
+  margin-bottom: 1.5rem;
+}

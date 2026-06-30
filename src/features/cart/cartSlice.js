@@ -22,10 +22,12 @@ export const loadCartCount = createAsyncThunk(
     try {
 
       const data = await fetchCart();
-
+//
       return Number(
         data.item_count ?? 0,
+        //
       );
+     
     } catch (err) {
 
       return rejectWithValue(

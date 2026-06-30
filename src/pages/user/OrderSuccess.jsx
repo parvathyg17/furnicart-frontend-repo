@@ -1,5 +1,4 @@
-import "../../styles/shop.css";
-import "../../styles/checkout.css";
+import "../../styles/order-success.css";
 
 import {
   useEffect,
@@ -12,6 +11,12 @@ import {
 } from "react-router-dom";
 
 import {
+  Check,
+  CircleCheck,
+  Truck,
+} from "lucide-react";
+
+import {
   fetchOrderApi,
   downloadOrderInvoicePdf,
 } from "../../features/orders/orderAPI";
@@ -22,81 +27,112 @@ import {
   formatProductApiError,
 } from "../../utils/productApiErrors.js";
 
-function SuccessIllustration() {
+import {
+  PAYMENT_LABELS,
+  paymentStatusFollowLine,
+} from "../../features/orders/orderUi.js";
 
-  return (
+function formatDeliveryWindow(
+  placedAt,
+) {
 
-    <svg
-      className="checkout-success-illus"
-      viewBox="0 0 280 200"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden
-    >
+  if (
+    !placedAt
+  ) {
 
-      <defs>
+    return "We will share delivery dates soon.";
+  }
 
-        <linearGradient
-          id="chk-bg"
-          x1="0%"
-          y1="0%"
-          x2="100%"
-          y2="100%"
-        >
-
-          <stop
-            offset="0%"
-            stopColor="#efe8df"
-          />
-
-          <stop
-            offset="100%"
-            stopColor="#e0d5c8"
-          />
-
-        </linearGradient>
-
-      </defs>
-
-      <rect
-        x="20"
-        y="24"
-        width="240"
-        height="152"
-        rx="18"
-        fill="url(#chk-bg)"
-        stroke="#d4c9bc"
-        strokeWidth="1.5"
-      />
-
-      <path
-        d="M72 118 L118 162 L208 72"
-        fill="none"
-        stroke="#3d6b4a"
-        strokeWidth="14"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-
-      <circle
-        cx="210"
-        cy="48"
-        r="22"
-        fill="#fdfcfa"
-        stroke="#8b7355"
-        strokeWidth="2"
-      />
-
-      <path
-        d="M200 48 L208 56 L224 38"
-        fill="none"
-        stroke="#5c4a3a"
-        strokeWidth="3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-
-    </svg>
+  const placed = new Date(
+    placedAt,
   );
+
+  if (
+    Number.isNaN(
+      placed.getTime(),
+    )
+  ) {
+
+    return "We will share delivery dates soon.";
+  }
+
+  const start = new Date(
+    placed,
+  );
+
+  start.setDate(
+    start.getDate() + 12,
+  );
+
+  const end = new Date(
+    placed,
+  );
+
+  end.setDate(
+    end.getDate() + 15,
+  );
+
+  const fmt = (
+    d,
+  ) =>
+    d.toLocaleDateString(
+      undefined,
+      {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      },
+    );
+
+  return `Between ${fmt(start)} and ${fmt(end)}`;
+}
+
+function formatShippingAddress(
+  order,
+) {
+
+  const lines = [
+    order.shipping_address_line,
+    [
+      order.shipping_city,
+      order.shipping_pincode,
+    ]
+      .filter(Boolean)
+      .join(" - "),
+    [
+      order.shipping_state,
+      "India",
+    ]
+      .filter(Boolean)
+      .join(", "),
+  ].filter(Boolean);
+
+  return lines.join(
+    "\n",
+  );
+}
+
+function paymentMessage(
+  order,
+) {
+
+  if (
+    order.payment_method === "razorpay"
+  ) {
+
+    return order.payment_status === "paid"
+      ? "Your payment was successful. We are preparing your pieces with care."
+      : "We are confirming your payment. This usually takes a moment.";
+  }
+
+  if (
+    order.payment_method === "wallet"
+  ) {
+
+    return "Your wallet payment was successful. We are preparing your pieces with care.";
+  }
+
+  return "We are preparing your pieces with care. You will pay by cash on delivery when your shipment arrives.";
 }
 
 export default function OrderSuccess() {
@@ -229,38 +265,51 @@ export default function OrderSuccess() {
     }
   };
 
+  const paymentLabel =
+    order
+      ? (
+          PAYMENT_LABELS[
+            order.payment_method
+          ] ||
+          order.payment_method
+        )
+      : "";
+
+  const statusLine =
+    order
+      ? paymentStatusFollowLine(
+          order,
+        )
+      : null;
+
   return (
 
-    <div className="artisan-shop checkout-shell">
+    <div className="order-success-page">
 
-      <main className="checkout-success-wrap">
-
-        <SuccessIllustration />
+      <main className="order-success-main">
 
         {
           loading ? (
 
-            <p className="cart-bag-muted">
+            <p className="order-success-muted">
               Loading confirmation…
             </p>
           ) : error ? (
 
             <>
 
-              <h1 className="checkout-success-title artisan-font-serif">
-
+              <h1 className="order-success-error-title">
                 Something went wrong
               </h1>
 
-              <p className="checkout-success-lead">
-
+              <p className="order-success-error-lead">
                 {error}
               </p>
 
-              <div className="checkout-success-actions">
+              <div className="order-success-actions">
 
                 <Link
-                  className="checkout-btn-secondary"
+                  className="order-success-btn-secondary"
                   to="/shop"
                 >
                   Continue shopping
@@ -273,96 +322,229 @@ export default function OrderSuccess() {
 
             <>
 
-              <h1 className="checkout-success-title artisan-font-serif">
+              <header className="order-success-hero">
 
-                Thank you for your order
-              </h1>
+                <div className="order-success-check">
+                  <Check size={28} strokeWidth={2.5} />
+                </div>
 
-              <p className="checkout-success-lead">
+                <h1 className="order-success-title">
+                  Thank you for your order
+                </h1>
 
-                {
-                  order.payment_method === "razorpay"
-                    ? (
-                      order.payment_status === "paid"
-                        ? "Your payment was successful. We are preparing your pieces with care."
-                        : "We are confirming your payment. This usually takes a moment."
-                    )
-                    : order.payment_method === "wallet"
-                      ? "Your wallet payment was successful. We are preparing your pieces with care."
-                      : "We are preparing your pieces with care. You will pay by cash on delivery when your shipment arrives."
-                }
-              </p>
+                <p className="order-success-lead">
+                  {paymentMessage(order)}
+                </p>
 
-              <p className="checkout-success-order">
+                <p className="order-success-order-pill">
+                  Order ID:{" "}
+                  <strong>
+                    {order.order_number}
+                  </strong>
+                </p>
 
-                Order ID:
-                {" "}
+              </header>
 
-                <code>
+              <div className="order-success-grid">
 
-                  {order.order_number}
-                </code>
+                <OrderSuccessSummary
+                  order={order}
+                />
 
-              </p>
+                <aside className="order-success-sidebar">
 
-              <OrderSuccessSummary
-                order={order}
-              />
+                  <div className="order-success-status-card">
 
-              {
-                invoiceError && (
+                    <p className="order-success-status-label">
+                      Payment Status
+                    </p>
 
-                  <p
-                    className="checkout-success-invoice-err"
-                    role="alert"
-                  >
+                    <p className="order-success-status-value">
 
-                    {invoiceError}
-                  </p>
-                )
-              }
+                      <span>
+                        Payment: {paymentLabel}
+                        {statusLine && (
+                          <>
+                            {" "}
+                            · {statusLine}
+                          </>
+                        )}
+                      </span>
 
-              <div className="checkout-success-actions">
+                      {
+                        order.payment_status === "paid" && (
+                          <CircleCheck
+                            size={18}
+                            aria-hidden
+                          />
+                        )
+                      }
 
-                <Link
-                  className="checkout-btn-primary"
-                  to={detailPath}
-                >
-                  View order details
-                </Link>
+                    </p>
 
-                <button
-                  type="button"
-                  className="checkout-btn-secondary"
-                  disabled={
-                    invoiceBusy
-                  }
-                  onClick={
-                    handleDownloadInvoice
-                  }
-                >
+                  </div>
+
+                  <div className="order-success-card order-success-address-card">
+
+                    <p className="order-success-address-label">
+                      Delivery Address
+                    </p>
+
+                    <address className="order-success-address-text">
+
+                      {
+                        order.shipping_name && (
+                          <>
+                            {order.shipping_name}
+                            <br />
+                          </>
+                        )
+                      }
+
+                      {
+                        formatShippingAddress(
+                          order,
+                        )
+                          .split("\n")
+                          .map(
+                            (
+                              line,
+                              i,
+                            ) => (
+
+                              <span key={i}>
+                                {line}
+                                <br />
+                              </span>
+                            ),
+                          )
+                      }
+
+                    </address>
+
+                  </div>
 
                   {
-                    invoiceBusy
-                      ? "Preparing PDF…"
-                      : "Download invoice (PDF)"
-                  }
-                </button>
+                    invoiceError && (
 
-                <Link
-                  className="checkout-btn-secondary"
-                  to="/shop"
-                >
-                  Continue shopping
-                </Link>
+                      <p
+                        className="order-success-invoice-err"
+                        role="alert"
+                      >
+                        {invoiceError}
+                      </p>
+                    )
+                  }
+
+                  <div className="order-success-actions">
+
+                    <Link
+                      className="order-success-btn-primary"
+                      to={detailPath}
+                    >
+                      View order details
+                    </Link>
+
+                    <button
+                      type="button"
+                      className="order-success-btn-secondary"
+                      disabled={invoiceBusy}
+                      onClick={handleDownloadInvoice}
+                    >
+                      {
+                        invoiceBusy
+                          ? "Preparing PDF…"
+                          : "Download invoice (PDF)"
+                      }
+                    </button>
+
+                  </div>
+
+                  <Link
+                    className="order-success-continue"
+                    to="/shop"
+                  >
+                    Continue shopping →
+                  </Link>
+
+                </aside>
 
               </div>
+
+              <section
+                className="order-success-delivery"
+                aria-label="Estimated delivery"
+              >
+
+                <div className="order-success-delivery-icon">
+                  <Truck size={28} strokeWidth={1.5} />
+                </div>
+
+                <h2 className="order-success-delivery-title">
+                  Estimated Delivery
+                </h2>
+
+                <p className="order-success-delivery-dates">
+                  {formatDeliveryWindow(
+                    order.placed_at,
+                  )}
+                </p>
+
+                <p className="order-success-delivery-note">
+                  Our artisans are currently preparing your order for
+                  dispatch. We will notify you once it ships.
+                </p>
+
+              </section>
 
             </>
           )
         }
 
       </main>
+
+      <footer className="order-success-footer">
+
+        <p className="order-success-footer-brand">
+          FurniCart
+        </p>
+
+        <nav
+          className="order-success-footer-links"
+          aria-label="Footer"
+        >
+
+          <Link to="/about">
+            Sustainability
+          </Link>
+
+          <Link to="/shop">
+            Craftsmanship
+          </Link>
+
+          <Link to="/contact">
+            Shipping Policy
+          </Link>
+
+          <Link to="/contact">
+            Terms of Service
+          </Link>
+
+          <Link to="/contact">
+            Privacy
+          </Link>
+
+          <Link to="/shop">
+            Care Guide
+          </Link>
+
+        </nav>
+
+        <p className="order-success-footer-copy">
+          © {new Date().getFullYear()} FurniCart. Crafted for Longevity.
+        </p>
+
+      </footer>
 
     </div>
   );

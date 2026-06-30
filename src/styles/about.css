@@ -1,0 +1,536 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&display=swap");
+
+.about-page {
+  --about-bg: #f5f3ee;
+  --about-brown: #2f1b10;
+  --about-brown-soft: #4b2d1d;
+  --about-muted: #6f6660;
+  --about-border: #e8dfd7;
+
+  min-height: 100vh;
+  background: var(--about-bg);
+  color: #221814;
+  font-family: "Inter", sans-serif;
+}
+
+.about-page .home-navbar {
+  background: rgba(245, 243, 238, 0.72);
+}
+
+/* Hero */
+
+.about-hero {
+  position: relative;
+  min-height: 88vh;
+  display: flex;
+  align-items: flex-end;
+  padding: 120px 42px 72px;
+  overflow: hidden;
+}
+
+.about-hero-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.about-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(20, 12, 8, 0.72) 0%,
+    rgba(20, 12, 8, 0.35) 55%,
+    rgba(20, 12, 8, 0.15) 100%
+  );
+}
+
+.about-hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
+  color: #fff;
+}
+
+.about-hero-title {
+  font-family: "Playfair Display", serif;
+  font-size: clamp(2.6rem, 5vw, 4.4rem);
+  line-height: 1.08;
+  font-weight: 600;
+  margin-bottom: 22px;
+}
+
+.about-hero-lead {
+  max-width: 560px;
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: rgba(255, 255, 255, 0.88);
+  margin-bottom: 30px;
+}
+
+.about-hero-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 24px;
+  border: none;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--about-brown);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.about-hero-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+}
+
+/* Philosophy */
+
+.about-philosophy {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 96px 42px;
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 72px;
+  align-items: start;
+}
+
+.about-quote {
+  margin: 0;
+}
+
+.about-quote p {
+  font-family: "Playfair Display", serif;
+  font-size: clamp(1.7rem, 3vw, 2.35rem);
+  line-height: 1.45;
+  font-style: italic;
+  color: var(--about-brown);
+}
+
+.about-quote footer {
+  margin-top: 28px;
+  font-family: "Inter", sans-serif;
+  font-size: 0.78rem;
+  font-style: normal;
+  letter-spacing: 0.18em;
+  color: var(--about-muted);
+}
+
+.about-philosophy-text p {
+  margin-bottom: 18px;
+  font-size: 1rem;
+  line-height: 1.85;
+  color: #4a433e;
+}
+
+.about-philosophy-text p:last-child {
+  margin-bottom: 0;
+}
+
+/* Journey */
+
+.about-journey {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 42px 96px;
+}
+
+.about-section-title {
+  text-align: center;
+  font-family: "Playfair Display", serif;
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  font-weight: 600;
+  margin-bottom: 56px;
+  color: var(--about-brown);
+}
+
+.about-journey-list {
+  display: flex;
+  flex-direction: column;
+  gap: 72px;
+}
+
+.about-journey-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: center;
+}
+
+.about-journey-row--reverse .about-journey-media {
+  order: 2;
+}
+
+.about-journey-row--reverse .about-journey-copy {
+  order: 1;
+}
+
+.about-journey-media img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 18px;
+  box-shadow: 0 18px 50px rgba(40, 27, 18, 0.08);
+}
+
+.about-journey-step {
+  display: block;
+  font-family: "Playfair Display", serif;
+  font-size: 3.5rem;
+  line-height: 1;
+  color: #ddd5cc;
+  margin-bottom: 10px;
+}
+
+.about-journey-copy h3 {
+  font-family: "Playfair Display", serif;
+  font-size: 1.8rem;
+  margin-bottom: 14px;
+  color: var(--about-brown);
+}
+
+.about-journey-copy p {
+  font-size: 1rem;
+  line-height: 1.8;
+  color: #4a433e;
+}
+
+/* Sustainability */
+
+.about-sustainability-wrap {
+  padding: 0 42px 96px;
+}
+
+.about-sustainability {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 56px;
+  border-radius: 28px;
+  background: var(--about-brown);
+  color: #fff;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 40px;
+  align-items: center;
+}
+
+.about-sustainability-copy h2 {
+  font-family: "Playfair Display", serif;
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  line-height: 1.2;
+  margin-bottom: 18px;
+}
+
+.about-sustainability-copy > p {
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.8;
+  margin-bottom: 28px;
+}
+
+.about-sustainability-features {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.about-sustainability-features li {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.about-feature-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.about-sustainability-features strong {
+  display: block;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  margin-bottom: 4px;
+}
+
+.about-sustainability-features p {
+  margin: 0;
+  font-size: 0.92rem;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.about-impact-card {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 22px;
+  padding: 28px;
+}
+
+.about-impact-card h3 {
+  font-family: "Playfair Display", serif;
+  font-size: 1.35rem;
+  margin-bottom: 22px;
+}
+
+.about-impact-row + .about-impact-row {
+  margin-top: 22px;
+}
+
+.about-impact-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+  font-size: 0.92rem;
+}
+
+.about-impact-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  overflow: hidden;
+}
+
+.about-impact-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #f0e8df;
+}
+
+/* Locations */
+
+.about-locations {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 42px 96px;
+  text-align: center;
+}
+
+.about-eyebrow {
+  font-size: 0.78rem;
+  letter-spacing: 0.2em;
+  color: var(--about-muted);
+  margin-bottom: 12px;
+}
+
+.about-location-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 40px;
+}
+
+.about-location-card {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  min-height: 320px;
+}
+
+.about-location-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.about-location-meta {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 22px;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.72),
+    transparent
+  );
+  color: #fff;
+  text-align: left;
+}
+
+.about-location-meta h3 {
+  font-family: "Playfair Display", serif;
+  font-size: 1.35rem;
+  margin-bottom: 4px;
+}
+
+.about-location-meta p {
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+/* Final CTA */
+
+.about-final-cta {
+  background: var(--about-brown);
+  color: #fff;
+  text-align: center;
+  padding: 88px 42px;
+}
+
+.about-final-cta h2 {
+  font-family: "Playfair Display", serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  margin-bottom: 14px;
+}
+
+.about-final-cta p {
+  max-width: 560px;
+  margin: 0 auto 30px;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.7;
+}
+
+.about-final-cta-actions {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.about-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 180px;
+  padding: 14px 22px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: 0.2s ease;
+}
+
+.about-btn--light {
+  background: #fff;
+  color: var(--about-brown);
+}
+
+.about-btn--outline {
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  color: #fff;
+}
+
+.about-btn:hover {
+  transform: translateY(-1px);
+}
+
+/* Footer */
+
+.about-footer {
+  padding: 48px 42px 36px;
+  text-align: center;
+  background: var(--about-bg);
+  border-top: 1px solid var(--about-border);
+}
+
+.about-footer-brand {
+  font-family: "Playfair Display", serif;
+  font-size: 1.6rem;
+  margin-bottom: 18px;
+  color: var(--about-brown);
+}
+
+.about-footer-links {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 22px;
+  margin-bottom: 18px;
+}
+
+.about-footer-links a {
+  text-decoration: none;
+  color: var(--about-muted);
+  font-size: 0.92rem;
+}
+
+.about-footer-links a:hover {
+  color: var(--about-brown-soft);
+}
+
+.about-footer-social {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.about-footer-social a {
+  color: var(--about-brown-soft);
+  text-decoration: none;
+}
+
+.about-pinterest-mark {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.about-footer-copy {
+  color: var(--about-muted);
+  font-size: 0.88rem;
+}
+
+/* Responsive */
+
+@media (max-width: 980px) {
+  .about-philosophy,
+  .about-journey-row,
+  .about-sustainability {
+    grid-template-columns: 1fr;
+  }
+
+  .about-journey-row--reverse .about-journey-media,
+  .about-journey-row--reverse .about-journey-copy {
+    order: unset;
+  }
+
+  .about-location-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .about-hero,
+  .about-philosophy,
+  .about-journey,
+  .about-sustainability-wrap,
+  .about-locations,
+  .about-final-cta,
+  .about-footer {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .about-sustainability {
+    padding: 32px 24px;
+  }
+
+  .about-hero {
+    min-height: 78vh;
+    padding-top: 110px;
+  }
+}

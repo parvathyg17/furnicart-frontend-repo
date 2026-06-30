@@ -57,9 +57,7 @@ export default function Login() {
     useState({});
 
 
-  // ==========================================
-  // LOGIN SUBMIT
-  // ==========================================
+  
 
   const handleSubmit = async (e) => {
 
@@ -69,17 +67,17 @@ export default function Login() {
 
     const errors = {};
 
-    // EMAIL VALIDATION
+ 
     if (!form.email.trim()) {
       errors.email = "Email is required";
     }
 
-    // PASSWORD VALIDATION
+    
     if (!form.password.trim()) {
       errors.password = "Password is required";
     }
 
-    // STOP IF ERRORS
+    
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
       return;
@@ -117,9 +115,7 @@ export default function Login() {
   };
 
 
-  // ==========================================
-  // AUTO REDIRECT
-  // ==========================================
+ 
 
   useEffect(() => {
 
@@ -135,9 +131,7 @@ export default function Login() {
   ]);
 
 
-  // ==========================================
-  // GOOGLE LOGIN
-  // ==========================================
+  
 
   const handleGoogleSuccess =
     async (credentialResponse) => {
@@ -196,7 +190,7 @@ export default function Login() {
           interior experience.
         </p>
 
-        {/* EMAIL */}
+        
         <div className="auth-group">
 
           <label>Email Address</label>
@@ -221,7 +215,7 @@ export default function Login() {
 
         </div>
 
-        {/* PASSWORD */}
+       
         <div className="auth-group">
 
           <label>Password</label>

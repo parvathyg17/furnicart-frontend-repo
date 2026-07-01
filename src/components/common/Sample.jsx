@@ -17,21 +17,23 @@ function Sample() {
   },[])
 
   useEffect(()=>{
-    fetchAdminOrders({page: 1, pageSize: 100,status:"pending"})
+    fetchAdminOrders({page:1,pageSize:100,})
     .then((data)=>{
       setOrders(data.results || [])
+        })
+      .catch((err)=>{
+        console.log(err)
+      })
 
-    }).catch((err)=>{
-      console.log(err)
-    })
   },[])
+
 
 
   return (
     <>
-      <h1>Users</h1>
+      <h1>Users:{users.length}</h1>
       <ul>
-        {users.map((user)=>(<li key={user.id}>{user.username} {""} {new Date(user.date_joined).toLocaleDateString("en-In")}
+        {users.map((user)=>(<li key={user.id}>{user.username} {""} {new Date(user.date_joined).toLocaleDateString("en-IN")}
 
 
         </li>))}
@@ -39,7 +41,7 @@ function Sample() {
 
       <h1>Orders:{orders.length}</h1>
       <ul>
-        {orders.map((order)=>(<li key={order.id}>{order.order_number} {""} {order.user_email}
+        {orders.map((order)=>(<li key={order.id}>{order.order_number} {""} {order.user_email} {""} {order.status}
 
 
         </li>))}

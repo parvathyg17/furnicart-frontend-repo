@@ -245,16 +245,12 @@ export default function Cart() {
       try {
 
        
-// if (nextQty <=1) {
 
-//           await removeCartItemApi(itemId);
-
-//         } else{
         await updateCartItemApi(
           itemId,
           nextQty
         );
-      
+        
       
       
 
@@ -314,9 +310,7 @@ export default function Cart() {
       }
     };
 
-  // const productCount = data?.items
-  // ? new Set(data.items.map((row) => row.product_id)).size
-  // : 0;
+  
 
   const handleCheckout =
     async () => {

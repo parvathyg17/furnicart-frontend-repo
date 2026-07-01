@@ -385,6 +385,9 @@ export default function Wishlist() {
     }
   };
 
+  
+  
+
   const pageNumbers =
     buildShopPageNumbers(
       {
@@ -699,6 +702,7 @@ export default function Wishlist() {
           )
         }
       </main>
+      
 
       <footer className="home-footer">
 

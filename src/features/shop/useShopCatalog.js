@@ -148,7 +148,7 @@ export default function useShopCatalog() {
   const maxPrice = searchParams.get("max_price") || "";
 
   const pageSize = Number(
-    searchParams.get("page_size") || 5
+    searchParams.get("page_size") || 8
   );
 
   const loadFilters =

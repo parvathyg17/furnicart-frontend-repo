@@ -1,8 +1,5 @@
 import api from "../../services/api";
 
-/**
- * Admin referral program API (`/api/admin/referral-program/`).
- */
 
 export async function fetchAdminReferralProgram() {
 

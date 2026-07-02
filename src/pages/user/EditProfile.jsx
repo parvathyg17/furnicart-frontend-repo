@@ -195,29 +195,6 @@ export default function EditProfilePage() {
         return;
       }
 
-      // DOB VALIDATION
-      if (
-        form.date_of_birth
-      ) {
-
-        const today =
-          new Date();
-
-        const dob =
-          new Date(
-            form.date_of_birth
-          );
-
-        if (dob > today) {
-
-          toast.error(
-            "Date of birth cannot be in the future"
-          );
-
-          return;
-        }
-      }
-
       try {
 
         setLoadingLocal(true);

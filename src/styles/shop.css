@@ -2213,7 +2213,7 @@
   margin: 0.35rem 0 0;
   font-size: 0.72rem;
   line-height: 1.35;
-  color: var(--bag-muted, #6b5b52);
+  color: red
 }
 
 .cart-bag-line-alert {

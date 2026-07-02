@@ -728,37 +728,12 @@ export default function AdminOrderDetail() {
     ],
   );
 
-  const cancellationStats = useMemo(
-    () => {
-
-      const lines = order?.lines || [];
-
-      let count = 0;
-
-      let sum = 0;
-
-      for (
-        const ln of lines
-      ) {
-
-        if (
-          ln.status === "cancelled"
-        ) {
-
-          count += 1;
-
-          sum += Number(
-            ln.line_total,
-          ) ||
-            0;
-        }
-      }
-
-      return {
-        count,
-        sum,
-      };
-    },
+  const cancelledCount = useMemo(
+    () =>
+      (order?.lines || []).filter(
+        (ln) =>
+          ln.status === "cancelled",
+      ).length,
     [
       order,
     ],
@@ -953,8 +928,18 @@ export default function AdminOrderDetail() {
     order,
   );
 
-  const discountNum = Number(
+  const couponDiscountNum = Number(
     order.discount_total,
+  ) ||
+    0;
+
+  const offerDiscountNum = Number(
+    order.offer_discount_total,
+  ) ||
+    0;
+
+  const refundedNum = Number(
+    order.refunded_total,
   ) ||
     0;
 
@@ -1541,16 +1526,61 @@ export default function AdminOrderDetail() {
               <div className="aod-summary-row">
 
                 <span>
-                  Subtotal
+                  {offerDiscountNum > 0
+                    ? "Items"
+                    : "Subtotal"}
                 </span>
 
                 <span>
                   ₹
                   {formatMoney(
-                    order.subtotal,
+                    offerDiscountNum > 0
+                      ? (
+                        order.subtotal_gross
+                        ?? order.subtotal
+                      )
+                      : order.subtotal,
                   )}
                 </span>
               </div>
+
+              {
+                offerDiscountNum > 0 && (
+
+                  <div className="aod-summary-row aod-summary-row--deduct">
+
+                    <span>
+                      Offer savings
+                    </span>
+
+                    <span>
+                      −₹
+                      {formatMoney(
+                        offerDiscountNum,
+                      )}
+                    </span>
+                  </div>
+                )
+              }
+
+              {
+                offerDiscountNum > 0 && (
+
+                  <div className="aod-summary-row">
+
+                    <span>
+                      Subtotal
+                    </span>
+
+                    <span>
+                      ₹
+                      {formatMoney(
+                        order.subtotal,
+                      )}
+                    </span>
+                  </div>
+                )
+              }
 
               <div className="aod-summary-row aod-summary-row--muted">
 
@@ -1582,39 +1612,20 @@ export default function AdminOrderDetail() {
               </div>
 
               {
-                discountNum > 0 && (
+                couponDiscountNum > 0 && (
 
                   <div className="aod-summary-row aod-summary-row--deduct">
 
                     <span>
-                      Discount
+                      {order.coupon_code
+                        ? `Coupon (${order.coupon_code})`
+                        : "Coupon"}
                     </span>
 
                     <span>
                       −₹
                       {formatMoney(
                         order.discount_total,
-                      )}
-                    </span>
-                  </div>
-                )
-              }
-
-              {
-                cancellationStats.count > 0 && (
-
-                  <div className="aod-summary-row aod-summary-row--deduct">
-
-                    <span>
-                      Cancellations (
-                      {cancellationStats.count}
-                      )
-                    </span>
-
-                    <span>
-                      −₹
-                      {formatMoney(
-                        cancellationStats.sum,
                       )}
                     </span>
                   </div>
@@ -1634,6 +1645,28 @@ export default function AdminOrderDetail() {
                   )}
                 </strong>
               </div>
+
+              {
+                refundedNum > 0 && (
+
+                  <div className="aod-summary-row aod-summary-row--deduct">
+
+                    <span>
+                      Refunded
+                      {cancelledCount > 0
+                        ? ` (${cancelledCount} cancelled)`
+                        : ""}
+                    </span>
+
+                    <span>
+                      −₹
+                      {formatMoney(
+                        refundedNum,
+                      )}
+                    </span>
+                  </div>
+                )
+              }
             </div>
           </div>
         </aside>

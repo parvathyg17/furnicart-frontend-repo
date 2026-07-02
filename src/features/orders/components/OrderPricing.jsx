@@ -16,6 +16,10 @@ export default function OrderPricing(
     order.discount_total ?? 0,
   );
 
+  const refundedNum = Number(
+    order.refunded_total ?? 0,
+  );
+
   return (
 
     <div className="odl-totals">
@@ -162,6 +166,25 @@ export default function OrderPricing(
             {formatMoney(order.grand_total)}
           </span>
         </div>
+
+        {
+          refundedNum > 0 && (
+
+            <div className="odl-total-row">
+
+              <span>
+                Refunded to wallet
+              </span>
+
+              <span>
+                −₹
+                {formatMoney(
+                  refundedNum,
+                )}
+              </span>
+            </div>
+          )
+        }
       </div>
     </div>
   );

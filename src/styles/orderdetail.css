@@ -487,3 +487,148 @@
 .odl-toolbar-links a:hover {
   text-decoration: underline;
 }
+
+.odl-refund-card {
+  background: #fff;
+  border: 1px solid #e7dfd7;
+  border-radius: 16px;
+  padding: 1.1rem 1.15rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 0 rgba(44, 36, 28, 0.04);
+}
+
+.odl-refund-card h3 {
+  margin: 0 0 0.75rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #8a8078;
+}
+
+.odl-refund-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.odl-refund-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  font-size: 0.88rem;
+  color: #2c241c;
+  padding: 0.3rem 0;
+}
+
+.odl-refund-row--muted {
+  color: #6b635c;
+  font-size: 0.84rem;
+}
+
+.odl-refund-row--deduct {
+  color: #047857;
+}
+
+.odl-refund-row--total {
+  margin-top: 0.35rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid #e7dfd7;
+  font-size: 0.95rem;
+}
+
+.odl-refund-amt {
+  font-weight: 700;
+  color: #047857;
+}
+
+.odl-refund-pill {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.odl-refund-pill--full {
+  background: #d1fae5;
+  color: #047857;
+}
+
+.odl-refund-pill--partial {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.odl-refund-txns {
+  list-style: none;
+  margin: 0.85rem 0 0;
+  padding: 0.85rem 0 0;
+  border-top: 1px solid #e7dfd7;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.odl-refund-txn {
+  font-size: 0.82rem;
+}
+
+.odl-refund-txn-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.odl-refund-txn-amt {
+  font-weight: 700;
+  color: #047857;
+}
+
+.odl-refund-txn-date {
+  font-size: 0.75rem;
+  color: #8a8078;
+  white-space: nowrap;
+}
+
+.odl-refund-txn-note {
+  margin: 0.2rem 0 0;
+  font-size: 0.78rem;
+  color: #6b635c;
+  line-height: 1.35;
+}
+
+.odl-refund-divider {
+  margin: 1rem 0;
+  border-top: 1px solid #e7dfd7;
+}
+
+.odl-refund-note {
+  margin: 0.85rem 0 0;
+  font-size: 0.78rem;
+  color: #6b635c;
+  line-height: 1.4;
+  background: #faf8f5;
+  border: 1px solid #e7dfd7;
+  border-radius: 10px;
+  padding: 0.65rem 0.75rem;
+}
+
+.odl-refund-note--policy {
+  margin-top: 0.55rem;
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #92400e;
+}
+
+.odl-line-refund {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #047857;
+}

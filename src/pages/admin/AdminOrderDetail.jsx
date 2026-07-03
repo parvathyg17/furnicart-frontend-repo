@@ -943,6 +943,54 @@ export default function AdminOrderDetail() {
   ) ||
     0;
 
+  const remainingValueNum = Number(
+    order.remaining_value ?? order.grand_total,
+  ) ||
+    0;
+
+  const originalPaidNum = Number(
+    order.original_paid ?? order.grand_total,
+  ) ||
+    0;
+
+  const refundTxns = order.refund_transactions || [];
+
+  const itemTotals = lines.reduce(
+    (
+      acc,
+      ln,
+    ) => {
+
+      acc.price += Number(
+        ln.line_total,
+      ) ||
+        0;
+
+      acc.coupon += Number(
+        ln.coupon_share,
+      ) ||
+        0;
+
+      acc.tax += Number(
+        ln.tax_share,
+      ) ||
+        0;
+
+      acc.refund += Number(
+        ln.refund_amount,
+      ) ||
+        0;
+
+      return acc;
+    },
+    {
+      price: 0,
+      coupon: 0,
+      tax: 0,
+      refund: 0,
+    },
+  );
+
   const shipNum = Number(
     order.shipping_total,
   ) ||
@@ -1210,20 +1258,24 @@ export default function AdminOrderDetail() {
                       Product
                     </th>
 
-                    <th>
-                      SKU
-                    </th>
-
                     <th className="aod-num">
                       Price
                     </th>
 
                     <th className="aod-num">
-                      Qty
+                      Coupon share
                     </th>
 
                     <th className="aod-num">
-                      Total
+                      Tax (18%)
+                    </th>
+
+                    <th>
+                      Status
+                    </th>
+
+                    <th className="aod-num">
+                      Refund amount
                     </th>
                   </tr>
                 </thead>
@@ -1251,6 +1303,18 @@ export default function AdminOrderDetail() {
                         const locked = cancelled || returned || delivered;
 
                         const showStrike = cancelled;
+
+                        const couponShare = Number(
+                          ln.coupon_share,
+                        ) ||
+                          0;
+
+                        const hasRefund =
+                          ln.refund_amount !== null &&
+                          ln.refund_amount !== undefined &&
+                          Number(
+                            ln.refund_amount,
+                          ) > 0;
 
                         return (
 
@@ -1298,129 +1362,11 @@ export default function AdminOrderDetail() {
                                     )
                                   }
 
-                                  <div className="aod-status-cell">
-
-                                    {
-                                      cancelled && (
-
-                                        <span className="aod-pill aod-pill--cancelled">
-                                          Cancelled
-                                        </span>
-                                      )
-                                    }
-
-                                    {
-                                      returned && !cancelled && (
-
-                                        <span className={fulfillmentPillClass(
-                                          "returned",
-                                        )}
-                                        >
-                                          {FULFILLMENT_LABEL.returned}
-                                        </span>
-                                      )
-                                    }
-
-                                    {
-                                      delivered && !cancelled && !returned && (
-
-                                        <span className={fulfillmentPillClass(
-                                          "delivered",
-                                        )}
-                                        >
-                                          {FULFILLMENT_LABEL.delivered}
-                                        </span>
-                                      )
-                                    }
-
-                                    {
-                                      !locked && (
-
-                                        <div className="aod-fulfill-wrap">
-
-                                          <span className={fulfillmentPillClass(
-                                            fs,
-                                          )}
-                                          style={{ marginBottom: "0.35rem" }}
-                                          >
-                                            {FULFILLMENT_LABEL[
-                                              fs
-                                            ] ||
-                                              fs}
-                                          </span>
-
-                                          <select
-                                            className="aod-fulfill-select"
-                                            disabled={busyLine === ln.id}
-                                            value={fs}
-                                            aria-label={`Fulfillment for ${ln.product_name}`}
-                                            onChange={(e) =>
-                                              onFulfillmentChange(
-                                                ln.id,
-                                                e.target.value,
-                                              )}
-                                          >
-
-                                            {
-                                              FULFILLMENT_OPTIONS.map(
-                                                (
-                                                  opt,
-                                                ) => (
-
-                                                  <option
-                                                    key={opt}
-                                                    value={opt}
-                                                  >
-                                                    {FULFILLMENT_LABEL[
-                                                      opt
-                                                    ] ||
-                                                      opt}
-                                                  </option>
-                                                ),
-                                              )
-                                            }
-                                          </select>
-                                        </div>
-                                      )
-                                    }
-
-                                    {
-                                      cancelled &&
-                                      ln.cancellation_reason && (
-
-                                        <p className="aod-line-reason">
-
-                                          <strong>
-                                            Reason:
-                                          </strong>
-
-                                          {" "}
-
-                                          {ln.cancellation_reason}
-                                        </p>
-                                      )
-                                    }
-                                  </div>
+                                  <p className="aod-variant-line aod-mono">
+                                    {ln.sku || "—"}
+                                  </p>
                                 </div>
                               </div>
-                            </td>
-
-                            <td>
-
-                              <span className="aod-mono">
-                                {ln.sku || "—"}
-                              </span>
-                            </td>
-
-                            <td className="aod-num aod-mono">
-                              ₹
-                              {formatMoney(
-                                ln.unit_price,
-                              )}
-                            </td>
-
-                            <td className="aod-num">
-                              {ln.quantity}
                             </td>
 
                             <td className={`aod-num${showStrike ? " aod-strike" : ""}`}>
@@ -1431,6 +1377,161 @@ export default function AdminOrderDetail() {
                                   ln.line_total,
                                 )}
                               </strong>
+
+                              {
+                                ln.quantity > 1 && (
+
+                                  <span className="aod-qty-sub">
+                                    {ln.quantity}
+                                    {" × ₹"}
+                                    {formatMoney(
+                                      ln.unit_price,
+                                    )}
+                                  </span>
+                                )
+                              }
+                            </td>
+
+                            <td className="aod-num">
+                              {couponShare > 0
+                                ? (
+
+                                  <span className="aod-num--deduct">
+                                    −₹
+                                    {formatMoney(
+                                      couponShare,
+                                    )}
+                                  </span>
+                                )
+                                : "—"}
+                            </td>
+
+                            <td className="aod-num aod-mono">
+                              ₹
+                              {formatMoney(
+                                ln.tax_share ?? 0,
+                              )}
+                            </td>
+
+                            <td>
+
+                              <div className="aod-status-cell">
+
+                                {
+                                  cancelled && (
+
+                                    <span className="aod-pill aod-pill--cancelled">
+                                      Cancelled
+                                    </span>
+                                  )
+                                }
+
+                                {
+                                  returned && !cancelled && (
+
+                                    <span className={fulfillmentPillClass(
+                                      "returned",
+                                    )}
+                                    >
+                                      {FULFILLMENT_LABEL.returned}
+                                    </span>
+                                  )
+                                }
+
+                                {
+                                  delivered && !cancelled && !returned && (
+
+                                    <span className={fulfillmentPillClass(
+                                      "delivered",
+                                    )}
+                                    >
+                                      {FULFILLMENT_LABEL.delivered}
+                                    </span>
+                                  )
+                                }
+
+                                {
+                                  !locked && (
+
+                                    <div className="aod-fulfill-wrap">
+
+                                      <span className={fulfillmentPillClass(
+                                        fs,
+                                      )}
+                                      style={{ marginBottom: "0.35rem" }}
+                                      >
+                                        {FULFILLMENT_LABEL[
+                                          fs
+                                        ] ||
+                                          fs}
+                                      </span>
+
+                                      <select
+                                        className="aod-fulfill-select"
+                                        disabled={busyLine === ln.id}
+                                        value={fs}
+                                        aria-label={`Fulfillment for ${ln.product_name}`}
+                                        onChange={(e) =>
+                                          onFulfillmentChange(
+                                            ln.id,
+                                            e.target.value,
+                                          )}
+                                      >
+
+                                        {
+                                          FULFILLMENT_OPTIONS.map(
+                                            (
+                                              opt,
+                                            ) => (
+
+                                              <option
+                                                key={opt}
+                                                value={opt}
+                                              >
+                                                {FULFILLMENT_LABEL[
+                                                  opt
+                                                ] ||
+                                                  opt}
+                                              </option>
+                                            ),
+                                          )
+                                        }
+                                      </select>
+                                    </div>
+                                  )
+                                }
+
+                                {
+                                  cancelled &&
+                                  ln.cancellation_reason && (
+
+                                    <p className="aod-line-reason">
+
+                                      <strong>
+                                        Reason:
+                                      </strong>
+
+                                      {" "}
+
+                                      {ln.cancellation_reason}
+                                    </p>
+                                  )
+                                }
+                              </div>
+                            </td>
+
+                            <td className="aod-num">
+                              {hasRefund
+                                ? (
+
+                                  <span className="aod-num--refund">
+                                    ₹
+                                    {formatMoney(
+                                      ln.refund_amount,
+                                    )}
+                                  </span>
+                                )
+                                : "—"}
                             </td>
                           </tr>
                         );
@@ -1438,6 +1539,62 @@ export default function AdminOrderDetail() {
                     )
                   }
                 </tbody>
+
+                <tfoot>
+
+                  <tr className="aod-items-foot">
+
+                    <td>
+                      Total
+                    </td>
+
+                    <td className="aod-num">
+                      <strong>
+                        ₹
+                        {formatMoney(
+                          itemTotals.price,
+                        )}
+                      </strong>
+                    </td>
+
+                    <td className="aod-num">
+                      {itemTotals.coupon > 0
+                        ? (
+
+                          <span className="aod-num--deduct">
+                            −₹
+                            {formatMoney(
+                              itemTotals.coupon,
+                            )}
+                          </span>
+                        )
+                        : "—"}
+                    </td>
+
+                    <td className="aod-num aod-mono">
+                      ₹
+                      {formatMoney(
+                        itemTotals.tax,
+                      )}
+                    </td>
+
+                    <td />
+
+                    <td className="aod-num">
+                      {itemTotals.refund > 0
+                        ? (
+
+                          <span className="aod-num--refund">
+                            ₹
+                            {formatMoney(
+                              itemTotals.refund,
+                            )}
+                          </span>
+                        )
+                        : "—"}
+                    </td>
+                  </tr>
+                </tfoot>
               </table>
             </div>
           </div>
@@ -1646,16 +1803,147 @@ export default function AdminOrderDetail() {
                 </strong>
               </div>
 
+            </div>
+          </div>
+
+          {
+            refundedNum > 0 && (
+
+              <div className="aod-side-card">
+
+                <h3>
+                  Refund summary
+                </h3>
+
+                <div className="aod-summary-rows">
+
+                  <div className="aod-summary-row">
+
+                    <span>
+                      Total refund amount
+                    </span>
+
+                    <span className="aod-num--refund">
+                      ₹
+                      {formatMoney(
+                        refundedNum,
+                      )}
+                    </span>
+                  </div>
+
+                  <div className="aod-summary-row">
+
+                    <span>
+                      Refund status
+                    </span>
+
+                    <span>
+                      <span className={`aod-pill ${
+                        order.payment_status === "refunded"
+                          ? "aod-pill--delivered"
+                          : "aod-pill--ofd"
+                      }`}
+                      >
+                        {order.payment_status === "refunded"
+                          ? "Refunded"
+                          : "Partially refunded"}
+                      </span>
+                    </span>
+                  </div>
+
+                  {
+                    cancelledCount > 0 && (
+
+                      <div className="aod-summary-row aod-summary-row--muted">
+
+                        <span>
+                          Cancelled items
+                        </span>
+
+                        <span>
+                          {cancelledCount}
+                        </span>
+                      </div>
+                    )
+                  }
+                </div>
+
+                {
+                  refundTxns.length > 0 && (
+
+                    <ul className="aod-refund-txns">
+
+                      {
+                        refundTxns.map(
+                          (
+                            txn,
+                          ) => (
+
+                            <li
+                              key={txn.id}
+                              className="aod-refund-txn"
+                            >
+
+                              <div className="aod-refund-txn-top">
+
+                                <span className="aod-refund-txn-amt">
+                                  ₹
+                                  {formatMoney(
+                                    txn.amount,
+                                  )}
+                                </span>
+
+                                <span className="aod-refund-txn-date">
+                                  {formatPlacedAt(
+                                    txn.created_at,
+                                  )}
+                                </span>
+                              </div>
+
+                              <p className="aod-refund-txn-note">
+                                {txn.reference_note ||
+                                  txn.reason_label}
+                              </p>
+                            </li>
+                          ),
+                        )
+                      }
+                    </ul>
+                  )
+                }
+              </div>
+            )
+          }
+
+          <div className="aod-side-card">
+
+            <h3>
+              Remaining order value
+            </h3>
+
+            <div className="aod-summary-rows">
+
+              <div className="aod-summary-row">
+
+                <span>
+                  Total paid
+                </span>
+
+                <span>
+                  ₹
+                  {formatMoney(
+                    originalPaidNum,
+                  )}
+                </span>
+              </div>
+
               {
                 refundedNum > 0 && (
 
                   <div className="aod-summary-row aod-summary-row--deduct">
 
                     <span>
-                      Refunded
-                      {cancelledCount > 0
-                        ? ` (${cancelledCount} cancelled)`
-                        : ""}
+                      Total refund
                     </span>
 
                     <span>
@@ -1667,7 +1955,26 @@ export default function AdminOrderDetail() {
                   </div>
                 )
               }
+
+              <div className="aod-summary-total">
+
+                <span>
+                  REMAINING
+                </span>
+
+                <strong>
+                  ₹
+                  {formatMoney(
+                    remainingValueNum,
+                  )}
+                </strong>
+              </div>
             </div>
+
+            <p className="aod-remaining-note">
+              This is the value retained for the items still active
+              in this order.
+            </p>
           </div>
         </aside>
       </div>

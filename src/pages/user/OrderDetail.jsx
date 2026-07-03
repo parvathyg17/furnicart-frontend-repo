@@ -10,6 +10,7 @@ import OrderShippingAddress from "../../features/orders/components/OrderShipping
 import OrderPaymentMethodCard from "../../features/orders/components/OrderPaymentMethodCard.jsx";
 import OrderItemsList from "../../features/orders/components/OrderItemsList.jsx";
 import OrderPricing from "../../features/orders/components/OrderPricing.jsx";
+import OrderRefundSummary from "../../features/orders/components/OrderRefundSummary.jsx";
 import OrderDetailToolbar from "../../features/orders/components/OrderDetailToolbar.jsx";
 import CancelOrderModal from "../../features/orders/components/CancelOrderModal.jsx";
 import ReturnRequestModal from "../../features/orders/components/ReturnRequestModal.jsx";
@@ -102,6 +103,8 @@ export default function OrderDetail() {
                   <OrderPaymentMethodCard order={order} />
                 </div>
 
+                <OrderRefundSummary order={order} />
+
                 <div className="odl-summary-card">
 
                   <div className="odl-summary-head">
@@ -143,6 +146,7 @@ export default function OrderDetail() {
                 cancelModalError={cancelModalError}
                 onClose={closeCancelModal}
                 onConfirm={submitCancel}
+                order={order}
               />
 
               <ReturnRequestModal
@@ -153,6 +157,7 @@ export default function OrderDetail() {
                 returnModalError={returnModalError}
                 onClose={closeReturnModal}
                 onSubmit={submitReturn}
+                order={order}
               />
             </>
           ) : null

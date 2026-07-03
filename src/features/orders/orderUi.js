@@ -14,6 +14,57 @@ export const PAYMENT_STATUS_LABELS = {
   partially_refunded: "Partially refunded",
 };
 
+export const DELIVERY_CHARGE_NON_REFUNDABLE_NOTE =
+  "Delivery charges are not refundable on partial cancellations or returns.";
+
+export function orderHasPaidDeliveryCharge(
+  order,
+) {
+
+  return Number(
+    order?.shipping_total ?? 0,
+  ) > 0;
+}
+
+/**
+ * Full-order cancellations refund the entire grand total, including shipping.
+ * For partial cancellations and returns, the delivery charge is retained.
+ */
+export function showDeliveryChargeNonRefundableNote(
+  order,
+  {
+    refundSummary = false,
+  } = {},
+) {
+
+  if (
+    !orderHasPaidDeliveryCharge(
+      order,
+    )
+  ) {
+
+    return false;
+  }
+
+  if (
+    refundSummary
+  ) {
+
+    if (
+      Number(
+        order?.refunded_total ?? 0,
+      ) <= 0
+    ) {
+
+      return false;
+    }
+
+    return order.status !== "cancelled";
+  }
+
+  return true;
+}
+
 /**
  * Extra payment line for the customer UI. COD orders stay ``pending`` until
  * delivery — showing raw ``pending`` looks like an error, so we omit it.

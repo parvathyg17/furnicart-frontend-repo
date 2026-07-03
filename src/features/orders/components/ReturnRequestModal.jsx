@@ -1,5 +1,10 @@
 import Modal from "../../../components/common/Modal.jsx";
 
+import {
+  DELIVERY_CHARGE_NON_REFUNDABLE_NOTE,
+  orderHasPaidDeliveryCharge,
+} from "../orderUi.js";
+
 export default function ReturnRequestModal(
   {
     open,
@@ -9,6 +14,7 @@ export default function ReturnRequestModal(
     returnModalError,
     onClose,
     onSubmit,
+    order,
   },
 ) {
 
@@ -33,6 +39,17 @@ export default function ReturnRequestModal(
         Returns require a reason. An administrator will review your request
         before stock is adjusted.
       </p>
+
+      {
+        orderHasPaidDeliveryCharge(
+          order,
+        ) && (
+
+          <p className="order-cancel-dialog-policy">
+            {DELIVERY_CHARGE_NON_REFUNDABLE_NOTE}
+          </p>
+        )
+      }
 
       <label
         className="order-cancel-label"

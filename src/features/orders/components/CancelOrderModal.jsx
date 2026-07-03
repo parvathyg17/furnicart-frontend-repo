@@ -1,5 +1,10 @@
 import Modal from "../../../components/common/Modal.jsx";
 
+import {
+  DELIVERY_CHARGE_NON_REFUNDABLE_NOTE,
+  orderHasPaidDeliveryCharge,
+} from "../orderUi.js";
+
 export default function CancelOrderModal(
   {
     open,
@@ -10,6 +15,7 @@ export default function CancelOrderModal(
     cancelModalError,
     onClose,
     onConfirm,
+    order,
   },
 ) {
 
@@ -43,6 +49,18 @@ export default function CancelOrderModal(
             : "Stock for this item will be restored. If it is your last active item, the whole order will be cancelled."
         }
       </p>
+
+      {
+        orderHasPaidDeliveryCharge(
+          order,
+        ) &&
+        cancelTarget?.type === "line" && (
+
+          <p className="order-cancel-dialog-policy">
+            {DELIVERY_CHARGE_NON_REFUNDABLE_NOTE}
+          </p>
+        )
+      }
 
       <label
         className="order-cancel-label"

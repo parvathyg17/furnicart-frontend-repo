@@ -61,6 +61,12 @@ export default function OrderItemsList(
 
             const trackingOpen = trackingLineId === line.id;
 
+            const refundAmt = Number(
+              line.refund_amount ?? 0,
+            );
+
+            const hasRefund = refundAmt > 0;
+
             return (
 
               <div
@@ -175,6 +181,18 @@ export default function OrderItemsList(
                         ₹
                         {formatMoney(line.line_total)}
                       </strong>
+
+                      {
+                        hasRefund && (
+
+                          <span className="odl-line-refund">
+                            Refunded ₹
+                            {formatMoney(
+                              refundAmt,
+                            )}
+                          </span>
+                        )
+                      }
                     </div>
 
                     <div className="odl-line-actions">

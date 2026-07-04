@@ -25,7 +25,7 @@ export default function CheckoutPageHeader() {
         className="checkout-back"
         to="/cart"
       >
-        Back to bag
+        Back to cart
       </Link>
     </header>
   );

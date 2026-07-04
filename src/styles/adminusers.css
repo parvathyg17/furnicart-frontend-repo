@@ -23,7 +23,7 @@ HEADER
 
   align-items: flex-start;
 
-  margin-bottom: 32px;
+  margin-bottom: 1rem;
 }
 
 .users-breadcrumb {
@@ -43,9 +43,9 @@ HEADER
 
 .users-header h1 {
 
-  font-size: 56px;
+  font-size: clamp(1.75rem, 3.5vw, 2.35rem);
 
-  line-height: 1;
+  line-height: 1.05;
 
   color: #241711;
 
@@ -62,12 +62,12 @@ CARD
 
   background: white;
 
-  border-radius: 32px;
+  border-radius: 12px;
 
-  padding: 32px;
+  padding: clamp(0.85rem, 1.5vw, 1.15rem);
 
   box-shadow:
-    0 10px 30px rgba(0,0,0,0.04);
+    0 4px 16px rgba(0,0,0,0.04);
 }
 
 /* ==========================================
@@ -134,18 +134,20 @@ TABLE
 
 .users-table-wrapper {
 
-  border-radius: 24px;
+  border-radius: 12px;
 
-  overflow: hidden;
+  overflow-x: auto;
+
+  min-width: 0;
 
   border: 1px solid #f0ebe6;
 }
 
 .users-table-header {
 
-  height: 64px;
+  height: 52px;
 
-  padding: 0 28px;
+  padding: 0 0.85rem;
 
   background: #f7f4f0;
 
@@ -420,12 +422,12 @@ RESPONSIVE
 
   .admin-users-page {
 
-    padding: 24px;
+    padding: 0;
   }
 
   .users-header h1 {
 
-    font-size: 42px;
+    font-size: 1.75rem;
   }
 
   .users-search-box {
@@ -441,7 +443,7 @@ RESPONSIVE
   .users-table-header,
   .users-row {
 
-    min-width: 850px;
+    min-width: 680px;
   }
 
   .users-footer {

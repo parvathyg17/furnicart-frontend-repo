@@ -20,30 +20,6 @@ export default function LineItemTracking(
   },
 ) {
 
-  if (
-    line.status === "cancelled"
-  ) {
-
-    return (
-
-      <div className="odl-mini-track odl-mini-track--muted">
-
-        <p style={{ margin: 0, fontSize: "0.88rem", color: "#991b1b" }}>
-          This line item was cancelled.
-        </p>
-
-        {
-          line.cancellation_reason && (
-
-            <p className="odl-mini-track-note">
-              {line.cancellation_reason}
-            </p>
-          )
-        }
-      </div>
-    );
-  }
-
   const fs = line.fulfillment_status || "pending";
 
   if (
@@ -52,22 +28,19 @@ export default function LineItemTracking(
 
     return (
 
-      <div>
+      <div className="odl-mini-track odl-mini-track--returned">
 
-        <div className="odl-mini-track">
+        <p>
+          This item was marked
+          {" "}
 
-          <p style={{ margin: 0, fontSize: "0.82rem", color: "#5c534a" }}>
-            This item was marked
-            {" "}
+          <strong>
+            returned
+          </strong>
 
-            <strong>
-              returned
-            </strong>
-
-            {" "}
-            after delivery.
-          </p>
-        </div>
+          {" "}
+          after delivery.
+        </p>
       </div>
     );
   }

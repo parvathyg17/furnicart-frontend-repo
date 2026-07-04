@@ -19,9 +19,9 @@ HEADER
 
   align-items: flex-start;
 
-  gap: 20px;
+  gap: 0.85rem;
 
-  margin-bottom: 32px;
+  margin-bottom: 1rem;
 }
 
 .breadcrumb {
@@ -41,9 +41,9 @@ HEADER
 
 .categories-topbar h1 {
 
-  font-size: 56px;
+  font-size: clamp(1.75rem, 3.5vw, 2.35rem);
 
-  line-height: 1;
+  line-height: 1.05;
 
   color: #1f130d;
 
@@ -96,12 +96,12 @@ CARD
 
   background: white;
 
-  border-radius: 32px;
+  border-radius: 12px;
 
-  padding: 32px;
+  padding: clamp(0.85rem, 1.5vw, 1.15rem);
 
   box-shadow:
-    0 10px 30px rgba(0,0,0,0.04);
+    0 4px 16px rgba(0,0,0,0.04);
 }
 
 /* ==========================================
@@ -260,18 +260,20 @@ TABLE
 
 .category-table {
 
-  border-radius: 24px;
+  border-radius: 12px;
 
-  overflow: hidden;
+  overflow-x: auto;
+
+  min-width: 0;
 
   border: 1px solid #f0ebe6;
 }
 
 .category-table-header {
 
-  height: 64px;
+  height: 52px;
 
-  padding: 0 28px;
+  padding: 0 0.85rem;
 
   background: #f7f4f0;
 
@@ -673,7 +675,7 @@ RESPONSIVE
   .category-table-header,
   .category-row {
 
-    min-width: 900px;
+    min-width: 680px;
   }
 }
 

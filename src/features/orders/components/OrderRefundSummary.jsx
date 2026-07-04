@@ -1,12 +1,16 @@
 import {
-  formatMoney,
-} from "../../../utils/currency.js";
+  Wallet,
+} from "lucide-react";
 
 import {
-  PAYMENT_STATUS_LABELS,
-  DELIVERY_CHARGE_NON_REFUNDABLE_NOTE,
-  showDeliveryChargeNonRefundableNote,
+  codReturnRefundNote,
+  codReturnRefundStatusLabel,
+  isCodOrder,
 } from "../orderUi.js";
+
+import {
+  formatMoney,
+} from "../../../utils/currency.js";
 
 function formatRefundDate(
   iso,
@@ -61,55 +65,48 @@ export default function OrderRefundSummary(
     return null;
   }
 
-  const cancelRefundNum = Number(
-    order.cancel_refund_total ?? 0,
-  );
-
-  const returnRefundNum = Number(
-    order.return_refund_total ?? 0,
-  );
-
-  const originalPaidNum = Number(
-    order.original_paid ?? order.grand_total,
-  );
-
-  const remainingValueNum = Number(
-    order.remaining_value ?? order.grand_total,
-  );
-
   const refundTxns = order.refund_transactions || [];
 
-  const cancelledCount = (order.lines || []).filter(
-    (line) => line.status === "cancelled",
-  ).length;
+  const codRefundStatus = codReturnRefundStatusLabel(
+    order,
+  );
 
-  const refundStatusLabel =
-    order.payment_status === "refunded"
-      ? PAYMENT_STATUS_LABELS.refunded
-      : PAYMENT_STATUS_LABELS.partially_refunded;
+  const codRefundNote = codReturnRefundNote(
+    order,
+    refundedNum,
+  );
 
-  const refundStatusClass =
-    order.payment_status === "refunded"
-      ? "odl-refund-pill--full"
-      : "odl-refund-pill--partial";
+  const latestTxn = refundTxns.length > 0
+    ? refundTxns[refundTxns.length - 1]
+    : null;
+
+  const refundDate = latestTxn
+    ? formatRefundDate(
+        latestTxn.created_at,
+      )
+    : order.cancelled_at
+      ? formatRefundDate(
+          order.cancelled_at,
+        )
+      : "—";
 
   return (
 
-    <div className="odl-refund-card">
+    <div className="odl-refund-banner">
 
-      <h3>
+      <h3 className="odl-refund-banner-title">
         Refund summary
       </h3>
 
-      <div className="odl-refund-rows">
+      <div className="odl-refund-banner-grid">
 
-        <div className="odl-refund-row">
+        <div className="odl-refund-banner-col">
 
-          <span>
-            Total refund amount
+          <span className="odl-refund-banner-label">
+            Refund amount
           </span>
 
-          <span className="odl-refund-amt">
+          <span className="odl-refund-banner-amount">
             ₹
             {formatMoney(
               refundedNum,
@@ -117,180 +114,46 @@ export default function OrderRefundSummary(
           </span>
         </div>
 
-        <div className="odl-refund-row">
+        <div className="odl-refund-banner-col">
 
-          <span>
-            Refund status
+          <span className="odl-refund-banner-label">
+            Refund method
           </span>
 
-          <span className={`odl-refund-pill ${refundStatusClass}`}>
-            {refundStatusLabel}
-          </span>
-        </div>
-
-        {
-          cancelRefundNum > 0 && (
-
-            <div className="odl-refund-row odl-refund-row--muted">
-
-              <span>
-                Cancellation refunds
-              </span>
-
-              <span>
-                ₹
-                {formatMoney(
-                  cancelRefundNum,
-                )}
-              </span>
-            </div>
-          )
-        }
-
-        {
-          returnRefundNum > 0 && (
-
-            <div className="odl-refund-row odl-refund-row--muted">
-
-              <span>
-                Return refunds
-              </span>
-
-              <span>
-                ₹
-                {formatMoney(
-                  returnRefundNum,
-                )}
-              </span>
-            </div>
-          )
-        }
-
-        {
-          cancelledCount > 0 && (
-
-            <div className="odl-refund-row odl-refund-row--muted">
-
-              <span>
-                Cancelled items
-              </span>
-
-              <span>
-                {cancelledCount}
-              </span>
-            </div>
-          )
-        }
-      </div>
-
-      {
-        refundTxns.length > 0 && (
-
-          <ul className="odl-refund-txns">
+          <span className="odl-refund-banner-method">
 
             {
-              refundTxns.map(
-                (txn) => (
-
-                  <li
-                    key={txn.id}
-                    className="odl-refund-txn"
-                  >
-
-                    <div className="odl-refund-txn-top">
-
-                      <span className="odl-refund-txn-amt">
-                        ₹
-                        {formatMoney(
-                          txn.amount,
-                        )}
-                      </span>
-
-                      <span className="odl-refund-txn-date">
-                        {formatRefundDate(
-                          txn.created_at,
-                        )}
-                      </span>
-                    </div>
-
-                    <p className="odl-refund-txn-note">
-                      {txn.reference_note ||
-                        txn.reason_label}
-                    </p>
-                  </li>
-                ),
+              isCodOrder(
+                order,
               )
+                ? codRefundStatus || "Refunded"
+                : (
+                  <>
+                    <Wallet size={16} aria-hidden />
+                    Refunded to wallet
+                  </>
+                )
             }
-          </ul>
-        )
-      }
-
-      <div className="odl-refund-divider" />
-
-      <h3>
-        Remaining order value
-      </h3>
-
-      <div className="odl-refund-rows">
-
-        <div className="odl-refund-row">
-
-          <span>
-            Total paid
-          </span>
-
-          <span>
-            ₹
-            {formatMoney(
-              originalPaidNum,
-            )}
           </span>
         </div>
 
-        <div className="odl-refund-row odl-refund-row--deduct">
+        <div className="odl-refund-banner-col">
 
-          <span>
-            Total refund
+          <span className="odl-refund-banner-label">
+            Refund date
           </span>
 
-          <span>
-            −₹
-            {formatMoney(
-              refundedNum,
-            )}
+          <span className="odl-refund-banner-date">
+            {refundDate}
           </span>
-        </div>
-
-        <div className="odl-refund-row odl-refund-row--total">
-
-          <span>
-            Remaining value
-          </span>
-
-          <strong>
-            ₹
-            {formatMoney(
-              remainingValueNum,
-            )}
-          </strong>
         </div>
       </div>
 
-      <p className="odl-refund-note">
-        Refunds are credited to your FurniCart wallet and can be used on future
-        orders.
-      </p>
-
       {
-        showDeliveryChargeNonRefundableNote(
-          order,
-          {
-            refundSummary: true,
-          },
-        ) && (
+        codRefundNote && (
 
-          <p className="odl-refund-note odl-refund-note--policy">
-            {DELIVERY_CHARGE_NON_REFUNDABLE_NOTE}
+          <p className="odl-refund-banner-cod-note">
+            {codRefundNote}
           </p>
         )
       }

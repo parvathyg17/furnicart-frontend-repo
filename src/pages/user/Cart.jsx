@@ -375,7 +375,7 @@ export default function Cart() {
 
             <h1 className="cart-bag-page-title artisan-font-serif">
 
-              Shopping Bag
+              Cart
             </h1>
              
 
@@ -432,7 +432,7 @@ export default function Cart() {
 
               <p className="cart-bag-empty-title artisan-font-serif">
 
-                Your bag is empty
+                Your cart is empty
               </p>
 
               <p className="cart-bag-muted">

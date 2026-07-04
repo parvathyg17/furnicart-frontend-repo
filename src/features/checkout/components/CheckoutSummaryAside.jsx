@@ -413,7 +413,7 @@ export default function CheckoutSummaryAside(
         !cartData.can_checkout && (
 
           <p className="cart-bag-summary-note">
-            Some items are unavailable or exceed stock. Update your bag and try
+            Some items are unavailable or exceed stock. Update your cart and try
             again.
           </p>
         )

@@ -18,12 +18,15 @@ import {
   Check,
   Package,
   Truck,
-  Circle,
+  ClipboardList,
+  Home,
+  ChevronRight,
 } from "lucide-react";
 
 import {
   fetchAdminOrder,
   patchAdminLineFulfillment,
+  patchAdminOrderFulfillment,
   postAdminCancelOrder,
 } from "../../features/admin/adminAPI";
 
@@ -34,6 +37,11 @@ import {
 import {
   stableStringify,
 } from "../../utils/stableStringify.js";
+
+import {
+  codReturnRefundNote,
+  codReturnRefundStatusLabel,
+} from "../../features/orders/orderUi.js";
 
 const IMAGE_BASE = (
   import.meta.env.VITE_API_URL || ""
@@ -53,18 +61,26 @@ const TRACKER_STEPS = [
   {
     key: "pending",
     label: "PENDING",
+    tone: "amber",
+    Icon: ClipboardList,
   },
   {
     key: "shipped",
     label: "SHIPPED",
+    tone: "blue",
+    Icon: Truck,
   },
   {
     key: "out_for_delivery",
     label: "OUT FOR DELIVERY",
+    tone: "indigo",
+    Icon: Package,
   },
   {
     key: "delivered",
     label: "DELIVERED",
+    tone: "green",
+    Icon: Check,
   },
 ];
 
@@ -322,23 +338,7 @@ function resolveTracker(
   };
 }
 
-function barFilled(
-  barIndex,
-  phase,
-  allDelivered,
-) {
-
-  if (
-    allDelivered
-  ) {
-
-    return barIndex < 3;
-  }
-
-  return barIndex < phase;
-}
-
-function stepDotKind(
+function stepState(
   stepIndex,
   {
     cancelled,
@@ -376,81 +376,6 @@ function stepDotKind(
   }
 
   return "upcoming";
-}
-
-function stepDotIcon(
-  kind,
-  stepIndex,
-) {
-
-  if (
-    kind === "done"
-  ) {
-
-    return (
-      <Check
-        size={16}
-        strokeWidth={2.5}
-        aria-hidden
-      />
-    );
-  }
-
-  if (
-    kind === "void"
-  ) {
-
-    return (
-      <Circle
-        size={16}
-        aria-hidden
-      />
-    );
-  }
-
-  if (
-    kind === "current"
-  ) {
-
-    if (
-      stepIndex === 0 ||
-      stepIndex === 3
-    ) {
-
-      return (
-        <Package
-          size={16}
-          aria-hidden
-        />
-      );
-    }
-
-    return (
-      <Truck
-        size={16}
-        aria-hidden
-      />
-    );
-  }
-
-  if (
-    stepIndex === 3
-  ) {
-
-    return (
-      <Package
-        size={16}
-        aria-hidden
-      />
-    );
-  }
-
-  return (
-    <Circle
-      size={16}
-      aria-hidden
-    />
-  );
 }
 
 function paymentSummary(
@@ -571,6 +496,28 @@ function canAdminCancelEntireOrder(
   );
 }
 
+function bulkUpdatableLines(
+  order,
+) {
+
+  if (
+    !order ||
+    order.status === "cancelled"
+  ) {
+
+    return [];
+  }
+
+  return (order.lines || []).filter(
+    (
+      ln,
+    ) =>
+      ln.status === "active"
+      && ln.fulfillment_status !== "returned"
+      && ln.fulfillment_status !== "delivered",
+  );
+}
+
 export default function AdminOrderDetail() {
 
   const {
@@ -596,6 +543,20 @@ export default function AdminOrderDetail() {
     setBusyLine,
   ] = useState(
     null,
+  );
+
+  const [
+    bulkFulfillmentStatus,
+    setBulkFulfillmentStatus,
+  ] = useState(
+    "pending",
+  );
+
+  const [
+    bulkFulfillmentBusy,
+    setBulkFulfillmentBusy,
+  ] = useState(
+    false,
   );
 
   const [
@@ -739,6 +700,26 @@ export default function AdminOrderDetail() {
     ],
   );
 
+  const returnedCount = useMemo(
+    () =>
+      (order?.lines || []).filter(
+        (ln) =>
+          ln.fulfillment_status === "returned",
+      ).length,
+    [
+      order,
+    ],
+  );
+
+  const codRefundStatus = codReturnRefundStatusLabel(
+    order,
+  );
+
+  const codRefundNote = codReturnRefundNote(
+    order,
+    order?.return_refund_total ?? order?.refunded_total,
+  );
+
   const onFulfillmentChange = async (
     lineId,
     value,
@@ -801,6 +782,68 @@ export default function AdminOrderDetail() {
 
       setBusyLine(
         null,
+      );
+    }
+  };
+
+  const onBulkFulfillmentApply = async () => {
+
+    if (
+      !order?.order_number
+    ) {
+
+      return;
+    }
+
+    setBulkFulfillmentBusy(
+      true,
+    );
+
+    setErr(
+      null,
+    );
+
+    try {
+
+      const data = await patchAdminOrderFulfillment(
+        order.order_number,
+        bulkFulfillmentStatus,
+      );
+
+      lastOrderSigRef.current =
+        stableStringify(
+          data,
+        );
+
+      setOrder(
+        data,
+      );
+    } catch (e) {
+
+      const msg = (
+
+        e.response?.data &&
+        (
+          e.response.data.detail ||
+          e.response.data.fulfillment_status?.[
+            0
+          ] ||
+          JSON.stringify(
+            e.response.data,
+          )
+        )
+      ) ||
+        "Bulk update failed.";
+
+      setErr(
+        typeof msg === "string"
+          ? msg
+          : "Bulk update failed.",
+      );
+    } finally {
+
+      setBulkFulfillmentBusy(
+        false,
       );
     }
   };
@@ -928,16 +971,6 @@ export default function AdminOrderDetail() {
     order,
   );
 
-  const couponDiscountNum = Number(
-    order.discount_total,
-  ) ||
-    0;
-
-  const offerDiscountNum = Number(
-    order.offer_discount_total,
-  ) ||
-    0;
-
   const refundedNum = Number(
     order.refunded_total,
   ) ||
@@ -976,6 +1009,11 @@ export default function AdminOrderDetail() {
       ) ||
         0;
 
+      acc.offer += Number(
+        ln.discount_amount,
+      ) ||
+        0;
+
       acc.refund += Number(
         ln.refund_amount,
       ) ||
@@ -987,130 +1025,153 @@ export default function AdminOrderDetail() {
       price: 0,
       coupon: 0,
       tax: 0,
+      offer: 0,
       refund: 0,
     },
   );
 
-  const shipNum = Number(
-    order.shipping_total,
-  ) ||
-    0;
+  // Immutable original order breakdown, reconstructed from per-line values
+  // (line_total / tax_share / coupon_share never change on cancel/return) and
+  // the immutable original_paid. These stay constant even after cancellations
+  // or returns, mirroring how real e-commerce keeps the placed-order summary.
+  const origItemsNet = itemTotals.price;
+
+  const origOfferNum = itemTotals.offer;
+
+  const origItemsGross = origItemsNet + origOfferNum;
+
+  const origTaxNum = itemTotals.tax;
+
+  const origCouponNum = itemTotals.coupon;
+
+  const origShippingNum = Math.max(
+    0,
+    Math.round(
+      (originalPaidNum
+        - origItemsNet
+        - origTaxNum
+        + origCouponNum) * 100,
+    ) / 100,
+  );
 
   const showAdminCancelOrder = canAdminCancelEntireOrder(
     order,
   );
 
+  const updatableFulfillmentLines = bulkUpdatableLines(
+    order,
+  );
+
+  const showBulkFulfillment = updatableFulfillmentLines.length > 0;
+
   return (
 
     <div className="aod-page">
 
-      <p className="aod-breadcrumb">
+      <nav className="aod-breadcrumb" aria-label="Breadcrumb">
 
-        <Link to="/admin/orders">
+        <Link to="/admin/orders" className="aod-breadcrumb-home">
+          <Home size={13} aria-hidden />
           Orders
         </Link>
 
-        <span>
-          /
+        <ChevronRight size={13} aria-hidden className="aod-breadcrumb-sep" />
+
+        <span className="aod-breadcrumb-current">
+          Order detail
         </span>
-
-        Order detail
-      </p>
-
-      <h1 className="aod-page-title">
-        Order
-        {" "}
-
-        <span style={{ color: "var(--ao-brown)" }}>
-          #
-          {order.order_number}
-        </span>
-      </h1>
-
-      <p className="aod-placed-line">
-
-        <span style={{ fontWeight: 600, color: "var(--ao-ink)" }}>
-          {ORDER_STATUS_LABEL[
-            order.status
-          ] ||
-            order.status}
-        </span>
-
-        {" · "}
-
-        Placed
-        {" "}
-
-        {formatPlacedAt(
-          order.placed_at,
-        )}
-      </p>
-
-      {
-        showAdminCancelOrder && (
-
-          <p style={{ margin: "0 0 1rem" }}>
-
-            <button
-              type="button"
-              className="ao-btn-ghost"
-              style={{
-                borderColor: "#b45309",
-                color: "#b45309",
-              }}
-              onClick={() =>
-                setCancelModalOpen(
-                  true,
-                )
-              }
-            >
-              Cancel entire order
-            </button>
-          </p>
-        )
-      }
+      </nav>
 
       {
         err && (
 
           <div
-            className="ao-error"
+            className="ao-error aod-inline-error"
             role="alert"
-            style={{ marginBottom: "1rem" }}
           >
             {err}
           </div>
         )
       }
 
-      <div
-        className={
-          `aod-tracker${
-            tracker.cancelled
-              ? " aod-tracker--cancelled"
-              : ""
-          }`
-        }
-      >
+      <div className="aod-hero">
 
-        {
-          tracker.cancelled &&
-          order.cancellation_reason && (
+        <div className="aod-hero-left">
 
-            <p className="aod-tracker-cancel-note">
-              <strong>
-                Cancelled.
-              </strong>
+          <h1 className="aod-hero-title">
+            Order #{order.order_number}
+          </h1>
 
-              {" "}
+          <p className="aod-hero-status">
 
-              {order.cancellation_reason}
-            </p>
-          )
-        }
+            <span
+              className={`aod-status-word aod-status-word--${
+                order.status === "delivered"
+                  ? "green"
+                  : order.status === "cancelled"
+                    ? "red"
+                    : String(order.status).startsWith("partially")
+                      ? "amber"
+                      : "slate"
+              }`}
+            >
+              {ORDER_STATUS_LABEL[
+                order.status
+              ] ||
+                order.status}
+            </span>
+
+            <span className="aod-status-sep">•</span>
+
+            Placed
+            {" "}
+            {formatPlacedAt(
+              order.placed_at,
+            )}
+          </p>
+
+          {
+            showAdminCancelOrder && (
+
+              <button
+                type="button"
+                className="aod-cancel-order-btn"
+                onClick={() =>
+                  setCancelModalOpen(
+                    true,
+                  )
+                }
+              >
+                Cancel entire order
+              </button>
+            )
+          }
+
+          {
+            tracker.cancelled &&
+            order.cancellation_reason && (
+
+              <p className="aod-tracker-cancel-note">
+                <strong>
+                  Cancelled.
+                </strong>
+
+                {" "}
+
+                {order.cancellation_reason}
+              </p>
+            )
+          }
+        </div>
 
         <div
-          className="aod-track-flex"
+          className={
+            `aod-hero-tracker${
+              tracker.cancelled
+                ? " aod-hero-tracker--cancelled"
+                : ""
+            }`
+          }
           role="list"
           aria-label="Order progress"
         >
@@ -1122,38 +1183,31 @@ export default function AdminOrderDetail() {
                 i,
               ) => {
 
-                const kind = stepDotKind(
+                const state = stepState(
                   i,
                   tracker,
                 );
 
-                const labelClass = [
-                  "aod-step-label",
-                  kind === "current"
-                    ? "aod-step-label--current"
-                    : "",
-                  kind === "done"
-                    ? "aod-step-label--done"
-                    : "",
-                ].filter(
-                  Boolean,
-                ).join(
-                  " ",
-                );
+                const reached =
+                  state === "done" ||
+                  state === "current";
+
+                const StepIcon = step.Icon;
 
                 const dotClass = [
-                  "aod-step-dot",
-                  kind === "done"
-                    ? "aod-step-dot--done"
+                  "aod-tdot",
+                  `aod-tdot--${step.tone}`,
+                  reached
+                    ? "aod-tdot--reached"
+                    : "aod-tdot--upcoming",
+                  state === "current"
+                    ? "aod-tdot--current"
                     : "",
-                  kind === "current"
-                    ? "aod-step-dot--current"
+                  state === "void"
+                    ? "aod-tdot--void"
                     : "",
-                  kind === "upcoming"
-                    ? "aod-step-dot--upcoming"
-                    : "",
-                  kind === "void"
-                    ? "aod-step-dot--void"
+                  i === 3 && reached
+                    ? "aod-tdot--filled"
                     : "",
                 ].filter(
                   Boolean,
@@ -1162,8 +1216,6 @@ export default function AdminOrderDetail() {
                 );
 
                 const meta = (
-
-                  kind === "done" &&
                   i === 0 &&
                   order.placed_at
                 )
@@ -1181,13 +1233,9 @@ export default function AdminOrderDetail() {
 
                         <div
                           className={
-                            `aod-track-bar${
-                              barFilled(
-                                i - 1,
-                                tracker.phase,
-                                tracker.allDelivered,
-                              )
-                                ? " aod-track-bar--on"
+                            `aod-tconn${
+                              reached && state !== "void"
+                                ? " aod-tconn--on"
                                 : ""
                             }`
                           }
@@ -1197,25 +1245,31 @@ export default function AdminOrderDetail() {
                     }
 
                     <div
-                      className="aod-track-col"
+                      className="aod-tstep"
                       role="listitem"
                     >
 
                       <div className={dotClass}>
 
-                        {stepDotIcon(
-                          kind,
-                          i,
-                        )}
+                        <StepIcon
+                          size={16}
+                          strokeWidth={2.25}
+                          aria-hidden
+                        />
                       </div>
 
-                      <div className={labelClass}>
+                      <div className="aod-tstep-label">
                         {step.label}
                       </div>
 
-                      <div className="aod-step-meta">
-                        {meta}
-                      </div>
+                      {
+                        meta && (
+
+                          <div className="aod-tstep-meta">
+                            {meta}
+                          </div>
+                        )
+                      }
                     </div>
                   </Fragment>
                 );
@@ -1227,23 +1281,309 @@ export default function AdminOrderDetail() {
 
       <div className="aod-grid">
 
+        <div className="aod-top-row">
+
+        <aside className="aod-aside">
+
+          <div className="aod-side-card aod-customer-card">
+
+            <div className="aod-order-id-row">
+              ORDER ID
+              <strong>
+                #
+                {order.order_number}
+              </strong>
+            </div>
+
+            <div className="aod-customer-row">
+
+              <div className="aod-avatar">
+                {initialsFromEmail(
+                  email,
+                )}
+              </div>
+
+              <div>
+
+                <p className="aod-customer-name">
+                  {displayNameFromEmail(
+                    email,
+                  )}
+                </p>
+
+                <p className="aod-customer-email">
+                  {email || "—"}
+                </p>
+              </div>
+            </div>
+
+            <dl className="aod-kv">
+
+              <dt>
+                Shipping address
+              </dt>
+
+              <dd style={{ whiteSpace: "pre-line" }}>
+                {ship}
+              </dd>
+
+              {
+                order.shipping_phone && (
+
+                  <>
+
+                    <dt>
+                      Phone
+                    </dt>
+
+                    <dd>
+                      {order.shipping_phone}
+                    </dd>
+                  </>
+                )
+              }
+
+              <dt>
+                Payment
+              </dt>
+
+              <dd>
+                {paymentSummary(
+                  order.payment_method,
+                  order.payment_status,
+                )}
+              </dd>
+            </dl>
+          </div>
+        </aside>
+
+          <div className="aod-side-card aod-order-summary-card">
+
+            <h3>
+              Order summary
+            </h3>
+
+            <div className="aod-summary-rows">
+
+              <div className="aod-summary-row">
+
+                <span>
+                  {origOfferNum > 0
+                    ? "Items"
+                    : "Subtotal"}
+                </span>
+
+                <span>
+                  ₹
+                  {formatMoney(
+                    origOfferNum > 0
+                      ? origItemsGross
+                      : origItemsNet,
+                  )}
+                </span>
+              </div>
+
+              {
+                origOfferNum > 0 && (
+
+                  <div className="aod-summary-row aod-summary-row--deduct">
+
+                    <span>
+                      Offer savings
+                    </span>
+
+                    <span>
+                      −₹
+                      {formatMoney(
+                        origOfferNum,
+                      )}
+                    </span>
+                  </div>
+                )
+              }
+
+              {
+                origOfferNum > 0 && (
+
+                  <div className="aod-summary-row">
+
+                    <span>
+                      Subtotal
+                    </span>
+
+                    <span>
+                      ₹
+                      {formatMoney(
+                        origItemsNet,
+                      )}
+                    </span>
+                  </div>
+                )
+              }
+
+              <div className="aod-summary-row aod-summary-row--muted">
+
+                <span>
+                  Shipping
+                </span>
+
+                <span>
+                  {origShippingNum <= 0
+                    ? "FREE"
+                    : `₹${formatMoney(
+                      origShippingNum,
+                    )}`}
+                </span>
+              </div>
+
+              <div className="aod-summary-row">
+
+                <span>
+                  Tax
+                </span>
+
+                <span>
+                  ₹
+                  {formatMoney(
+                    origTaxNum,
+                  )}
+                </span>
+              </div>
+
+              {
+                origCouponNum > 0 && (
+
+                  <div className="aod-summary-row aod-summary-row--deduct">
+
+                    <span>
+                      {order.coupon_code
+                        ? `Coupon (${order.coupon_code})`
+                        : "Coupon"}
+                    </span>
+
+                    <span>
+                      −₹
+                      {formatMoney(
+                        origCouponNum,
+                      )}
+                    </span>
+                  </div>
+                )
+              }
+
+              <div className="aod-summary-total">
+
+                <span>
+                  TOTAL ORDERED VALUE
+                </span>
+
+                <strong>
+                  ₹
+                  {formatMoney(
+                    originalPaidNum,
+                  )}
+                </strong>
+              </div>
+
+            </div>
+
+            <p className="aod-remaining-note">
+              This is the original value of the order when placed. It stays
+              fixed even after cancellations or returns.
+            </p>
+          </div>
+
+        </div>
+
         <div className="aod-items-card">
 
             <div className="aod-card-head">
 
-              <h2>
-                Order items
-              </h2>
+              <div className="aod-card-head-main">
 
-              <span className="aod-item-count">
-                {lines.length}
+                <h2>
+                  Order items
+                </h2>
 
-                {" "}
+                <span className="aod-item-count">
+                  {lines.length}
 
-                {lines.length === 1
-                  ? "ITEM"
-                  : "ITEMS"}
-              </span>
+                  {" "}
+
+                  {lines.length === 1
+                    ? "ITEM"
+                    : "ITEMS"}
+                </span>
+              </div>
+
+              {
+                showBulkFulfillment && (
+
+                  <div className="aod-bulk-fulfill">
+
+                    <label
+                      className="aod-bulk-fulfill-label"
+                      htmlFor="aod-bulk-fulfill-select"
+                    >
+                      Update all items
+                    </label>
+
+                    <select
+                      id="aod-bulk-fulfill-select"
+                      className="aod-bulk-fulfill-select"
+                      value={bulkFulfillmentStatus}
+                      disabled={
+                        bulkFulfillmentBusy ||
+                        Boolean(
+                          busyLine,
+                        )
+                      }
+                      onChange={(e) =>
+                        setBulkFulfillmentStatus(
+                          e.target.value,
+                        )}
+                    >
+
+                      {
+                        FULFILLMENT_OPTIONS.map(
+                          (
+                            opt,
+                          ) => (
+
+                            <option
+                              key={opt}
+                              value={opt}
+                            >
+                              {FULFILLMENT_LABEL[
+                                opt
+                              ] ||
+                                opt}
+                            </option>
+                          ),
+                        )
+                      }
+                    </select>
+
+                    <button
+                      type="button"
+                      className="aod-bulk-fulfill-btn"
+                      disabled={
+                        bulkFulfillmentBusy ||
+                        Boolean(
+                          busyLine,
+                        )
+                      }
+                      onClick={onBulkFulfillmentApply}
+                    >
+                      {
+                        bulkFulfillmentBusy
+                          ? "Updating…"
+                          : "Apply to all"
+                      }
+                    </button>
+                  </div>
+                )
+              }
             </div>
 
             <div className="aod-table-wrap">
@@ -1364,7 +1704,31 @@ export default function AdminOrderDetail() {
 
                                   <p className="aod-variant-line aod-mono">
                                     {ln.sku || "—"}
+                                    {" · Qty "}
+                                    {ln.quantity}
                                   </p>
+
+                                  {
+                                    (
+                                      (ln.cancelled_quantity ?? 0) > 0
+                                      || (ln.returned_quantity ?? 0) > 0
+                                    ) && (
+
+                                      <p className="aod-variant-line-qty">
+                                        {
+                                          (ln.active_quantity ?? ln.quantity) > 0
+                                            ? `${ln.active_quantity ?? ln.quantity} active`
+                                            : "None active"
+                                        }
+                                        {(ln.cancelled_quantity ?? 0) > 0
+                                          ? ` · ${ln.cancelled_quantity} cancelled`
+                                          : ""}
+                                        {(ln.returned_quantity ?? 0) > 0
+                                          ? ` · ${ln.returned_quantity} returned`
+                                          : ""}
+                                      </p>
+                                    )
+                                  }
                                 </div>
                               </div>
                             </td>
@@ -1458,7 +1822,6 @@ export default function AdminOrderDetail() {
                                       <span className={fulfillmentPillClass(
                                         fs,
                                       )}
-                                      style={{ marginBottom: "0.35rem" }}
                                       >
                                         {FULFILLMENT_LABEL[
                                           fs
@@ -1468,7 +1831,10 @@ export default function AdminOrderDetail() {
 
                                       <select
                                         className="aod-fulfill-select"
-                                        disabled={busyLine === ln.id}
+                                        disabled={
+                                          busyLine === ln.id ||
+                                          bulkFulfillmentBusy
+                                        }
                                         value={fs}
                                         aria-label={`Fulfillment for ${ln.product_name}`}
                                         onChange={(e) =>
@@ -1599,321 +1965,142 @@ export default function AdminOrderDetail() {
             </div>
           </div>
 
-        <aside className="aod-aside">
+      </div>
 
-          <div className="aod-side-card">
+      <div className="aod-summary-grid aod-summary-grid--duo">
 
-            <div className="aod-order-id-row">
-              ORDER ID
-              <strong>
-                #
-                {order.order_number}
-              </strong>
-            </div>
-
-            <div className="aod-customer-row">
-
-              <div className="aod-avatar">
-                {initialsFromEmail(
-                  email,
-                )}
-              </div>
-
-              <div>
-
-                <p className="aod-customer-name">
-                  {displayNameFromEmail(
-                    email,
-                  )}
-                </p>
-
-                <p className="aod-customer-email">
-                  {email || "—"}
-                </p>
-              </div>
-            </div>
-
-            <dl className="aod-kv">
-
-              <dt>
-                Shipping address
-              </dt>
-
-              <dd style={{ whiteSpace: "pre-line" }}>
-                {ship}
-              </dd>
-
-              {
-                order.shipping_phone && (
-
-                  <>
-
-                    <dt>
-                      Phone
-                    </dt>
-
-                    <dd>
-                      {order.shipping_phone}
-                    </dd>
-                  </>
-                )
-              }
-
-              <dt>
-                Payment
-              </dt>
-
-              <dd>
-                {paymentSummary(
-                  order.payment_method,
-                  order.payment_status,
-                )}
-              </dd>
-            </dl>
-          </div>
-
-          <div className="aod-side-card">
+          <div className="aod-side-card aod-refund-card">
 
             <h3>
-              Order summary
+              Refund summary
             </h3>
 
-            <div className="aod-summary-rows">
+            <div className="aod-refund-stats">
 
-              <div className="aod-summary-row">
+              <div className="aod-refund-stat">
 
-                <span>
-                  {offerDiscountNum > 0
-                    ? "Items"
-                    : "Subtotal"}
+                <span className="aod-refund-stat-label">
+                  Total refund amount
                 </span>
 
-                <span>
+                <span className="aod-refund-stat-value aod-refund-stat-value--refund">
                   ₹
                   {formatMoney(
-                    offerDiscountNum > 0
-                      ? (
-                        order.subtotal_gross
-                        ?? order.subtotal
+                    refundedNum,
+                  )}
+                </span>
+              </div>
+
+              <div className="aod-refund-stat">
+
+                <span className="aod-refund-stat-label">
+                  Refund status
+                </span>
+
+                <span
+                  className={`aod-refund-stat-value aod-refund-stat-value--status ${
+                    codRefundStatus
+                      ? codRefundStatus.startsWith(
+                        "Partial",
                       )
-                      : order.subtotal,
-                  )}
-                </span>
-              </div>
-
-              {
-                offerDiscountNum > 0 && (
-
-                  <div className="aod-summary-row aod-summary-row--deduct">
-
-                    <span>
-                      Offer savings
-                    </span>
-
-                    <span>
-                      −₹
-                      {formatMoney(
-                        offerDiscountNum,
-                      )}
-                    </span>
-                  </div>
-                )
-              }
-
-              {
-                offerDiscountNum > 0 && (
-
-                  <div className="aod-summary-row">
-
-                    <span>
-                      Subtotal
-                    </span>
-
-                    <span>
-                      ₹
-                      {formatMoney(
-                        order.subtotal,
-                      )}
-                    </span>
-                  </div>
-                )
-              }
-
-              <div className="aod-summary-row aod-summary-row--muted">
-
-                <span>
-                  Shipping
-                </span>
-
-                <span>
-                  {shipNum <= 0
-                    ? "FREE"
-                    : `₹${formatMoney(
-                      order.shipping_total,
-                    )}`}
-                </span>
-              </div>
-
-              <div className="aod-summary-row">
-
-                <span>
-                  Tax
-                </span>
-
-                <span>
-                  ₹
-                  {formatMoney(
-                    order.tax_total,
-                  )}
-                </span>
-              </div>
-
-              {
-                couponDiscountNum > 0 && (
-
-                  <div className="aod-summary-row aod-summary-row--deduct">
-
-                    <span>
-                      {order.coupon_code
-                        ? `Coupon (${order.coupon_code})`
-                        : "Coupon"}
-                    </span>
-
-                    <span>
-                      −₹
-                      {formatMoney(
-                        order.discount_total,
-                      )}
-                    </span>
-                  </div>
-                )
-              }
-
-              <div className="aod-summary-total">
-
-                <span>
-                  TOTAL
-                </span>
-
-                <strong>
-                  ₹
-                  {formatMoney(
-                    order.grand_total,
-                  )}
-                </strong>
-              </div>
-
-            </div>
-          </div>
-
-          {
-            refundedNum > 0 && (
-
-              <div className="aod-side-card">
-
-                <h3>
-                  Refund summary
-                </h3>
-
-                <div className="aod-summary-rows">
-
-                  <div className="aod-summary-row">
-
-                    <span>
-                      Total refund amount
-                    </span>
-
-                    <span className="aod-num--refund">
-                      ₹
-                      {formatMoney(
-                        refundedNum,
-                      )}
-                    </span>
-                  </div>
-
-                  <div className="aod-summary-row">
-
-                    <span>
-                      Refund status
-                    </span>
-
-                    <span>
-                      <span className={`aod-pill ${
+                        ? "aod-refund-stat-value--partial"
+                        : "aod-refund-stat-value--ok"
+                      : order.payment_status === "refunded"
+                        ? "aod-refund-stat-value--ok"
+                        : refundedNum > 0
+                          ? "aod-refund-stat-value--partial"
+                          : ""
+                  }`}
+                >
+                  {
+                    codRefundStatus
+                      ?? (
                         order.payment_status === "refunded"
-                          ? "aod-pill--delivered"
-                          : "aod-pill--ofd"
-                      }`}
-                      >
-                        {order.payment_status === "refunded"
                           ? "Refunded"
-                          : "Partially refunded"}
-                      </span>
-                    </span>
-                  </div>
+                          : refundedNum > 0
+                            ? "Partial"
+                            : "—"
+                      )
+                  }
+                </span>
+              </div>
+
+              <div className="aod-refund-stat">
+
+                <span className="aod-refund-stat-label">
+                  Cancelled items
+                </span>
+
+                <span className="aod-refund-stat-value">
+                  {cancelledCount}
+                </span>
+              </div>
+
+              <div className="aod-refund-stat">
+
+                <span className="aod-refund-stat-label">
+                  Refunded items
+                </span>
+
+                <span className="aod-refund-stat-value">
+                  {returnedCount}
+                </span>
+              </div>
+            </div>
+
+            {
+              codRefundNote && (
+
+                <p className="aod-refund-cod-note">
+                  {codRefundNote}
+                </p>
+              )
+            }
+
+            {
+              refundTxns.length > 0 && (
+
+                <ul className="aod-refund-txns">
 
                   {
-                    cancelledCount > 0 && (
+                    refundTxns.map(
+                      (
+                        txn,
+                      ) => (
 
-                      <div className="aod-summary-row aod-summary-row--muted">
+                        <li
+                          key={txn.id}
+                          className="aod-refund-txn"
+                        >
 
-                        <span>
-                          Cancelled items
-                        </span>
+                          <div className="aod-refund-txn-top">
 
-                        <span>
-                          {cancelledCount}
-                        </span>
-                      </div>
+                            <span className="aod-refund-txn-amt">
+                              ₹
+                              {formatMoney(
+                                txn.amount,
+                              )}
+                            </span>
+
+                            <span className="aod-refund-txn-date">
+                              {formatPlacedAt(
+                                txn.created_at,
+                              )}
+                            </span>
+                          </div>
+
+                          <p className="aod-refund-txn-note">
+                            {txn.reference_note ||
+                              txn.reason_label}
+                          </p>
+                        </li>
+                      ),
                     )
                   }
-                </div>
-
-                {
-                  refundTxns.length > 0 && (
-
-                    <ul className="aod-refund-txns">
-
-                      {
-                        refundTxns.map(
-                          (
-                            txn,
-                          ) => (
-
-                            <li
-                              key={txn.id}
-                              className="aod-refund-txn"
-                            >
-
-                              <div className="aod-refund-txn-top">
-
-                                <span className="aod-refund-txn-amt">
-                                  ₹
-                                  {formatMoney(
-                                    txn.amount,
-                                  )}
-                                </span>
-
-                                <span className="aod-refund-txn-date">
-                                  {formatPlacedAt(
-                                    txn.created_at,
-                                  )}
-                                </span>
-                              </div>
-
-                              <p className="aod-refund-txn-note">
-                                {txn.reference_note ||
-                                  txn.reason_label}
-                              </p>
-                            </li>
-                          ),
-                        )
-                      }
-                    </ul>
-                  )
-                }
-              </div>
-            )
-          }
+                </ul>
+              )
+            }
+          </div>
 
           <div className="aod-side-card">
 
@@ -1976,7 +2163,6 @@ export default function AdminOrderDetail() {
               in this order.
             </p>
           </div>
-        </aside>
       </div>
 
       {

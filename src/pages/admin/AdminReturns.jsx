@@ -990,6 +990,17 @@ export default function AdminReturns() {
                                     </p>
                                   )
                                 }
+
+                                {
+                                  r.quantity > 0 && (
+
+                                    <p className="ar-product-meta">
+                                      Qty:
+                                      {" "}
+                                      {r.quantity}
+                                    </p>
+                                  )
+                                }
                               </div>
                             </div>
                           </td>

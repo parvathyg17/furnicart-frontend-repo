@@ -63,7 +63,7 @@ import {
   stableStringify,
 } from "../../utils/stableStringify.js";
 
-function wishlistVariantCanAddToBag(
+function wishlistVariantCanAddToCart(
   variant,
 ) {
 
@@ -540,8 +540,8 @@ export default function Wishlist() {
                         product,
                       );
 
-                    const canMoveToBag =
-                      wishlistVariantCanAddToBag(
+                    const canMoveToCart =
+                      wishlistVariantCanAddToCart(
                         variant,
                       );
 
@@ -577,7 +577,7 @@ export default function Wishlist() {
                           }
 
                           {
-                            !canMoveToBag && (
+                            !canMoveToCart && (
 
                               <span
                                 className="wishlist-card-media-badge"
@@ -627,7 +627,7 @@ export default function Wishlist() {
                           />
 
                           {
-                            !canMoveToBag && (
+                            !canMoveToCart && (
 
                               <p
                                 className="wishlist-card-stock-note"
@@ -651,14 +651,14 @@ export default function Wishlist() {
                           <button
                             type="button"
                             className="wishlist-move-btn"
-                            disabled={!canMoveToBag}
+                            disabled={!canMoveToCart}
                             aria-label={
-                              canMoveToBag
-                                ? "Move to bag"
+                              canMoveToCart
+                                ? "Move to cart"
                                 : (
                                   variant?.is_active === false
-                                    ? "Unavailable — cannot add to bag"
-                                    : "Out of stock — cannot add to bag"
+                                    ? "Unavailable — cannot add to cart"
+                                    : "Out of stock — cannot add to cart"
                                 )
                             }
                             onClick={() =>
@@ -667,7 +667,7 @@ export default function Wishlist() {
                               )
                             }
                           >
-                            Move to bag
+                            Move to cart
                           </button>
 
                           <button

@@ -1,3 +1,7 @@
+import {
+  formatMoney,
+} from "../../utils/currency.js";
+
 export const PAYMENT_LABELS = {
   cod: "Cash on delivery",
   razorpay: "Razorpay",
@@ -16,6 +20,64 @@ export const PAYMENT_STATUS_LABELS = {
 
 export const DELIVERY_CHARGE_NON_REFUNDABLE_NOTE =
   "Delivery charges are not refundable on partial cancellations or returns.";
+
+export const INVOICE_UNAVAILABLE_NOTE =
+  "Invoice is not available after any item has been cancelled, returned, or refunded.";
+
+/**
+ * Invoice PDF is only available while the order is unchanged since placement —
+ * no partial or full cancellations, returns, or refunds.
+ */
+export function canDownloadOrderInvoice(
+  order,
+) {
+
+  if (
+    !order
+  ) {
+
+    return false;
+  }
+
+  if (
+    order.status === "cancelled" ||
+    order.status === "partially_cancelled"
+  ) {
+
+    return false;
+  }
+
+  if (
+    order.payment_status === "partially_refunded" ||
+    order.payment_status === "refunded"
+  ) {
+
+    return false;
+  }
+
+  if (
+    Number(
+      order.refunded_total ?? 0,
+    ) > 0
+  ) {
+
+    return false;
+  }
+
+  const lines = order.lines || [];
+
+  return !lines.some(
+    (line) =>
+      line.status === "cancelled" ||
+      line.fulfillment_status === "returned" ||
+      Number(
+        line.cancelled_quantity ?? 0,
+      ) > 0 ||
+      Number(
+        line.returned_quantity ?? 0,
+      ) > 0,
+  );
+}
 
 export function orderHasPaidDeliveryCharge(
   order,
@@ -108,6 +170,44 @@ export const STATUS_LABELS = {
   partially_shipped: "Partially shipped",
   partially_delivered: "Partially delivered",
 };
+
+export function orderStatusPillClass(
+  status,
+) {
+
+  if (
+    status === "cancelled"
+  ) {
+
+    return "odl-pill--cancelled";
+  }
+
+  if (
+    status === "partially_cancelled"
+  ) {
+
+    return "odl-pill--partial";
+  }
+
+  if (
+    status === "delivered" ||
+    status === "partially_delivered"
+  ) {
+
+    return "odl-pill--delivered";
+  }
+
+  if (
+    status === "shipped" ||
+    status === "out_for_delivery" ||
+    status === "partially_shipped"
+  ) {
+
+    return "odl-pill--progress";
+  }
+
+  return "odl-pill--pending";
+}
 
 export const FULFILLMENT_LABELS = {
   pending: "Pending",
@@ -328,10 +428,204 @@ export function lineStatusLabel(
     return "Cancelled";
   }
 
+  const returnedQty = Number(
+    line.returned_quantity ?? 0,
+  );
+
+  const deliverable = Number(
+    line.quantity ?? 0,
+  ) - Number(
+    line.cancelled_quantity ?? 0,
+  );
+
+  if (
+    returnedQty > 0
+    && deliverable > 0
+    && returnedQty < deliverable
+  ) {
+
+    return "Partially returned";
+  }
+
   const fs = line.fulfillment_status || "pending";
 
   return FULFILLMENT_LABELS[
     fs
   ] ||
     fs;
+}
+
+/**
+ * Immutable placed-order breakdown from per-line values and original_paid.
+ * Stays fixed after cancellations or returns (mirrors admin order summary).
+ */
+export function computeOriginalOrderBreakdown(
+  order,
+) {
+
+  const lines = order?.lines || [];
+
+  const originalPaid = Number(
+    order?.original_paid ?? order?.grand_total ?? 0,
+  );
+
+  const itemTotals = lines.reduce(
+    (
+      acc,
+      ln,
+    ) => {
+
+      acc.price += Number(
+        ln.line_total,
+      ) ||
+        0;
+
+      acc.coupon += Number(
+        ln.coupon_share,
+      ) ||
+        0;
+
+      acc.tax += Number(
+        ln.tax_share,
+      ) ||
+        0;
+
+      acc.offer += Number(
+        ln.discount_amount,
+      ) ||
+        0;
+
+      return acc;
+    },
+    {
+      price: 0,
+      coupon: 0,
+      tax: 0,
+      offer: 0,
+    },
+  );
+
+  const origItemsNet = itemTotals.price;
+
+  const origOfferNum = itemTotals.offer;
+
+  const origItemsGross = origItemsNet + origOfferNum;
+
+  const origTaxNum = itemTotals.tax;
+
+  const origCouponNum = itemTotals.coupon;
+
+  const origShippingNum = Math.max(
+    0,
+    Math.round(
+      (originalPaid
+        - origItemsNet
+        - origTaxNum
+        + origCouponNum) * 100,
+    ) / 100,
+  );
+
+  return {
+    originalPaid,
+    origItemsNet,
+    origOfferNum,
+    origItemsGross,
+    origTaxNum,
+    origCouponNum,
+    origShippingNum,
+  };
+}
+
+/**
+ * COD returns are settled in cash at pickup — not via wallet credits.
+ */
+export function isCodOrder(
+  order,
+) {
+
+  return order?.payment_method === "cod";
+}
+
+export function codReturnRefundStatusLabel(
+  order,
+) {
+
+  if (
+    !isCodOrder(
+      order,
+    )
+  ) {
+
+    return null;
+  }
+
+  const lines = order?.lines || [];
+
+  const activeLines = lines.filter(
+    (line) =>
+      line.status !== "cancelled",
+  );
+
+  const returnedLines = activeLines.filter(
+    (line) =>
+      (line.returned_quantity ?? 0) > 0
+      || line.fulfillment_status === "returned",
+  );
+
+  if (
+    returnedLines.length <= 0
+  ) {
+
+    return null;
+  }
+
+  const allReturned = activeLines.length > 0
+    && activeLines.every(
+      (line) => {
+        const deliverable = (line.quantity ?? 0)
+          - (line.cancelled_quantity ?? 0);
+
+        return deliverable > 0
+          && (line.returned_quantity ?? 0) >= deliverable;
+      },
+    );
+
+  return allReturned
+    ? "Refunded"
+    : "Partially refunded";
+}
+
+export function codReturnRefundNote(
+  order,
+  amount,
+) {
+
+  const label = codReturnRefundStatusLabel(
+    order,
+  );
+
+  if (
+    !label
+  ) {
+
+    return null;
+  }
+
+  const amt = Number(
+    amount ?? order?.return_refund_total ?? order?.refunded_total ?? 0,
+  );
+
+  if (
+    Number.isNaN(
+      amt,
+    )
+    || amt <= 0
+  ) {
+
+    return "Cash on delivery — amount refunded when the item was picked up.";
+  }
+
+  return `Cash on delivery — ₹${formatMoney(
+    amt,
+  )} refunded when the item was picked up.`;
 }

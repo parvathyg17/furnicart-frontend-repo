@@ -1,5 +1,7 @@
 import Modal from "../../../components/common/Modal.jsx";
 
+import QuantityStepper from "./QuantityStepper.jsx";
+
 import {
   DELIVERY_CHARGE_NON_REFUNDABLE_NOTE,
   orderHasPaidDeliveryCharge,
@@ -11,6 +13,8 @@ export default function CancelOrderModal(
     cancelTarget,
     cancelReason,
     onCancelReasonChange,
+    cancelQuantity,
+    onCancelQuantityChange,
     cancelBusy,
     cancelModalError,
     onClose,
@@ -18,6 +22,20 @@ export default function CancelOrderModal(
     order,
   },
 ) {
+
+  const cancelLine = cancelTarget?.type === "line"
+    ? order?.lines?.find(
+      (l) =>
+        l.id === cancelTarget.lineId,
+    )
+    : null;
+
+  const maxCancelQty = cancelLine?.cancellable_quantity ?? 1;
+
+  const showQtyPicker = Boolean(
+    cancelLine &&
+    maxCancelQty > 1,
+  );
 
   return (
 
@@ -37,7 +55,9 @@ export default function CancelOrderModal(
         {
           cancelTarget?.type === "order"
             ? "Cancel entire order?"
-            : "Cancel this line?"
+            : showQtyPicker
+              ? "Cancel units?"
+              : "Cancel this line?"
         }
       </h2>
 
@@ -45,10 +65,27 @@ export default function CancelOrderModal(
 
         {
           cancelTarget?.type === "order"
-            ? "This cancels every item and restores stock. This cannot be undone."
-            : "Stock for this item will be restored. If it is your last active item, the whole order will be cancelled."
+            ? "This cancels every remaining item and restores stock. This cannot be undone."
+            : showQtyPicker
+              ? "Choose how many units to cancel before shipping. Stock will be restored for those units."
+              : "Stock for this item will be restored. If it is your last active item, the whole order will be cancelled."
         }
       </p>
+
+      {
+        showQtyPicker && (
+
+          <QuantityStepper
+            id="order-cancel-quantity"
+            label="Units to cancel"
+            value={cancelQuantity}
+            min={1}
+            max={maxCancelQty}
+            disabled={cancelBusy}
+            onChange={onCancelQuantityChange}
+          />
+        )
+      }
 
       {
         orderHasPaidDeliveryCharge(
@@ -117,7 +154,17 @@ export default function CancelOrderModal(
           {
             cancelBusy
               ? "Working…"
-              : "Confirm cancel"
+              : showQtyPicker
+                ? `Cancel ${Math.min(
+                  Math.max(
+                    1,
+                    Number(
+                      cancelQuantity,
+                    ) || 1,
+                  ),
+                  maxCancelQty,
+                )} unit(s)`
+                : "Confirm cancel"
           }
         </button>
       </div>

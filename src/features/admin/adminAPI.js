@@ -212,6 +212,21 @@ export async function patchAdminLineFulfillment(
   return res.data;
 }
 
+export async function patchAdminOrderFulfillment(
+  orderNumber,
+  fulfillmentStatus,
+) {
+
+  const res = await api.patch(
+    `admin/orders/${encodeURIComponent(orderNumber)}/fulfillment/`,
+    {
+      fulfillment_status: fulfillmentStatus,
+    },
+  );
+
+  return res.data;
+}
+
 export async function fetchAdminReturns(
   {
     page = 1,

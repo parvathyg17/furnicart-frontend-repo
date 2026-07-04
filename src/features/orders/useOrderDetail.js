@@ -30,6 +30,10 @@ import {
   stableStringify,
 } from "../../utils/stableStringify.js";
 
+import {
+  canDownloadOrderInvoice,
+} from "./orderUi.js";
+
 export default function useOrderDetail() {
 
   const { orderNumber } = useParams();
@@ -82,6 +86,11 @@ export default function useOrderDetail() {
   ] = useState(null);
 
   const [
+    cancelQuantity,
+    setCancelQuantity,
+  ] = useState(1);
+
+  const [
     returnTargetLineId,
     setReturnTargetLineId,
   ] = useState(null);
@@ -102,9 +111,9 @@ export default function useOrderDetail() {
   ] = useState(null);
 
   const [
-    trackingLineId,
-    setTrackingLineId,
-  ] = useState(null);
+    returnQuantity,
+    setReturnQuantity,
+  ] = useState(1);
 
   const lastOrderSigRef =
     useRef(
@@ -290,25 +299,36 @@ export default function useOrderDetail() {
 
   const canCancelLine = (line) =>
     line.status === "active" &&
-    (line.fulfillment_status || "pending") === "pending";
+    (line.fulfillment_status || "pending") === "pending" &&
+    (line.cancellable_quantity ?? line.quantity ?? 0) > 0;
 
   const canCancelEntireOrder =
     order &&
     (order.lines || []).some(
       (l) =>
-        l.status === "active",
-    ) &&
-    (order.lines || []).every(
-      (l) =>
-        l.status !== "active" ||
-        (l.fulfillment_status || "pending") === "pending",
+        canCancelLine(
+          l,
+        ),
     );
 
+  const canDownloadInvoice = canDownloadOrderInvoice(
+    order,
+  );
+
   const openReturnModal = (lineId) => {
+
+    const line = order?.lines?.find(
+      (l) =>
+        l.id === lineId,
+    );
 
     setReturnModalError(null);
 
     setReturnReason("");
+
+    setReturnQuantity(
+      1,
+    );
 
     setReturnTargetLineId(lineId);
   };
@@ -323,6 +343,10 @@ export default function useOrderDetail() {
     setReturnTargetLineId(null);
 
     setReturnReason("");
+
+    setReturnQuantity(
+      1,
+    );
 
     setReturnModalError(null);
   };
@@ -347,12 +371,38 @@ export default function useOrderDetail() {
 
     setReturnModalError(null);
 
+    const line = order.lines?.find(
+      (l) =>
+        l.id === returnTargetLineId,
+    );
+
     try {
+
+      const payload = {
+        reason: r,
+      };
+
+      const maxReturn = line?.returnable_quantity ?? 1;
+
+      if (
+        maxReturn > 1
+      ) {
+
+        payload.quantity = Math.min(
+          Math.max(
+            1,
+            Number(
+              returnQuantity,
+            ) || 1,
+          ),
+          maxReturn,
+        );
+      }
 
       const data = await submitReturnRequest(
         order.order_number,
         returnTargetLineId,
-        { reason: r },
+        payload,
       );
 
       lastOrderSigRef.current =
@@ -388,7 +438,10 @@ export default function useOrderDetail() {
   const handleDownloadInvoice = async () => {
 
     if (
-      !order?.order_number
+      !order?.order_number ||
+      !canDownloadOrderInvoice(
+        order,
+      )
     ) {
 
       return;
@@ -440,6 +493,10 @@ export default function useOrderDetail() {
       "",
     );
 
+    setCancelQuantity(
+      1,
+    );
+
     setCancelTarget(
       { type: "order" },
     );
@@ -470,6 +527,10 @@ export default function useOrderDetail() {
       "",
     );
 
+    setCancelQuantity(
+      1,
+    );
+
     setCancelTarget(
       { type: "line", lineId },
     );
@@ -488,6 +549,10 @@ export default function useOrderDetail() {
 
     setCancelReason(
       "",
+    );
+
+    setCancelQuantity(
+      1,
     );
 
     setCancelModalError(
@@ -522,6 +587,33 @@ export default function useOrderDetail() {
         );
       }
 
+      if (
+        cancelTarget.type === "line"
+      ) {
+
+        const line = order.lines?.find(
+          (l) =>
+            l.id === cancelTarget.lineId,
+        );
+
+        const maxCancel = line?.cancellable_quantity ?? 1;
+
+        if (
+          maxCancel > 1
+        ) {
+
+          body.quantity = Math.min(
+            Math.max(
+              1,
+              Number(
+                cancelQuantity,
+              ) || 1,
+            ),
+            maxCancel,
+          );
+        }
+      }
+
       if (cancelTarget.type === "order") {
 
         await cancelOrderApi(
@@ -545,6 +637,10 @@ export default function useOrderDetail() {
 
       setCancelReason(
         "",
+      );
+
+      setCancelQuantity(
+        1,
       );
     } catch (err) {
 
@@ -577,15 +673,18 @@ export default function useOrderDetail() {
     setCancelReason,
     cancelBusy,
     cancelModalError,
+    cancelQuantity,
+    setCancelQuantity,
     returnTargetLineId,
     returnReason,
     setReturnReason,
+    returnQuantity,
+    setReturnQuantity,
     returnBusy,
     returnModalError,
-    trackingLineId,
-    setTrackingLineId,
     canCancelLine,
     canCancelEntireOrder,
+    canDownloadInvoice,
     handleDownloadInvoice,
     openCancelOrderModal,
     openCancelLineModal,

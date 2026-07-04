@@ -1,40 +1,40 @@
-export default function OrderShippingAddress(
-  {
-    order,
-  },
-) {
+// export default function OrderShippingAddress(
+//   {
+//     order,
+//   },
+// ) {
 
-  return (
+//   return (
 
-    <div className="odl-info-card">
+//     <div className="odl-info-card">
 
-      <h3>
-        Shipping address
-      </h3>
+//       <h3>
+//         Shipping address
+//       </h3>
 
-      <p>
+//       <p>
 
-        <strong>
-          {order.shipping_name}
-        </strong>
+//         <strong>
+//           {order.shipping_name}
+//         </strong>
 
-        {order.shipping_phone
-          ? (
-            <>
-              {" · "}
-              {order.shipping_phone}
-            </>
-          )
-          : null}
+//         {order.shipping_phone
+//           ? (
+//             <>
+//               {" · "}
+//               {order.shipping_phone}
+//             </>
+//           )
+//           : null}
 
-        <br />
+//         <br />
 
-        {[
-          order.shipping_address_line,
-          order.shipping_city,
-          `${order.shipping_state} ${order.shipping_pincode}`,
-        ].filter(Boolean).join(", ")}
-      </p>
-    </div>
-  );
-}
+//         {[
+//           order.shipping_address_line,
+//           order.shipping_city,
+//           `${order.shipping_state} ${order.shipping_pincode}`,
+//         ].filter(Boolean).join(", ")}
+//       </p>
+//     </div>
+//   );
+// }

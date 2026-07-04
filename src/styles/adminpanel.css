@@ -56,7 +56,7 @@ body {
 
   height: 100vh;
 
-  width: 272px;
+  width: 200px;
 
   background: linear-gradient(
     180deg,
@@ -89,7 +89,7 @@ body {
 
   padding: 1.5rem 1rem 1rem;
 
-  scrollbar-width: thin;
+  scrollbar-width: none;
 
   scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }
@@ -397,6 +397,8 @@ body {
 
   min-width: 0;
 
+  overflow-x: clip;
+
   background: var(--bg);
 }
 
@@ -408,13 +410,13 @@ body {
 
   z-index: 100;
 
-  min-height: 88px;
+  min-height: 64px;
 
   background: rgba(255, 255, 255, 0.92);
 
   border-bottom: 1px solid var(--border);
 
-  padding: 0.85rem 2rem;
+  padding: 0.6rem 1.15rem;
 
   display: flex;
 
@@ -422,7 +424,7 @@ body {
 
   justify-content: space-between;
 
-  gap: 1.5rem;
+  gap: 0.85rem;
 
   flex-wrap: wrap;
 
@@ -513,19 +515,19 @@ body {
   width: 100%;
 
   padding: clamp(
-    0.85rem,
-    2vw,
-    1.5rem
+    0.5rem,
+    1.2vw,
+    0.85rem
   )
     clamp(
-      0.85rem,
-      2.2vw,
-      1.75rem
+      0.5rem,
+      1.4vw,
+      1rem
     )
     clamp(
-      1rem,
-      2.5vw,
-      2rem
+      0.65rem,
+      1.5vw,
+      1.1rem
     );
 
   display: flex;
@@ -540,7 +542,7 @@ body {
 
   width: 100%;
 
-  max-width: 1280px;
+  max-width: none;
 
   margin: 0 auto;
 
@@ -550,7 +552,7 @@ body {
 
   border: 1px solid var(--border);
 
-  border-radius: 18px;
+  border-radius: 12px;
 
   box-shadow:
     0 1px 0 rgba(
@@ -559,35 +561,47 @@ body {
       23,
       0.05
     ),
-    0 16px 48px rgba(
+    0 8px 24px rgba(
       28,
       25,
       23,
-      0.06
+      0.05
     );
 
   padding: clamp(
-    1.1rem,
-    2.8vw,
-    1.85rem
+    0.65rem,
+    1.5vw,
+    1rem
   )
     clamp(
-      1.1rem,
-      2.8vw,
-      2rem
+      0.65rem,
+      1.5vw,
+      1.15rem
     );
 
   min-height: 0;
 }
 
-/* Artisan list/detail roots: use full width inside the shell */
+/* Full-width page roots inside the shell */
 .admin-page .ao-artisan,
 .admin-page .ar-artisan,
 .admin-page .aod-page,
-.admin-page .inv-page {
+.admin-page .inv-page,
+.admin-page .asr-page,
+.admin-page .da-page,
+.admin-page .admin-coupons-page,
+.admin-page .admin-products-page,
+.admin-page .admin-users-page,
+.admin-page .admin-categories-page,
+.admin-page .admin-room-types-page,
+.admin-page .admin-returns-page,
+.admin-page .admin-product-detail-page,
+.admin-page .variant-media-page {
   max-width: none;
 
   margin: 0;
+
+  min-width: 0;
 }
 
 /* Nested content cards: slightly inset from the shell */
@@ -603,9 +617,15 @@ body {
     0.95
   );
 
-  border-radius: 16px;
+  border-radius: 12px;
 
   box-shadow: none;
+
+  padding: clamp(
+    0.85rem,
+    1.5vw,
+    1.15rem
+  );
 }
 
 /* =========================================
@@ -710,10 +730,11 @@ body {
 }
 
 .table-wrapper {
-  margin-top: 30px;
+  margin-top: 0.85rem;
   background: white;
-  border-radius: 24px;
-  overflow: hidden;
+  border-radius: 12px;
+  overflow-x: auto;
+  min-width: 0;
   border: 1px solid var(--border);
 }
 
@@ -859,13 +880,13 @@ body {
   }
 
   .admin-content {
-    padding: 20px;
+    padding: 0.75rem;
   }
 
   .admin-page {
-    border-radius: 14px;
+    border-radius: 10px;
 
-    padding: 1rem 1rem 1.2rem;
+    padding: 0.75rem 0.8rem 0.9rem;
   }
 
   .users-search {
@@ -1003,12 +1024,12 @@ body {
 }
 
 .admin-input {
-  height: 44px;
+  height: 40px;
   border-radius: 10px;
   border: 1px solid var(--border);
   padding: 0 12px;
-  font-size: 0.95rem;
-  min-width: 160px;
+  font-size: 0.9rem;
+  min-width: 0;
 }
 
 .admin-primary-btn {

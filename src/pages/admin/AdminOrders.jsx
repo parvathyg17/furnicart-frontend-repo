@@ -812,6 +812,8 @@ export default function AdminOrders() {
 
       <div className="ao-card">
 
+        <div className="ao-table-scroll">
+
         <table className="ao-table">
 
           <thead>
@@ -885,6 +887,16 @@ export default function AdminOrders() {
                     const prod = productSummary(
                       o.line_items,
                     );
+
+                    const remainingTotal = Number(
+                      o.remaining_value ?? o.grand_total,
+                    ) || 0;
+
+                    const originalTotal = Number(
+                      o.original_paid ?? o.grand_total,
+                    ) || 0;
+
+                    const totalAdjusted = originalTotal - remainingTotal > 0.009;
 
                     return (
 
@@ -1020,11 +1032,11 @@ export default function AdminOrders() {
                         </td>
 
                         <td className="ao-total">
-
-                          ₹
-                          {formatMoney(
-                            o.grand_total,
-                          )}
+                          <span className="ao-total-current">
+                            ₹{formatMoney(
+                              Number(o.original_paid ?? o.grand_total) || 0
+                            )}
+                          </span>
                         </td>
 
                         <td>
@@ -1051,6 +1063,8 @@ export default function AdminOrders() {
           </tbody>
 
         </table>
+
+        </div>
 
         {
           totalCount > 0 && (

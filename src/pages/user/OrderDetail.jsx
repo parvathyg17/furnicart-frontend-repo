@@ -5,11 +5,10 @@ import "../../styles/orderdetail.css";
 import useOrderDetail from "../../features/orders/useOrderDetail.js";
 
 import OrderHeader from "../../features/orders/components/OrderHeader.jsx";
-import OrderProgressStepper from "../../features/orders/components/OrderProgressStepper.jsx";
-import OrderShippingAddress from "../../features/orders/components/OrderShippingAddress.jsx";
-import OrderPaymentMethodCard from "../../features/orders/components/OrderPaymentMethodCard.jsx";
+import OrderHeroCard from "../../features/orders/components/OrderHeroCard.jsx";
+import OrderSideInfo from "../../features/orders/components/OrderSideInfo.jsx";
 import OrderItemsList from "../../features/orders/components/OrderItemsList.jsx";
-import OrderPricing from "../../features/orders/components/OrderPricing.jsx";
+import OrderSummaryCard from "../../features/orders/components/OrderSummaryCard.jsx";
 import OrderRefundSummary from "../../features/orders/components/OrderRefundSummary.jsx";
 import OrderDetailToolbar from "../../features/orders/components/OrderDetailToolbar.jsx";
 import CancelOrderModal from "../../features/orders/components/CancelOrderModal.jsx";
@@ -28,15 +27,18 @@ export default function OrderDetail() {
     setCancelReason,
     cancelBusy,
     cancelModalError,
+    cancelQuantity,
+    setCancelQuantity,
     returnTargetLineId,
     returnReason,
     setReturnReason,
+    returnQuantity,
+    setReturnQuantity,
     returnBusy,
     returnModalError,
-    trackingLineId,
-    setTrackingLineId,
     canCancelLine,
     canCancelEntireOrder,
+    canDownloadInvoice,
     handleDownloadInvoice,
     openCancelOrderModal,
     openCancelLineModal,
@@ -73,13 +75,7 @@ export default function OrderDetail() {
 
               <div className="odl-page">
 
-                <OrderHeader
-                  order={order}
-                  invoiceBusy={invoiceBusy}
-                  onDownloadInvoice={handleDownloadInvoice}
-                  canCancelEntireOrder={canCancelEntireOrder}
-                  onCancelEntireOrder={openCancelOrderModal}
-                />
+                <OrderHeader />
 
                 {
                   invoiceError && (
@@ -94,44 +90,42 @@ export default function OrderDetail() {
                   )
                 }
 
-                <OrderProgressStepper order={order} />
+                <div className="odl-layout">
 
-                <div className="odl-cards-row">
+                  <div className="odl-col-main">
 
-                  <OrderShippingAddress order={order} />
+                    <OrderHeroCard
+                      order={order}
+                      invoiceBusy={invoiceBusy}
+                      canDownloadInvoice={canDownloadInvoice}
+                      onDownloadInvoice={handleDownloadInvoice}
+                      canCancelEntireOrder={canCancelEntireOrder}
+                      onCancelEntireOrder={openCancelOrderModal}
+                    />
 
-                  <OrderPaymentMethodCard order={order} />
-                </div>
+                    <section className="odl-main">
 
-                <OrderRefundSummary order={order} />
+                      <h2 className="odl-section-title">
+                        Shipment details
+                      </h2>
 
-                <div className="odl-summary-card">
+                      <OrderItemsList
+                        order={order}
+                        canCancelLine={canCancelLine}
+                        onOpenCancelLine={openCancelLineModal}
+                        onOpenReturn={openReturnModal}
+                      />
+                    </section>
 
-                  <div className="odl-summary-head">
-
-                    <h2>
-                      Order summary
-                    </h2>
+                    <OrderRefundSummary order={order} />
                   </div>
 
-                  <OrderItemsList
-                    order={order}
-                    trackingLineId={trackingLineId}
-                    onToggleTracking={(lineId) => {
+                  <aside className="odl-col-side">
 
-                      setTrackingLineId(
-                        (prev) =>
-                          prev === lineId
-                            ? null
-                            : lineId,
-                      );
-                    }}
-                    canCancelLine={canCancelLine}
-                    onOpenCancelLine={openCancelLineModal}
-                    onOpenReturn={openReturnModal}
-                  />
+                    <OrderSideInfo order={order} />
 
-                  <OrderPricing order={order} />
+                    <OrderSummaryCard order={order} />
+                  </aside>
                 </div>
 
                 <OrderDetailToolbar />
@@ -142,6 +136,8 @@ export default function OrderDetail() {
                 cancelTarget={cancelTarget}
                 cancelReason={cancelReason}
                 onCancelReasonChange={setCancelReason}
+                cancelQuantity={cancelQuantity}
+                onCancelQuantityChange={setCancelQuantity}
                 cancelBusy={cancelBusy}
                 cancelModalError={cancelModalError}
                 onClose={closeCancelModal}
@@ -153,11 +149,14 @@ export default function OrderDetail() {
                 open={returnTargetLineId !== null}
                 returnReason={returnReason}
                 onReturnReasonChange={setReturnReason}
+                returnQuantity={returnQuantity}
+                onReturnQuantityChange={setReturnQuantity}
                 returnBusy={returnBusy}
                 returnModalError={returnModalError}
                 onClose={closeReturnModal}
                 onSubmit={submitReturn}
                 order={order}
+                returnTargetLineId={returnTargetLineId}
               />
             </>
           ) : null

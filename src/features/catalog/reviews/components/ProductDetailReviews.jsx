@@ -72,6 +72,7 @@ export default function ProductDetailReviews(
   const [modalOpen, setModalOpen] = useState(false);
   const [modalBusy, setModalBusy] = useState(false);
   const [modalError, setModalError] = useState("");
+  const [hasOpenedOnLoad, setHasOpenedOnLoad] = useState(false);
 
   const loadReviews = useCallback(
     async (page = 1) => {
@@ -127,7 +128,8 @@ export default function ProductDetailReviews(
 
     if (
       !openReviewOnLoad ||
-      !user
+      !user ||
+      hasOpenedOnLoad
     ) {
 
       return;
@@ -139,12 +141,14 @@ export default function ProductDetailReviews(
     ) {
 
       setModalOpen(true);
+      setHasOpenedOnLoad(true);
     }
   }, [
     openReviewOnLoad,
     user,
     product.can_review,
     product.user_review,
+    hasOpenedOnLoad,
   ]);
 
   const handleSubmitReview = async (

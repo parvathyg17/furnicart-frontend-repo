@@ -95,12 +95,12 @@ CARD
 
   background: #fbfaf8;
 
-  border-radius: 34px;
+  border-radius: 12px;
 
-  padding: 28px;
+  padding: clamp(0.85rem, 1.5vw, 1.15rem);
 
   box-shadow:
-    0 10px 30px rgba(0,0,0,0.04);
+    0 4px 16px rgba(0,0,0,0.04);
 }
 
 /* ==========================================
@@ -115,9 +115,9 @@ FILTERS
 
   justify-content: space-between;
 
-  gap: 20px;
+  gap: 0.65rem;
 
-  margin-bottom: 28px;
+  margin-bottom: 0.85rem;
 }
 
 .room-type-tabs {
@@ -235,9 +235,11 @@ TABLE
 
 .room-type-table {
 
-  overflow: hidden;
+  overflow-x: auto;
 
-  border-radius: 28px;
+  min-width: 0;
+
+  border-radius: 12px;
 
   border: 1px solid #eee7df;
 }

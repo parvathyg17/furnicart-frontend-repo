@@ -7,7 +7,6 @@ import {
   Lock,
   LogOut,
   Package,
-  ShoppingBag,
   Wallet,
 } from "lucide-react";
 

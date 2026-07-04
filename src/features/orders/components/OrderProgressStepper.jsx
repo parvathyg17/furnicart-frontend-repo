@@ -31,14 +31,10 @@ export default function OrderProgressStepper(
 
     <div className="odl-order-track">
 
-      <p className="odl-order-track-title">
-        Order status
-      </p>
-
       {
         tracker.cancelled && (
 
-          <p style={{ margin: "0 0 0.75rem", fontSize: "0.88rem", color: "#991b1b" }}>
+          <p className="odl-order-track-cancelled">
             This order was cancelled.
           </p>
         )

@@ -1,66 +1,184 @@
-/* User order detail — luxe / artisan layout + per-line tracking */
-.odl-page {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 0 0 2.5rem;
+/* User order detail — two-column layout with immutable order summary */
+
+/* Widen the shared shell for this page (default is 800px, which forces the
+   two-column grid to collapse). Scoped to the order detail shell only. */
+.order-detail-shell .order-detail-main {
+  max-width: 1180px;
 }
 
-.odl-breadcrumb {
-  font-size: 0.8rem;
-  color: #6b635c;
+.odl-page {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0;
+}
+
+/* ── Back link ── */
+
+.odl-back {
   margin: 0 0 1.25rem;
 }
 
-.odl-breadcrumb a {
-  color: #4a3226;
-  font-weight: 600;
+.odl-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #6b635c;
   text-decoration: none;
 }
 
-.odl-breadcrumb a:hover {
-  text-decoration: underline;
+.odl-back-link:hover {
+  color: #2c241c;
 }
 
-.odl-breadcrumb span {
-  margin: 0 0.35rem;
-  opacity: 0.45;
+/* ── Grid layout ── */
+
+.odl-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 1.5rem;
+  align-items: start;
 }
 
-.odl-hero {
+.odl-col-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-width: 0;
+}
+
+.odl-col-side {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  position: sticky;
+  top: 1rem;
+}
+
+@media (max-width: 900px) {
+  .odl-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .odl-col-side {
+    position: static;
+  }
+}
+
+/* ── Hero card ── */
+
+.odl-hero-card {
+  background: #fff;
+  border: 1px solid #e7dfd7;
+  border-radius: 16px;
+  padding: 1.35rem 1.25rem 1.25rem;
+  box-shadow: 0 1px 0 rgba(44, 36, 28, 0.04);
+}
+
+.odl-hero-top {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
 }
 
 .odl-hero-title {
   font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif;
-  font-size: clamp(1.65rem, 3.5vw, 2.25rem);
+  font-size: clamp(1.5rem, 3vw, 2rem);
   font-weight: 600;
   color: #1c1917;
-  margin: 0 0 0.35rem;
+  margin: 0 0 0.3rem;
   line-height: 1.15;
 }
 
 .odl-hero-sub {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: #6b635c;
 }
+
+.odl-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.odl-hero-cancelled {
+  margin: 0 0 1rem;
+  font-size: 0.88rem;
+  color: #7a4a4a;
+}
+
+.odl-hero-cancel-row {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #efe8e0;
+}
+
+/* ── Status pill ── */
+
+.odl-pill {
+  display: inline-block;
+  padding: 0.3rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.odl-pill--pending {
+  background: #fffbeb;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+.odl-pill--progress {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.odl-pill--delivered {
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.odl-pill--partial {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.odl-pill--cancelled {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+/* ── Invoice button ── */
 
 .odl-btn-invoice {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  padding: 0.55rem 1.15rem;
-  border-radius: 12px;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
   border: none;
   background: linear-gradient(180deg, #2c241c 0%, #1a1410 100%);
   color: #faf8f5;
-  font-size: 0.88rem;
-  font-weight: 600;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   font-family: inherit;
   cursor: pointer;
   white-space: nowrap;
@@ -75,33 +193,16 @@
   cursor: not-allowed;
 }
 
-.odl-meta-strip {
-  font-size: 0.86rem;
-  color: #5c534a;
-  margin-bottom: 1.25rem;
-  line-height: 1.5;
-}
-
-.odl-meta-strip strong {
-  color: #2c241c;
-}
+/* ── Order progress stepper ── */
 
 .odl-order-track {
-  background: #fff;
-  border: 1px solid #e7dfd7;
-  border-radius: 16px;
-  padding: 1.25rem 1rem 1.35rem;
-  margin-bottom: 1.25rem;
-  box-shadow: 0 1px 0 rgba(44, 36, 28, 0.04);
+  padding-top: 0.25rem;
 }
 
-.odl-order-track-title {
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #8a8078;
-  margin: 0 0 1rem;
+.odl-order-track-cancelled {
+  margin: 0 0 0.75rem;
+  font-size: 0.88rem;
+  color: #991b1b;
 }
 
 .odl-track-flex {
@@ -121,7 +222,7 @@
   height: 3px;
   background: #e7dfd7;
   border-radius: 2px;
-  margin-top: 17px;
+  margin-top: 15px;
   min-width: 6px;
 }
 
@@ -130,15 +231,15 @@
 }
 
 .odl-track-dot {
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  margin: 0 auto 0.45rem;
+  margin: 0 auto 0.4rem;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 2px solid #e7dfd7;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   background: #faf8f5;
   color: #a8a29e;
 }
@@ -162,7 +263,7 @@
 }
 
 .odl-track-label {
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -179,110 +280,131 @@
 }
 
 .odl-track-meta {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   color: #a8a29e;
-  margin-top: 0.15rem;
-  min-height: 1rem;
+  margin-top: 0.12rem;
+  min-height: 0.9rem;
 }
 
-.odl-cards-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-@media (max-width: 720px) {
-  .odl-cards-row {
-    grid-template-columns: 1fr;
-  }
-}
+/* ── Sidebar info card ── */
 
 .odl-info-card {
   background: #fff;
   border: 1px solid #e7dfd7;
   border-radius: 16px;
-  padding: 1.1rem 1.15rem;
+  padding: 1.25rem 1.35rem;
   box-shadow: 0 1px 0 rgba(44, 36, 28, 0.04);
+}
+
+.odl-info-divider {
+  height: 1px;
+  background: #efe8e0;
+  margin: 1.15rem 0;
 }
 
 .odl-info-card h3 {
   margin: 0 0 0.75rem;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #8a8078;
 }
 
-.odl-info-card p {
-  margin: 0;
-  font-size: 0.9rem;
-  line-height: 1.5;
-  color: #2c241c;
+.odl-info-name {
+  margin: 0 0 0.35rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #1c1917;
 }
 
-.odl-summary-card {
-  background: #fff;
-  border: 1px solid #e7dfd7;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 1px 0 rgba(44, 36, 28, 0.04);
+.odl-info-detail {
+  margin: 0 0 0.25rem;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  color: #5c534a;
 }
 
-.odl-summary-head {
-  padding: 1rem 1.15rem;
-  border-bottom: 1px solid #e7dfd7;
+.odl-info-txn {
+  margin: 0.65rem 0 0;
+  font-size: 0.78rem;
+  color: #8a8078;
+  word-break: break-all;
 }
 
-.odl-summary-head h2 {
-  margin: 0;
+.odl-payment-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.odl-razorpay-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  background: #1a56db;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* ── Section title ── */
+
+.odl-section-title {
+  margin: 0 0 1rem;
   font-family: "Cormorant Garamond", Georgia, serif;
   font-size: 1.35rem;
   font-weight: 600;
   color: #1c1917;
 }
 
-.odl-line-block {
-  border-bottom: 1px solid #efe8e0;
-}
+/* ── Item cards ── */
 
-.odl-line-block:last-of-type {
-  border-bottom: none;
-}
-
-.odl-line-row {
-  display: grid;
-  grid-template-columns: 72px 1fr auto;
+.odl-items {
+  display: flex;
+  flex-direction: column;
   gap: 1rem;
-  align-items: center;
-  padding: 1.1rem 1.15rem;
 }
 
-@media (max-width: 640px) {
-  .odl-line-row {
-    grid-template-columns: 56px 1fr;
-    grid-template-rows: auto auto;
-  }
-
-  .odl-line-side {
-    grid-column: 1 / -1;
-    flex-direction: row !important;
-    justify-content: space-between;
-    align-items: center;
-  }
+.odl-item-card {
+  background: #fff;
+  border: 1px solid #e7dfd7;
+  border-radius: 16px;
+  padding: 1.15rem;
+  box-shadow: 0 1px 0 rgba(44, 36, 28, 0.04);
 }
 
-.odl-line-thumb {
-  width: 72px;
-  height: 72px;
+.odl-item-card--cancelled {
+  background: #f9f7f5;
+  opacity: 0.85;
+}
+
+.odl-item-card--cancelled .odl-item-thumb {
+  filter: grayscale(1);
+  opacity: 0.6;
+}
+
+.odl-item-head {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 0.85rem;
+}
+
+.odl-item-thumb {
+  width: 80px;
+  height: 80px;
   border-radius: 12px;
   object-fit: cover;
   background: #f3efe8;
   border: 1px solid #e7dfd7;
+  flex-shrink: 0;
 }
 
-.odl-line-thumb--empty {
+.odl-item-thumb--empty {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -292,68 +414,91 @@
   line-height: 1.2;
 }
 
-.odl-line-name {
+.odl-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.odl-item-name {
   font-weight: 600;
   font-size: 0.95rem;
   color: #1c1917;
-  margin: 0 0 0.25rem;
+  margin: 0 0 0.2rem;
 }
 
-.odl-line-variant {
+.odl-item-variant {
+  font-size: 0.8rem;
+  color: #6b635c;
+  margin: 0 0 0.5rem;
+}
+
+.odl-item-qty-note {
+  margin: -0.25rem 0 0.5rem;
+  font-size: 0.78rem;
+  color: #8a7f76;
+}
+
+.order-qty-stepper {
+  margin-bottom: 0.85rem;
+}
+
+.order-qty-stepper-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.order-qty-stepper-btn {
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid #d4c8bc;
+  border-radius: 8px;
+  background: #fff;
+  color: #4a3226;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.order-qty-stepper-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.order-qty-stepper-input {
+  width: 3.25rem;
+  padding: 0.35rem 0.4rem;
+  border: 1px solid #d4c8bc;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+.order-qty-stepper-max {
   font-size: 0.82rem;
   color: #6b635c;
-  margin: 0;
 }
 
-.odl-line-side {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.5rem;
-}
-
-.odl-line-qty-price {
-  text-align: right;
-  font-size: 0.86rem;
-  color: #5c534a;
-}
-
-.odl-line-qty-price strong {
-  display: block;
-  font-size: 1rem;
-  color: #1c1917;
-  margin-top: 0.15rem;
-}
+/* ── Status badges (line level) ── */
 
 .odl-status-badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.35rem 0.65rem 0.35rem 0.75rem;
+  gap: 0.3rem;
+  padding: 0.28rem 0.6rem;
   border-radius: 999px;
   border: 1px solid transparent;
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  cursor: pointer;
   font-family: inherit;
-  transition: background 0.15s, border-color 0.15s;
-}
-
-.odl-status-badge:hover {
-  filter: brightness(0.98);
-}
-
-.odl-status-badge:focus {
-  outline: 2px solid #4a3226;
-  outline-offset: 2px;
 }
 
 .odl-status-badge--pending {
-  background: #fffbeb;
-  color: #92400e;
-  border-color: #fde68a;
+  background: #ecfdf5;
+  color: #047857;
+  border-color: #a7f3d0;
 }
 
 .odl-status-badge--shipped {
@@ -381,100 +526,355 @@
 }
 
 .odl-status-badge--cancelled {
-  background: #fef2f2;
-  color: #b91c1c;
-  border-color: #fecaca;
+  background: #f3f4f6;
+  color: #6b7280;
+  border-color: #d1d5db;
 }
 
-.odl-status-badge--open {
-  box-shadow: 0 0 0 2px rgba(74, 50, 38, 0.15);
+/* ── Item breakdown box ── */
+
+.odl-item-breakdown {
+  background: #faf8f5;
+  border: 1px solid #efe8e0;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.85rem;
 }
 
-.odl-status-badge .odl-chevron {
-  transition: transform 0.2s ease;
-  opacity: 0.85;
+.odl-item-breakdown--cancel {
+  background: #f5f3f0;
+  border-color: #e7dfd7;
 }
 
-.odl-status-badge .odl-chevron--up {
-  transform: rotate(-180deg);
+.odl-breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  font-size: 0.84rem;
+  color: #5c534a;
+  padding: 0.25rem 0;
 }
 
-.odl-line-tracking {
-  padding: 0 1.15rem 1.15rem;
-  margin-top: -0.25rem;
+.odl-breakdown-row--total {
+  margin-top: 0.35rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #e7dfd7;
+  font-size: 0.9rem;
+  color: #1c1917;
+}
+
+.odl-breakdown-refund {
+  font-weight: 700;
+  color: #047857;
+}
+
+.odl-breakdown-reason {
+  text-align: right;
+  max-width: 60%;
+  color: #6b635c;
+  font-size: 0.82rem;
+}
+
+/* ── Item tracking ── */
+
+.odl-item-tracking {
+  margin-bottom: 0.5rem;
 }
 
 .odl-mini-track {
   background: #faf8f5;
   border: 1px solid #e7dfd7;
   border-radius: 12px;
-  padding: 1rem 0.75rem;
+  padding: 0.85rem 0.65rem;
 }
 
-.odl-mini-track--muted {
-  background: #fef2f2;
-  border-color: #fecaca;
+.odl-mini-track--cancelled {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  color: #6b7280;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 0.65rem 1rem;
+}
+
+.odl-mini-track--returned {
+  background: #faf5ff;
+  border-color: #e9d5ff;
+}
+
+.odl-mini-track--returned p {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #5c534a;
 }
 
 .odl-mini-track-note {
-  margin: 0.65rem 0 0;
-  font-size: 0.82rem;
+  margin: 0.55rem 0 0;
+  font-size: 0.8rem;
   color: #6b635c;
 }
 
-.odl-line-actions {
+/* ── Item actions & notes ── */
+
+.odl-item-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem;
-  justify-content: flex-end;
+  gap: 0.4rem;
+  margin-top: 0.65rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid #efe8e0;
 }
 
-.odl-line-actions button {
-  font-size: 0.78rem;
+.odl-item-actions button,
+.odl-item-actions a {
+  font-size: 0.76rem;
 }
 
-.odl-totals {
-  padding: 1rem 1.15rem 1.25rem;
-  background: #faf8f5;
-  border-top: 1px solid #e7dfd7;
+.odl-item-return-note {
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  color: #8b6914;
 }
 
-.odl-totals > div {
-  margin: 0;
-  max-width: 320px;
-  margin-left: auto;
+.odl-item-refund-note {
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #047857;
 }
 
-.odl-total-row {
+.odl-return-rejected {
+  color: #991b1b !important;
+}
+
+.odl-return-rejected-date {
+  font-weight: 400;
+  color: #7a4a4a;
+}
+
+.odl-return-rejected-note {
+  color: #6b635c;
+}
+
+/* ── Immutable order summary card (sidebar) ── */
+
+.odl-summary-card {
+  background: linear-gradient(165deg, #3d2b1f 0%, #2c241c 55%, #1a1410 100%);
+  border-radius: 16px;
+  padding: 1.5rem 1.35rem;
+  color: #faf8f5;
+}
+
+.odl-summary-title {
+  margin: 0 0 1.1rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(250, 248, 245, 0.65);
+}
+
+.odl-summary-rows {
   display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  font-size: 0.88rem;
-  color: #5c534a;
-  padding: 0.35rem 0;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin-bottom: 0.85rem;
 }
 
-.odl-total-row strong {
-  color: #2c241c;
-}
-
-.odl-total-final {
+.odl-summary-row {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  margin-top: 0.5rem;
+  gap: 1rem;
+  font-size: 0.88rem;
+  color: rgba(250, 248, 245, 0.85);
+  padding: 0.3rem 0;
+}
+
+.odl-summary-row--deduct {
+  color: #fca5a5;
+}
+
+.odl-summary-row--muted {
+  color: rgba(250, 248, 245, 0.65);
+}
+
+.odl-summary-row--refund {
+  color: #fca5a5;
+}
+
+.odl-summary-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
   padding-top: 0.75rem;
-  border-top: 1px solid #e7dfd7;
+  margin-bottom: 0.85rem;
+  border-top: 1px solid rgba(250, 248, 245, 0.15);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(250, 248, 245, 0.65);
+}
+
+.odl-summary-total strong {
   font-size: 1.05rem;
   font-weight: 700;
-  color: #1c1917;
+  letter-spacing: 0;
+  text-transform: none;
+  color: #faf8f5;
 }
+
+.odl-summary-rows--after-total {
+  margin-bottom: 0.65rem;
+}
+
+.odl-summary-final {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(250, 248, 245, 0.15);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(250, 248, 245, 0.7);
+  margin-bottom: 1rem;
+}
+
+.odl-summary-final strong {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  color: #faf8f5;
+}
+
+.odl-summary-note {
+  margin: 0 0 0.85rem;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: rgba(250, 248, 245, 0.55);
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  padding: 0.55rem 0.65rem;
+}
+
+.odl-summary-cta {
+  display: block;
+  width: 100%;
+  text-align: center;
+  padding: 0.7rem 1rem;
+  border-radius: 12px;
+  border: 2px solid rgba(250, 248, 245, 0.35);
+  background: transparent;
+  color: #faf8f5;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.odl-summary-cta:hover {
+  background: rgba(250, 248, 245, 0.08);
+  border-color: rgba(250, 248, 245, 0.55);
+}
+
+/* ── Refund summary banner ── */
+
+.odl-refund-banner {
+  background: linear-gradient(135deg, #1e4d2b 0%, #2d6b3a 50%, #1a3d24 100%);
+  border-radius: 16px;
+  padding: 1.35rem 1.5rem;
+  color: #faf8f5;
+}
+
+.odl-refund-banner-title {
+  margin: 0 0 1rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(250, 248, 245, 0.65);
+}
+
+.odl-refund-banner-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+@media (max-width: 640px) {
+  .odl-refund-banner-grid {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+}
+
+.odl-refund-banner-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.odl-refund-banner-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(250, 248, 245, 0.55);
+}
+
+.odl-refund-banner-amount {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #faf8f5;
+}
+
+.odl-refund-banner-method {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #faf8f5;
+}
+
+.odl-refund-banner-date {
+  font-size: 0.92rem;
+  color: rgba(250, 248, 245, 0.85);
+}
+
+.odl-refund-banner-cod-note {
+  margin: 1rem 0 0;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: rgba(250, 248, 245, 0.9);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+}
+
+/* ── Toolbar ── */
 
 .odl-toolbar-links {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.65rem;
+  gap: 1.25rem;
   margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #e7dfd7;
   font-size: 0.88rem;
 }
 
@@ -488,142 +888,7 @@
   text-decoration: underline;
 }
 
-.odl-refund-card {
-  background: #fff;
-  border: 1px solid #e7dfd7;
-  border-radius: 16px;
-  padding: 1.1rem 1.15rem;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 1px 0 rgba(44, 36, 28, 0.04);
-}
-
-.odl-refund-card h3 {
-  margin: 0 0 0.75rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: #8a8078;
-}
-
-.odl-refund-rows {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-}
-
-.odl-refund-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 1rem;
-  font-size: 0.88rem;
-  color: #2c241c;
-  padding: 0.3rem 0;
-}
-
-.odl-refund-row--muted {
-  color: #6b635c;
-  font-size: 0.84rem;
-}
-
-.odl-refund-row--deduct {
-  color: #047857;
-}
-
-.odl-refund-row--total {
-  margin-top: 0.35rem;
-  padding-top: 0.65rem;
-  border-top: 1px solid #e7dfd7;
-  font-size: 0.95rem;
-}
-
-.odl-refund-amt {
-  font-weight: 700;
-  color: #047857;
-}
-
-.odl-refund-pill {
-  display: inline-block;
-  padding: 0.2rem 0.55rem;
-  border-radius: 999px;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-}
-
-.odl-refund-pill--full {
-  background: #d1fae5;
-  color: #047857;
-}
-
-.odl-refund-pill--partial {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.odl-refund-txns {
-  list-style: none;
-  margin: 0.85rem 0 0;
-  padding: 0.85rem 0 0;
-  border-top: 1px solid #e7dfd7;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.odl-refund-txn {
-  font-size: 0.82rem;
-}
-
-.odl-refund-txn-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 0.75rem;
-}
-
-.odl-refund-txn-amt {
-  font-weight: 700;
-  color: #047857;
-}
-
-.odl-refund-txn-date {
-  font-size: 0.75rem;
-  color: #8a8078;
-  white-space: nowrap;
-}
-
-.odl-refund-txn-note {
-  margin: 0.2rem 0 0;
-  font-size: 0.78rem;
-  color: #6b635c;
-  line-height: 1.35;
-}
-
-.odl-refund-divider {
-  margin: 1rem 0;
-  border-top: 1px solid #e7dfd7;
-}
-
-.odl-refund-note {
-  margin: 0.85rem 0 0;
-  font-size: 0.78rem;
-  color: #6b635c;
-  line-height: 1.4;
-  background: #faf8f5;
-  border: 1px solid #e7dfd7;
-  border-radius: 10px;
-  padding: 0.65rem 0.75rem;
-}
-
-.odl-refund-note--policy {
-  margin-top: 0.55rem;
-  background: #fffbeb;
-  border-color: #fde68a;
-  color: #92400e;
-}
+/* ── Legacy compat (used by modals) ── */
 
 .odl-line-refund {
   display: block;

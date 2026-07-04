@@ -1,191 +1,191 @@
-import {
-  formatMoney,
-} from "../../../utils/currency.js";
+// import {
+//   formatMoney,
+// } from "../../../utils/currency.js";
 
-export default function OrderPricing(
-  {
-    order,
-  },
-) {
+// export default function OrderPricing(
+//   {
+//     order,
+//   },
+// ) {
 
-  const offerDiscountNum = Number(
-    order.offer_discount_total ?? 0,
-  );
+//   const offerDiscountNum = Number(
+//     order.offer_discount_total ?? 0,
+//   );
 
-  const couponDiscountNum = Number(
-    order.discount_total ?? 0,
-  );
+//   const couponDiscountNum = Number(
+//     order.discount_total ?? 0,
+//   );
 
-  const refundedNum = Number(
-    order.refunded_total ?? 0,
-  );
+//   const refundedNum = Number(
+//     order.refunded_total ?? 0,
+//   );
 
-  return (
+//   return (
 
-    <div className="odl-totals">
+//     <div className="odl-totals">
 
-      <div>
+//       <div>
 
-        <div className="odl-total-row">
+//         <div className="odl-total-row">
 
-          <span>
-            {
-              offerDiscountNum > 0
-                ? "Items"
-                : "Subtotal"
-            }
-          </span>
+//           <span>
+//             {
+//               offerDiscountNum > 0
+//                 ? "Items"
+//                 : "Subtotal"
+//             }
+//           </span>
 
-          <span>
-            ₹
-            {formatMoney(
-              offerDiscountNum > 0
-                ? (
-                    order.subtotal_gross
-                    ?? order.subtotal
-                  )
-                : order.subtotal,
-            )}
-          </span>
-        </div>
+//           <span>
+//             ₹
+//             {formatMoney(
+//               offerDiscountNum > 0
+//                 ? (
+//                     order.subtotal_gross
+//                     ?? order.subtotal
+//                   )
+//                 : order.subtotal,
+//             )}
+//           </span>
+//         </div>
 
-        {
-          offerDiscountNum > 0 && (
+//         {
+//           offerDiscountNum > 0 && (
 
-            <div className="odl-total-row">
+//             <div className="odl-total-row">
 
-              <span>
-                Offer savings
-              </span>
+//               <span>
+//                 Offer savings
+//               </span>
 
-              <span>
-                −₹
-                {formatMoney(
-                  offerDiscountNum,
-                )}
-              </span>
-            </div>
-          )
-        }
+//               <span>
+//                 −₹
+//                 {formatMoney(
+//                   offerDiscountNum,
+//                 )}
+//               </span>
+//             </div>
+//           )
+//         }
 
-        {
-          offerDiscountNum > 0 && (
+//         {
+//           offerDiscountNum > 0 && (
 
-            <div className="odl-total-row">
+//             <div className="odl-total-row">
 
-              <span>
-                Subtotal
-              </span>
+//               <span>
+//                 Subtotal
+//               </span>
 
-              <span>
-                ₹
-                {formatMoney(
-                  order.subtotal,
-                )}
-              </span>
-            </div>
-          )
-        }
+//               <span>
+//                 ₹
+//                 {formatMoney(
+//                   order.subtotal,
+//                 )}
+//               </span>
+//             </div>
+//           )
+//         }
 
-        <div className="odl-total-row">
+//         <div className="odl-total-row">
 
-          <span>
-            Shipping
-          </span>
+//           <span>
+//             Shipping
+//           </span>
 
-          <span>
-            {Number(order.shipping_total) === 0
-              ? "Free"
-              : `₹${formatMoney(order.shipping_total)}`}
-          </span>
-        </div>
+//           <span>
+//             {Number(order.shipping_total) === 0
+//               ? "Free"
+//               : `₹${formatMoney(order.shipping_total)}`}
+//           </span>
+//         </div>
 
-        <div className="odl-total-row">
+//         <div className="odl-total-row">
 
-          <span>
-            Tax
-          </span>
+//           <span>
+//             Tax
+//           </span>
 
-          <span>
-            ₹
-            {formatMoney(order.tax_total)}
-          </span>
-        </div>
+//           <span>
+//             ₹
+//             {formatMoney(order.tax_total)}
+//           </span>
+//         </div>
 
-        {
-          couponDiscountNum > 0 && (
+//         {
+//           couponDiscountNum > 0 && (
 
-            <div className="odl-total-row">
+//             <div className="odl-total-row">
 
-              <span>
-                {
-                  order.coupon_code
-                    ? `Coupon (${order.coupon_code})`
-                    : "Coupon"
-                }
-              </span>
+//               <span>
+//                 {
+//                   order.coupon_code
+//                     ? `Coupon (${order.coupon_code})`
+//                     : "Coupon"
+//                 }
+//               </span>
 
-              <span>
-                −₹
-                {formatMoney(
-                  couponDiscountNum,
-                )}
-              </span>
-            </div>
-          )
-        }
+//               <span>
+//                 −₹
+//                 {formatMoney(
+//                   couponDiscountNum,
+//                 )}
+//               </span>
+//             </div>
+//           )
+//         }
 
-        {
-          offerDiscountNum <= 0 &&
-          couponDiscountNum <= 0 && (
+//         {
+//           offerDiscountNum <= 0 &&
+//           couponDiscountNum <= 0 && (
 
-            <div className="odl-total-row">
+//             <div className="odl-total-row">
 
-              <span>
-                Discounts
-              </span>
+//               <span>
+//                 Discounts
+//               </span>
 
-              <span>
-                ₹
-                {formatMoney(
-                  0,
-                )}
-              </span>
-            </div>
-          )
-        }
+//               <span>
+//                 ₹
+//                 {formatMoney(
+//                   0,
+//                 )}
+//               </span>
+//             </div>
+//           )
+//         }
 
-        <div className="odl-total-final">
+//         <div className="odl-total-final">
 
-          <span>
-            Total
-          </span>
+//           <span>
+//             Total
+//           </span>
 
-          <span>
-            ₹
-            {formatMoney(order.grand_total)}
-          </span>
-        </div>
+//           <span>
+//             ₹
+//             {formatMoney(order.grand_total)}
+//           </span>
+//         </div>
 
-        {
-          refundedNum > 0 && (
+//         {
+//           refundedNum > 0 && (
 
-            <div className="odl-total-row">
+//             <div className="odl-total-row">
 
-              <span>
-                Refunded to wallet
-              </span>
+//               <span>
+//                 Refunded to wallet
+//               </span>
 
-              <span>
-                −₹
-                {formatMoney(
-                  refundedNum,
-                )}
-              </span>
-            </div>
-          )
-        }
-      </div>
-    </div>
-  );
-}
+//               <span>
+//                 −₹
+//                 {formatMoney(
+//                   refundedNum,
+//                 )}
+//               </span>
+//             </div>
+//           )
+//         }
+//       </div>
+//     </div>
+//   );
+// }

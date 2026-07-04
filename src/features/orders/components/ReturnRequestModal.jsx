@@ -1,5 +1,7 @@
 import Modal from "../../../components/common/Modal.jsx";
 
+import QuantityStepper from "./QuantityStepper.jsx";
+
 import {
   DELIVERY_CHARGE_NON_REFUNDABLE_NOTE,
   orderHasPaidDeliveryCharge,
@@ -10,13 +12,25 @@ export default function ReturnRequestModal(
     open,
     returnReason,
     onReturnReasonChange,
+    returnQuantity,
+    onReturnQuantityChange,
     returnBusy,
     returnModalError,
     onClose,
     onSubmit,
     order,
+    returnTargetLineId,
   },
 ) {
+
+  const returnLine = order?.lines?.find(
+    (l) =>
+      l.id === returnTargetLineId,
+  );
+
+  const maxReturnQty = returnLine?.returnable_quantity ?? 1;
+
+  const showQtyPicker = maxReturnQty > 1;
 
   return (
 
@@ -39,6 +53,21 @@ export default function ReturnRequestModal(
         Returns require a reason. An administrator will review your request
         before stock is adjusted.
       </p>
+
+      {
+        showQtyPicker && (
+
+          <QuantityStepper
+            id="order-return-quantity"
+            label="Units to return"
+            value={returnQuantity}
+            min={1}
+            max={maxReturnQty}
+            disabled={returnBusy}
+            onChange={onReturnQuantityChange}
+          />
+        )
+      }
 
       {
         orderHasPaidDeliveryCharge(
@@ -105,7 +134,17 @@ export default function ReturnRequestModal(
           {
             returnBusy
               ? "Submitting…"
-              : "Submit return"
+              : showQtyPicker
+                ? `Return ${Math.min(
+                  Math.max(
+                    1,
+                    Number(
+                      returnQuantity,
+                    ) || 1,
+                  ),
+                  maxReturnQty,
+                )} unit(s)`
+                : "Submit return"
           }
         </button>
       </div>

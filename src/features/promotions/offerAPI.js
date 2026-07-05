@@ -70,9 +70,13 @@ export async function postAdminOffer(
   body,
 ) {
 
+  const isFormData = body instanceof FormData;
+  const config = isFormData ? { headers: { "Content-Type": "multipart/form-data" } } : {};
+
   const res = await api.post(
     "admin/offers/",
     body,
+    config,
   );
 
   return res.data;
@@ -84,9 +88,13 @@ export async function patchAdminOffer(
   body,
 ) {
 
+  const isFormData = body instanceof FormData;
+  const config = isFormData ? { headers: { "Content-Type": "multipart/form-data" } } : {};
+
   const res = await api.patch(
     `admin/offers/${offerId}/`,
     body,
+    config,
   );
 
   return res.data;
@@ -101,5 +109,11 @@ export async function deleteAdminOffer(
     `admin/offers/${offerId}/`,
   );
 
+  return res.data;
+}
+
+
+export async function fetchPublicOffers() {
+  const res = await api.get("promotions/offers/banners/");
   return res.data;
 }

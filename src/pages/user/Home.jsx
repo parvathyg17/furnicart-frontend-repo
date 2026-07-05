@@ -29,6 +29,10 @@ import {
 } from "../../features/shop/shopAPI";
 
 import {
+  fetchPublicOffers,
+} from "../../features/promotions/offerAPI";
+
+import {
   useBackgroundServerSync,
 } from "../../hooks/useBackgroundServerSync.js";
 
@@ -101,6 +105,30 @@ export default function Home() {
     featuredLoading,
     setFeaturedLoading,
   ] = useState(true);
+
+  const [offers, setOffers] = useState([]);
+  const [offersLoading, setOffersLoading] = useState(true);
+
+  const carouselRef = useRef(null);
+
+  useEffect(() => {
+    if (!offersLoading && offers.length > 1 && carouselRef.current) {
+      const interval = setInterval(() => {
+        const container = carouselRef.current;
+        if (!container) return;
+        const scrollLeft = container.scrollLeft;
+        const clientWidth = container.clientWidth;
+        const scrollWidth = container.scrollWidth;
+        
+        if (scrollLeft + clientWidth >= scrollWidth - 10) {
+          container.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          container.scrollBy({ left: clientWidth, behavior: 'smooth' });
+        }
+      }, 3000);
+      return () => clearInterval(interval);
+    }
+  }, [offersLoading, offers]);
 
   const lastFeaturedSigRef =
     useRef(
@@ -178,14 +206,27 @@ export default function Home() {
       [],
     );
 
+  const loadOffers = useCallback(async () => {
+    try {
+      const data = await fetchPublicOffers();
+      setOffers(data || []);
+    } catch {
+      setOffers([]);
+    } finally {
+      setOffersLoading(false);
+    }
+  }, []);
+
   useEffect(
     () => {
 
       loadFeatured();
+      loadOffers();
     },
 
     [
       loadFeatured,
+      loadOffers,
     ],
   );
 
@@ -278,6 +319,77 @@ export default function Home() {
         </div>
 
       </section>
+
+      {!offersLoading && offers.length > 0 && (
+        <section className="offers-banner-carousel" style={{ 
+          width: "100%", 
+          margin: "2rem 0",
+          position: "relative",
+          overflow: "hidden" 
+        }}>
+          <div 
+          ref={carouselRef}
+          style={{
+            display: "flex",
+            overflowX: "auto",
+            scrollSnapType: "x mandatory",
+            scrollBehavior: "smooth",
+            WebkitOverflowScrolling: "touch",
+            scrollbarWidth: "none", /* Firefox */
+            msOverflowStyle: "none", /* IE */
+          }}
+          className="fc-hide-scrollbar"
+          >
+            {(Array.isArray(offers) ? offers : (offers.results || [])).map(offer => (
+              <div key={offer.id} style={{ 
+                flex: "0 0 100%", 
+                scrollSnapAlign: "start",
+                padding: "0 5%",
+                boxSizing: "border-box"
+              }}>
+                <Link to={offer.offer_type === 'product' && offer.product ? `/shop/product/${offer.product_slug || offer.product}` : (offer.offer_type === 'category' && offer.category ? `/shop?category=${offer.category_slug || offer.category}` : '/shop')}
+                  style={{ display: "block", position: "relative", borderRadius: "16px", overflow: "hidden", cursor: "pointer", textDecoration: "none" }}
+                >
+                  <img src={offer.image?.startsWith('http') ? offer.image : `${import.meta.env.VITE_API_URL}${offer.image}`} alt={offer.title} style={{ width: "100%", height: "350px", objectFit: "cover", display: "block" }} />
+                  <div style={{ 
+                    position: "absolute", 
+                    inset: 0, 
+                    background: "linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 60%)",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "flex-end",
+                    padding: "2rem",
+                    color: "white"
+                  }}>
+                    <span style={{ 
+                      background: "white", 
+                      color: "black", 
+                      padding: "4px 12px", 
+                      borderRadius: "20px", 
+                      fontSize: "0.8rem", 
+                      fontWeight: "bold",
+                      width: "fit-content",
+                      marginBottom: "12px",
+                      textTransform: "uppercase",
+                      letterSpacing: "1px"
+                    }}>
+                      {offer.discount_type === 'percent' ? `${offer.discount_value}% OFF` : `₹${offer.discount_value} OFF`}
+                    </span>
+                    <h2 style={{ margin: "0 0 8px 0", fontSize: "2rem", fontWeight: "600", textShadow: "0 2px 4px rgba(0,0,0,0.3)" }}>
+                      {offer.title}
+                    </h2>
+                    {offer.description && (
+                      <p style={{ margin: 0, fontSize: "1.1rem", opacity: 0.9, textShadow: "0 1px 2px rgba(0,0,0,0.3)" }}>
+                        {offer.description}
+                      </p>
+                    )}
+                  </div>
+                </Link>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
 
       <section className="features-section">

@@ -86,6 +86,7 @@ function emptyFormState() {
     valid_from: "",
     valid_until: "",
     is_active: true,
+    image: null,
   };
 }
 
@@ -128,65 +129,45 @@ function offerToForm(
     is_active: Boolean(
       offer.is_active,
     ),
+    image: offer.image || null,
   };
 }
 
-function buildPayload(
-  form,
-) {
+function buildPayload(form) {
+  const formData = new FormData();
+  formData.append("title", form.title.trim());
+  formData.append("description", (form.description || "").trim());
+  formData.append("offer_type", form.offer_type);
+  formData.append("discount_type", form.discount_type);
+  formData.append("discount_value", form.discount_value);
+  formData.append("is_active", form.is_active);
 
-  const body = {
-    title: form.title.trim(),
-    description: (
-      form.description || ""
-    ).trim(),
-    offer_type: form.offer_type,
-    discount_type: form.discount_type,
-    discount_value: form.discount_value,
-    is_active: form.is_active,
-  };
-
-  if (
-    form.offer_type === "product"
-  ) {
-
-    body.product = parseInt(
-      form.product,
-      10,
-    );
-
-    body.category = null;
+  if (form.offer_type === "product") {
+    formData.append("product", parseInt(form.product, 10));
+    formData.append("category", "");
   } else {
-
-    body.category = parseInt(
-      form.category,
-      10,
-    );
-
-    body.product = null;
+    formData.append("category", parseInt(form.category, 10));
+    formData.append("product", "");
   }
 
-  const maxDisc = (
-    form.max_discount_amount || ""
-  ).trim();
+  const maxDisc = (form.max_discount_amount || "").trim();
+  if (maxDisc) {
+    formData.append("max_discount_amount", maxDisc);
+  }
 
-  body.max_discount_amount = maxDisc
-    ? maxDisc
-    : null;
+  if (form.valid_from) {
+    formData.append("valid_from", new Date(form.valid_from).toISOString());
+  }
 
-  body.valid_from = form.valid_from
-    ? new Date(
-        form.valid_from,
-      ).toISOString()
-    : null;
+  if (form.valid_until) {
+    formData.append("valid_until", new Date(form.valid_until).toISOString());
+  }
 
-  body.valid_until = form.valid_until
-    ? new Date(
-        form.valid_until,
-      ).toISOString()
-    : null;
+  if (form.image instanceof File) {
+    formData.append("image", form.image);
+  }
 
-  return body;
+  return formData;
 }
 
 function discountLabel(
@@ -1316,6 +1297,29 @@ export default function AdminOffers() {
                   value={form.valid_until}
                   onChange={onFormChange}
                 />
+              </div>
+
+              <div className="admin-coupons-field">
+                <label htmlFor="of-img">
+                  Banner Image (optional)
+                </label>
+                <input
+                  id="of-img"
+                  name="image"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      setForm((prev) => ({ ...prev, image: file }));
+                    }
+                  }}
+                />
+                {typeof form.image === "string" && form.image && (
+                  <p className="admin-coupons-muted" style={{ marginTop: "4px" }}>
+                    Current image uploaded. Select a new file to replace it.
+                  </p>
+                )}
               </div>
 
               <label className="admin-coupons-check">

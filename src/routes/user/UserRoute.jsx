@@ -45,6 +45,8 @@ import OrderDetail from "../../pages/user/OrderDetail";
 import PrivateRoute from "../user/PrivateRoute";
 import PublicRoute from "../user/PublicRoute";
 import About from "../../pages/user/About";
+import Contact from "../../pages/user/Contact";
+import Sample from "../../components/common/Sample";
 
 
 export default function UserRoutes() {
@@ -78,6 +80,11 @@ export default function UserRoutes() {
       <Route
         path="/about"
         element={<About />}
+      />
+
+      <Route
+        path="/contact"
+        element={<Contact />}
       />
 
       <Route
@@ -256,6 +263,14 @@ export default function UserRoutes() {
           <PrivateRoute>
             <WalletPage />
           </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/sample"
+        element={
+          <Sample />
+          
         }
       />
 

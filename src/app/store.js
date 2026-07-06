@@ -10,6 +10,8 @@ from "../features/catalog/roomType/roomTypeSlice";
 import productReducer
 from "../features/catalog/product/productSlice";
 import cartReducer from "../features/cart/cartSlice";
+import wishlistReducer from "../features/wishlist/wishlistSlice";
+
 
 export const store = configureStore({
   reducer: {
@@ -21,5 +23,6 @@ export const store = configureStore({
     roomType: roomTypeReducer,
     product: productReducer,
     cart: cartReducer,
+    wishlist: wishlistReducer
   },
 });

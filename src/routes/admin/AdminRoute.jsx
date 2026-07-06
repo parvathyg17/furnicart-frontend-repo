@@ -42,6 +42,7 @@ import AdminCoupons from "../../pages/admin/AdminCoupons";
 import AdminOffers from "../../pages/admin/AdminOffers";
 import AdminReferral from "../../pages/admin/AdminReferral";
 import AdminSalesReport from "../../pages/admin/AdminSalesReport";
+import AdminContactMessages from "../../pages/admin/AdminContactMessages";
 import Sample from "../../components/common/Sample";
 
 
@@ -174,6 +175,13 @@ export default function AdminRoutes() {
         />
 
         <Route
+          path="contact-messages"
+          element={
+            <AdminContactMessages />
+          }
+        />
+
+        <Route
           path="orders/:orderNumber"
           element={
             <AdminOrderDetail />
@@ -232,13 +240,13 @@ export default function AdminRoutes() {
         }
       />
 
-      <Route
+      {/* <Route
         path="/sample"
         element={
           <Sample />
           
         }
-      />
+      /> */}
 
     </Routes>
   );

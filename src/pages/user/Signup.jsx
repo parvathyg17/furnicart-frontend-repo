@@ -1,44 +1,26 @@
-
 import toast from "react-hot-toast";
-
-import {
-  useEffect,
-  useState,
-} from "react";
-
-import {
-  Link,
-  useNavigate,
-  useLocation,
-} from "react-router-dom";
-
-import {
-  useDispatch,
-  useSelector,
-} from "react-redux";
-
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import { GoogleLogin } from "@react-oauth/google";
+import { User, Mail, Lock, Eye, EyeOff, Hash } from "lucide-react";
 
 import {
   signupUser,
   googleLogin,
   loadUser,
 } from "../../features/auth/authSlice";
-
 import AuthLayout from "../../components/auth/AuthLayout";
-
 import {
   formatProductApiError,
   mapPayloadToFormErrors,
 } from "../../utils/productApiErrors.js";
-
 import {
   getStoredReferralPayload,
   setStoredReferralCode,
   captureReferralFromSearch,
   clearStoredReferral,
 } from "../../features/referral/referralAPI";
-
 
 const BLOCKED_USERNAMES = [
   "admin",
@@ -112,42 +94,18 @@ function validateSignupFields(form) {
   return errors;
 }
 
-
 export default function Signup() {
-
   const dispatch = useDispatch();
-
   const navigate = useNavigate();
-
   const location = useLocation();
+  const { isAuthenticated } = useSelector((state) => state.auth);
 
-  const { isAuthenticated } = useSelector(
-    (state) => state.auth
-  );
-
-  // ==========================================
-  // LOCAL STATES
-  // ==========================================
-
-  const [showPassword, setShowPassword] =
-    useState(false);
-
-  const [
-    showConfirmPassword,
-    setShowConfirmPassword,
-  ] = useState(false);
-
-  const [fieldErrors, setFieldErrors] =
-    useState({});
-
-  const [backendError, setBackendError] =
-    useState("");
-
-  const [loadingLocal, setLoadingLocal] =
-    useState(false);
-
-  const [successMessage, setSuccessMessage] =
-    useState(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [backendError, setBackendError] = useState("");
+  const [loadingLocal, setLoadingLocal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState(null);
 
   const [form, setForm] = useState({
     username: "",
@@ -157,38 +115,19 @@ export default function Signup() {
     referralCode: "",
   });
 
-
   useEffect(() => {
-
-    captureReferralFromSearch(
-      location.search,
-    );
-
-    const stored = sessionStorage.getItem(
-      "referral_code",
-    );
-
+    captureReferralFromSearch(location.search);
+    const stored = sessionStorage.getItem("referral_code");
     if (stored) {
-
       setForm((prev) => ({
         ...prev,
         referralCode: stored,
       }));
     }
-
-  }, [
-    location.search,
-  ]);
-
-
-  // ==========================================
-  // SUBMIT HANDLER
-  // ==========================================
+  }, [location.search]);
 
   const handleSubmit = async (e) => {
-
     e.preventDefault();
-
     setFieldErrors({});
     setBackendError("");
 
@@ -200,13 +139,8 @@ export default function Signup() {
     }
 
     try {
-
       setLoadingLocal(true);
-
-      setStoredReferralCode(
-        form.referralCode,
-      );
-
+      setStoredReferralCode(form.referralCode);
       const result = await dispatch(
         signupUser({
           username: normalizeUsername(form.username),
@@ -214,438 +148,222 @@ export default function Signup() {
           password: form.password,
         })
       ).unwrap();
-
       setSuccessMessage(result);
-
     } catch (err) {
-
       const mapped = mapPayloadToFormErrors(err);
       const general = mapped._general;
-
       delete mapped._general;
 
-      if (
-        err?.status === "already_verified" &&
-        typeof err?.message === "string"
-      ) {
-
+      if (err?.status === "already_verified" && typeof err?.message === "string") {
         mapped.email = err.message;
-      } else if (
-        general &&
-        !mapped.email &&
-        general.toLowerCase().includes("email")
-      ) {
-
+      } else if (general && !mapped.email && general.toLowerCase().includes("email")) {
         mapped.email = general;
       }
 
       if (Object.keys(mapped).length > 0) {
-
         setFieldErrors(mapped);
         setBackendError("");
       } else {
-
         setBackendError(
-
-          general ||
-          err?.message ||
-          err?.error ||
-          formatProductApiError(err),
-
+          general || err?.message || err?.error || formatProductApiError(err)
         );
       }
-
     } finally {
-
       setLoadingLocal(false);
-
     }
   };
 
-
-  // ==========================================
-  // SIGNUP SUCCESS FLOW
-  // ==========================================
-
   useEffect(() => {
-
     if (!successMessage) return;
+    const status = successMessage?.status;
 
-    const status =
-      successMessage?.status;
-
-    // OTP SENT
-    if (
-      status === "otp_sent" ||
-      status === "otp_resent"
-    ) {
-
-      toast.success(
-        successMessage.message
-      );
-
-      // ==========================================
-      // RESET OTP TIMER
-      // ==========================================
-
-      const resendUntil =
-        Date.now() + 60000;
-
-      localStorage.setItem(
-        "otp_resend_until",
-        resendUntil
-      );
-
-      sessionStorage.setItem(
-        "otp_email",
-        successMessage.email
-      );
-
-      sessionStorage.setItem(
-        "otp_purpose",
-        "signup"
-      );
-
+    if (status === "otp_sent" || status === "otp_resent") {
+      toast.success(successMessage.message);
+      const resendUntil = Date.now() + 60000;
+      localStorage.setItem("otp_resend_until", resendUntil);
+      sessionStorage.setItem("otp_email", successMessage.email);
+      sessionStorage.setItem("otp_purpose", "signup");
       navigate("/verify-otp", {
-        state: {
-          email: successMessage.email,
-          purpose: "signup",
-        },
+        state: { email: successMessage.email, purpose: "signup" },
       });
     }
 
-    // ALREADY VERIFIED
-    if (
-      status === "already_verified"
-    ) {
-
-      toast.error(
-        successMessage.message
-      );
-
+    if (status === "already_verified") {
+      toast.error(successMessage.message);
       navigate("/login");
     }
-
-  }, [
-    successMessage,
-    navigate,
-  ]);
-
-
-  // ==========================================
-  // AUTO LOGIN REDIRECT
-  // ==========================================
+  }, [successMessage, navigate]);
 
   useEffect(() => {
-
     if (isAuthenticated) {
-
       navigate("/");
-
     }
+  }, [isAuthenticated, navigate]);
 
-  }, [
-    isAuthenticated,
-    navigate,
-  ]);
-
-
-  // ==========================================
-  // GOOGLE LOGIN
-  // ==========================================
-
-  const handleGoogleSuccess =
-    async (credentialResponse) => {
-
-      try {
-
-        setLoadingLocal(true);
-
-        const token =
-          credentialResponse.credential;
-
-        await dispatch(
-          googleLogin({
-            token,
-            ...getStoredReferralPayload(),
-          })
-        ).unwrap();
-
-        clearStoredReferral();
-
-        await dispatch(
-          loadUser()
-        ).unwrap();
-
-        toast.success(
-          "Google signup successful"
-        );
-
-        navigate("/");
-
-      } catch (err) {
-
-        toast.error(
-          err?.error ||
-          "Google login failed"
-        );
-
-      } finally {
-
-        setLoadingLocal(false);
-
-      }
-    };
-
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      setLoadingLocal(true);
+      const token = credentialResponse.credential;
+      await dispatch(
+        googleLogin({
+          token,
+          ...getStoredReferralPayload(),
+        })
+      ).unwrap();
+      clearStoredReferral();
+      await dispatch(loadUser()).unwrap();
+      toast.success("Google signup successful");
+      navigate("/");
+    } catch (err) {
+      toast.error(err?.error || "Google login failed");
+    } finally {
+      setLoadingLocal(false);
+    }
+  };
 
   return (
-
     <AuthLayout>
-
-      <form
-        className="auth-form"
-        onSubmit={handleSubmit}
-      >
-
-        <h1 className="auth-title">
-          Create Account
-        </h1>
-
+      <form onSubmit={handleSubmit}>
+        <h1 className="auth-title">Create Account</h1>
         <p className="auth-subtitle">
           Start your journey into intentional design.
         </p>
 
         {/* USERNAME */}
         <div className="auth-group">
-
           <label>Username</label>
-
-          <input
-            type="text"
-            placeholder="julian99"
-            value={form.username}
-            onChange={(e) => {
-              setForm({
-                ...form,
-                username: e.target.value,
-              });
-              setFieldErrors({
-                ...fieldErrors,
-                username: "",
-              });
-            }}
-          />
-
-          {
-            fieldErrors.username && (
-              <p className="error-text">
-                {fieldErrors.username}
-              </p>
-            )
-          }
-
+          <div className="auth-input-wrapper">
+            <User size={18} className="auth-input-icon" />
+            <input
+              type="text"
+              placeholder="julian99"
+              value={form.username}
+              onChange={(e) => {
+                setForm({ ...form, username: e.target.value });
+                setFieldErrors({ ...fieldErrors, username: "" });
+              }}
+            />
+          </div>
+          {fieldErrors.username && (
+            <p className="error-text">{fieldErrors.username}</p>
+          )}
         </div>
 
         {/* EMAIL */}
         <div className="auth-group">
-
           <label>Email Address</label>
-
-          <input
-            type="email"
-            placeholder="julian@example.com"
-            value={form.email}
-            onChange={(e) => {
-              setForm({
-                ...form,
-                email: e.target.value,
-              });
-              setFieldErrors({
-                ...fieldErrors,
-                email: "",
-              });
-            }}
-          />
-
-          {
-            fieldErrors.email && (
-              <p className="error-text">
-                {fieldErrors.email}
-              </p>
-            )
-          }
-
+          <div className="auth-input-wrapper">
+            <Mail size={18} className="auth-input-icon" />
+            <input
+              type="email"
+              placeholder="julian@example.com"
+              value={form.email}
+              onChange={(e) => {
+                setForm({ ...form, email: e.target.value });
+                setFieldErrors({ ...fieldErrors, email: "" });
+              }}
+            />
+          </div>
+          {fieldErrors.email && (
+            <p className="error-text">{fieldErrors.email}</p>
+          )}
         </div>
 
         {/* PASSWORD ROW */}
         <div className="auth-row">
-
           <div className="auth-group">
-
             <label>Password</label>
-
-            <div className="password-box">
-
+            <div className="auth-input-wrapper">
+              <Lock size={18} className="auth-input-icon" />
               <input
-                type={
-                  showPassword
-                    ? "text"
-                    : "password"
-                }
+                type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
                 value={form.password}
                 onChange={(e) => {
-                  setForm({
-                    ...form,
-                    password: e.target.value,
-                  });
-                  setFieldErrors({
-                    ...fieldErrors,
-                    password: "",
-                  });
+                  setForm({ ...form, password: e.target.value });
+                  setFieldErrors({ ...fieldErrors, password: "" });
                 }}
               />
-
+              {/* <button
+                type="button"
+                className="auth-input-action"
+                onClick={() => setShowPassword(!showPassword)}
+                tabIndex="-1"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button> */}
             </div>
-
-            {
-              fieldErrors.password && (
-                <p className="error-text">
-                  {fieldErrors.password}
-                </p>
-              )
-            }
-
+            {fieldErrors.password && (
+              <p className="error-text">{fieldErrors.password}</p>
+            )}
           </div>
 
           <div className="auth-group">
-
             <label>Confirm</label>
-
-            <div className="password-box">
-
+            <div className="auth-input-wrapper">
+              <Lock size={18} className="auth-input-icon" />
               <input
-                type={
-                  showConfirmPassword
-                    ? "text"
-                    : "password"
-                }
+                type={showConfirmPassword ? "text" : "password"}
                 placeholder="••••••••"
-                value={
-                  form.confirmPassword
-                }
+                value={form.confirmPassword}
                 onChange={(e) => {
-                  setForm({
-                    ...form,
-                    confirmPassword:
-                      e.target.value,
-                  });
-                  setFieldErrors({
-                    ...fieldErrors,
-                    confirmPassword: "",
-                  });
+                  setForm({ ...form, confirmPassword: e.target.value });
+                  setFieldErrors({ ...fieldErrors, confirmPassword: "" });
                 }}
               />
-
+              {/* <button
+                type="button"
+                className="auth-input-action"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                tabIndex="-1"
+              >
+                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button> */}
             </div>
-
-            {
-              fieldErrors.confirmPassword && (
-                <p className="error-text">
-                  {fieldErrors.confirmPassword}
-                </p>
-              )
-            }
-
+            {fieldErrors.confirmPassword && (
+              <p className="error-text">{fieldErrors.confirmPassword}</p>
+            )}
           </div>
-
         </div>
 
         <div className="auth-group">
-
-          <label>
-            Referral code (optional)
-          </label>
-
-          <input
-            type="text"
-            placeholder="Enter a friend's code"
-            value={form.referralCode}
-            onChange={(e) => {
-              const value = e.target.value;
-
-              setForm({
-                ...form,
-                referralCode: value,
-              });
-
-              setStoredReferralCode(
-                value,
-              );
-            }}
-          />
-
+          <label>Referral code (optional)</label>
+          <div className="auth-input-wrapper">
+            <Hash size={18} className="auth-input-icon" />
+            <input
+              type="text"
+              placeholder="Enter a friend's code"
+              value={form.referralCode}
+              onChange={(e) => {
+                const value = e.target.value;
+                setForm({ ...form, referralCode: value });
+                setStoredReferralCode(value);
+              }}
+            />
+          </div>
         </div>
 
-        {/* <p className="auth-subtitle" style={{ marginTop: "0.5rem", fontSize: "0.85rem" }}>
-          Password must be at least 8 characters with uppercase, lowercase, and a number.
-        </p> */}
+        {backendError && <div className="error-message">{backendError}</div>}
 
-        
-        {backendError && (
-          <p className="error-text">
-            {backendError}
-          </p>
-        )}
-
-        
-        <button
-          className="auth-btn"
-          type="submit"
-        >
-
-          {loadingLocal
-            ? "Loading..."
-            : "CREATE YOUR ACCOUNT"}
-
+        <button className="auth-btn" type="submit" disabled={loadingLocal}>
+          {loadingLocal ? "Loading..." : "CREATE YOUR ACCOUNT"}
         </button>
 
-       
-        <div className="auth-divider">
-          OR CONTINUE WITH
-        </div>
+        <div className="auth-divider">OR CONTINUE WITH</div>
 
-        
         <div className="google-login-wrapper">
-
           <GoogleLogin
-            onSuccess={
-              handleGoogleSuccess
-            }
+            onSuccess={handleGoogleSuccess}
             onError={() => {
-
-              toast.error(
-                "Google login failed"
-              );
-
+              toast.error("Google login failed");
             }}
           />
-
         </div>
 
-        {/* LOGIN LINK */}
         <div className="auth-bottom-text">
-
-          Already have an account?{" "}
-
-          <Link to="/login">
-            Log in
-          </Link>
-
+          Already have an account? <Link to="/login">Log in</Link>
         </div>
-
       </form>
-
     </AuthLayout>
   );
 }

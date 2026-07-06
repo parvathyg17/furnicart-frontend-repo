@@ -49,7 +49,15 @@ body {
   flex-shrink: 0;
 
   border: 1px solid #e7dfd7;
+    /* Hide scrollbar */
+  scrollbar-width: none;
+
 }
+.account-sidebar::-webkit-scrollbar {
+  display: none;
+}
+
+
 
 .account-sidebar h2 {
   font-size: 38px;

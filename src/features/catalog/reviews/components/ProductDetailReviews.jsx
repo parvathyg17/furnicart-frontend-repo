@@ -22,6 +22,7 @@ import {
 import ReviewCard from "./ReviewCard.jsx";
 import ReviewFormModal from "./ReviewFormModal.jsx";
 import StarRating from "./StarRating.jsx";
+import ConfirmDialog from "../../../../components/common/ConfirmDialog.jsx";
 
 
 function buildPageNumbers(
@@ -73,6 +74,7 @@ export default function ProductDetailReviews(
   const [modalBusy, setModalBusy] = useState(false);
   const [modalError, setModalError] = useState("");
   const [hasOpenedOnLoad, setHasOpenedOnLoad] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const loadReviews = useCallback(
     async (page = 1) => {
@@ -205,7 +207,12 @@ export default function ProductDetailReviews(
     }
   };
 
-  const handleDeleteReview = async () => {
+  const requestDeleteReview = () => {
+    setConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    setConfirmOpen(false);
 
     if (
       !user ||
@@ -214,12 +221,6 @@ export default function ProductDetailReviews(
 
       return;
     }
-
-    const confirmed = window.confirm(
-      "Delete your review?",
-    );
-
-    if (!confirmed) return;
 
     try {
 
@@ -328,7 +329,7 @@ export default function ProductDetailReviews(
                   <button
                     type="button"
                     className="order-cancel-line-btn"
-                    onClick={handleDeleteReview}
+                    onClick={requestDeleteReview}
                   >
                     Delete
                   </button>
@@ -417,6 +418,17 @@ export default function ProductDetailReviews(
         error={modalError}
         initialReview={product.user_review}
         productName={product.name}
+      />
+
+      <ConfirmDialog
+        open={confirmOpen}
+        titleId="delete-review-title"
+        title="Delete Review"
+        hint="Are you sure you want to delete your review?"
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setConfirmOpen(false)}
       />
     </section>
   );

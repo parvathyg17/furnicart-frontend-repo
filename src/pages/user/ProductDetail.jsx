@@ -35,10 +35,14 @@ import ProductDetailFooter from "../../features/products/components/ProductDetai
 import ProductDetailReviews from "../../features/catalog/reviews/components/ProductDetailReviews.jsx";
 
 import PublicNavbar from "../../components/common/PublicNavbar.jsx";
+import { setWishlistCount } from "../../features/wishlist/wishlistSlice.jsx";
+import { useDispatch } from "react-redux";
+import { setCartItemCount } from "../../features/cart/cartSlice.js";
 
 export default function ProductDetail() {
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [searchParams] = useSearchParams();
 
@@ -121,7 +125,7 @@ export default function ProductDetail() {
 
       try {
 
-        await addToCartApi({
+        const res=await addToCartApi({
 
           variantId:
             selectedVariant.id,
@@ -132,6 +136,12 @@ export default function ProductDetail() {
         toast.success(
           "Added to cart."
         );
+        dispatch(
+                  setCartItemCount(
+                    res.item_count,
+                    
+                  ),
+                );
       } catch (err) {
 
         toast.error(
@@ -211,6 +221,7 @@ export default function ProductDetail() {
 
             : "Removed from wishlist."
         );
+        dispatch(setWishlistCount(res.item_count));
       } catch (err) {
 
         toast.error(

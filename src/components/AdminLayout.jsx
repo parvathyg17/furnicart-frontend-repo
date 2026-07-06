@@ -16,6 +16,7 @@ import {
   Percent,
   BarChart3,
   Gift,
+  Mail,
 } from "lucide-react";
 
 import {
@@ -111,6 +112,17 @@ const NAV_SECTIONS = [
         ) =>
           pathname.includes(
             "/admin/orders/returns",
+          ),
+      },
+      {
+        to: "/admin/contact-messages",
+        label: "Messages",
+        icon: Mail,
+        match: (
+          pathname,
+        ) =>
+          pathname.includes(
+            "/admin/contact-messages",
           ),
       },
     ],

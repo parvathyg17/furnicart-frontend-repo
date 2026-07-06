@@ -19,6 +19,7 @@ import {
 import {
   loadCartCount,
 } from "./features/cart/cartSlice";
+import { loadWishlistCount } from "./features/wishlist/wishlistSlice";
 
 function App() {
 
@@ -55,6 +56,9 @@ function App() {
 
             await dispatch(
               loadCartCount(),
+            );
+            await dispatch(
+              loadWishlistCount(),
             );
           }
 

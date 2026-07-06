@@ -14,6 +14,8 @@ import {
   Trash2,
 } from "lucide-react";
 
+import ConfirmDialog from "../../components/common/ConfirmDialog";
+
 import {
   deleteAdminCoupon,
   fetchAdminCoupons,
@@ -316,6 +318,9 @@ export default function AdminCoupons() {
     null,
   );
 
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [couponToDelete, setCouponToDelete] = useState(null);
+
   const load = useCallback(
     async (
       pageOverride,
@@ -533,18 +538,17 @@ export default function AdminCoupons() {
     }
   };
 
-  const handleDelete = async (
+  const requestDelete = (
     c,
   ) => {
+    setCouponToDelete(c);
+    setConfirmOpen(true);
+  };
 
-    if (
-      !window.confirm(
-        `Delete coupon ${c.code}?`,
-      )
-    ) {
-
-      return;
-    }
+  const handleConfirmDelete = async () => {
+    if (!couponToDelete) return;
+    const c = couponToDelete;
+    setConfirmOpen(false);
 
     setDeleteBusyId(
       c.id,
@@ -590,6 +594,7 @@ export default function AdminCoupons() {
       setDeleteBusyId(
         null,
       );
+      setCouponToDelete(null);
     }
   };
 
@@ -893,7 +898,7 @@ export default function AdminCoupons() {
                                 c.id
                               }
                               onClick={() =>
-                                handleDelete(
+                                requestDelete(
                                   c,
                                 )
                               }
@@ -1216,6 +1221,20 @@ export default function AdminCoupons() {
           </div>
         )
       }
+
+      <ConfirmDialog
+        open={confirmOpen}
+        titleId="delete-coupon-title"
+        title="Delete Coupon"
+        hint={`Are you sure you want to delete the coupon ${couponToDelete?.code}?`}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => {
+          setConfirmOpen(false);
+          setCouponToDelete(null);
+        }}
+      />
     </div>
   );
 }

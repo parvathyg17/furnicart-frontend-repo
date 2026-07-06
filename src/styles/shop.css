@@ -42,12 +42,14 @@
   background: #fef2f2;
   color: #991b1b;
   border: 1px solid #fecaca;
+  width: 350px;
 }
 
 .shop-banner.success {
   background: #ecfdf5;
   color: #065f46;
   border: 1px solid #a7f3d0;
+  width: 350px;
 }
 
 .shop-toolbar {
@@ -577,7 +579,7 @@
 
 @media (min-width: 960px) {
   .artisan-layout {
-    grid-template-columns: minmax(220px, 280px) 1fr;
+    grid-template-columns: minmax(200px, 260px) 1fr;
     gap: 2.5rem;
   }
 }

@@ -14,6 +14,8 @@ import {
   Trash2,
 } from "lucide-react";
 
+import ConfirmDialog from "../../components/common/ConfirmDialog";
+
 import {
   deleteAdminOffer,
   fetchAdminOffers,
@@ -310,6 +312,9 @@ export default function AdminOffers() {
     null,
   );
 
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [offerToDelete, setOfferToDelete] = useState(null);
+
   const [
     products,
     setProducts,
@@ -598,18 +603,17 @@ export default function AdminOffers() {
     }
   };
 
-  const handleDelete = async (
+  const requestDelete = (
     offer,
   ) => {
+    setOfferToDelete(offer);
+    setConfirmOpen(true);
+  };
 
-    if (
-      !window.confirm(
-        `Delete offer "${offer.title}"?`,
-      )
-    ) {
-
-      return;
-    }
+  const handleConfirmDelete = async () => {
+    if (!offerToDelete) return;
+    const offer = offerToDelete;
+    setConfirmOpen(false);
 
     setDeleteBusyId(
       offer.id,
@@ -641,6 +645,7 @@ export default function AdminOffers() {
       setDeleteBusyId(
         null,
       );
+      setOfferToDelete(null);
     }
   };
 
@@ -968,7 +973,7 @@ export default function AdminOffers() {
                                 offer.id
                               }
                               onClick={() =>
-                                handleDelete(
+                                requestDelete(
                                   offer,
                                 )
                               }
@@ -1358,6 +1363,20 @@ export default function AdminOffers() {
           </div>
         )
       }
+
+      <ConfirmDialog
+        open={confirmOpen}
+        titleId="delete-offer-title"
+        title="Delete Offer"
+        hint={`Are you sure you want to delete the offer "${offerToDelete?.title}"?`}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => {
+          setConfirmOpen(false);
+          setOfferToDelete(null);
+        }}
+      />
     </div>
   );
 }

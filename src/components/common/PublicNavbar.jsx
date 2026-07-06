@@ -13,6 +13,7 @@ import {
 import logofc from "../../assets/images/logofc.png";
 
 import NavCartLink from "./NavCartLink.jsx";
+import NavWishlistLink from "./NavWishlistLink.jsx";
 
 import {
   resolveMediaUrl,
@@ -67,7 +68,7 @@ export default function PublicNavbar() {
 
         <div className="home-nav-icons">
 
-          <Link
+          {/* <Link
             to={
               user
                 ? "/wishlist"
@@ -78,8 +79,9 @@ export default function PublicNavbar() {
           >
 
             <Heart size={20} />
-          </Link>
+          </Link> */}
 
+          <NavWishlistLink user={user} />
           <NavCartLink user={user} />
 
           <Link

@@ -30,6 +30,11 @@ import {
 } from "../../features/wishlist/wishlistAPI.js";
 
 import {
+  setWishlistCount,
+  loadWishlistCount,
+} from "../../features/wishlist/wishlistSlice"
+
+import {
   addToCartApi,
 } from "../../features/cart/cartAPI";
 
@@ -333,11 +338,16 @@ export default function Wishlist() {
 
     try {
 
-      await toggleWishlistApi(
+      const res = await toggleWishlistApi(
         variantId,
       );
 
       await reloadAfterChange();
+      if (res.item_count !== undefined) {
+        dispatch(setWishlistCount(res.item_count));
+      } else {
+        dispatch(loadWishlistCount());
+      }
     } catch (err) {
 
       setError(
@@ -369,11 +379,16 @@ export default function Wishlist() {
         ),
       );
 
-      await toggleWishlistApi(
+      const toggleRes = await toggleWishlistApi(
         variantId,
       );
 
       await reloadAfterChange();
+      if (toggleRes.item_count !== undefined) {
+        dispatch(setWishlistCount(toggleRes.item_count));
+      } else {
+        dispatch(loadWishlistCount());
+      }
     } catch (err) {
 
       setError(

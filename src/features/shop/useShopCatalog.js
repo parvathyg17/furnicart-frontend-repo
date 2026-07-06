@@ -41,7 +41,12 @@ import {
 import {
   toggleWishlistApi,
   fetchWishlist,
-} from "../wishlist/wishlistAPI.js";
+} from "../../features/wishlist/wishlistAPI"
+
+import {
+  setWishlistCount,
+  loadWishlistCount,
+} from "../../features/wishlist/wishlistSlice"
 
 import {
   formatProductApiError,
@@ -743,6 +748,11 @@ export default function useShopCatalog() {
             ? "Saved to wishlist."
             : "Removed from wishlist.",
         );
+        if (res.item_count !== undefined) {
+          dispatch(setWishlistCount(res.item_count));
+        } else {
+          dispatch(loadWishlistCount());
+        }
       } catch (err) {
 
         setToast(

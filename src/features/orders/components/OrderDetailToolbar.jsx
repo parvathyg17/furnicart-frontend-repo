@@ -12,9 +12,9 @@ export default function OrderDetailToolbar() {
         My orders
       </Link>
 
-      <Link to="/purchases">
+      {/* <Link to="/purchases">
         My purchases
-      </Link>
+      </Link> */}
 
       <Link to="/shop">
         Continue shopping

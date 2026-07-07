@@ -689,23 +689,29 @@ export default function AdminOrderDetail() {
     ],
   );
 
-  const cancelledCount = useMemo(
+  const cancelledQuantity = useMemo(
     () =>
-      (order?.lines || []).filter(
-        (ln) =>
-          ln.status === "cancelled",
-      ).length,
+      (order?.lines || []).reduce(
+        (total, ln) =>
+          total + Number(
+            ln.cancelled_quantity ?? 0,
+          ),
+        0,
+      ),
     [
       order,
     ],
   );
 
-  const returnedCount = useMemo(
+  const returnedQuantity = useMemo(
     () =>
-      (order?.lines || []).filter(
-        (ln) =>
-          ln.fulfillment_status === "returned",
-      ).length,
+      (order?.lines || []).reduce(
+        (total, ln) =>
+          total + Number(
+            ln.returned_quantity ?? 0,
+          ),
+        0,
+      ),
     [
       order,
     ],
@@ -2028,22 +2034,22 @@ export default function AdminOrderDetail() {
               <div className="aod-refund-stat">
 
                 <span className="aod-refund-stat-label">
-                  Cancelled items
+                  Cancelled quantity
                 </span>
 
                 <span className="aod-refund-stat-value">
-                  {cancelledCount}
+                  {cancelledQuantity}
                 </span>
               </div>
 
               <div className="aod-refund-stat">
 
                 <span className="aod-refund-stat-label">
-                  Refunded items
+                  Returned quantity
                 </span>
 
                 <span className="aod-refund-stat-value">
-                  {returnedCount}
+                  {returnedQuantity}
                 </span>
               </div>
             </div>

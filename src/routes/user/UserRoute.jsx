@@ -46,7 +46,7 @@ import PrivateRoute from "../user/PrivateRoute";
 import PublicRoute from "../user/PublicRoute";
 import About from "../../pages/user/About";
 import Contact from "../../pages/user/Contact";
-import Sample from "../../components/common/Sample";
+// import Sample from "../../components/common/Sample";
 
 
 export default function UserRoutes() {
@@ -266,13 +266,13 @@ export default function UserRoutes() {
         }
       />
 
-      <Route
+      {/* <Route
         path="/sample"
         element={
           <Sample />
           
         }
-      />
+      /> */}
 
         
 

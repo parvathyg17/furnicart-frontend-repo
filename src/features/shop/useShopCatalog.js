@@ -399,6 +399,8 @@ export default function useShopCatalog() {
           setProducts(
             data.results || []
           );
+          // const filteredProducts=(data.results||[]).filter((p)=>p.variants?.some((v)=>v.color==="Black"))
+          // setProducts(filteredProducts)
 
           setPagination(
             nextPagination,

@@ -1,6 +1,3 @@
-// ==========================================
-// src/pages/auth/ResetPassword.jsx
-// ==========================================
 
 import {
   useState,
@@ -211,9 +208,9 @@ export default function ResetPassword() {
               }
             >
 
-              {showPassword
+              {/* {showPassword
                 ? "Hide"
-                : "Show"}
+                : "Show"} */}
 
             </span>
 
@@ -258,9 +255,9 @@ export default function ResetPassword() {
               }
             >
 
-              {showConfirmPassword
+              {/* {showConfirmPassword
                 ? "Hide"
-                : "Show"}
+                : "Show"} */}
 
             </span>
 

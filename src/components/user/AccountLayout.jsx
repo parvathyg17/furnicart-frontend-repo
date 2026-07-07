@@ -252,7 +252,7 @@ export default function AccountLayout({
             <div className="logout-actions">
 
               <button
-                className="cancel-btn"
+                className="modal-cancel-btn"
                 onClick={() =>
                   setShowLogoutModal(
                     false
@@ -263,7 +263,7 @@ export default function AccountLayout({
               </button>
 
               <button
-                className="confirm-btn"
+                className="modal-block-btn"
                 onClick={
                   handleLogout
                 }

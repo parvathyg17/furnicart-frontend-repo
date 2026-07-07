@@ -42,9 +42,7 @@ export default function AdminUsers() {
     (state) => state.admin
   );
 
-  // ==========================================
-  // STATES
-  // ==========================================
+  
 
   const [
     loadingLocal,
@@ -76,9 +74,7 @@ export default function AdminUsers() {
     setActionLoading,
   ] = useState(false);
 
-  // ==========================================
-  // FETCH USERS
-  // ==========================================
+ 
 
   const fetchUsersList =
     useCallback(
@@ -157,9 +153,7 @@ export default function AdminUsers() {
     },
   );
 
-  // ==========================================
-  // MODAL
-  // ==========================================
+  
 
   const openModal =
     (user) => {
@@ -177,9 +171,7 @@ export default function AdminUsers() {
       setShowModal(false);
     };
 
-  // ==========================================
-  // BLOCK / UNBLOCK
-  // ==========================================
+
 
   const confirmAction =
     async () => {
@@ -224,9 +216,7 @@ export default function AdminUsers() {
       }
     };
 
-  // ==========================================
-  // STATUS LABEL
-  // ==========================================
+
 
   const getStatusLabel =
     (status) => {
@@ -246,7 +236,6 @@ export default function AdminUsers() {
 
     <div className="admin-users-page">
 
-      {/* HEADER */}
 
       <div className="users-header">
 
@@ -276,7 +265,7 @@ export default function AdminUsers() {
 
       <div className="users-card">
 
-        {/* TOOLBAR */}
+       
 
         <div className="users-toolbar">
 
@@ -299,7 +288,7 @@ export default function AdminUsers() {
 
         </div>
 
-        {/* TABLE */}
+        
 
         <div className="users-table-wrapper">
 

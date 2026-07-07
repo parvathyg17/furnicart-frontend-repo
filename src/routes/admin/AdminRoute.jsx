@@ -240,13 +240,13 @@ export default function AdminRoutes() {
         }
       />
 
-      {/* <Route
+      <Route
         path="/sample"
         element={
           <Sample />
           
         }
-      /> */}
+      />
 
     </Routes>
   );

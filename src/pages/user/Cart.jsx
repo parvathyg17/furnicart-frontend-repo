@@ -233,6 +233,8 @@ export default function Cart() {
     },
   );
 
+ 
+
   const changeQty =
     async (
       itemId,
@@ -243,13 +245,13 @@ export default function Cart() {
       setCheckoutErr(null);
 
       try {
-
-       
+        
 
         await updateCartItemApi(
           itemId,
           nextQty
         );
+      
         
       
       
@@ -310,7 +312,10 @@ export default function Cart() {
       }
     };
 
-  
+  // const cartCount=data?.item_count ??0
+  // const productCount = data?.items
+  // ? new Set(data.items.map((item) => item.product_id)).size
+  // : 0;
 
   const handleCheckout =
     async () => {
@@ -376,6 +381,7 @@ export default function Cart() {
             <h1 className="cart-bag-page-title artisan-font-serif">
 
               Cart
+              
             </h1>
              
 

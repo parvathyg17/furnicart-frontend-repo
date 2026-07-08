@@ -422,6 +422,7 @@ export default function Wishlist() {
       </div>
     );
   }
+ 
 
   const count =
     pagination.count;
@@ -476,6 +477,7 @@ export default function Wishlist() {
 
         <h1 className="wishlist-title">
           My Wishlist
+          
         </h1>
 
         {

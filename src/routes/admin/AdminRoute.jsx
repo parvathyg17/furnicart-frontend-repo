@@ -43,7 +43,7 @@ import AdminOffers from "../../pages/admin/AdminOffers";
 import AdminReferral from "../../pages/admin/AdminReferral";
 import AdminSalesReport from "../../pages/admin/AdminSalesReport";
 import AdminContactMessages from "../../pages/admin/AdminContactMessages";
-import Sample from "../../components/common/Sample";
+// import Sample from "../../components/common/Sample";
 
 
 export default function AdminRoutes() {
@@ -52,7 +52,7 @@ export default function AdminRoutes() {
 
     <Routes>
 
-      {/* LOGIN */}
+     
 
       <Route
         path="/login"
@@ -240,13 +240,13 @@ export default function AdminRoutes() {
         }
       />
 
-      <Route
+      {/* <Route
         path="/sample"
         element={
           <Sample />
           
         }
-      />
+      /> */}
 
     </Routes>
   );

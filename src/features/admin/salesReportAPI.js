@@ -1,8 +1,6 @@
 import api from "../../services/api";
 
-/**
- * Admin sales report (`GET /api/admin/reports/sales/`).
- */
+
 
 function buildReportQueryParams(
   {

@@ -1,4 +1,5 @@
 import "../../../styles/createvariantmodal.css";
+import "../../../styles/adminvariantmedialibrary.css"; // Added to reuse upload styles
 
 import {
   useEffect,
@@ -14,12 +15,18 @@ import {
 import {
   X,
   Plus,
+  ImagePlus,
+  Upload,
+  Trash2,
 } from "lucide-react";
 
 import {
   createVariant,
   clearProductMessages,
+  uploadVariantImage,
 } from "../../../features/catalog/product/productSlice";
+
+import VariantMediaUploader from "../../../components/admin/products/VariantMediaUploader";
 
 export default function CreateVariantModal({
 
@@ -73,40 +80,28 @@ export default function CreateVariantModal({
   ] = useState({});
 
   useEffect(() => {
-
-    if (!isOpen)
-      return;
-
-    dispatch(
-      clearProductMessages()
-    );
-
+    dispatch(clearProductMessages());
     setFormErrors({});
+    setSelectedImages([]);
+    
+    if (isOpen) {
+      setFormData({
+        variant_name: "",
+        sku: "",
+        price: "",
+        stock: "",
+        color: "",
+        material: "",
+        size: "",
+        is_active: false,
+      });
+    }
+  }, [dispatch, isOpen]);
 
-    setFormData({
-
-      variant_name: "",
-
-      sku: "",
-
-      price: "",
-
-      stock: "",
-
-      color: "",
-
-      material: "",
-
-      size: "",
-
-      is_active: false,
-    });
-  }, [
-
-    dispatch,
-    isOpen,
-
-  ]);
+  // ==========================================
+  // IMAGE UPLOAD STATE
+  // ==========================================
+  const [selectedImages, setSelectedImages] = useState([]);
 
   // ==========================================
   // HANDLE CHANGE
@@ -351,6 +346,17 @@ export default function CreateVariantModal({
             result
           )
         ) {
+          const newVariant = result.payload;
+
+          if (selectedImages.length > 0) {
+            const filesToUpload = selectedImages.map((img) => img.file);
+            await dispatch(
+              uploadVariantImage({
+                variant: newVariant.id,
+                images: filesToUpload,
+              })
+            );
+          }
 
           onClose();
 
@@ -374,6 +380,8 @@ export default function CreateVariantModal({
           });
 
           setFormErrors({});
+          setSelectedImages([]);
+          setUploadError("");
         }
       } finally {
 
@@ -731,42 +739,12 @@ export default function CreateVariantModal({
 
             </div>
 
-            {/* STATUS */}
-
-            <div className="variant-status-card">
-
-              <div>
-
-                <h4>
-                  Active Status
-                </h4>
-
-                <p>
-                  Off by default. Turn on only after color,
-                  material, size, and at least three images are
-                  ready; otherwise leave inactive and activate later.
-                </p>
-
-              </div>
-
-              <label className="switch">
-
-                <input
-                  type="checkbox"
-                  name="is_active"
-                  checked={
-                    formData.is_active
-                  }
-                  onChange={
-                    handleChange
-                  }
-                />
-
-                <span className="slider"></span>
-
-              </label>
-
-            </div>
+            {/* IMAGE UPLOAD */}
+            <VariantMediaUploader
+              selectedImages={selectedImages}
+              setSelectedImages={setSelectedImages}
+              isEditMode={false}
+            />
 
           </div>
 

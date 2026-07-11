@@ -6,6 +6,8 @@ import {
   toggleVariantStatus,
   clearProductMessages,
   getAdminProductDetail,
+  toggleProductStatus,
+  updateProduct,
 } from "../../../features/catalog/product/productSlice";
 
 import EditVariantModal
@@ -31,6 +33,8 @@ import {
   Plus,
   Upload,
   MoreHorizontal,
+  Eye,
+  EyeOff
 } from "lucide-react";
 
 import EditProductModal
@@ -115,6 +119,36 @@ const handleToggleVariant =
       }
     };
 
+const handleToggleFeaturedProduct = async () => {
+    try {
+      await dispatch(
+        updateProduct({
+          productId: id,
+          data: {
+            name: productDetail.name,
+            description: productDetail.description,
+            category: productDetail.category?.id || productDetail.category,
+            room_type_ids: productDetail.room_types?.map(r => r.id) || [],
+            is_active: productDetail.is_active,
+            is_featured: !productDetail.is_featured
+          },
+        })
+      ).unwrap();
+      dispatch(getAdminProductDetail(id));
+    } catch (err) {
+      toast.error("Failed to toggle featured status");
+    }
+  };
+
+  const handleToggleActiveProduct = async () => {
+    try {
+      await dispatch(toggleProductStatus(id)).unwrap();
+      dispatch(getAdminProductDetail(id));
+    } catch (err) {
+      
+    }
+  };
+
   useEffect(() => {
 
     if (id) {
@@ -185,7 +219,14 @@ const handleToggleVariant =
 
   ]);
 
-  
+  useEffect(() => {
+    if (selectedVariant && productDetail) {
+      const updatedVariant = productDetail.variants?.find(v => v.id === selectedVariant.id);
+      if (updatedVariant) {
+        setSelectedVariant(updatedVariant);
+      }
+    }
+  }, [productDetail, selectedVariant]);
 
   if (!productDetail) {
 
@@ -249,520 +290,150 @@ const handleToggleVariant =
   return (
 
     <div className="admin-product-detail-page">
+      <div className="admin-product-header-section">
+        {/* BREADCRUMBS */}
+        <div className="product-breadcrumbs">
+          <Link to="/admin/products">Products</Link>
+          <span>{" > "}</span>
+          {productDetail.breadcrumbs?.map((item, index) => (
+             <span key={item.id}>
+               <Link to={`/admin/categories/${item.slug}`}>{item.name}</Link>
+               {index !== productDetail.breadcrumbs.length - 1 && <span>{" > "}</span>}
+             </span>
+          ))}
+        </div>
 
-      {/* BREADCRUMBS */}
-
-      <div className="product-breadcrumbs">
-
-      <Link to="/admin/products">
-
-        Products
-
-      </Link>
-
-      <span>
-        {" / "}
-      </span>
-
-      {
-        productDetail.breadcrumbs?.map(
-          (item, index) => (
-
-            <span key={item.id}>
-
-              <Link
-                to={`/admin/categories/${item.slug}`}
-              >
-
-                {item.name}
-
-              </Link>
-
-              {
-                index !==
-                productDetail.breadcrumbs.length - 1 && (
-                  <span>
-                    {" / "}
-                  </span>
-                )
-              }
-
+        {/* TITLE ROW */}
+        <div className="product-title-row">
+          <div className="product-title-left">
+            <h1>{productDetail.name}</h1>
+            <span className={showActiveProductStatus ? "product-status active" : "product-status inactive"}>
+              ● {showActiveProductStatus ? "ACTIVE" : "INACTIVE"}
             </span>
-          )
-        )
-      }
-
-    </div>
-
-      {/* HERO */}
-
-      <div className="product-detail-hero">
-
-        {/* LEFT */}
-
-        <div className="product-detail-image">
-
-          {
-            productImage ? (
-
-              <img
-                src={productImage}
-                alt={
-                  productDetail.name
-                }
-              />
-
-            ) : (
-
-              <div className="no-product-image">
-
-                No Image
-
-              </div>
-            )
-          }
-
-          <div
-            className={
-              showActiveProductStatus
-
-                ? "product-status active"
-
-                : "product-status inactive"
-            }
-          >
-
-            {
-              showActiveProductStatus
-
-                ? "ACTIVE STATUS"
-
-                : "INACTIVE STATUS"
-            }
-
           </div>
-
+          <button className="edit-product-btn" onClick={() => setOpenEditModal(true)}>
+            <Pencil size={16} /> Edit Product
+          </button>
         </div>
-
-        {/* RIGHT */}
-
-        <div className="product-detail-content">
-
-          {/* TAGS */}
-
-          <div className="product-detail-tags">
-
-           {/* {
-              productDetail.category_name && (
-
-                <span>
-
-                  {
-                    productDetail.category_name
-                  }
-
-                </span>
-              )
-            } */}
-
-                    {
-                productDetail.room_types?.map(
-                  (room) => (
-
-                    <span key={room.id}>
-
-                      {room.name}
-
-                    </span>
-                  )
-                )
-                
-              }
-
-          </div>
-
-          
-
-          <h1>
-
-            {
-              productDetail.name
-            }
-
-          </h1>
-
-        
-
-          <p className="product-description">
-
-            {
-              productDetail.description ||
-              "No description added."
-            }
-
-          </p>
-
-          
-
-         <div className="product-meta-grid">
-
-              <div>
-
-                <small>
-                  CREATED
-                </small>
-
-                <strong>
-
-                  {
-                    productDetail.created_at
-
-                      ? new Date(
-                          productDetail.created_at
-                        ).toLocaleDateString(
-                          "en-US",
-                          {
-
-                            month:
-                              "short",
-
-                            day:
-                              "2-digit",
-
-                            year:
-                              "numeric",
-                          }
-                        )
-
-                      : "-"
-                  }
-
-                </strong>
-
-              </div>
-
-              <div>
-
-                <small>
-                  INVENTORY
-                </small>
-
-                <strong>
-
-                  {
-                    totalInventory
-                  } Total Units
-
-                </strong>
-
-              </div>
-
-              <div>
-
-                <small>
-                  CATEGORY
-                </small>
-
-                <strong>
-
-                  {
-                    productDetail.category_name ||
-                    "-"
-                  }
-
-                </strong>
-
-              </div>
-
-            </div>
-
-          
-
-          <div className="product-detail-actions">
-
-            <button
-              className="edit-product-btn"
-              onClick={() =>
-                setOpenEditModal(true)
-              }
-            >
-
-              <Pencil size={18} />
-
-              Edit Product
-
-            </button>
-
-            <button className="more-btn">
-
-              <MoreHorizontal
-                size={20}
-              />
-
-            </button>
-
-          </div>
-
-        </div>
-
       </div>
 
-      
-
-      <div className="variants-section">
-
-        <div className="variants-header">
-
-          <div>
-
-            <h2>
-              Variants
-            </h2>
-
-            <p>
-              Manage material finishes,
-              colors, and stock levels.
-            </p>
-
+      <div className="product-main-grid">
+        {/* LEFT COLUMN */}
+        <div className="product-main-left">
+          
+          {/* COMMON IMAGE */}
+          <div className="product-common-image" style={{ marginBottom: '24px', overflow: 'hidden', height: '280px', backgroundColor: '#f9fafb', display: 'flex', justifyContent: 'center' }}>
+            {productImage ? (
+              <img src={productImage} alt={productDetail.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+            ) : (
+              <div className="no-product-image" style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af' }}>No Image</div>
+            )}
           </div>
 
-          <button
-            className="add-variant-btn"
-            onClick={() =>
-              setOpenVariantModal(true)
-            }
-          >
+          {/* STATS CARD */}
+          <div className="product-stats-card">
+             <div className="stat-item">
+               <span className="stat-label">Created</span>
+               <span className="stat-value">
+                 {productDetail.created_at ? new Date(productDetail.created_at).toLocaleDateString("en-US", {month:"short", day:"2-digit", year:"numeric"}) : "-"}
+               </span>
+             </div>
+             <div className="stat-item">
+               <span className="stat-label">Inventory</span>
+               <span className="stat-value">{totalInventory} Total Units</span>
+             </div>
+             <div className="stat-item">
+               <span className="stat-label">Category</span>
+               <span className="stat-value">{productDetail.category_name || "-"}</span>
+             </div>
+          </div>
 
-            <Plus size={18} />
+          {/* DESCRIPTION CARD */}
+          <div className="product-desc-card">
+             <h4>Description</h4>
+             <div className="desc-text-wrapper">
+               <p>"{productDetail.description || "No description added."}"</p>
+             </div>
+          </div>
 
-            Add Variant
-
-          </button>
-
+          {/* VARIANTS SECTION */}
+          <div className="variants-section">
+            <div className="variants-header">
+              <div>
+                <h2>Variants</h2>
+                <p>Manage material finishes, colors, and stock levels</p>
+              </div>
+              <button className="add-variant-btn" onClick={() => setOpenVariantModal(true)}>
+                <Plus size={16} /> Add Variant
+              </button>
+            </div>
+            
+            {variants.length > 0 ? (
+              <div className="variants-list">
+                 {variants.map(variant => (
+                    <div key={variant.id} className="variant-row-card">
+                       <img src={variant.images?.[0]?.image || variant.images?.[0]?.image_url || ""} alt="" className="variant-row-img" />
+                       <div className="variant-row-info">
+                         <h4>{variant.variant_name}</h4>
+                         <span>SKU: {variant.sku || "-"}</span>
+                       </div>
+                       <div className="variant-row-details">
+                         <span className="meta-label">DETAILS</span>
+                         <span className="meta-val"><span className="color-dot"></span> {variant.material || "Material"}</span>
+                       </div>
+                       <div className="variant-row-price-stock">
+                         <span className="meta-label">PRICE & STOCK</span>
+                         <span className="meta-val price-val">₹{variant.price || "0.00"}</span>
+                         <span className="meta-subval">{variant.stock || 0} in stock</span>
+                       </div>
+                       <div className="variant-row-actions">
+                         <button onClick={() => handleEditVariant(variant)}><Pencil size={18} /></button>
+                         <label className="switch" style={{ margin: 0, transform: 'scale(0.8)' }}>
+                           <input 
+                             type="checkbox" 
+                             checked={variant.is_active || false} 
+                             onChange={() => handleToggleVariant(variant.id)} 
+                           />
+                           <span className="slider"></span>
+                         </label>
+                       </div>
+                    </div>
+                 ))}
+              </div>
+            ) : (
+              <div className="empty-variants">No variants added yet</div>
+            )}
+          </div>
         </div>
 
-        
-
-        {
-          variants.length > 0 ? (
-
-            <div className="variants-grid">
-
-              {
-                variants.map(
-                  (variant) => {
-
-                    return (
-
-                      <div
-                        key={variant.id}
-                        className="variant-card"
-                      >
-
-                        {/* IMAGES */}
-
-                        <div className="variant-images">
-
-                          {
-                            variant.images
-                              ?.slice(0, 3)
-                              ?.map(
-                                (image) => (
-
-                                  <img
-                                    key={
-                                      image.id
-                                    }
-                                    src={
-                                      image.image
-                                    }
-                                    alt=""
-                                  />
-                                )
-                              )
-                          }
-
-                        </div>
-
-                    
-
-                        <div className="variant-content">
-
-                          <div className="variant-top">
-
-                            <div>
-
-                              <h3>
-
-                                {
-                                  variant.variant_name
-                                }
-
-                              </h3>
-
-                              <small>
-
-                                SKU:
-                                {" "}
-
-                                {
-                                  variant.sku ||
-                                  "-"
-                                }
-
-                              </small>
-
-                            </div>
-
-                            <span
-                              className={
-                                !variant.is_active
-
-                                  ? "variant-status inactive"
-
-                                  : (variant.stock || 0) < 1
-
-                                    ? "variant-status out-of-stock"
-
-                                    : "variant-status active"
-                              }
-                            >
-
-                              {
-                                !variant.is_active
-
-                                  ? "INACTIVE"
-
-                                  : (variant.stock || 0) < 1
-
-                                    ? "OUT OF STOCK"
-
-                                    : "ACTIVE"
-                              }
-
-                            </span>
-
-                          </div>
-
-                   
-
-                          <div className="variant-meta">
-
-                            <div>
-
-                              
-
-                              {
-                                variant.color ||
-                                "Color"
-                              }
-
-                            </div>
-
-                            <div>
-
-                              {
-                                variant.material ||
-                                "Material"
-                              }
-
-                            </div>
-
-                          </div>
-
-                         
-
-                          <div className="variant-price-stock">
-
-                            <strong>
-
-                              ₹
-                              {
-                                variant.price ||
-                                0
-                              }
-
-                            </strong>
-
-                            <span>
-
-                              {
-                                variant.stock ||
-                                0
-                              } in stock
-
-                            </span>
-
-                          </div>
-
-                          
-
-                          <div className="variant-actions">
-
-                           <button
-                            onClick={() =>
-                                handleEditVariant(
-                                variant
-                                )
-                            }
-                            >
-
-                            Edit Variant
-
-                            </button>
-
-                            <button
-                                onClick={() =>
-                                    handleToggleVariant(
-                                    variant.id
-                                    )
-                                }
-                                >
-
-                                {
-                                    variant.is_active
-
-                                    ? "Deactivate"
-
-                                    : "Activate"
-                                }
-
-                                </button>
-
-                          </div>
-
-                          <Link
-                            to={`/admin/products/${productDetail.id}/variants/${variant.id}/media`}
-                            className="upload-images-btn"
-                            >
-
-                            <Upload size={16} />
-
-                            Upload Images
-
-                            </Link>
-
-                        </div>
-
-                      </div>
-                    );
-                  }
-                )
-              }
-
+        {/* RIGHT COLUMN */}
+        <div className="product-main-right">
+          <div className="product-status-card">
+            <h3>Product Status</h3>
+            
+            <div className="status-toggle-row">
+              <div className="toggle-info">
+                <h4>Featured</h4>
+                <p>Highlight on storefront</p>
+              </div>
+              <label className="switch">
+                <input type="checkbox" checked={productDetail.is_featured || false} onChange={handleToggleFeaturedProduct} disabled={productLoading} />
+                <span className="slider"></span>
+              </label>
             </div>
 
-          ) : (
-
-            <div className="empty-variants">
-
-              No variants added yet
-
+            <div className="status-toggle-row">
+              <div className="toggle-info">
+                <h4>Active</h4>
+                <p>Product visibility</p>
+              </div>
+              <label className="switch">
+                <input type="checkbox" checked={productDetail.is_active || false} onChange={handleToggleActiveProduct} disabled={productLoading} />
+                <span className="slider"></span>
+              </label>
             </div>
-
-          )
-        }
-
+          </div>
+        </div>
       </div>
 
       

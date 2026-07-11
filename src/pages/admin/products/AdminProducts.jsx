@@ -13,6 +13,7 @@ from "./CreateProductModal";
 
 import {
   Link,
+  useNavigate,
 } from "react-router-dom";
 
 import {
@@ -21,19 +22,22 @@ import {
 } from "react-redux";
 
 import {
-  Search,
   Plus,
   Eye,
   Pencil,
   Trash2,
   ChevronLeft,
   ChevronRight,
+  MoreVertical,
+  Filter,
 } from "lucide-react";
 
 import {
   getAdminProducts,
   deleteProduct,
   clearProductMessages,
+  updateProduct,
+  toggleProductStatus,
 } from "../../../features/catalog/product/productSlice";
 
 import {
@@ -51,6 +55,7 @@ import {
 export default function AdminProducts() {
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   // ==========================================
   // PRODUCT STATE
@@ -266,6 +271,36 @@ export default function AdminProducts() {
     );
   };
 
+  const handleToggleFeaturedProduct = async (product) => {
+    try {
+      await dispatch(
+        updateProduct({
+          productId: product.id,
+          data: {
+            name: product.name,
+            description: product.description,
+            category: product.category?.id || product.category,
+            room_type_ids: product.room_types?.map(r => r.id) || [],
+            is_active: product.is_active,
+            is_featured: !product.is_featured
+          },
+        })
+      ).unwrap();
+      toast.success("Featured status updated");
+    } catch (err) {
+      toast.error("Failed to toggle featured status");
+    }
+  };
+
+  const handleToggleActiveProduct = async (productId) => {
+    try {
+      await dispatch(toggleProductStatus(productId)).unwrap();
+      toast.success("Active status updated");
+    } catch (err) {
+      // toast is handled in slice
+    }
+  };
+
   const handleDeleteProduct =
     async () => {
 
@@ -418,598 +453,210 @@ export default function AdminProducts() {
   ]);
 
   return (
-
     <div className="admin-products-page">
-
-     
-
-      <div className="products-header">
-
-        <div>
-
-          <h1>
-            Products
-          </h1>
-
-          <p>
-
-            Catalog /
-
-            <span>
-              {" "}All Products
-            </span>
-
-          </p>
-
-        </div>
-
-        <button
-          className="new-product-btn"
-          onClick={() =>
-            setOpenCreateModal(true)
-          }
-        >
-
-          <Plus size={18} />
-
-          New Product
-
-        </button>
-
-      </div>
-
- 
-
-      <div className="products-filters">
-
-        {/* SEARCH */}
-
-        <div className="search-box">
-
-          <Search size={18} />
-
-          <input
-            type="text"
-            placeholder="Search products..."
-            value={search}
-            onChange={(e) => {
-
-              setSearch(
-                e.target.value
-              );
-
-              setCurrentPage(1);
-            }}
-          />
-
-        </div>
-
-        {/* CATEGORY */}
-
-        <select
-          value={category}
-          onChange={(e) => {
-
-            setCategory(
-              e.target.value
-            );
-
-            setCurrentPage(1);
-          }}
-        >
-
-          <option value="">
-            Category
-          </option>
-
-          {
-            categories
-              ?.filter(
-                (item) =>
-                  item.is_active
-              )
-              ?.map(
-                (item) => (
-
-                  <option
-                    key={item.id}
-                    value={item.slug}
-                  >
-
-                    {item.name}
-
-                  </option>
-                )
-              )
-          }
-
-        </select>
-
-        {/* ROOM TYPE */}
-
-        <select
-          value={roomType}
-          onChange={(e) => {
-
-            setRoomType(
-              e.target.value
-            );
-
-            setCurrentPage(1);
-          }}
-        >
-
-          <option value="">
-            Room Type
-          </option>
-
-          {
-            roomTypes
-              ?.filter(
-                (item) =>
-                  item.is_active
-              )
-              ?.map(
-                (item) => (
-
-                  <option
-                    key={item.id}
-                    value={item.slug}
-                  >
-
-                    {item.name}
-
-                  </option>
-                )
-              )
-          }
-
-        </select>
-
-       
-
-        <div className="status-tabs">
-
-          
-
-          <select
-            value={sort}
-            onChange={(e) => {
-
-              setSort(
-                e.target.value
-              );
-
-              setCurrentPage(1);
-            }}
-          >
-
-            <option value="latest">
-              Latest
-            </option>
-
-            <option value="oldest">
-              Oldest
-            </option>
-
-            <option value="a_z">
-              A-Z
-            </option>
-
-            <option value="z_a">
-              Z-A
-            </option>
-
-            <option value="price_low">
-              Price Low to High
-            </option>
-
-            <option value="price_high">
-              Price High to Low
-            </option>
-
-          </select>
-
-          <button
-            type="button"
-            className={
-              status === "all"
-
-                ? "active"
-
-                : ""
-            }
-            onClick={() => {
-
-              setStatus("all");
-
-              setCurrentPage(1);
-            }}
-          >
-            All
-          </button>
-
-          <button
-            type="button"
-            className={
-              status === "active"
-
-                ? "active"
-
-                : ""
-            }
-            onClick={() => {
-
-              setStatus("active");
-
-              setCurrentPage(1);
-            }}
-          >
-            Active
-          </button>
-
-          <button
-            type="button"
-            className={
-              status === "inactive"
-
-                ? "active"
-
-                : ""
-            }
-            onClick={() => {
-
-              setStatus("inactive");
-
-              setCurrentPage(1);
-            }}
-          >
-            Inactive
-          </button>
-
-        </div>
-
-      </div>
-
-
-      {
-        productLoading ? (
-
-          <div className="empty-products">
-
-            Loading products...
-
-          </div>
-
-        ) : products?.length > 0 ? (
-
-          <div className="products-grid">
-
-            {
-              products.map(
-                (product) => {
-
-                  const variants =
-                    product.variants || [];
-
-                  const thumbnail =
-
-                    product.thumbnail ||
-
-                    product.image ||
-
-                    variants?.[0]
-                      ?.images?.[0]
-                      ?.image ||
-
-                    "";
-
-                  return (
-
-                    <div
-                      key={product.id}
-                      className="product-card"
-                    >
-
-                      
-
-                      <div className="product-image-wrapper">
-
-                        {
-                          thumbnail ? (
-
-                            <img
-                              src={thumbnail}
-                              alt={
-                                product.name
-                              }
-                              className="product-image"
-                            />
-
-                          ) : (
-
-                            <div className="no-image">
-
-                              No Image
-
-                            </div>
-                          )
-                        }
-
-                        <div
-                          className={
-                            product.is_active
-
-                              ? "status-badge active"
-
-                              : "status-badge inactive"
-                          }
-                        >
-
-                          {
-                            product.is_active
-
-                              ? "ACTIVE"
-
-                              : "INACTIVE"
-                          }
-
-                        </div>
-
-                      </div>
-
-                      
-
-                      <div className="product-content">
-
-                        <h3>
-
-                          {
-                            product.name
-                          }
-
-                        </h3>
-
-                        <div className="product-tags">
-
-                          {
-                            product.category_name && (
-
-                              <span>
-
-                                {
-                                  product.category_name
-                                }
-
-                              </span>
-                            )
-                          }
-
-                          {
-                            product.room_types?.map(
-                              (room) => (
-
-                                <span key={room.id}>
-
-                                  {room.name}
-
-                                </span>
-                              )
-                            )
-                          }
-
-                        </div>
-
-                        <div className="product-meta">
-
-                          <div>
-
-                            <small>
-                              VARIANTS
-                            </small>
-
-                            <strong>
-
-                              {
-                                variants.length
-                              } Options
-
-                            </strong>
-
-                          </div>
-
-                          <div>
-
-                            <small>
-                              CREATED
-                            </small>
-
-                            <strong>
-
-                              {
-                                product.created_at
-
-                                  ? new Date(
-                                      product.created_at
-                                    ).toLocaleDateString(
-                                      "en-US",
-                                      {
-
-                                        month:
-                                          "short",
-
-                                        day:
-                                          "2-digit",
-
-                                        year:
-                                          "numeric",
-                                      }
-                                    )
-
-                                  : "-"
-                              }
-
-                            </strong>
-
-                          </div>
-
-                        </div>
-
-                        {/* ACTIONS */}
-
-                        <div className="product-actions">
-
-                          <Link
-                            to={`/admin/products/${product.id}`}
-                            className="product-action-link"
-                          >
-
-                            <Eye size={18} />
-
-                          </Link>
-
-                          <Link
-                            to={`/admin/products/${product.id}`}
-                            className="product-action-link"
-                          >
-
-                            <Pencil size={18} />
-
-                          </Link>
-
-                          <button
-                            type="button"
-                            className="delete-btn"
-                            onClick={() =>
-                              openDeleteModal(
-                                product
-                              )
-                            }
-                          >
-                            <Trash2 size={18} />
-                          </button>
-
-                        </div>
-
-                      </div>
-
-                    </div>
-                  );
-                }
-              )
-            }
-
-          </div>
-
-        ) : (
-
-          <div className="empty-products">
-
-            No products found
-
-          </div>
-
-        )
-      }
-
       
+      {/* HEADER SECTION */}
+      <div className="products-header-top">
+        <div className="products-breadcrumb">
+          <span>CATALOG</span>
+          <ChevronRight size={12} color="#9ca3af" />
+          <span>ALL PRODUCTS</span>
+        </div>
+        <div className="products-header-title-row">
+          <h1>Products</h1>
+          <button className="new-product-btn" onClick={() => setOpenCreateModal(true)}>
+            <Plus size={18} /> New Product
+          </button>
+        </div>
+      </div>
 
-      {
-        products?.length > 0 && (
+      {/* STATUS TABS */}
+      <div className="status-tabs-container">
+        <button className={status === "all" ? "status-tab active" : "status-tab"} onClick={() => { setStatus("all"); setCurrentPage(1); }}>
+          All Products
+        </button>
+        <button className={status === "active" ? "status-tab active" : "status-tab"} onClick={() => { setStatus("active"); setCurrentPage(1); }}>
+          Active
+        </button>
+        <button className={status === "inactive" ? "status-tab active" : "status-tab"} onClick={() => { setStatus("inactive"); setCurrentPage(1); }}>
+          Inactive
+        </button>
+      </div>
 
-          <div className="products-footer">
+      {/* FILTERS CARD */}
+      <div className="products-filters-card">
+        <div className="filter-group">
+          <label>CATEGORY</label>
+          <select value={category} onChange={(e) => { setCategory(e.target.value); setCurrentPage(1); }}>
+            <option value="">All Categories</option>
+            {categories?.filter((item) => item.is_active)?.map((item) => (
+              <option key={item.id} value={item.slug}>{item.name}</option>
+            ))}
+          </select>
+        </div>
 
-            <p>
+        <div className="filter-group">
+          <label>ROOM TYPE</label>
+          <select value={roomType} onChange={(e) => { setRoomType(e.target.value); setCurrentPage(1); }}>
+            <option value="">All Rooms</option>
+            {roomTypes?.filter((item) => item.is_active)?.map((item) => (
+              <option key={item.id} value={item.slug}>{item.name}</option>
+            ))}
+          </select>
+        </div>
 
-              Showing{" "}
+        <div className="filter-group">
+          <label>SORT BY</label>
+          <select value={sort} onChange={(e) => { setSort(e.target.value); setCurrentPage(1); }}>
+            <option value="latest">Latest</option>
+            <option value="oldest">Oldest</option>
+            <option value="a_z">A-Z</option>
+            <option value="z_a">Z-A</option>
+            <option value="price_low">Price Low to High</option>
+            <option value="price_high">Price High to Low</option>
+          </select>
+        </div>
 
-              {
-                products.length
-              }
+        <button className="clear-filters-btn" onClick={() => {
+          setCategory(""); setRoomType(""); setStatus("all"); setSort("latest"); setCurrentPage(1);
+        }}>
+          <Filter size={16} /> Clear
+        </button>
+      </div>
 
-              {" "}of{" "}
+      {/* TABLE AREA */}
+      <div className="products-table-container">
+        <div className="products-table-header">
+          <span>PRODUCT DETAILS</span>
+          <span>ROOM / SPECS</span>
+          <span>CREATED</span>
+          <span>STATUS</span>
+          <span>CONTROLS</span>
+        </div>
 
-              {
-                productPagination?.count || 0
-              }
+        {productLoading ? (
+          <div className="empty-products">Loading products...</div>
+        ) : products?.length > 0 ? (
+          <div>
+            {products.map((product) => {
+              const variants = product.variants || [];
+              const thumbnail = product.thumbnail || product.image || variants?.[0]?.images?.[0]?.image || "";
+              
+              return (
+                <div 
+                  key={product.id} 
+                  className="products-table-row" 
+                  onClick={() => navigate(`/admin/products/${product.id}`)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  
+                  {/* COL 1: DETAILS */}
+                  <div className="col-details">
+                    <img src={thumbnail || "/placeholder.png"} alt={product.name} />
+                    <div className="product-info-text">
+                      <h4>{product.name}</h4>
+                      <p>{product.category_name || "Uncategorized"}</p>
+                    </div>
+                  </div>
 
-              {" "}products
+                  {/* COL 2: ROOM / SPECS */}
+                  <div className="col-room">
+                    <div className="room-tags">
+                      {product.room_types?.slice(0,2).map((room) => (
+                        <span key={room.id}>{room.name.toUpperCase()}</span>
+                      ))}
+                      {product.room_types?.length > 2 && <span>+{product.room_types.length - 2} MORE</span>}
+                    </div>
+                    <div className="variant-count">
+                      {variants.length} {variants.length === 1 ? "Variant" : "Variants"}
+                    </div>
+                  </div>
 
-            </p>
+                  {/* COL 3: CREATED */}
+                  <div className="col-created">
+                    {product.created_at ? new Date(product.created_at).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }) : "-"}
+                  </div>
 
-            <div className="pagination">
+                  {/* COL 4: STATUS */}
+                  <div>
+                    <span className={product.is_active ? "status-pill active" : "status-pill"}>
+                      <span className="status-dot"></span>
+                      {product.is_active ? "ACTIVE" : "INACTIVE"}
+                    </span>
+                  </div>
 
-              <button
-                type="button"
-                disabled={
-                  currentPage === 1
-                }
-                onClick={() =>
-                  setCurrentPage(
-                    (prev) =>
-                      Math.max(
-                        prev - 1,
-                        1
-                      )
-                  )
-                }
-              >
+                  {/* COL 5: CONTROLS */}
+                  <div className="col-controls" onClick={(e) => e.stopPropagation()}>
+                    <div className="toggles-stack">
+                      <div className="toggle-row">
+                        <label className="switch" style={{ margin: 0, transform: 'scale(0.7)' }}>
+                          <input type="checkbox" checked={product.is_featured || false} onChange={() => handleToggleFeaturedProduct(product)} disabled={productLoading} />
+                          <span className="slider"></span>
+                        </label>
+                        <span>FEATURED</span>
+                      </div>
+                      <div className="toggle-row">
+                        <label className="switch" style={{ margin: 0, transform: 'scale(0.7)' }}>
+                          <input type="checkbox" checked={product.is_active || false} onChange={() => handleToggleActiveProduct(product.id)} disabled={productLoading} />
+                          <span className="slider"></span>
+                        </label>
+                        <span>ACTIVE</span>
+                      </div>
+                    </div>
 
-                <ChevronLeft size={18} />
-
-              </button>
-
-              {
-                pages.map(
-                  (page) => (
-
-                    <button
-                      type="button"
-                      key={page}
-                      className={
-                        currentPage === page
-
-                          ? "active"
-
-                          : ""
-                      }
-                      onClick={() =>
-                        setCurrentPage(page)
-                      }
+                    <button 
+                      className="view-details-btn"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        navigate(`/admin/products/${product.id}`);
+                      }}
                     >
-
-                      {page}
-
+                      <Eye size={18} style={{ marginRight: '6px' }} />
+                      
                     </button>
-                  )
-                )
-              }
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="empty-products">No products found matching your criteria.</div>
+        )}
+      </div>
 
+      {/* FOOTER PAGINATION */}
+      {products?.length > 0 && (
+        <div className="products-footer">
+          <p>Showing <strong>{products.length}</strong> of <strong>{productPagination?.count || 0}</strong> products</p>
+          <div className="pagination">
+            <button
+              type="button"
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            >
+              <ChevronLeft size={16} />
+            </button>
+            {pages.map((page) => (
               <button
                 type="button"
-                disabled={
-                  currentPage === totalPages
-                }
-                onClick={() =>
-                  setCurrentPage(
-                    (prev) =>
-                      Math.min(
-                        prev + 1,
-                        totalPages
-                      )
-                  )
-                }
+                key={page}
+                className={currentPage === page ? "active" : ""}
+                onClick={() => setCurrentPage(page)}
               >
-
-                <ChevronRight size={18} />
-
+                {page}
               </button>
-
-            </div>
-
+            ))}
+            <button
+              type="button"
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            >
+              <ChevronRight size={16} />
+            </button>
           </div>
-        )
-      }
+        </div>
+      )}
 
       
 

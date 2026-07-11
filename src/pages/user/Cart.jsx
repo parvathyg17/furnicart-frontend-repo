@@ -312,10 +312,7 @@ export default function Cart() {
       }
     };
 
-  // const cartCount=data?.item_count ??0
-  // const productCount = data?.items
-  // ? new Set(data.items.map((item) => item.product_id)).size
-  // : 0;
+  
 
   const handleCheckout =
     async () => {
@@ -742,20 +739,38 @@ export default function Cart() {
                   <dl className="cart-bag-summary-lines">
 
                     <div className="cart-bag-summary-line">
-
                       <dt>
-                        Subtotal
+                        {Number(data.offer_discount_total) > 0 ? "Items" : "Subtotal"}
                       </dt>
-
                       <dd>
-
                         ₹
                         {formatCartMoney(
-                          data.subtotal,
+                          Number(data.offer_discount_total) > 0 
+                            ? (data.subtotal_gross || data.subtotal) 
+                            : data.subtotal,
                         )}
                       </dd>
-
                     </div>
+
+                    {Number(data.offer_discount_total) > 0 && (
+                      <div className="cart-bag-summary-line">
+                        <dt>Offer savings</dt>
+                        <dd>
+                          −₹
+                          {formatCartMoney(data.offer_discount_total)}
+                        </dd>
+                      </div>
+                    )}
+
+                    {Number(data.offer_discount_total) > 0 && (
+                      <div className="cart-bag-summary-line">
+                        <dt>Subtotal</dt>
+                        <dd>
+                          ₹
+                          {formatCartMoney(data.subtotal)}
+                        </dd>
+                      </div>
+                    )}
 
                     <div className="cart-bag-summary-line">
 

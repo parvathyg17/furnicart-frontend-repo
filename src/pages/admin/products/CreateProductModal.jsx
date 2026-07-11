@@ -694,57 +694,18 @@ export default function CreateProductModal({
 
             </div>
 
-            {/* TOGGLES */}
+            {/* NOTE */}
 
-            <div className="toggle-section">
+            <div className="variant-note">
 
-              {/* FEATURED */}
+              <p>
 
-              <div className="toggle-card">
+                New products are saved as inactive. After you add at
+                least one variants, three images per active variant,
+                and complete all variant fields, you can activate the
+                product from its detail page.
 
-                <div>
-
-                  <h4>
-                    Featured Product
-                  </h4>
-
-                  <p>
-                    Show on the homepage gallery
-                  </p>
-
-                </div>
-
-                <label className="switch">
-
-                  <input
-                    type="checkbox"
-                    name="is_featured"
-                    checked={
-                      formData.is_featured
-                    }
-                    onChange={
-                      handleChange
-                    }
-                  />
-
-                  <span className="slider"></span>
-
-                </label>
-
-              </div>
-
-              <div className="variant-note">
-
-                <p>
-
-                  New products are saved as inactive. After you add at
-                  least one variants, three images per active variant,
-                  and complete all variant fields, you can activate the
-                  product from its detail page.
-
-                </p>
-
-              </div>
+              </p>
 
             </div>
 

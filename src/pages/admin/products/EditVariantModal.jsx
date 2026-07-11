@@ -18,7 +18,12 @@ import {
 import {
   updateVariant,
   clearProductMessages,
+  uploadVariantImage,
+  deleteVariantImage,
+  getAdminProductDetail,
 } from "../../../features/catalog/product/productSlice";
+
+import VariantMediaUploader from "../../../components/admin/products/VariantMediaUploader";
 
 export default function EditVariantModal({
 
@@ -59,14 +64,50 @@ export default function EditVariantModal({
     material: "",
 
     size: "",
-
-    is_active: true,
   });
 
   const [
     formErrors,
     setFormErrors,
   ] = useState({});
+
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [uploadErrorLocal, setUploadErrorLocal] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleSaveNewImages = async () => {
+    if (selectedImages.length === 0) return;
+    setIsUploading(true);
+    try {
+      const filesToUpload = selectedImages.map(img => img.file);
+      await dispatch(
+        uploadVariantImage({
+          variant: variant.id,
+          images: filesToUpload,
+        })
+      ).unwrap();
+      
+      // refresh product detail to get new images
+      // assuming productId is available? We don't have productId in EditVariantModal props!
+      // But variant has product id? Yes, variant.product. Or we can just let Redux handle it.
+      // The slice updates the variant images locally in state if productDetail exists.
+      setSelectedImages([]);
+    } catch (err) {
+      const errMsg = typeof err === "string" ? err : err?.error || err?.detail || err?.message || "Failed to upload images";
+      setUploadErrorLocal(errMsg);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleDeleteExistingImage = async (imageId) => {
+    try {
+      await dispatch(deleteVariantImage(imageId)).unwrap();
+    } catch (err) {
+      const errMsg = typeof err === "string" ? err : err?.error || err?.detail || err?.message || "Failed to delete image";
+      setUploadErrorLocal(errMsg);
+    }
+  };
 
   // ==========================================
   // PREFILL
@@ -98,30 +139,21 @@ export default function EditVariantModal({
 
         size:
           variant.size || "",
-
-        is_active:
-          variant.is_active ?? true,
       });
 
       setFormErrors({});
+      setUploadErrorLocal("");
+      setSelectedImages([]);
     }
-
   }, [variant]);
 
   useEffect(() => {
-
-    if (!isOpen)
-      return;
-
-    dispatch(
-      clearProductMessages()
-    );
-  }, [
-
-    dispatch,
-    isOpen,
-
-  ]);
+    dispatch(clearProductMessages());
+    if (isOpen) {
+      setUploadErrorLocal("");
+      setSelectedImages([]);
+    }
+  }, [dispatch, isOpen]);
 
   // ==========================================
   // HANDLE CHANGE
@@ -248,27 +280,6 @@ export default function EditVariantModal({
           "Enter a whole number stock of 0 or more.";
       }
 
-      if (formData.is_active) {
-
-        if (!formData.color.trim()) {
-
-          next.color =
-            "Color / finish is required for an active variant.";
-        }
-
-        if (!formData.material.trim()) {
-
-          next.material =
-            "Material is required for an active variant.";
-        }
-
-        if (!formData.size.trim()) {
-
-          next.size =
-            "Size / dimensions are required for an active variant.";
-        }
-      }
-
       setFormErrors(next);
 
       return Object.keys(next).length === 0;
@@ -315,8 +326,7 @@ export default function EditVariantModal({
         size:
           formData.size.trim(),
 
-        is_active:
-          formData.is_active,
+
       };
 
       const result =
@@ -715,41 +725,17 @@ export default function EditVariantModal({
 
             </div>
 
-            {/* STATUS */}
-
-            <div className="variant-status-card">
-
-              <div>
-
-                <h4>
-                  Active Status
-                </h4>
-
-                <p>
-                  Control storefront visibility
-                  for this variant.
-                </p>
-
-              </div>
-
-              <label className="switch">
-
-                <input
-                  type="checkbox"
-                  name="is_active"
-                  checked={
-                    formData.is_active
-                  }
-                  onChange={
-                    handleChange
-                  }
-                />
-
-                <span className="slider"></span>
-
-              </label>
-
-            </div>
+            {/* IMAGE UPLOAD */}
+            <VariantMediaUploader
+              existingImages={variant.images || []}
+              onDeleteExistingImage={handleDeleteExistingImage}
+              selectedImages={selectedImages}
+              setSelectedImages={setSelectedImages}
+              isEditMode={true}
+              onSaveNewImages={handleSaveNewImages}
+              uploadLoading={productLoading || isUploading}
+            />
+            {uploadErrorLocal && <div className="form-error" style={{ marginTop: '8px' }}>{uploadErrorLocal}</div>}
 
           </div>
 

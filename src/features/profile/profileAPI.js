@@ -24,3 +24,8 @@ export const emailRequestAPI = (data) =>
 export const emailVerifyAPI = (data) =>
   api.post("profile/email-change/verify/", data).then(res => res.data);
 
+// export const getOfferSavingsAPI = async () => {
+//   const res = await api.get("profile/offer-savings/");
+//   return res.data;
+// };
+

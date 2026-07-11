@@ -194,22 +194,12 @@ export function formatProductApiError(payload) {
     }
 
     if (Array.isArray(val) && val.length) {
-
-      parts.push(
-
-        `${key}: ${val[0]}`
-      );
+      parts.push(val[0]);
     } else if (
-
       typeof val === "string" &&
-
       val.trim()
     ) {
-
-      parts.push(
-
-        `${key}: ${val}`
-      );
+      parts.push(val);
     }
   }
 

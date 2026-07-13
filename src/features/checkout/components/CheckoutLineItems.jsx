@@ -103,6 +103,19 @@ export default function CheckoutLineItems(
                   <div className="checkout-item-qty">
                     Qty {row.quantity}
                   </div>
+                  {
+                    row.line_availability &&
+                    row.line_availability.status !== "ok" &&
+                    row.line_availability.message && (
+                      <div
+                        className="shop-banner error"
+                        style={{ padding: "0.25rem 0.5rem", marginTop: "0.5rem", fontSize: "0.85rem", borderRadius: "4px" }}
+                        role="alert"
+                      >
+                        {row.line_availability.message}
+                      </div>
+                    )
+                  }
                 </div>
 
                 <div className="checkout-item-price">

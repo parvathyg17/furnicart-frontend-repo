@@ -60,6 +60,15 @@ export function listableVariants(
   );
 }
 
+function getFinalPrice(variant) {
+  if (!variant) return 0;
+  if (variant.discounted_price != null) {
+    const sale = Number(variant.discounted_price);
+    if (!Number.isNaN(sale)) return sale;
+  }
+  return Number(variant.price);
+}
+
 function cheapestVariant(
   variants,
 ) {
@@ -84,11 +93,7 @@ function cheapestVariant(
         return variant;
       }
 
-      return Number(
-        variant.price,
-      ) < Number(
-        best.price,
-      )
+      return getFinalPrice(variant) < getFinalPrice(best)
         ? variant
         : best;
     },
@@ -121,11 +126,7 @@ function mostExpensiveVariant(
         return variant;
       }
 
-      return Number(
-        variant.price,
-      ) > Number(
-        best.price,
-      )
+      return getFinalPrice(variant) > getFinalPrice(best)
         ? variant
         : best;
     },
@@ -187,8 +188,8 @@ function variantsInPriceRange(
     ) => {
 
       const price =
-        Number(
-          variant.price,
+        getFinalPrice(
+          variant,
         );
 
       if (
@@ -276,16 +277,10 @@ export function variantDisplayLabel(
   );
 }
 
-/**
- * Variant shown on shop cards — follows sort and price filters.
- */
 export function catalogVariantForSort(
   product,
   sort = "latest",
-  {
-    minPrice = "",
-    maxPrice = "",
-  } = {},
+  options = {},
 ) {
 
   const list =
@@ -300,43 +295,12 @@ export function catalogVariantForSort(
     return null;
   }
 
-  const inRange =
-    variantsInPriceRange(
-      list,
-      minPrice,
-      maxPrice,
-    );
-
-  const candidates =
-    inRange.length > 0
-      ? inRange
-      : list;
-
   if (
     sort === "price_high"
   ) {
 
     return mostExpensiveVariant(
-      candidates,
-    );
-  }
-
-  if (
-    sort === "price_low"
-  ) {
-
-    return cheapestVariant(
-      candidates,
-    );
-  }
-
-  if (
-    minPrice ||
-    maxPrice
-  ) {
-
-    return cheapestVariant(
-      candidates,
+      list,
     );
   }
 

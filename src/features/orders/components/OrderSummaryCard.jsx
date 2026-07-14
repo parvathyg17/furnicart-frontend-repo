@@ -196,7 +196,7 @@ export default function OrderSummaryCard(
       <div className="odl-summary-final">
 
         <span>
-          Final paid value
+          Final value
         </span>
 
         <strong>

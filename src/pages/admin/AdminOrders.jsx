@@ -1,43 +1,20 @@
 import "../../styles/admin-orders.css";
 
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import {
-  Link,
-} from "react-router-dom";
+import { Link } from "react-router-dom";
 
-import {
-  Search,
-  ChevronLeft,
-  ChevronRight,
-  Eye,
-} from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Eye } from "lucide-react";
 
-import {
-  fetchAdminOrders,
-} from "../../features/admin/adminAPI";
+import { fetchAdminOrders } from "../../features/admin/adminAPI";
 
-import {
-  useBackgroundServerSync,
-} from "../../hooks/useBackgroundServerSync.js";
+import { useBackgroundServerSync } from "../../hooks/useBackgroundServerSync.js";
 
-import {
-  stableStringify,
-} from "../../utils/stableStringify.js";
+import { stableStringify } from "../../utils/stableStringify.js";
 
 const PAGE_SIZE = 10;
 
-const IMAGE_BASE = (
-  import.meta.env.VITE_API_URL || ""
-).replace(
-  /\/$/,
-  "",
-);
+const IMAGE_BASE = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
 
 const STATUS_FILTER = {
   "": "All statuses",
@@ -72,133 +49,59 @@ const ORDERING_OPTIONS = [
   },
 ];
 
-function formatMoney(
-  v,
-) {
+function formatMoney(v) {
+  const n = Number(v);
 
-  const n = Number(
-    v,
-  );
-
-  if (
-    Number.isNaN(
-      n,
-    )
-  ) {
-
-    return String(
-      v ?? "—",
-    );
+  if (Number.isNaN(n)) {
+    return String(v ?? "—");
   }
 
-  return n.toLocaleString(
-    undefined,
-    {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    },
-  );
+  return n.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 }
 
-function lineImageSrc(
-  imageUrl,
-) {
-
-  if (
-    !imageUrl
-  ) {
-
+function lineImageSrc(imageUrl) {
+  if (!imageUrl) {
     return null;
   }
 
-  if (
-    imageUrl.startsWith(
-      "http",
-    )
-  ) {
-
+  if (imageUrl.startsWith("http")) {
     return imageUrl;
   }
 
-  const path = imageUrl.startsWith(
-    "/",
-  )
-    ? imageUrl
-    : `/${imageUrl}`;
+  const path = imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`;
 
   return `${IMAGE_BASE}${path}`;
 }
 
-function displayNameFromEmail(
-  email,
-) {
-
-  if (
-    !email ||
-    typeof email !== "string"
-  ) {
-
+function displayNameFromEmail(email) {
+  if (!email || typeof email !== "string") {
     return "Customer";
   }
 
-  const local = email.split(
-    "@",
-  )[
-    0
-  ] ||
-    email;
+  const local = email.split("@")[0] || email;
 
   return local
-    .replace(
-      /[._-]+/g,
-      " ",
-    )
-    .split(
-      " ",
-    )
-    .filter(
-      Boolean,
-    )
-    .map(
-      (
-        w,
-      ) =>
-        w.charAt(
-          0,
-        ).toUpperCase() +
-        w.slice(
-          1,
-        ),
-    )
-    .join(
-      " ",
-    );
+    .replace(/[._-]+/g, " ")
+    .split(" ")
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
 }
 
-function formatDateBlock(
-  iso,
-) {
-
-  if (
-    !iso
-  ) {
-
+function formatDateBlock(iso) {
+  if (!iso) {
     return {
       date: "—",
       time: "",
     };
   }
 
-  const d = new Date(
-    iso,
-  );
+  const d = new Date(iso);
 
-  if (
-    Number.isNaN(
-      d.getTime(),
-    )
-  ) {
-
+  if (Number.isNaN(d.getTime())) {
     return {
       date: "—",
       time: "",
@@ -206,137 +109,71 @@ function formatDateBlock(
   }
 
   return {
-    date: d.toLocaleDateString(
-      undefined,
-      {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      },
-    ),
-    time: d.toLocaleTimeString(
-      undefined,
-      {
-        hour: "2-digit",
-        minute: "2-digit",
-      },
-    ),
+    date: d.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }),
+    time: d.toLocaleTimeString(undefined, {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
   };
 }
 
-function statusPillClass(
-  status,
-) {
-
-  switch (
-    status
-  ) {
-
+function statusPillClass(status) {
+  switch (status) {
     case "delivered":
     case "partially_delivered":
     case "shipped":
     case "partially_shipped":
-
       return "ao-status-pill ao-status-pill--green";
 
     case "out_for_delivery":
-
       return "ao-status-pill ao-status-pill--slate";
 
     case "pending":
     case "partially_cancelled":
-
       return "ao-status-pill ao-status-pill--amber";
 
     case "cancelled":
-
       return "ao-status-pill ao-status-pill--rose";
 
     default:
-
       return "ao-status-pill ao-status-pill--neutral";
   }
 }
 
-function statusLabel(
-  status,
-) {
-
-  return STATUS_FILTER[
-    status
-  ] ||
-    status ||
-    "—";
+function statusLabel(status) {
+  return STATUS_FILTER[status] || status || "—";
 }
 
-function buildPageList(
-  current,
-  total,
-) {
-
-  if (
-    total <= 7
-  ) {
-
+function buildPageList(current, total) {
+  if (total <= 7) {
     return Array.from(
       {
         length: total,
       },
-      (
-        _,
-        i,
-      ) =>
-        i + 1,
+      (_, i) => i + 1,
     );
   }
 
-  const pages = new Set(
-    [
-      1,
-      total,
-      current,
-      current - 1,
-      current + 1,
-    ],
-  );
+  const pages = new Set([1, total, current, current - 1, current + 1]);
 
-  const sorted = [
-    ...pages,
-  ].filter(
-    (
-      p,
-    ) =>
-      p >= 1 &&
-      p <= total,
-  ).sort(
-    (
-      a,
-      b,
-    ) =>
-      a - b,
-  );
+  const sorted = [...pages]
+    .filter((p) => p >= 1 && p <= total)
+    .sort((a, b) => a - b);
 
   const out = [];
 
   let prev = 0;
 
-  for (
-    const p of sorted
-  ) {
-
-    if (
-      p - prev >
-      1
-    ) {
-
-      out.push(
-        "…",
-      );
+  for (const p of sorted) {
+    if (p - prev > 1) {
+      out.push("…");
     }
 
-    out.push(
-      p,
-    );
+    out.push(p);
 
     prev = p;
   }
@@ -344,17 +181,10 @@ function buildPageList(
   return out;
 }
 
-function productSummary(
-  lineItems,
-) {
+function productSummary(lineItems) {
+  const items = lineItems || [];
 
-  const items = lineItems ||
-    [];
-
-  if (
-    items.length === 0
-  ) {
-
+  if (items.length === 0) {
     return {
       primary: "—",
       variant: "",
@@ -363,265 +193,129 @@ function productSummary(
     };
   }
 
-  const first = items[
-    0
-  ];
+  const first = items[0];
 
-  const primary = first.product_name ||
-    "Item";
+  const primary = first.product_name || "Item";
 
-  const variant = [
-    first.variant_name,
-    first.sku &&
-      `SKU ${first.sku}`,
-  ]
-    .filter(
-      Boolean,
-    )
-    .join(
-      " · ",
-    );
+  const variant = [first.variant_name, first.sku && `SKU ${first.sku}`]
+    .filter(Boolean)
+    .join(" · ");
 
-  const thumbSrc = lineImageSrc(
-    first.image_url,
-  );
+  const thumbSrc = lineImageSrc(first.image_url);
 
   return {
     primary,
     variant,
     thumbSrc,
-    more: Math.max(
-      0,
-      items.length - 1,
-    ),
+    more: Math.max(0, items.length - 1),
   };
 }
 
 export default function AdminOrders() {
+  const [rows, setRows] = useState([]);
 
-  const [
-    rows,
-    setRows,
-  ] = useState(
-    [],
-  );
+  const [page, setPage] = useState(1);
 
-  const [
-    page,
-    setPage,
-  ] = useState(
-    1,
-  );
+  const [totalPages, setTotalPages] = useState(1);
 
-  const [
-    totalPages,
-    setTotalPages,
-  ] = useState(
-    1,
-  );
+  const [totalCount, setTotalCount] = useState(0);
 
-  const [
-    totalCount,
-    setTotalCount,
-  ] = useState(
-    0,
-  );
+  const [search, setSearch] = useState("");
 
-  const [
-    search,
-    setSearch,
-  ] = useState(
-    "",
-  );
+  const [draft, setDraft] = useState("");
 
-  const [
-    draft,
-    setDraft,
-  ] = useState(
-    "",
-  );
+  const [status, setStatus] = useState("");
 
-  const [
-    status,
-    setStatus,
-  ] = useState(
-    "",
-  );
+  const [ordering, setOrdering] = useState(DEFAULT_ORDERING);
 
-  const [
-    ordering,
-    setOrdering,
-  ] = useState(
-    DEFAULT_ORDERING,
-  );
+  const [err, setErr] = useState(null);
 
-  const [
-    err,
-    setErr,
-  ] = useState(
-    null,
-  );
+  const [loading, setLoading] = useState(true);
 
-  const [
-    loading,
-    setLoading,
-  ] = useState(
-    true,
-  );
+  const lastRowsSigRef = useRef(null);
 
-  const lastRowsSigRef =
-    useRef(
-      null,
-    );
+  const load = useCallback(
+    async ({ silent = false } = {}) => {
+      if (!silent) {
+        setErr(null);
 
-  const load =
-    useCallback(
-      async (
-        { silent = false } = {},
-      ) => {
+        setLoading(true);
+      }
 
-        if (!silent) {
+      try {
+        const data = await fetchAdminOrders({
+          page,
 
-          setErr(
-            null,
-          );
+          pageSize: PAGE_SIZE,
 
-          setLoading(
-            true,
-          );
-        }
+          search,
 
-        try {
+          status,
 
-          const data =
-            await fetchAdminOrders(
-              {
-                page,
+          ordering,
+        });
 
-                pageSize: PAGE_SIZE,
+        const snap = stableStringify({
+          results: data.results || [],
 
-                search,
+          total_pages: data.total_pages || 1,
 
-                status,
-
-                ordering,
-              },
-            );
-
-          const snap =
-            stableStringify(
-              {
-
-                results:
-                  data.results || [],
-
-                total_pages:
-                  data.total_pages || 1,
-
-                count:
-                  typeof data.count === "number"
-                    ? data.count
-                    : (
-                      data.results || []
-                    ).length,
-              },
-            );
-
-          if (
-            silent &&
-            lastRowsSigRef.current ===
-              snap
-          ) {
-
-            return;
-          }
-
-          lastRowsSigRef.current =
-            snap;
-
-          setRows(
-            data.results || [],
-          );
-
-          setTotalPages(
-            data.total_pages || 1,
-          );
-
-          setTotalCount(
+          count:
             typeof data.count === "number"
               ? data.count
               : (data.results || []).length,
-          );
-        } catch (e) {
+        });
 
-          if (!silent) {
-
-            setErr(
-              e.response?.data?.detail ||
-                "Could not load orders.",
-            );
-          }
-        } finally {
-
-          if (!silent) {
-
-            setLoading(
-              false,
-            );
-          }
+        if (silent && lastRowsSigRef.current === snap) {
+          return;
         }
-      },
-      [
-        page,
-        search,
-        status,
-        ordering,
-      ],
-    );
 
-  useEffect(
-    () => {
+        lastRowsSigRef.current = snap;
 
-      lastRowsSigRef.current =
-        null;
+        setRows(data.results || []);
 
-      load();
+        setTotalPages(data.total_pages || 1);
+
+        setTotalCount(
+          typeof data.count === "number"
+            ? data.count
+            : (data.results || []).length,
+        );
+      } catch (e) {
+        if (!silent) {
+          setErr(e.response?.data?.detail || "Could not load orders.");
+        }
+      } finally {
+        if (!silent) {
+          setLoading(false);
+        }
+      }
     },
-    [load],
+    [page, search, status, ordering],
   );
 
-  useBackgroundServerSync(
-    {
+  useEffect(() => {
+    lastRowsSigRef.current = null;
 
-      enabled: true,
+    load();
+  }, [load]);
 
-      pollIntervalMs: 90_000,
+  useBackgroundServerSync({
+    enabled: true,
 
-      onRefresh:
-        () =>
-          load(
-            {
-              silent: true,
-            },
-          ),
-    },
-  );
+    pollIntervalMs: 90_000,
 
-  const start = totalCount === 0
-    ? 0
-    : (
-      page - 1
-    ) * PAGE_SIZE + 1;
+    onRefresh: () =>
+      load({
+        silent: true,
+      }),
+  });
 
-  const end = Math.min(
-    page * PAGE_SIZE,
-    totalCount,
-  );
+  const start = totalCount === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
 
-  const pageNums = buildPageList(
-    page,
-    totalPages,
-  );
+  const end = Math.min(page * PAGE_SIZE, totalCount);
+
+  const pageNums = buildPageList(page, totalPages);
 
   const filtersActive =
     Boolean(status) ||
@@ -630,64 +324,39 @@ export default function AdminOrders() {
     ordering !== DEFAULT_ORDERING;
 
   const handleClearFilters = () => {
+    setDraft("");
 
-    setDraft(
-      "",
-    );
+    setSearch("");
 
-    setSearch(
-      "",
-    );
+    setStatus("");
 
-    setStatus(
-      "",
-    );
+    setOrdering(DEFAULT_ORDERING);
 
-    setOrdering(
-      DEFAULT_ORDERING,
-    );
-
-    setPage(
-      1,
-    );
+    setPage(1);
   };
 
   return (
-
     <div className="ao-artisan">
-
       <p className="ao-breadcrumb">
         Admin
-        <span>
-          /
-        </span>
+        <span>/</span>
         Order management
       </p>
 
-      <h1 className="ao-title">
-        Recent orders
-      </h1>
+      <h1 className="ao-title">Recent orders</h1>
 
       <form
         className="ao-toolbar"
         onSubmit={(e) => {
-
           e.preventDefault();
 
-          setPage(
-            1,
-          );
+          setPage(1);
 
-          setSearch(
-            draft.trim(),
-          );
+          setSearch(draft.trim());
         }}
       >
-
         <div className="ao-search-wrap">
-
           <label className="ao-search" htmlFor="ao-order-search">
-
             <Search size={18} aria-hidden />
 
             <input
@@ -695,491 +364,281 @@ export default function AdminOrders() {
               type="search"
               placeholder="Find orders by ID, customer email, product, variant, or SKU…"
               value={draft}
-              onChange={(e) =>
-                setDraft(
-                  e.target.value,
-                )
-              }
+              onChange={(e) => setDraft(e.target.value)}
             />
-
           </label>
-
         </div>
 
         <select
           className="ao-filter"
           value={status}
           onChange={(e) => {
+            setPage(1);
 
-            setPage(
-              1,
-            );
-
-            setStatus(
-              e.target.value,
-            );
+            setStatus(e.target.value);
           }}
           aria-label="Filter by status"
         >
-
-          {
-            Object.entries(
-              STATUS_FILTER,
-            ).map(
-              ([
-                k,
-                lab,
-              ]) => (
-
-                <option
-                  key={
-                    k || "all"
-                  }
-                  value={k}
-                >
-                  {lab}
-                </option>
-              ),
-            )
-          }
-
+          {Object.entries(STATUS_FILTER).map(([k, lab]) => (
+            <option key={k || "all"} value={k}>
+              {lab}
+            </option>
+          ))}
         </select>
 
         <select
           className="ao-filter"
           value={ordering}
           onChange={(e) => {
+            setPage(1);
 
-            setPage(
-              1,
-            );
-
-            setOrdering(
-              e.target.value,
-            );
+            setOrdering(e.target.value);
           }}
           aria-label="Sort orders"
         >
-
-          {
-            ORDERING_OPTIONS.map(
-              (
-                opt,
-              ) => (
-
-                <option
-                  key={opt.value}
-                  value={opt.value}
-                >
-                  {opt.label}
-                </option>
-              ),
-            )
-          }
-
+          {ORDERING_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
         </select>
 
-        <button
-          type="submit"
-          className="ao-btn-ghost"
-        >
+        <button type="submit" className="ao-btn-ghost">
           Search
         </button>
 
-        {
-          filtersActive && (
-
-            <button
-              type="button"
-              className="ao-btn-ghost"
-              onClick={handleClearFilters}
-            >
-              Clear filters
-            </button>
-          )
-        }
-
+        {filtersActive && (
+          <button
+            type="button"
+            className="ao-btn-ghost"
+            onClick={handleClearFilters}
+          >
+            Clear filters
+          </button>
+        )}
       </form>
 
-      {
-        err && (
-
-          <div className="ao-error" role="alert">
-            {err}
-          </div>
-        )
-      }
+      {err && (
+        <div className="ao-error" role="alert">
+          {err}
+        </div>
+      )}
 
       <div className="ao-card">
-
         <div className="ao-table-scroll">
+          <table className="ao-table">
+            <thead>
+              <tr>
+                <th>Order ID</th>
 
-        <table className="ao-table">
+                <th>Date</th>
 
-          <thead>
+                <th>Customer</th>
 
-            <tr>
+                <th>Product</th>
 
-              <th>
-                Order ID
-              </th>
+                <th>Status</th>
 
-              <th>
-                Date
-              </th>
+                <th style={{ textAlign: "right" }}>Total</th>
 
-              <th>
-                Customer
-              </th>
+                <th style={{ width: "1%" }} aria-label="Actions" />
+              </tr>
+            </thead>
 
-              <th>
-                Product
-              </th>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td
+                    colSpan={7}
+                    style={{
+                      padding: "2.5rem",
+                      textAlign: "center",
+                      color: "#78716c",
+                    }}
+                  >
+                    Loading orders…
+                  </td>
+                </tr>
+              ) : rows.length === 0 && !err ? (
+                <tr>
+                  <td
+                    colSpan={7}
+                    style={{
+                      padding: "2rem",
+                      textAlign: "center",
+                      color: "#78716c",
+                    }}
+                  >
+                    No orders match your filters.
+                  </td>
+                </tr>
+              ) : (
+                rows.map((o) => {
+                  const dt = formatDateBlock(o.placed_at);
 
-              <th>
-                Status
-              </th>
+                  const email = o.user_email || "";
 
-              <th style={{ textAlign: "right" }}>
-                Total
-              </th>
+                  const prod = productSummary(o.line_items);
 
-              <th style={{ width: "1%" }} aria-label="Actions" />
-            </tr>
+                  const remainingTotal =
+                    Number(o.remaining_value ?? o.grand_total) || 0;
 
-          </thead>
+                  const originalTotal =
+                    Number(o.original_paid ?? o.grand_total) || 0;
 
-          <tbody>
+                  const totalAdjusted = originalTotal - remainingTotal > 0.009;
 
-            {
-              loading
-                ? (
-
-                  <tr>
-
-                    <td colSpan={7} style={{ padding: "2.5rem", textAlign: "center", color: "#78716c" }}>
-                      Loading orders…
-                    </td>
-
-                  </tr>
-                )
-                : rows.length === 0 && !err
-                  ? (
-
-                    <tr>
-
-                      <td colSpan={7} style={{ padding: "2rem", textAlign: "center", color: "#78716c" }}>
-                        No orders match your filters.
+                  return (
+                    <tr key={o.id}>
+                      <td>
+                        <span className="ao-order-id">#{o.order_number}</span>
                       </td>
 
-                    </tr>
-                  )
-                  : rows.map(
-                  (o) => {
+                      <td>
+                        <div className="ao-date-stack">
+                          <strong>{dt.date}</strong>
 
-                    const dt = formatDateBlock(
-                      o.placed_at,
-                    );
+                          {dt.time ? <> | {dt.time}</> : null}
+                        </div>
+                      </td>
 
-                    const email = o.user_email ||
-                      "";
-
-                    const prod = productSummary(
-                      o.line_items,
-                    );
-
-                    const remainingTotal = Number(
-                      o.remaining_value ?? o.grand_total,
-                    ) || 0;
-
-                    const originalTotal = Number(
-                      o.original_paid ?? o.grand_total,
-                    ) || 0;
-
-                    const totalAdjusted = originalTotal - remainingTotal > 0.009;
-
-                    return (
-
-                      <tr key={o.id}>
-
-                        <td>
-
-                          <span className="ao-order-id">
-                            #
-                            {o.order_number}
-                          </span>
-
-                        </td>
-
-                        <td>
-
-                          <div className="ao-date-stack">
-
-                            <strong>
-                              {dt.date}
-                            </strong>
-
-                            {
-                              dt.time
-                                ? (
-                                  <>
-                                    {" "}
-                                    |
-                                    {" "}
-                                    {dt.time}
-                                  </>
-                                )
-                                : null
-                            }
-
+                      <td>
+                        <div className="ao-customer">
+                          <div className="ao-customer-name">
+                            {displayNameFromEmail(email)}
                           </div>
 
-                        </td>
-
-                        <td>
-
-                          <div className="ao-customer">
-
-                            <div className="ao-customer-name">
-                              {displayNameFromEmail(
-                                email,
-                              )}
-                            </div>
-
-                            <div className="ao-customer-email">
-                              {email || "—"}
-                            </div>
-
+                          <div className="ao-customer-email">
+                            {email || "—"}
                           </div>
+                        </div>
+                      </td>
 
-                        </td>
-
-                        <td className="ao-product-cell">
-
-                          <div className="ao-product-row">
-
-                            {
-                              prod.thumbSrc
-                                ? (
-
-                                  <img
-                                    className="ao-product-thumb"
-                                    src={prod.thumbSrc}
-                                    alt=""
-                                  />
-                                )
-                                : (
-
-                                  <div
-                                    className="ao-product-thumb ao-product-thumb--empty"
-                                    aria-hidden
-                                  >
-                                    No
-                                    <br />
-                                    image
-                                  </div>
-                                )
-                            }
-
-                            <div className="ao-product-text">
-
-                              <div className="ao-product-primary">
-                                {prod.primary}
-                              </div>
-
-                              {
-                                prod.variant
-                                  ? (
-
-                                    <div className="ao-product-variant">
-                                      {prod.variant}
-                                    </div>
-                                  )
-                                  : null
-                              }
-
-                              {
-                                prod.more > 0
-                                  ? (
-
-                                    <div className="ao-product-more">
-                                      +
-                                      {prod.more}
-                                      {" "}
-                                      more line
-                                      {prod.more === 1 ? "" : "s"}
-                                    </div>
-                                  )
-                                  : null
-                              }
+                      <td className="ao-product-cell">
+                        <div className="ao-product-row">
+                          {prod.thumbSrc ? (
+                            <img
+                              className="ao-product-thumb"
+                              src={prod.thumbSrc}
+                              alt=""
+                            />
+                          ) : (
+                            <div
+                              className="ao-product-thumb ao-product-thumb--empty"
+                              aria-hidden
+                            >
+                              No
+                              <br />
+                              image
                             </div>
-                          </div>
-
-                        </td>
-
-                        <td>
-
-                          <span className={statusPillClass(
-                            o.status,
                           )}
-                          >
 
-                            {statusLabel(
-                              o.status,
-                            )}
-                          </span>
+                          <div className="ao-product-text">
+                            <div className="ao-product-primary">
+                              {prod.primary}
+                            </div>
 
-                        </td>
+                            {prod.variant ? (
+                              <div className="ao-product-variant">
+                                {prod.variant}
+                              </div>
+                            ) : null}
 
-                        <td className="ao-total">
-                          <span className="ao-total-current">
-                            ₹{formatMoney(
-                              Number(o.original_paid ?? o.grand_total) || 0
-                            )}
-                          </span>
-                        </td>
+                            {prod.more > 0 ? (
+                              <div className="ao-product-more">
+                                +{prod.more} more line
+                                {prod.more === 1 ? "" : "s"}
+                              </div>
+                            ) : null}
+                          </div>
+                        </div>
+                      </td>
 
-                        <td>
+                      <td>
+                        <span className={statusPillClass(o.status)}>
+                          {statusLabel(o.status)}
+                        </span>
+                      </td>
 
-                          <Link
-                            className="ao-action-link"
-                            to={
-                              `/admin/orders/${encodeURIComponent(o.order_number)}`
-                            }
-                            title="View order"
-                            aria-label="View order details"
-                          >
+                      <td className="ao-total">
+                        <span className="ao-total-current">
+                          ₹
+                          {formatMoney(
+                            Number(o.original_paid ?? o.grand_total) || 0,
+                          )}
+                        </span>
+                      </td>
 
-                            <Eye size={18} />
-                          </Link>
-
-                        </td>
-
-                      </tr>
-                    );
-                  })
-            }
-
-          </tbody>
-
-        </table>
-
+                      <td>
+                        <Link
+                          className="ao-action-link"
+                          to={`/admin/orders/${encodeURIComponent(o.order_number)}`}
+                          title="View order"
+                          aria-label="View order details"
+                        >
+                          <Eye size={18} />
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
         </div>
 
-        {
-          totalCount > 0 && (
+        {totalCount > 0 && (
+          <div className="ao-footer">
+            <span>
+              Showing {start}–{end} of {totalCount} order
+              {totalCount === 1 ? "" : "s"}
+            </span>
 
-            <div className="ao-footer">
+            {totalPages > 1 && (
+              <div className="ao-pagination">
+                <button
+                  type="button"
+                  className="ao-page-btn"
+                  disabled={page <= 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  aria-label="Previous page"
+                >
+                  <ChevronLeft size={18} />
+                </button>
 
-              <span>
-                Showing
-                {" "}
-                {start}
-                –
-                {end}
-                {" "}
-                of
-                {" "}
-                {totalCount}
-                {" "}
-                order
-                {totalCount === 1 ? "" : "s"}
-              </span>
-
-              {
-                totalPages > 1 && (
-
-                  <div className="ao-pagination">
-
+                {pageNums.map((p, i) =>
+                  p === "…" ? (
+                    <span key={`e-${i}`} className="ao-page-ellipsis">
+                      …
+                    </span>
+                  ) : (
                     <button
+                      key={p}
                       type="button"
-                      className="ao-page-btn"
-                      disabled={page <= 1}
-                      onClick={() =>
-                        setPage(
-                          (p) =>
-                            Math.max(
-                              1,
-                              p - 1,
-                            ),
-                        )
-                      }
-                      aria-label="Previous page"
+                      className={`ao-page-btn${
+                        p === page ? " ao-page-btn--active" : ""
+                      }`}
+                      onClick={() => setPage(p)}
                     >
-
-                      <ChevronLeft size={18} />
+                      {p}
                     </button>
+                  ),
+                )}
 
-                    {
-                      pageNums.map(
-                        (
-                          p,
-                          i,
-                        ) =>
-                          p === "…"
-                            ? (
-
-                              <span
-                                key={`e-${i}`}
-                                className="ao-page-ellipsis"
-                              >
-                                …
-                              </span>
-                            )
-                            : (
-
-                              <button
-                                key={p}
-                                type="button"
-                                className={
-                                  `ao-page-btn${
-                                    p === page
-                                      ? " ao-page-btn--active"
-                                      : ""
-                                  }`
-                                }
-                                onClick={() =>
-                                  setPage(
-                                    p,
-                                  )
-                                }
-                              >
-                                {p}
-                              </button>
-                            ),
-                      )
-                    }
-
-                    <button
-                      type="button"
-                      className="ao-page-btn"
-                      disabled={page >= totalPages}
-                      onClick={() =>
-                        setPage(
-                          (p) =>
-                            Math.min(
-                              totalPages,
-                              p + 1,
-                            ),
-                        )
-                      }
-                      aria-label="Next page"
-                    >
-
-                      <ChevronRight size={18} />
-                    </button>
-
-                  </div>
-                )
-              }
-
-            </div>
-          )
-        }
-
+                <button
+                  type="button"
+                  className="ao-page-btn"
+                  disabled={page >= totalPages}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  aria-label="Next page"
+                >
+                  <ChevronRight size={18} />
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
-
     </div>
-
   );
 }

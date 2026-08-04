@@ -1,10 +1,7 @@
 import api from "../../services/api";
 
 export async function fetchCart() {
-
-  const response = await api.get(
-    "cart/",
-  );
+  const response = await api.get("cart/");
 
   return response.data;
 }
@@ -19,62 +16,38 @@ export async function fetchCart() {
 //   ).size;
 // }
 
-export async function addToCartApi({
-  variantId,
-  quantity = 1,
-}) {
+export async function addToCartApi({ variantId, quantity = 1 }) {
+  const response = await api.post("cart/", {
+    variant_id: variantId,
 
-  const response = await api.post(
-    "cart/",
-    {
-      variant_id: variantId,
-
-      quantity,
-    }
-  );
+    quantity,
+  });
 
   return response.data;
 }
 
-export async function updateCartItemApi(
-  itemId,
-  quantity,
-) {
-
-  const response = await api.patch(
-    `cart/items/${itemId}/`,
-    {
-      quantity,
-    }
-  );
+export async function updateCartItemApi(itemId, quantity) {
+  const response = await api.patch(`cart/items/${itemId}/`, {
+    quantity,
+  });
 
   return response.data;
 }
 
 export async function removeCartItemApi(itemId) {
-
-  const response = await api.delete(
-    `cart/items/${itemId}/`,
-  );
+  const response = await api.delete(`cart/items/${itemId}/`);
 
   return response.data;
 }
 
 export async function validateCheckoutApi() {
-
-  const response = await api.post(
-    "cart/validate-checkout/",
-    {},
-  );
+  const response = await api.post("cart/validate-checkout/", {});
 
   return response.data;
 }
 
 export async function fetchCheckoutPreview() {
-
-  const response = await api.get(
-    "cart/checkout-preview/",
-  );
+  const response = await api.get("cart/checkout-preview/");
 
   return response.data;
 }

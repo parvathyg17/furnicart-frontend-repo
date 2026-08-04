@@ -2,38 +2,19 @@
 // src/routes/PrivateRoute.jsx
 // ==========================================
 
-import {
-  useSelector,
-} from "react-redux";
+import { useSelector } from "react-redux";
 
-import {
-  Navigate,
-} from "react-router-dom";
+import { Navigate } from "react-router-dom";
 
-
-export default function PrivateRoute({
-  children,
-}) {
-
-  const {
-    isAuthenticated,
-    checkingAuth,
-  } = useSelector(
-    (state) => state.auth
-  );
+export default function PrivateRoute({ children }) {
+  const { isAuthenticated, checkingAuth } = useSelector((state) => state.auth);
 
   // ==========================================
   // WAIT FOR AUTH CHECK
   // ==========================================
 
   if (checkingAuth) {
-
-    return (
-      <div>
-        Loading...
-      </div>
-    );
-
+    return <div>Loading...</div>;
   }
 
   // ==========================================
@@ -41,14 +22,7 @@ export default function PrivateRoute({
   // ==========================================
 
   if (!isAuthenticated) {
-
-    return (
-      <Navigate
-        to="/login"
-        replace
-      />
-    );
-
+    return <Navigate to="/login" replace />;
   }
 
   // ==========================================

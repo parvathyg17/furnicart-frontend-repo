@@ -1,60 +1,33 @@
 import "../../../styles/createcategorymodal.css";
 
-import {
-  useEffect,
-  useState,
-} from "react";
+import { useEffect, useState } from "react";
 
-import {
-  useDispatch,
-  useSelector,
-} from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
-import {
-  X,
-  ImagePlus,
-  Check,
-} from "lucide-react";
+import { X, ImagePlus, Check } from "lucide-react";
 
-import {
-  updateRoomType,
-} from "../../../features/catalog/roomType/roomTypeSlice";
+import { updateRoomType } from "../../../features/catalog/roomType/roomTypeSlice";
 
 export default function EditRoomTypeModal({
-
   isOpen,
   onClose,
   roomType,
   onSuccess,
-
 }) {
-
   const dispatch = useDispatch();
 
-  const {
+  const { roomTypeUpdateLoading } = useSelector((state) => state.roomType);
 
-    roomTypeUpdateLoading,
+  const [name, setName] = useState("");
 
-  } = useSelector(
-    (state) => state.roomType
-  );
+  const [image, setImage] = useState(null);
 
-  const [name, setName] =
-    useState("");
+  const [preview, setPreview] = useState(null);
 
-  const [image, setImage] =
-    useState(null);
-
-  const [preview, setPreview] =
-    useState(null);
-
-  const [formErrors, setFormErrors] =
-    useState({});
+  const [formErrors, setFormErrors] = useState({});
 
   useEffect(() => {
-
     if (!isOpen) {
-
       setName("");
       setImage(null);
       setPreview(null);
@@ -64,237 +37,125 @@ export default function EditRoomTypeModal({
     }
 
     if (roomType) {
-
       setName(roomType.name || "");
       setPreview(roomType.image || null);
       setImage(null);
       setFormErrors({});
     }
-
-  }, [
-    roomType,
-    isOpen,
-  ]);
+  }, [roomType, isOpen]);
 
   useEffect(() => {
-
     return () => {
-
-      if (
-
-        preview &&
-        preview.startsWith("blob:")
-
-      ) {
-
-        URL.revokeObjectURL(
-          preview
-        );
+      if (preview && preview.startsWith("blob:")) {
+        URL.revokeObjectURL(preview);
       }
     };
-
   }, [preview]);
 
-  const handleImageChange =
-    (e) => {
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
 
-      const file =
-        e.target.files[0];
+    if (!file) return;
 
-      if (!file) return;
+    if (preview && preview.startsWith("blob:")) {
+      URL.revokeObjectURL(preview);
+    }
 
-      if (
-        preview &&
-        preview.startsWith("blob:")
-      ) {
+    setFormErrors((prev) => ({
+      ...prev,
 
-        URL.revokeObjectURL(
-          preview
-        );
-      }
+      image: "",
+    }));
 
+    if (file.size > 5 * 1024 * 1024) {
       setFormErrors((prev) => ({
-
         ...prev,
 
-        image: "",
+        image: "Image must be below 5MB",
       }));
 
-      if (
+      return;
+    }
 
-        file.size >
-        5 * 1024 * 1024
+    if (!file.type.startsWith("image/")) {
+      setFormErrors((prev) => ({
+        ...prev,
 
-      ) {
+        image: "Only image files allowed",
+      }));
 
-        setFormErrors((prev) => ({
+      return;
+    }
 
-          ...prev,
+    setImage(file);
 
-          image:
-            "Image must be below 5MB",
-        }));
+    setPreview(URL.createObjectURL(file));
+  };
 
-        return;
-      }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-      if (
+    if (!roomType) return;
 
-        !file.type.startsWith(
-          "image/"
-        )
+    setFormErrors({});
 
-      ) {
+    const formData = new FormData();
 
-        setFormErrors((prev) => ({
+    formData.append("name", name);
 
-          ...prev,
+    if (image) {
+      formData.append("image", image);
+    }
 
-          image:
-            "Only image files allowed",
-        }));
+    try {
+      await dispatch(
+        updateRoomType({
+          roomTypeId: roomType.id,
 
-        return;
-      }
+          data: formData,
+        }),
+      ).unwrap();
 
-      setImage(file);
+      onSuccess?.();
 
-      setPreview(
-        URL.createObjectURL(file)
-      );
-    };
+      onClose();
+    } catch (error) {
+      setFormErrors({
+        name: error?.name?.[0] || error?.name || "",
 
-  const handleSubmit =
-    async (e) => {
+        image: error?.image?.[0] || error?.image || "",
+      });
+    }
+  };
 
-      e.preventDefault();
-
-      if (!roomType) return;
-
-      setFormErrors({});
-
-      const formData =
-        new FormData();
-
-      formData.append(
-        "name",
-        name
-      );
-
-      if (image) {
-
-        formData.append(
-          "image",
-          image
-        );
-      }
-
-      try {
-
-        await dispatch(
-
-          updateRoomType({
-
-            roomTypeId:
-              roomType.id,
-
-            data: formData,
-          })
-
-        ).unwrap();
-
-        onSuccess?.();
-
-        onClose();
-
-      } catch (error) {
-
-        setFormErrors({
-
-          name:
-
-            error?.name?.[0] ||
-
-            error?.name ||
-
-            "",
-
-          image:
-
-            error?.image?.[0] ||
-
-            error?.image ||
-
-            "",
-        });
-      }
-    };
-
-  if (
-    !isOpen ||
-    !roomType
-  ) return null;
+  if (!isOpen || !roomType) return null;
 
   return (
-
     <div className="category-modal-overlay">
-
       <div className="category-modal">
-
         <div className="category-modal-header">
-
           <div>
+            <h2>Edit Room Type</h2>
 
-            <h2>
-
-              Edit Room Type
-
-            </h2>
-
-            <p>
-
-              Update your room type details
-              and image.
-
-            </p>
-
+            <p>Update your room type details and image.</p>
           </div>
 
-          <button
-            onClick={onClose}
-            className="close-btn"
-          >
-
+          <button onClick={onClose} className="close-btn">
             <X size={28} />
-
           </button>
-
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="category-form"
-        >
-
+        <form onSubmit={handleSubmit} className="category-form">
           <div className="form-group">
-
-            <label>
-
-              Room Type Name
-
-            </label>
+            <label>Room Type Name</label>
 
             <input
               type="text"
               value={name}
               onChange={(e) => {
-
-                setName(
-                  e.target.value
-                );
+                setName(e.target.value);
 
                 setFormErrors((prev) => ({
-
                   ...prev,
 
                   name: "",
@@ -302,148 +163,70 @@ export default function EditRoomTypeModal({
               }}
               placeholder="e.g. Living Room"
               required
-              className={
-                formErrors.name
-                  ? "input-error"
-                  : ""
-              }
+              className={formErrors.name ? "input-error" : ""}
             />
 
-            {
-              formErrors.name && (
-
-                <p className="field-error">
-
-                  {formErrors.name}
-
-                </p>
-              )
-            }
-
+            {formErrors.name && (
+              <p className="field-error">{formErrors.name}</p>
+            )}
           </div>
 
           <div className="form-group">
-
-            <label>
-
-              Room Type Image
-
-            </label>
+            <label>Room Type Image</label>
 
             <div
               className={`image-upload-box ${
-                formErrors.image
-                  ? "input-error"
-                  : ""
+                formErrors.image ? "input-error" : ""
               }`}
               onClick={() =>
-                document
-                  .getElementById(
-                    "edit-roomtype-image-input"
-                  )
-                  ?.click()
+                document.getElementById("edit-roomtype-image-input")?.click()
               }
             >
-
               <input
                 id="edit-roomtype-image-input"
                 type="file"
                 accept="image/*"
                 hidden
-                onChange={
-                  handleImageChange
-                }
+                onChange={handleImageChange}
               />
 
-              {
-                preview ? (
-
-                  <img
-                    src={preview}
-                    alt="Preview"
-                    className="preview-image"
-                  />
-
-                ) : (
-
-                  <div className="upload-content">
-
-                    <div className="upload-icon-box">
-
-                      <ImagePlus size={46} />
-
-                    </div>
-
-                    <div className="upload-btn">
-
-                      Upload Image
-
-                    </div>
-
-                    <p>
-
-                      High-resolution JPEG or PNG.
-                      Max 5MB.
-
-                    </p>
-
+              {preview ? (
+                <img src={preview} alt="Preview" className="preview-image" />
+              ) : (
+                <div className="upload-content">
+                  <div className="upload-icon-box">
+                    <ImagePlus size={46} />
                   </div>
-                )
-              }
 
+                  <div className="upload-btn">Upload Image</div>
+
+                  <p>High-resolution JPEG or PNG. Max 5MB.</p>
+                </div>
+              )}
             </div>
 
-            {
-              formErrors.image && (
-
-                <p className="field-error">
-
-                  {formErrors.image}
-
-                </p>
-              )
-            }
-
+            {formErrors.image && (
+              <p className="field-error">{formErrors.image}</p>
+            )}
           </div>
 
           <div className="category-modal-footer">
-
-            <button
-              type="button"
-              onClick={onClose}
-              className="cancel-button"
-            >
-
+            <button type="button" onClick={onClose} className="cancel-button">
               Cancel
-
             </button>
 
             <button
               type="submit"
-              disabled={
-                roomTypeUpdateLoading
-              }
+              disabled={roomTypeUpdateLoading}
               className="submit-button"
             >
-
               <Check size={18} />
 
-              {
-                roomTypeUpdateLoading
-
-                  ? "Updating..."
-
-                  : "Update Room Type"
-              }
-
+              {roomTypeUpdateLoading ? "Updating..." : "Update Room Type"}
             </button>
-
           </div>
-
         </form>
-
       </div>
-
     </div>
   );
 }

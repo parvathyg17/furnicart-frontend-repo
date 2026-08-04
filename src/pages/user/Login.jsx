@@ -70,7 +70,7 @@ export default function Login() {
         googleLogin({
           token: credentialResponse.credential,
           ...getStoredReferralPayload(),
-        })
+        }),
       ).unwrap();
       await dispatch(loadUser()).unwrap();
       toast.success("Google login successful");

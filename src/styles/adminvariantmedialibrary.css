@@ -3,7 +3,6 @@ ROOT
 ========================================== */
 
 .variant-media-page {
-
   min-height: 0;
 
   padding: 0;
@@ -18,7 +17,6 @@ HEADER
 ========================================== */
 
 .media-header {
-
   display: flex;
 
   align-items: center;
@@ -29,7 +27,6 @@ HEADER
 }
 
 .media-header-left {
-
   display: flex;
 
   flex-direction: column;
@@ -38,7 +35,6 @@ HEADER
 }
 
 .media-header h1 {
-
   font-size: 32px;
 
   font-weight: 700;
@@ -49,7 +45,6 @@ HEADER
 }
 
 .media-header p {
-
   color: #6b7280;
 
   font-size: 14px;
@@ -58,7 +53,6 @@ HEADER
 }
 
 .back-btn {
-
   width: fit-content;
 
   height: 42px;
@@ -87,19 +81,16 @@ HEADER
 }
 
 .back-btn:hover {
-
   background: #f9fafb;
 }
 
 .media-header-actions {
-
   display: flex;
 
   gap: 10px;
 }
 
 .view-btn {
-
   width: 42px;
 
   height: 42px;
@@ -120,7 +111,6 @@ HEADER
 }
 
 .view-btn.active {
-
   background: #111827;
 
   color: white;
@@ -131,7 +121,6 @@ UPLOAD PANEL
 ========================================== */
 
 .upload-zone {
-
   background: white;
 
   border: 2px dashed #d1d5db;
@@ -148,14 +137,12 @@ UPLOAD PANEL
 }
 
 .upload-zone.active {
-
   border-color: #111827;
 
   background: #f9fafb;
 }
 
 .upload-icon {
-
   width: 70px;
 
   height: 70px;
@@ -176,7 +163,6 @@ UPLOAD PANEL
 }
 
 .upload-zone h3 {
-
   font-size: 20px;
 
   font-weight: 700;
@@ -187,7 +173,6 @@ UPLOAD PANEL
 }
 
 .upload-zone p {
-
   font-size: 14px;
 
   color: #6b7280;
@@ -196,7 +181,6 @@ UPLOAD PANEL
 }
 
 .browse-btn {
-
   height: 46px;
 
   padding: 0 20px;
@@ -227,7 +211,6 @@ ERROR
 ========================================== */
 
 .upload-error {
-
   padding: 14px 16px;
 
   border-radius: 12px;
@@ -248,7 +231,6 @@ SECTION HEADER
 ========================================== */
 
 .selected-preview-header {
-
   display: flex;
 
   align-items: center;
@@ -259,7 +241,6 @@ SECTION HEADER
 }
 
 .selected-preview-header h2 {
-
   font-size: 22px;
 
   font-weight: 700;
@@ -268,7 +249,6 @@ SECTION HEADER
 }
 
 .save-images-btn {
-
   height: 44px;
 
   padding: 0 18px;
@@ -300,14 +280,9 @@ GRID
 
 .preview-grid,
 .media-grid {
-
   display: grid;
 
-  grid-template-columns:
-    repeat(
-      auto-fill,
-      minmax(220px, 1fr)
-    );
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
 
   gap: 18px;
 }
@@ -318,7 +293,6 @@ CARD
 
 .preview-card,
 .media-card {
-
   background: white;
 
   border-radius: 18px;
@@ -332,11 +306,9 @@ CARD
 
 .preview-card:hover,
 .media-card:hover {
-
   transform: translateY(-2px);
 
-  box-shadow:
-    0 10px 24px rgba(0,0,0,0.08);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
 }
 
 /* ==========================================
@@ -345,7 +317,6 @@ IMAGE
 
 .preview-card img,
 .media-image {
-
   width: 100%;
 
   aspect-ratio: 1 / 1;
@@ -356,7 +327,6 @@ IMAGE
 }
 
 .media-image-wrapper {
-
   position: relative;
 }
 
@@ -365,7 +335,6 @@ BADGE
 ========================================== */
 
 .primary-badge {
-
   position: absolute;
 
   top: 12px;
@@ -378,7 +347,7 @@ BADGE
 
   border-radius: 999px;
 
-  background: rgba(17,24,39,0.9);
+  background: rgba(17, 24, 39, 0.9);
 
   color: white;
 
@@ -398,7 +367,6 @@ OVERLAY
 ========================================== */
 
 .preview-overlay {
-
   position: absolute;
 
   top: 12px;
@@ -414,7 +382,6 @@ OVERLAY
 
 .preview-overlay button,
 .media-actions button {
-
   width: 38px;
 
   height: 38px;
@@ -423,7 +390,7 @@ OVERLAY
 
   border-radius: 10px;
 
-  background: rgba(17,24,39,0.82);
+  background: rgba(17, 24, 39, 0.82);
 
   color: white;
 
@@ -440,7 +407,6 @@ OVERLAY
 
 .preview-overlay button:hover,
 .media-actions button:hover {
-
   transform: scale(1.05);
 }
 
@@ -450,13 +416,11 @@ INFO
 
 .preview-info,
 .media-info {
-
   padding: 14px;
 }
 
 .preview-info p,
 .media-info h4 {
-
   font-size: 14px;
 
   font-weight: 600;
@@ -473,7 +437,6 @@ INFO
 }
 
 .preview-info small {
-
   color: #6b7280;
 
   font-size: 12px;
@@ -484,7 +447,6 @@ MEDIA ACTIONS
 ========================================== */
 
 .media-actions {
-
   display: flex;
 
   gap: 8px;
@@ -493,7 +455,6 @@ MEDIA ACTIONS
 }
 
 .delete-image-btn {
-
   background: #ef4444 !important;
 }
 
@@ -502,12 +463,11 @@ CROP MODAL
 ========================================== */
 
 .crop-modal-overlay {
-
   position: fixed;
 
   inset: 0;
 
-  background: rgba(0,0,0,0.72);
+  background: rgba(0, 0, 0, 0.72);
 
   display: flex;
 
@@ -521,7 +481,6 @@ CROP MODAL
 }
 
 .crop-modal {
-
   width: 100%;
 
   max-width: 920px;
@@ -538,7 +497,6 @@ CROP MODAL
 }
 
 .crop-header {
-
   height: 70px;
 
   padding: 0 24px;
@@ -553,7 +511,6 @@ CROP MODAL
 }
 
 .crop-header h2 {
-
   font-size: 20px;
 
   font-weight: 700;
@@ -562,7 +519,6 @@ CROP MODAL
 }
 
 .crop-header button {
-
   width: 40px;
 
   height: 40px;
@@ -577,7 +533,6 @@ CROP MODAL
 }
 
 .crop-area {
-
   position: relative;
 
   height: 500px;
@@ -593,7 +548,6 @@ CROP TOPBAR
 ========================================== */
 
 .crop-topbar {
-
   height: 84px;
 
   padding: 0 24px;
@@ -610,7 +564,6 @@ CROP TOPBAR
 }
 
 .crop-title-section h2 {
-
   font-size: 18px;
 
   font-weight: 700;
@@ -621,14 +574,12 @@ CROP TOPBAR
 }
 
 .crop-title-section p {
-
   font-size: 13px;
 
   color: #6b7280;
 }
 
 .crop-topbar-actions {
-
   display: flex;
 
   align-items: center;
@@ -642,7 +593,6 @@ TOOLBAR BUTTONS
 
 .crop-toolbar-btn,
 .crop-close-btn {
-
   width: 42px;
 
   height: 42px;
@@ -666,12 +616,10 @@ TOOLBAR BUTTONS
 
 .crop-toolbar-btn:hover,
 .crop-close-btn:hover {
-
   background: #f3f4f6;
 }
 
 .crop-apply-btn {
-
   height: 42px;
 
   padding: 0 18px;
@@ -694,7 +642,6 @@ TOOLBAR BUTTONS
 }
 
 .crop-apply-btn:hover {
-
   opacity: 0.92;
 }
 
@@ -703,9 +650,7 @@ RESPONSIVE
 ========================================== */
 
 @media (max-width: 768px) {
-
   .crop-topbar {
-
     height: auto;
 
     padding: 18px;
@@ -718,25 +663,22 @@ RESPONSIVE
   }
 
   .crop-topbar-actions {
-
     width: 100%;
 
     flex-wrap: wrap;
   }
 }
 
-
 /* ==========================================
 ZOOM VIEW
 ========================================== */
 
 .zoom-overlay {
-
   position: fixed;
 
   inset: 0;
 
-  background: rgba(0,0,0,0.85);
+  background: rgba(0, 0, 0, 0.85);
 
   display: flex;
 
@@ -750,7 +692,6 @@ ZOOM VIEW
 }
 
 .zoomed-image {
-
   max-width: 90%;
 
   max-height: 90%;
@@ -765,7 +706,6 @@ LIST VIEW
 ========================================== */
 
 .media-list {
-
   display: flex;
 
   flex-direction: column;
@@ -774,21 +714,18 @@ LIST VIEW
 }
 
 .media-list .media-card {
-
   display: flex;
 
   align-items: center;
 }
 
 .media-list .media-image {
-
   width: 220px;
 
   aspect-ratio: 1 / 1;
 }
 
 .media-list .media-info {
-
   flex: 1;
 }
 
@@ -797,14 +734,11 @@ RESPONSIVE
 ========================================== */
 
 @media (max-width: 768px) {
-
   .variant-media-page {
-
     padding: 18px;
   }
 
   .media-header {
-
     flex-direction: column;
 
     align-items: flex-start;
@@ -814,54 +748,44 @@ RESPONSIVE
 
   .preview-grid,
   .media-grid {
-
     grid-template-columns: 1fr 1fr;
   }
 
   .crop-area {
-
     height: 340px;
   }
 
   .crop-actions {
-
     flex-direction: column;
   }
 
   .reset-btn,
   .save-crop-btn {
-
     width: 100%;
   }
 }
 
 @media (max-width: 540px) {
-
   .preview-grid,
   .media-grid {
-
     grid-template-columns: 1fr;
   }
 
   .media-list .media-card {
-
     flex-direction: column;
   }
 
   .media-list .media-image {
-
     width: 100%;
   }
 }
 
-
 .zoom-overlay {
-
   position: fixed;
 
   inset: 0;
 
-  background: rgba(0,0,0,0.85);
+  background: rgba(0, 0, 0, 0.85);
 
   display: flex;
 
@@ -873,7 +797,6 @@ RESPONSIVE
 }
 
 .zoomed-image {
-
   max-width: 90%;
 
   max-height: 90%;

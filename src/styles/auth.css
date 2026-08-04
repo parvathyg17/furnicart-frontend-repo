@@ -91,7 +91,8 @@ body {
   gap: 16px;
 }
 
-.auth-nav-icons button, .auth-nav-icons a {
+.auth-nav-icons button,
+.auth-nav-icons a {
   background: transparent;
   border: none;
   color: var(--auth-primary);
@@ -173,7 +174,7 @@ body {
   left: 0;
   right: 0;
   padding: 60px 40px 40px;
-  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
   color: white;
 }
 
@@ -534,12 +535,15 @@ body {
   gap: 4px;
 }
 
-
-
-
 @keyframes modalShow {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* =========================================
@@ -552,11 +556,11 @@ body {
     gap: 40px;
     padding: 40px 24px;
   }
-  
+
   .auth-image-section {
     display: none; /* Hide image on smaller screens */
   }
-  
+
   .auth-form-card {
     padding: 40px 32px;
   }
@@ -566,20 +570,20 @@ body {
   .auth-navbar {
     padding: 0 20px;
   }
-  
+
   .auth-nav-links {
     display: none;
   }
-  
+
   .auth-title {
     font-size: 2.2rem;
   }
-  
+
   .auth-row {
     grid-template-columns: 1fr;
     gap: 0;
   }
-  
+
   .auth-form-card {
     padding: 32px 24px;
   }

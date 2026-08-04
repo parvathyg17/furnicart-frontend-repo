@@ -5,36 +5,21 @@
  * @param {{ minFractionDigits?: number; maxFractionDigits?: number }} [options]
  * @returns {string}
  */
-export function formatMoney(
-  value,
-  options = {},
-) {
+export function formatMoney(value, options = {}) {
+  const { minFractionDigits = 2, maxFractionDigits = 2 } = options;
 
-  const {
-    minFractionDigits = 2,
-    maxFractionDigits = 2,
-  } = options;
-
-  if (
-    value === null ||
-    value === undefined
-  ) {
-
+  if (value === null || value === undefined) {
     return "—";
   }
 
   const n = Number(value);
 
   if (Number.isNaN(n)) {
-
     return "—";
   }
 
-  return n.toLocaleString(
-    undefined,
-    {
-      minimumFractionDigits: minFractionDigits,
-      maximumFractionDigits: maxFractionDigits,
-    },
-  );
+  return n.toLocaleString(undefined, {
+    minimumFractionDigits: minFractionDigits,
+    maximumFractionDigits: maxFractionDigits,
+  });
 }

@@ -1,41 +1,31 @@
 import SearchInput from "../../../components/common/SearchInput.jsx";
 
-import {
-  SORT_OPTIONS,
-} from "../shopConstants.js";
+import { SORT_OPTIONS } from "../shopConstants.js";
 
-export default function ShopFiltersSidebar(
-  {
-    categories,
-    roomTypes,
-    draftSearch,
-    onDraftSearchChange,
-    onApplySearch,
-    onClearSearch,
-    sort,
-    onSortChange,
-    category,
-    onCategoryChange,
-    roomType,
-    onRoomTypeChange,
-    minPrice,
-    maxPrice,
-    onMinPriceChange,
-    onMaxPriceChange,
-  },
-) {
-
+export default function ShopFiltersSidebar({
+  categories,
+  roomTypes,
+  draftSearch,
+  onDraftSearchChange,
+  onApplySearch,
+  onClearSearch,
+  sort,
+  onSortChange,
+  category,
+  onCategoryChange,
+  roomType,
+  onRoomTypeChange,
+  minPrice,
+  maxPrice,
+  onMinPriceChange,
+  onMaxPriceChange,
+}) {
   return (
-
     <aside className="artisan-sidebar">
-
       <SearchInput
         value={draftSearch}
         onChange={(e) => {
-
-          onDraftSearchChange(
-            e.target.value,
-          );
+          onDraftSearchChange(e.target.value);
         }}
         onSubmit={onApplySearch}
         onClear={onClearSearch}
@@ -51,177 +41,99 @@ export default function ShopFiltersSidebar(
       </button>
 
       <div className="artisan-field-block">
-
-        <span className="artisan-field-label">
-          Sort by
-        </span>
+        <span className="artisan-field-label">Sort by</span>
 
         <select
           className="artisan-select"
           value={sort}
           onChange={(e) => {
-
-            onSortChange(
-              e.target.value,
-            );
+            onSortChange(e.target.value);
           }}
         >
-
-          {
-            SORT_OPTIONS.map(
-              (o) => (
-
-                <option
-                  key={o.value}
-                  value={o.value}
-                >
-                  {o.label}
-                </option>
-              )
-            )
-          }
+          {SORT_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
         </select>
       </div>
 
       <div className="artisan-field-block">
-
-        <span className="artisan-field-label">
-          Category
-        </span>
+        <span className="artisan-field-label">Category</span>
 
         <ul className="artisan-check-list">
-
           <li>
-
             <label className="artisan-check-row">
-
               <input
                 type="radio"
                 name="shop-category"
                 checked={category === ""}
                 onChange={() => {
-
-                  onCategoryChange(
-                    "",
-                  );
+                  onCategoryChange("");
                 }}
               />
 
-              <span>
-                All
-              </span>
+              <span>All</span>
             </label>
           </li>
 
-          {
-            categories.map(
-              (c) => (
+          {categories.map((c) => (
+            <li key={c.id}>
+              <label className="artisan-check-row">
+                <input
+                  type="radio"
+                  name="shop-category"
+                  checked={category === c.slug}
+                  onChange={() => {
+                    onCategoryChange(c.slug);
+                  }}
+                />
 
-                <li key={c.id}>
-
-                  <label className="artisan-check-row">
-
-                    <input
-                      type="radio"
-                      name="shop-category"
-                      checked={
-                        category ===
-                        c.slug
-                      }
-                      onChange={() => {
-
-                        onCategoryChange(
-                          c.slug,
-                        );
-                      }}
-                    />
-
-                    <span>
-                      {c.name}
-                    </span>
-                  </label>
-                </li>
-              )
-            )
-          }
+                <span>{c.name}</span>
+              </label>
+            </li>
+          ))}
         </ul>
       </div>
 
       <div className="artisan-field-block">
-
-        <span className="artisan-field-label">
-          Room type
-        </span>
+        <span className="artisan-field-label">Room type</span>
 
         <ul className="artisan-room-list">
-
           <li>
-
             <button
               type="button"
-              className={
-                roomType === ""
-
-                  ? "is-active"
-
-                  : ""
-              }
+              className={roomType === "" ? "is-active" : ""}
               onClick={() => {
-
-                onRoomTypeChange(
-                  "",
-                );
+                onRoomTypeChange("");
               }}
             >
               All
             </button>
           </li>
 
-          {
-            roomTypes.map(
-              (r) => (
-
-                <li key={r.id}>
-
-                  <button
-                    type="button"
-                    className={
-                      roomType ===
-                      r.slug
-
-                        ? "is-active"
-
-                        : ""
-                    }
-                    onClick={() => {
-
-                      onRoomTypeChange(
-                        r.slug,
-                      );
-                    }}
-                  >
-                    {r.name}
-                  </button>
-                </li>
-              )
-            )
-          }
+          {roomTypes.map((r) => (
+            <li key={r.id}>
+              <button
+                type="button"
+                className={roomType === r.slug ? "is-active" : ""}
+                onClick={() => {
+                  onRoomTypeChange(r.slug);
+                }}
+              >
+                {r.name}
+              </button>
+            </li>
+          ))}
         </ul>
       </div>
 
       <div className="artisan-field-block">
-
-        <span className="artisan-field-label">
-          Price range
-        </span>
+        <span className="artisan-field-label">Price range</span>
 
         <div className="artisan-price-row">
-
           <label>
-
-            <span className="artisan-sr-only">
-              Min
-            </span>
+            <span className="artisan-sr-only">Min</span>
 
             <input
               type="number"
@@ -231,19 +143,13 @@ export default function ShopFiltersSidebar(
               className="artisan-input"
               value={minPrice}
               onChange={(e) => {
-
-                onMinPriceChange(
-                  e.target.value,
-                );
+                onMinPriceChange(e.target.value);
               }}
             />
           </label>
 
           <label>
-
-            <span className="artisan-sr-only">
-              Max
-            </span>
+            <span className="artisan-sr-only">Max</span>
 
             <input
               type="number"
@@ -253,10 +159,7 @@ export default function ShopFiltersSidebar(
               className="artisan-input"
               value={maxPrice}
               onChange={(e) => {
-
-                onMaxPriceChange(
-                  e.target.value,
-                );
+                onMaxPriceChange(e.target.value);
               }}
             />
           </label>

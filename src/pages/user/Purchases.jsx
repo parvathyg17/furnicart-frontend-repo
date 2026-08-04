@@ -1085,11 +1085,8 @@
 //   );
 // }
 
-
 function Purchases() {
-  return (
-    <div>Purchases</div>
-  )
+  return <div>Purchases</div>;
 }
 
-export default Purchases
+export default Purchases;

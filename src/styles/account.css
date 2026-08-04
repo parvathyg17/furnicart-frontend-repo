@@ -49,15 +49,12 @@ body {
   flex-shrink: 0;
 
   border: 1px solid #e7dfd7;
-    /* Hide scrollbar */
+  /* Hide scrollbar */
   scrollbar-width: none;
-
 }
 .account-sidebar::-webkit-scrollbar {
   display: none;
 }
-
-
 
 .account-sidebar h2 {
   font-size: 38px;
@@ -363,7 +360,6 @@ body {
 }
 
 @media (max-width: 992px) {
-
   .account-page {
     flex-direction: column;
     padding: 20px;
@@ -394,7 +390,6 @@ body {
   .full-width {
     grid-column: span 1;
   }
-
 }
 
 .back-btn {
@@ -482,7 +477,6 @@ body {
 }
 
 @keyframes formFade {
-
   from {
     opacity: 0;
     transform: translateY(-10px);
@@ -492,15 +486,12 @@ body {
     opacity: 1;
     transform: translateY(0);
   }
-
 }
 
 @media (max-width: 992px) {
-
   .full-address {
     grid-column: span 1;
   }
-
 }
 
 /* =========================================
@@ -727,7 +718,10 @@ body {
   font-weight: 500;
   font-family: inherit;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    border-color 0.2s;
 }
 
 .orders-artisan-pill:hover {
@@ -1250,7 +1244,6 @@ body {
 ========================================= */
 
 @media (max-width: 992px) {
-
   .account-nav-links {
     display: none;
   }
@@ -1264,7 +1257,6 @@ body {
     flex-direction: column;
     align-items: flex-start;
   }
-
 }
 
 .field-error {

@@ -45,76 +45,46 @@
 //     }
 // };
 
-
 // src/utils/logoutUser.js
 
 import axios from "axios";
 
-let isLoggingOut =
-  false;
+let isLoggingOut = false;
 
-export const forceLogout =
-  async () => {
+export const forceLogout = async () => {
+  if (isLoggingOut) return;
 
-    if (isLoggingOut)
-      return;
+  isLoggingOut = true;
 
-    isLoggingOut =
-      true;
+  try {
+    await axios.post(
+      `${import.meta.env.VITE_API_URL}/api/users/logout/`,
 
-    try {
+      {},
 
-      await axios.post(
+      {
+        withCredentials: true,
+      },
+    );
+  } catch (err) {
+    // ignore logout errors
+  } finally {
+    // REMOVE ONLY AUTH DATA
 
-        `${import.meta.env.VITE_API_URL}/api/users/logout/`,
+    localStorage.removeItem("user");
 
-        {},
+    localStorage.removeItem("access");
 
-        {
-          withCredentials: true,
-        }
-      );
+    sessionStorage.clear();
 
-    } catch (err) {
+    isLoggingOut = false;
 
-      // ignore logout errors
+    // REDIRECT
 
-    } finally {
-
-      // REMOVE ONLY AUTH DATA
-
-      localStorage.removeItem(
-        "user"
-      );
-
-      localStorage.removeItem(
-        "access"
-      );
-
-      sessionStorage.clear();
-
-      isLoggingOut =
-        false;
-
-      // REDIRECT
-
-      if (
-
-        window.location.pathname.startsWith(
-          "/admin"
-        )
-
-      ) {
-
-        window.location.replace(
-          "/admin/login"
-        );
-
-      } else {
-
-        window.location.replace(
-          "/login"
-        );
-      }
+    if (window.location.pathname.startsWith("/admin")) {
+      window.location.replace("/admin/login");
+    } else {
+      window.location.replace("/login");
     }
+  }
 };

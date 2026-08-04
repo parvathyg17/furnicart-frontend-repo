@@ -1,17 +1,10 @@
 import "../../styles/admin-coupons.css";
 
-import {
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import toast from "react-hot-toast";
 
-import {
-  Gift,
-  Save,
-} from "lucide-react";
+import { Gift, Save } from "lucide-react";
 
 import {
   fetchAdminReferralProgram,
@@ -19,12 +12,9 @@ import {
   postAdminReferralProgram,
 } from "../../features/referral/referralProgramAPI";
 
-import {
-  formatProductApiError,
-} from "../../utils/productApiErrors.js";
+import { formatProductApiError } from "../../utils/productApiErrors.js";
 
 function emptyFormState() {
-
   return {
     name: "Default Referral Program",
     is_active: true,
@@ -36,293 +26,157 @@ function emptyFormState() {
   };
 }
 
-function programToForm(
-  program,
-) {
-
+function programToForm(program) {
   return {
     name: program.name || "",
-    is_active: Boolean(
-      program.is_active,
-    ),
-    referee_discount_type:
-      program.referee_discount_type || "percent",
-    referee_discount_value: String(
-      program.referee_discount_value ?? "",
-    ),
+    is_active: Boolean(program.is_active),
+    referee_discount_type: program.referee_discount_type || "percent",
+    referee_discount_value: String(program.referee_discount_value ?? ""),
     referee_max_discount_amount:
       program.referee_max_discount_amount != null
-        ? String(
-            program.referee_max_discount_amount,
-          )
+        ? String(program.referee_max_discount_amount)
         : "",
     referee_coupon_valid_days:
       program.referee_coupon_valid_days != null
-        ? String(
-            program.referee_coupon_valid_days,
-          )
+        ? String(program.referee_coupon_valid_days)
         : "",
-    referrer_reward_amount: String(
-      program.referrer_reward_amount ?? "",
-    ),
+    referrer_reward_amount: String(program.referrer_reward_amount ?? ""),
   };
 }
 
-function buildPayload(
-  form,
-) {
+function buildPayload(form) {
+  const maxDiscount = (form.referee_max_discount_amount || "").trim();
 
-  const maxDiscount = (
-    form.referee_max_discount_amount || ""
-  ).trim();
-
-  const validDays = (
-    form.referee_coupon_valid_days || ""
-  ).trim();
+  const validDays = (form.referee_coupon_valid_days || "").trim();
 
   return {
     name: form.name.trim(),
     is_active: form.is_active,
     referee_discount_type: form.referee_discount_type,
     referee_discount_value: form.referee_discount_value,
-    referee_max_discount_amount: maxDiscount
-      ? maxDiscount
-      : null,
-    referee_coupon_valid_days: validDays
-      ? parseInt(
-          validDays,
-          10,
-        )
-      : null,
+    referee_max_discount_amount: maxDiscount ? maxDiscount : null,
+    referee_coupon_valid_days: validDays ? parseInt(validDays, 10) : null,
     referrer_reward_amount: form.referrer_reward_amount,
   };
 }
 
 export default function AdminReferral() {
+  const [program, setProgram] = useState(null);
 
-  const [
-    program,
-    setProgram,
-  ] = useState(
-    null,
-  );
+  const [loading, setLoading] = useState(true);
 
-  const [
-    loading,
-    setLoading,
-  ] = useState(
-    true,
-  );
+  const [error, setError] = useState("");
 
-  const [
-    error,
-    setError,
-  ] = useState(
-    "",
-  );
+  const [form, setForm] = useState(emptyFormState);
 
-  const [
-    form,
-    setForm,
-  ] = useState(
-    emptyFormState,
-  );
+  const [saveBusy, setSaveBusy] = useState(false);
 
-  const [
-    saveBusy,
-    setSaveBusy,
-  ] = useState(
-    false,
-  );
+  const load = useCallback(async () => {
+    setLoading(true);
 
-  const load = useCallback(
-    async () => {
+    setError("");
 
-      setLoading(
-        true,
-      );
+    try {
+      const data = await fetchAdminReferralProgram();
 
-      setError(
-        "",
-      );
+      const existing = data.program;
 
-      try {
+      setProgram(existing);
 
-        const data = await fetchAdminReferralProgram();
-
-        const existing = data.program;
-
-        setProgram(
-          existing,
-        );
-
-        if (existing) {
-
-          setForm(
-            programToForm(
-              existing,
-            ),
-          );
-        } else {
-
-          setForm(
-            emptyFormState(),
-          );
-        }
-      } catch {
-
-        setError(
-          "Could not load referral program.",
-        );
-      } finally {
-
-        setLoading(
-          false,
-        );
+      if (existing) {
+        setForm(programToForm(existing));
+      } else {
+        setForm(emptyFormState());
       }
-    },
-    [],
-  );
+    } catch {
+      setError("Could not load referral program.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  useEffect(
-    () => {
+  useEffect(() => {
+    load();
+  }, [load]);
 
-      load();
-    },
-    [load],
-  );
-
-  const updateField = (
-    key,
-    value,
-  ) => {
-
-    setForm(
-      (
-        prev,
-      ) => ({
-        ...prev,
-        [key]: value,
-      }),
-    );
+  const updateField = (key, value) => {
+    setForm((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
   };
 
   const handleSave = async () => {
-
-    if (
-      !form.name.trim()
-    ) {
-
-      toast.error(
-        "Program name is required.",
-      );
+    if (!form.name.trim()) {
+      toast.error("Program name is required.");
 
       return;
     }
 
     if (
-      form.referee_discount_value === ""
-      ||
+      form.referee_discount_value === "" ||
       form.referee_discount_value == null
     ) {
-
-      toast.error(
-        "Referee discount value is required.",
-      );
+      toast.error("Referee discount value is required.");
 
       return;
     }
 
     if (
-      form.referrer_reward_amount === ""
-      ||
+      form.referrer_reward_amount === "" ||
       form.referrer_reward_amount == null
     ) {
-
-      toast.error(
-        "Referrer reward amount is required.",
-      );
+      toast.error("Referrer reward amount is required.");
 
       return;
     }
 
-    setSaveBusy(
-      true,
-    );
+    setSaveBusy(true);
 
     try {
-
-      const body = buildPayload(
-        form,
-      );
+      const body = buildPayload(form);
 
       const data = program
-        ? await patchAdminReferralProgram(
-            body,
-          )
-        : await postAdminReferralProgram(
-            body,
-          );
+        ? await patchAdminReferralProgram(body)
+        : await postAdminReferralProgram(body);
 
       const saved = data.program;
 
-      setProgram(
-        saved,
-      );
+      setProgram(saved);
 
-      setForm(
-        programToForm(
-          saved,
-        ),
-      );
+      setForm(programToForm(saved));
 
       toast.success(
-        program
-          ? "Referral program updated."
-          : "Referral program created.",
+        program ? "Referral program updated." : "Referral program created.",
       );
     } catch (err) {
-
       toast.error(
-        formatProductApiError(
-          err.response?.data,
-        ) || "Could not save referral program.",
+        formatProductApiError(err.response?.data) ||
+          "Could not save referral program.",
       );
     } finally {
-
-      setSaveBusy(
-        false,
-      );
+      setSaveBusy(false);
     }
   };
 
   if (loading) {
-
     return (
       <div className="admin-coupons-page">
-        <p className="admin-coupons-muted">
-          Loading referral program...
-        </p>
+        <p className="admin-coupons-muted">Loading referral program...</p>
       </div>
     );
   }
 
   return (
     <div className="admin-coupons-page">
-
       <header className="admin-coupons-header">
-
         <div>
-
-          <h1>
-            Refer & Earn
-          </h1>
+          <h1>Refer & Earn</h1>
 
           <p>
-            Configure the referral program shown on customer profile pages.
-            When active, users can share a code and earn wallet credit.
+            Configure the referral program shown on customer profile pages. When
+            active, users can share a code and earn wallet credit.
           </p>
-
         </div>
 
         <button
@@ -332,25 +186,16 @@ export default function AdminReferral() {
           disabled={saveBusy}
         >
           <Save size={18} />
-          {saveBusy
-            ? "Saving..."
-            : program
-              ? "Save changes"
-              : "Create program"}
+          {saveBusy ? "Saving..." : program ? "Save changes" : "Create program"}
         </button>
-
       </header>
 
-      {error && (
-        <p className="admin-coupons-error">
-          {error}
-        </p>
-      )}
+      {error && <p className="admin-coupons-error">{error}</p>}
 
       {!program && !error && (
         <p className="admin-coupons-muted">
-          No referral program yet. Fill in the details below and click
-          Create program.
+          No referral program yet. Fill in the details below and click Create
+          program.
         </p>
       )}
 
@@ -364,11 +209,9 @@ export default function AdminReferral() {
                 : "admin-coupons-badge admin-coupons-badge--off"
             }
           >
-            {program.is_active
-              ? "Active"
-              : "Inactive"}
-          </span>
-          {" "}— customers only see Refer & Earn when this is active.
+            {program.is_active ? "Active" : "Inactive"}
+          </span>{" "}
+          — customers only see Refer & Earn when this is active.
         </p>
       )}
 
@@ -380,7 +223,6 @@ export default function AdminReferral() {
           boxShadow: "0 4px 24px rgba(0, 0, 0, 0.06)",
         }}
       >
-
         <h2>
           <Gift
             size={22}
@@ -393,52 +235,31 @@ export default function AdminReferral() {
         </h2>
 
         <div className="admin-coupons-field">
-
-          <label htmlFor="referral-name">
-            Program name
-          </label>
+          <label htmlFor="referral-name">Program name</label>
 
           <input
             id="referral-name"
             type="text"
             value={form.name}
-            onChange={(
-              e,
-            ) =>
-              updateField(
-                "name",
-                e.target.value,
-              )
-            }
+            onChange={(e) => updateField("name", e.target.value)}
             placeholder="Default Referral Program"
           />
-
         </div>
 
         <div className="admin-coupons-field admin-coupons-field--inline">
-
           <input
             id="referral-active"
             type="checkbox"
             checked={form.is_active}
-            onChange={(
-              e,
-            ) =>
-              updateField(
-                "is_active",
-                e.target.checked,
-              )
-            }
+            onChange={(e) => updateField("is_active", e.target.checked)}
           />
 
           <label htmlFor="referral-active">
             Program active (show on profile pages)
           </label>
-
         </div>
 
         <div className="admin-coupons-field">
-
           <label htmlFor="referrer-reward">
             Referrer reward (₹ wallet credit)
           </label>
@@ -449,25 +270,19 @@ export default function AdminReferral() {
             min="0"
             step="0.01"
             value={form.referrer_reward_amount}
-            onChange={(
-              e,
-            ) =>
-              updateField(
-                "referrer_reward_amount",
-                e.target.value,
-              )
+            onChange={(e) =>
+              updateField("referrer_reward_amount", e.target.value)
             }
             placeholder="500.00"
           />
 
           <p className="admin-coupons-muted">
-            Paid to the referrer after the friend completes their first paid order.
+            Paid to the referrer after the friend completes their first paid
+            order.
           </p>
-
         </div>
 
         <div className="admin-coupons-field">
-
           <label htmlFor="referee-discount-type">
             Referee welcome discount type
           </label>
@@ -475,30 +290,17 @@ export default function AdminReferral() {
           <select
             id="referee-discount-type"
             value={form.referee_discount_type}
-            onChange={(
-              e,
-            ) =>
-              updateField(
-                "referee_discount_type",
-                e.target.value,
-              )
+            onChange={(e) =>
+              updateField("referee_discount_type", e.target.value)
             }
           >
-            <option value="percent">
-              Percentage off
-            </option>
-            <option value="fixed">
-              Fixed amount off (₹)
-            </option>
+            <option value="percent">Percentage off</option>
+            <option value="fixed">Fixed amount off (₹)</option>
           </select>
-
         </div>
 
         <div className="admin-coupons-field">
-
-          <label htmlFor="referee-discount-value">
-            Referee discount value
-          </label>
+          <label htmlFor="referee-discount-value">Referee discount value</label>
 
           <input
             id="referee-discount-value"
@@ -506,18 +308,11 @@ export default function AdminReferral() {
             min="0"
             step="0.01"
             value={form.referee_discount_value}
-            onChange={(
-              e,
-            ) =>
-              updateField(
-                "referee_discount_value",
-                e.target.value,
-              )
+            onChange={(e) =>
+              updateField("referee_discount_value", e.target.value)
             }
             placeholder={
-              form.referee_discount_type === "percent"
-                ? "10"
-                : "100"
+              form.referee_discount_type === "percent" ? "10" : "100"
             }
           />
 
@@ -526,12 +321,10 @@ export default function AdminReferral() {
               ? "Percentage off the referee's first order (0–100)."
               : "Fixed rupee amount off the referee's first order."}
           </p>
-
         </div>
 
         {form.referee_discount_type === "percent" && (
           <div className="admin-coupons-field">
-
             <label htmlFor="referee-max-discount">
               Max discount cap (₹, optional)
             </label>
@@ -542,22 +335,15 @@ export default function AdminReferral() {
               min="0"
               step="0.01"
               value={form.referee_max_discount_amount}
-              onChange={(
-                e,
-              ) =>
-                updateField(
-                  "referee_max_discount_amount",
-                  e.target.value,
-                )
+              onChange={(e) =>
+                updateField("referee_max_discount_amount", e.target.value)
               }
               placeholder="Leave empty for no cap"
             />
-
           </div>
         )}
 
         <div className="admin-coupons-field">
-
           <label htmlFor="referee-valid-days">
             Welcome coupon valid days (optional)
           </label>
@@ -568,21 +354,14 @@ export default function AdminReferral() {
             min="1"
             step="1"
             value={form.referee_coupon_valid_days}
-            onChange={(
-              e,
-            ) =>
-              updateField(
-                "referee_coupon_valid_days",
-                e.target.value,
-              )
+            onChange={(e) =>
+              updateField("referee_coupon_valid_days", e.target.value)
             }
             placeholder="Leave empty for no expiry"
           />
-
         </div>
 
         <div className="admin-coupons-modal-actions">
-
           <button
             type="button"
             className="admin-coupons-btn-primary"
@@ -595,11 +374,8 @@ export default function AdminReferral() {
                 ? "Save changes"
                 : "Create program"}
           </button>
-
         </div>
-
       </div>
-
     </div>
   );
 }

@@ -1,28 +1,15 @@
 import "../../styles/home.css";
 import "../../styles/shop.css";
 
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import {
-  Link,
-  useNavigate,
-} from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
-import {
-  useDispatch,
-  useSelector,
-} from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import Pagination from "../../components/common/Pagination.jsx";
 
-import {
-  buildShopPageNumbers,
-} from "../../features/shop/shopListUtils.js";
+import { buildShopPageNumbers } from "../../features/shop/shopListUtils.js";
 
 import {
   fetchWishlist,
@@ -32,132 +19,67 @@ import {
 import {
   setWishlistCount,
   loadWishlistCount,
-} from "../../features/wishlist/wishlistSlice"
+} from "../../features/wishlist/wishlistSlice";
 
-import {
-  addToCartApi,
-} from "../../features/cart/cartAPI";
+import { addToCartApi } from "../../features/cart/cartAPI";
 
-import {
-  setCartItemCount,
-} from "../../features/cart/cartSlice";
+import { setCartItemCount } from "../../features/cart/cartSlice";
 
-import {
-  lineImageUrl,
-} from "../../features/checkout/checkoutUtils.js";
+import { lineImageUrl } from "../../features/checkout/checkoutUtils.js";
 
-import {
-  ProductPriceDisplay,
-} from "../../features/promotions/components/OfferBadge.jsx";
+import { ProductPriceDisplay } from "../../features/promotions/components/OfferBadge.jsx";
 
-import {
-  useBackgroundServerSync,
-} from "../../hooks/useBackgroundServerSync.js";
+import { useBackgroundServerSync } from "../../hooks/useBackgroundServerSync.js";
 
 import PublicNavbar from "../../components/common/PublicNavbar.jsx";
 
-import {
-  formatProductApiError,
-} from "../../utils/productApiErrors.js";
+import { formatProductApiError } from "../../utils/productApiErrors.js";
 
-import {
-  shopProductPathFrom,
-} from "../../utils/shopProductPath.js";
+import { shopProductPathFrom } from "../../utils/shopProductPath.js";
 
-import {
-  stableStringify,
-} from "../../utils/stableStringify.js";
+import { stableStringify } from "../../utils/stableStringify.js";
 
-function wishlistVariantCanAddToCart(
-  variant,
-) {
-
-  if (
-    !variant ||
-    !variant.is_active
-  ) {
-
+function wishlistVariantCanAddToCart(variant) {
+  if (!variant || !variant.is_active) {
     return false;
   }
 
-  return (
-    (Number(variant.stock) || 0) >= 1
-  );
+  return (Number(variant.stock) || 0) >= 1;
 }
 
-function wishlistVariantSubtitle(
-  variant,
-) {
-
-  if (
-    !variant
-  ) {
-
+function wishlistVariantSubtitle(variant) {
+  if (!variant) {
     return "";
   }
 
-  const parts =
-    [
-      variant.material,
-      variant.color,
-      variant.size,
-    ]
-      .map(
-        (s) =>
-          (s || "").trim(),
-      )
-      .filter(Boolean);
+  const parts = [variant.material, variant.color, variant.size]
+    .map((s) => (s || "").trim())
+    .filter(Boolean);
 
-  if (
-    parts.length
-  ) {
-
+  if (parts.length) {
     return parts.join(" / ");
   }
 
-  return (
-    variant.variant_name || ""
-  ).trim();
+  return (variant.variant_name || "").trim();
 }
 
 const PAGE_SIZE = 5;
 
 export default function Wishlist() {
-
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const {
-    checkingAuth,
-  } = useSelector(
-    (state) => state.auth,
-  );
+  const { checkingAuth } = useSelector((state) => state.auth);
 
-  const [
-    items,
-    setItems,
-  ] = useState([]);
+  const [items, setItems] = useState([]);
 
-  const [
-    loading,
-    setLoading,
-  ] = useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const [
-    error,
-    setError,
-  ] = useState(null);
+  const [error, setError] = useState(null);
 
-  const [
-    page,
-    setPage,
-  ] = useState(1);
+  const [page, setPage] = useState(1);
 
-  const [
-    pagination,
-    setPagination,
-  ] = useState({
-
+  const [pagination, setPagination] = useState({
     count: 0,
 
     totalPages: 1,
@@ -169,111 +91,66 @@ export default function Wishlist() {
     previous: null,
   });
 
-  const lastWishlistSigRef =
-    useRef(null);
+  const lastWishlistSigRef = useRef(null);
 
   const pageRef = useRef(page);
 
   pageRef.current = page;
 
   const load = useCallback(
-    async (
-      {
-        silent = false,
-        pageNum = pageRef.current,
-      } = {},
-    ) => {
-
-      if (
-        !silent
-      ) {
-
+    async ({ silent = false, pageNum = pageRef.current } = {}) => {
+      if (!silent) {
         setLoading(true);
         setError(null);
       }
 
       try {
+        const res = await fetchWishlist({
+          page: pageNum,
+          pageSize: PAGE_SIZE,
+        });
 
-        const res =
-          await fetchWishlist(
-            {
-              page: pageNum,
-              pageSize: PAGE_SIZE,
-            },
-          );
+        const rows = res.results || [];
 
-        const rows =
-          res.results || [];
+        const nextPagination = {
+          count: res.count ?? 0,
 
-        const nextPagination =
-          {
+          totalPages: res.total_pages || 1,
 
-            count:
-              res.count ?? 0,
+          currentPage: res.current_page || pageNum,
 
-            totalPages:
-              res.total_pages || 1,
+          next: res.next,
 
-            currentPage:
-              res.current_page || pageNum,
+          previous: res.previous,
+        };
 
-            next:
-              res.next,
+        const snap = stableStringify({
+          results: rows,
+          pagination: nextPagination,
+        });
 
-            previous:
-              res.previous,
-          };
-
-        const snap =
-          stableStringify(
-            {
-              results: rows,
-              pagination: nextPagination,
-            },
-          );
-
-        if (
-          silent &&
-          lastWishlistSigRef.current === snap
-        ) {
-
+        if (silent && lastWishlistSigRef.current === snap) {
           return;
         }
 
-        lastWishlistSigRef.current =
-          snap;
+        lastWishlistSigRef.current = snap;
 
         setItems(rows);
-        setPagination(
-          nextPagination,
-        );
+        setPagination(nextPagination);
       } catch (err) {
-
-        if (
-          err.response?.status === 401
-        ) {
-
+        if (err.response?.status === 401) {
           navigate("/login");
           return;
         }
 
-        if (
-          !silent
-        ) {
-
+        if (!silent) {
           setError(
-            formatProductApiError(
-              err.response?.data,
-            ) ||
+            formatProductApiError(err.response?.data) ||
               "Could not load wishlist.",
           );
         }
       } finally {
-
-        if (
-          !silent
-        ) {
-
+        if (!silent) {
           setLoading(false);
         }
       }
@@ -282,65 +159,38 @@ export default function Wishlist() {
     [navigate],
   );
 
-  useEffect(
-    () => {
+  useEffect(() => {
+    load({
+      pageNum: page,
+    });
+  }, [page, load]);
 
-      load(
-        {
-          pageNum: page,
-        },
-      );
-    },
-
-    [page, load],
-  );
-
-  useBackgroundServerSync(
-    {
-      enabled: true,
-      pollIntervalMs: 90_000,
-      onRefresh: () =>
-        load(
-          {
-            silent: true,
-            pageNum: pageRef.current,
-          },
-        ),
-    },
-  );
+  useBackgroundServerSync({
+    enabled: true,
+    pollIntervalMs: 90_000,
+    onRefresh: () =>
+      load({
+        silent: true,
+        pageNum: pageRef.current,
+      }),
+  });
 
   const reloadAfterChange = async () => {
+    const nextPage = items.length === 1 && page > 1 ? page - 1 : page;
 
-    const nextPage =
-      items.length === 1 &&
-      page > 1
-        ? page - 1
-        : page;
-
-    if (
-      nextPage !== page
-    ) {
-
+    if (nextPage !== page) {
       setPage(nextPage);
       return;
     }
 
-    await load(
-      {
-        pageNum: page,
-      },
-    );
+    await load({
+      pageNum: page,
+    });
   };
 
-  const remove = async (
-    variantId,
-  ) => {
-
+  const remove = async (variantId) => {
     try {
-
-      const res = await toggleWishlistApi(
-        variantId,
-      );
+      const res = await toggleWishlistApi(variantId);
 
       await reloadAfterChange();
       if (res.item_count !== undefined) {
@@ -349,39 +199,25 @@ export default function Wishlist() {
         dispatch(loadWishlistCount());
       }
     } catch (err) {
-
       setError(
-        formatProductApiError(
-          err.response?.data,
-        ) ||
+        formatProductApiError(err.response?.data) ||
           "Could not update wishlist.",
       );
     }
   };
 
-  const moveToCart = async (
-    variantId,
-  ) => {
-
+  const moveToCart = async (variantId) => {
     setError(null);
 
     try {
-
-      const res =
-        await addToCartApi({
-          variantId,
-          quantity: 1,
-        });
-
-      dispatch(
-        setCartItemCount(
-          res.item_count,
-        ),
-      );
-
-      const toggleRes = await toggleWishlistApi(
+      const res = await addToCartApi({
         variantId,
-      );
+        quantity: 1,
+      });
+
+      dispatch(setCartItemCount(res.item_count));
+
+      const toggleRes = await toggleWishlistApi(variantId);
 
       await reloadAfterChange();
       if (toggleRes.item_count !== undefined) {
@@ -390,320 +226,171 @@ export default function Wishlist() {
         dispatch(loadWishlistCount());
       }
     } catch (err) {
-
       setError(
-        formatProductApiError(
-          err.response?.data,
-        ) ||
-          "Could not add to cart.",
+        formatProductApiError(err.response?.data) || "Could not add to cart.",
       );
     }
   };
 
-  
-  
+  const pageNumbers = buildShopPageNumbers({
+    totalPages: pagination.totalPages,
+    currentPage: pagination.currentPage,
+  });
 
-  const pageNumbers =
-    buildShopPageNumbers(
-      {
-        totalPages: pagination.totalPages,
-        currentPage: pagination.currentPage,
-      },
-    );
-
-  if (
-    checkingAuth
-  ) {
-
-    return (
-
-      <div className="home-loading">
-        Loading...
-      </div>
-    );
+  if (checkingAuth) {
+    return <div className="home-loading">Loading...</div>;
   }
- 
 
-  const count =
-    pagination.count;
+  const count = pagination.count;
 
-  const countLabel =
-    count === 1
-      ? "1 item"
-      : `${count} items`;
+  const countLabel = count === 1 ? "1 item" : `${count} items`;
 
   return (
-
     <div className="home-page wishlist-page">
-
       <PublicNavbar />
 
       <main className="wishlist-main">
+        <nav className="wishlist-bc" aria-label="Breadcrumb">
+          <Link to="/">Home</Link>
 
-        <nav
-          className="wishlist-bc"
-          aria-label="Breadcrumb"
-        >
-
-          <Link to="/">
-            Home
-          </Link>
-
-          <span
-            className="wishlist-bc-sep"
-            aria-hidden="true"
-          >
+          <span className="wishlist-bc-sep" aria-hidden="true">
             ›
           </span>
 
-          <Link to="/profile">
-            My Account
-          </Link>
+          <Link to="/profile">My Account</Link>
 
-          <span
-            className="wishlist-bc-sep"
-            aria-hidden="true"
-          >
+          <span className="wishlist-bc-sep" aria-hidden="true">
             ›
           </span>
 
-          <span
-            className="wishlist-bc-current"
-            aria-current="page"
-          >
+          <span className="wishlist-bc-current" aria-current="page">
             Wishlist
           </span>
         </nav>
 
-        <h1 className="wishlist-title">
-          My Wishlist
-          
-        </h1>
+        <h1 className="wishlist-title">My Wishlist</h1>
 
-        {
-          !loading && (
+        {!loading && (
+          <p className="wishlist-lead">
+            {count === 0
+              ? "Save pieces you love — they will appear here."
+              : `You have ${countLabel} curated for your home.`}
+          </p>
+        )}
 
-            <p className="wishlist-lead">
-              {
-                count === 0
-                  ? "Save pieces you love — they will appear here."
-                  : `You have ${countLabel} curated for your home.`
-              }
-            </p>
-          )
-        }
+        {error && (
+          <div className="shop-banner error wishlist-banner" role="alert">
+            {error}
+          </div>
+        )}
 
-        {
-          error && (
+        {loading ? (
+          <p className="wishlist-muted">Loading…</p>
+        ) : count === 0 ? (
+          <div className="wishlist-empty">
+            <p className="wishlist-muted">Your wishlist is empty.</p>
 
-            <div
-              className="shop-banner error wishlist-banner"
-              role="alert"
-            >
-              {error}
-            </div>
-          )
-        }
-
-        {
-          loading ? (
-
-            <p className="wishlist-muted">
-              Loading…
-            </p>
-          ) : count === 0 ? (
-
-            <div className="wishlist-empty">
-
-              <p className="wishlist-muted">
-                Your wishlist is empty.
-              </p>
-
-              <Link
-                className="wishlist-empty-cta"
-                to="/shop"
-              >
-                Browse shop
-              </Link>
-            </div>
-          ) : (
-
-            <>
-
+            <Link className="wishlist-empty-cta" to="/shop">
+              Browse shop
+            </Link>
+          </div>
+        ) : (
+          <>
             <ul className="wishlist-grid">
+              {items.map((row) => {
+                const variant = row.variant;
 
-              {
-                items.map(
-                  (row) => {
+                const product = variant?.product;
 
-                    const variant =
-                      row.variant;
+                const imgUrl = lineImageUrl(variant);
 
-                    const product =
-                      variant?.product;
+                const subtitle = wishlistVariantSubtitle(variant);
 
-                    const imgUrl =
-                      lineImageUrl(
-                        variant,
-                      );
+                const productPath = shopProductPathFrom(product);
 
-                    const subtitle =
-                      wishlistVariantSubtitle(
-                        variant,
-                      );
+                const canMoveToCart = wishlistVariantCanAddToCart(variant);
 
-                    const productPath =
-                      shopProductPathFrom(
-                        product,
-                      );
+                return (
+                  <li key={row.id} className="wishlist-card">
+                    <Link
+                      className="wishlist-card-media"
+                      to={productPath || "/shop"}
+                    >
+                      {imgUrl ? (
+                        <img src={imgUrl} alt="" />
+                      ) : (
+                        <div className="wishlist-card-ph" aria-hidden="true" />
+                      )}
 
-                    const canMoveToCart =
-                      wishlistVariantCanAddToCart(
-                        variant,
-                      );
-
-                    return (
-
-                      <li
-                        key={row.id}
-                        className="wishlist-card"
-                      >
-
-                        <Link
-                          className="wishlist-card-media"
-                          to={
-                            productPath ||
-                            "/shop"
-                          }
+                      {!canMoveToCart && (
+                        <span
+                          className="wishlist-card-media-badge"
+                          role="status"
                         >
+                          {variant?.is_active === false
+                            ? "Unavailable"
+                            : "Out of stock"}
+                        </span>
+                      )}
+                    </Link>
 
-                          {
-                            imgUrl ? (
+                    <div className="wishlist-card-body">
+                      <Link
+                        className="wishlist-card-title-link"
+                        to={productPath || "/shop"}
+                      >
+                        <h2 className="wishlist-card-title">
+                          {product?.name || "Product"}
+                        </h2>
+                      </Link>
 
-                              <img
-                                src={imgUrl}
-                                alt=""
-                              />
-                            ) : (
+                      {subtitle && (
+                        <p className="wishlist-card-meta">{subtitle}</p>
+                      )}
 
-                              <div
-                                className="wishlist-card-ph"
-                                aria-hidden="true"
-                              />
-                            )
-                          }
+                      <ProductPriceDisplay
+                        variant={variant}
+                        product={product}
+                        className="wishlist-card-price"
+                      />
 
-                          {
-                            !canMoveToCart && (
+                      {!canMoveToCart && (
+                        <p className="wishlist-card-stock-note" role="status">
+                          {variant?.is_active === false
+                            ? "This option is no longer available. " +
+                              "Remove it or pick another variant on the product page."
+                            : "This item is out of stock. " +
+                              "You can keep it here and try again later."}
+                        </p>
+                      )}
 
-                              <span
-                                className="wishlist-card-media-badge"
-                                role="status"
-                              >
-                                {
-                                  variant?.is_active === false
-                                    ? "Unavailable"
-                                    : "Out of stock"
-                                }
-                              </span>
-                            )
-                          }
-                        </Link>
+                      <button
+                        type="button"
+                        className="wishlist-move-btn"
+                        disabled={!canMoveToCart}
+                        aria-label={
+                          canMoveToCart
+                            ? "Move to cart"
+                            : variant?.is_active === false
+                              ? "Unavailable — cannot add to cart"
+                              : "Out of stock — cannot add to cart"
+                        }
+                        onClick={() => moveToCart(variant.id)}
+                      >
+                        Move to cart
+                      </button>
 
-                        <div className="wishlist-card-body">
-
-                          <Link
-                            className="wishlist-card-title-link"
-                            to={
-                              productPath ||
-                              "/shop"
-                            }
-                          >
-
-                            <h2 className="wishlist-card-title">
-                              {
-                                product?.name ||
-                                "Product"
-                              }
-                            </h2>
-                          </Link>
-
-                          {
-                            subtitle && (
-
-                              <p className="wishlist-card-meta">
-                                {subtitle}
-                              </p>
-                            )
-                          }
-
-                          <ProductPriceDisplay
-                            variant={variant}
-                            product={product}
-                            className="wishlist-card-price"
-                          />
-
-                          {
-                            !canMoveToCart && (
-
-                              <p
-                                className="wishlist-card-stock-note"
-                                role="status"
-                              >
-                                {
-                                  variant?.is_active === false
-                                    ? (
-                                      "This option is no longer available. "
-                                      + "Remove it or pick another variant on the product page."
-                                    )
-                                    : (
-                                      "This item is out of stock. "
-                                      + "You can keep it here and try again later."
-                                    )
-                                }
-                              </p>
-                            )
-                          }
-
-                          <button
-                            type="button"
-                            className="wishlist-move-btn"
-                            disabled={!canMoveToCart}
-                            aria-label={
-                              canMoveToCart
-                                ? "Move to cart"
-                                : (
-                                  variant?.is_active === false
-                                    ? "Unavailable — cannot add to cart"
-                                    : "Out of stock — cannot add to cart"
-                                )
-                            }
-                            onClick={() =>
-                              moveToCart(
-                                variant.id,
-                              )
-                            }
-                          >
-                            Move to cart
-                          </button>
-
-                          <button
-                            type="button"
-                            className="wishlist-remove-link"
-                            onClick={() =>
-                              remove(
-                                variant.id,
-                              )
-                            }
-                          >
-                            Remove from wishlist
-                          </button>
-                        </div>
-                      </li>
-                    );
-                  },
-                )
-              }
+                      <button
+                        type="button"
+                        className="wishlist-remove-link"
+                        onClick={() => remove(variant.id)}
+                      >
+                        Remove from wishlist
+                      </button>
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
 
             <Pagination
@@ -716,41 +403,25 @@ export default function Wishlist() {
               className="artisan-pagination wishlist-pagination"
             />
           </>
-          )
-        }
+        )}
       </main>
-      
 
       <footer className="home-footer">
-
         <div className="home-footer-inner">
-
-          <div className="footer-logo">
-            FURNICART
-          </div>
+          <div className="footer-logo">FURNICART</div>
 
           <div className="footer-links">
+            <Link to="/">Privacy Policy</Link>
 
-            <Link to="/">
-              Privacy Policy
-            </Link>
+            <Link to="/">Terms of Service</Link>
 
-            <Link to="/">
-              Terms of Service
-            </Link>
+            <Link to="/">Shipping Information</Link>
 
-            <Link to="/">
-              Shipping Information
-            </Link>
-
-            <Link to="/">
-              Return Policy
-            </Link>
+            <Link to="/">Return Policy</Link>
           </div>
 
           <div className="footer-copy">
-            © 2026 Furnicart.
-            All rights reserved.
+            © 2026 Furnicart. All rights reserved.
           </div>
         </div>
       </footer>

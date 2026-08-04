@@ -10,7 +10,6 @@ import ShopProductGrid from "../../features/shop/components/ShopProductGrid.jsx"
 import ShopPageFooter from "../../features/shop/components/ShopPageFooter.jsx";
 
 export default function Shop() {
-
   const {
     patchParams,
     draftSearch,
@@ -37,58 +36,34 @@ export default function Shop() {
   } = useShopCatalog();
 
   if (checkingAuth) {
-
-    return (
-
-      <div className="home-loading">
-        Loading...
-      </div>
-    );
+    return <div className="home-loading">Loading...</div>;
   }
 
   return (
-
     <div className="artisan-shop">
-
       <PublicNavbar />
 
       <main className="artisan-main-wrap">
-
-        <h1 className="artisan-title artisan-font-serif">
-          Shop
-        </h1>
+        <h1 className="artisan-title artisan-font-serif">Shop</h1>
 
         <p className="artisan-lead">
           Curated furniture for calm, considered spaces — filter by room,
           category, and price.
         </p>
 
-        {
-          toast && (
+        {toast && (
+          <div className="artisan-toast" role="status">
+            {toast}
+          </div>
+        )}
 
-            <div
-              className="artisan-toast"
-              role="status"
-            >
-              {toast}
-            </div>
-          )
-        }
-
-        {
-          error && (
-
-            <div
-              className="artisan-banner error"
-              role="alert"
-            >
-              {error}
-            </div>
-          )
-        }
+        {error && (
+          <div className="artisan-banner error" role="alert">
+            {error}
+          </div>
+        )}
 
         <div className="artisan-layout">
-
           <ShopFiltersSidebar
             categories={categories}
             roomTypes={roomTypes}
@@ -98,7 +73,6 @@ export default function Shop() {
             onClearSearch={clearSearch}
             sort={sort}
             onSortChange={(value) => {
-
               patchParams({
                 sort: value,
                 page: 1,
@@ -106,7 +80,6 @@ export default function Shop() {
             }}
             category={category}
             onCategoryChange={(slug) => {
-
               patchParams({
                 category: slug,
                 page: 1,
@@ -114,7 +87,6 @@ export default function Shop() {
             }}
             roomType={roomType}
             onRoomTypeChange={(slug) => {
-
               patchParams({
                 room_type: slug,
                 page: 1,
@@ -123,14 +95,12 @@ export default function Shop() {
             minPrice={minPrice}
             maxPrice={maxPrice}
             onMinPriceChange={(value) => {
-
               patchParams({
                 min_price: value,
                 page: 1,
               });
             }}
             onMaxPriceChange={(value) => {
-
               patchParams({
                 max_price: value,
                 page: 1,
@@ -139,7 +109,6 @@ export default function Shop() {
           />
 
           <section className="artisan-content">
-
             <ShopProductGrid
               loading={loading}
               products={products}
@@ -149,16 +118,13 @@ export default function Shop() {
               minPrice={minPrice}
               maxPrice={maxPrice}
               onPageChange={(nextPage) => {
-
                 patchParams({
                   page: nextPage,
                 });
               }}
               onAddToCart={handleAddToCart}
               onWishlist={handleWishlist}
-              wishlistedVariantIds={
-                wishlistedVariantIds
-              }
+              wishlistedVariantIds={wishlistedVariantIds}
             />
           </section>
         </div>

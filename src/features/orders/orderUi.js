@@ -1,6 +1,4 @@
-import {
-  formatMoney,
-} from "../../utils/currency.js";
+import { formatMoney } from "../../utils/currency.js";
 
 export const PAYMENT_LABELS = {
   cod: "Cash on delivery",
@@ -28,22 +26,12 @@ export const INVOICE_UNAVAILABLE_NOTE =
  * Invoice PDF is only available while the order is unchanged since placement —
  * no partial or full cancellations, returns, or refunds.
  */
-export function canDownloadOrderInvoice(
-  order,
-) {
-
-  if (
-    !order
-  ) {
-
+export function canDownloadOrderInvoice(order) {
+  if (!order) {
     return false;
   }
 
-  if (
-    order.status === "cancelled" ||
-    order.status === "partially_cancelled"
-  ) {
-
+  if (order.status === "cancelled" || order.status === "partially_cancelled") {
     return false;
   }
 
@@ -51,16 +39,10 @@ export function canDownloadOrderInvoice(
     order.payment_status === "partially_refunded" ||
     order.payment_status === "refunded"
   ) {
-
     return false;
   }
 
-  if (
-    Number(
-      order.refunded_total ?? 0,
-    ) > 0
-  ) {
-
+  if (Number(order.refunded_total ?? 0) > 0) {
     return false;
   }
 
@@ -70,22 +52,13 @@ export function canDownloadOrderInvoice(
     (line) =>
       line.status === "cancelled" ||
       line.fulfillment_status === "returned" ||
-      Number(
-        line.cancelled_quantity ?? 0,
-      ) > 0 ||
-      Number(
-        line.returned_quantity ?? 0,
-      ) > 0,
+      Number(line.cancelled_quantity ?? 0) > 0 ||
+      Number(line.returned_quantity ?? 0) > 0,
   );
 }
 
-export function orderHasPaidDeliveryCharge(
-  order,
-) {
-
-  return Number(
-    order?.shipping_total ?? 0,
-  ) > 0;
+export function orderHasPaidDeliveryCharge(order) {
+  return Number(order?.shipping_total ?? 0) > 0;
 }
 
 /**
@@ -94,30 +67,14 @@ export function orderHasPaidDeliveryCharge(
  */
 export function showDeliveryChargeNonRefundableNote(
   order,
-  {
-    refundSummary = false,
-  } = {},
+  { refundSummary = false } = {},
 ) {
-
-  if (
-    !orderHasPaidDeliveryCharge(
-      order,
-    )
-  ) {
-
+  if (!orderHasPaidDeliveryCharge(order)) {
     return false;
   }
 
-  if (
-    refundSummary
-  ) {
-
-    if (
-      Number(
-        order?.refunded_total ?? 0,
-      ) <= 0
-    ) {
-
+  if (refundSummary) {
+    if (Number(order?.refunded_total ?? 0) <= 0) {
       return false;
     }
 
@@ -131,33 +88,20 @@ export function showDeliveryChargeNonRefundableNote(
  * Extra payment line for the customer UI. COD orders stay ``pending`` until
  * delivery — showing raw ``pending`` looks like an error, so we omit it.
  */
-export function paymentStatusFollowLine(
-  order,
-) {
-
+export function paymentStatusFollowLine(order) {
   const ps = order.payment_status;
 
   const pm = order.payment_method;
 
-  if (
-    !ps
-  ) {
-
+  if (!ps) {
     return null;
   }
 
-  if (
-    ps === "pending" &&
-    pm === "cod"
-  ) {
-
+  if (ps === "pending" && pm === "cod") {
     return null;
   }
 
-  return PAYMENT_STATUS_LABELS[
-    ps
-  ] ||
-    ps;
+  return PAYMENT_STATUS_LABELS[ps] || ps;
 }
 
 export const STATUS_LABELS = {
@@ -171,29 +115,16 @@ export const STATUS_LABELS = {
   partially_delivered: "Partially delivered",
 };
 
-export function orderStatusPillClass(
-  status,
-) {
-
-  if (
-    status === "cancelled"
-  ) {
-
+export function orderStatusPillClass(status) {
+  if (status === "cancelled") {
     return "odl-pill--cancelled";
   }
 
-  if (
-    status === "partially_cancelled"
-  ) {
-
+  if (status === "partially_cancelled") {
     return "odl-pill--partial";
   }
 
-  if (
-    status === "delivered" ||
-    status === "partially_delivered"
-  ) {
-
+  if (status === "delivered" || status === "partially_delivered") {
     return "odl-pill--delivered";
   }
 
@@ -202,7 +133,6 @@ export function orderStatusPillClass(
     status === "out_for_delivery" ||
     status === "partially_shipped"
   ) {
-
     return "odl-pill--progress";
   }
 
@@ -255,14 +185,8 @@ export const LINE_TRACK_STEPS = [
   },
 ];
 
-export function resolveOrderTracker(
-  status,
-) {
-
-  if (
-    status === "cancelled"
-  ) {
-
+export function resolveOrderTracker(status) {
+  if (status === "cancelled") {
     return {
       cancelled: true,
       phase: 0,
@@ -272,7 +196,7 @@ export function resolveOrderTracker(
 
   const allDelivered = status === "delivered";
 
-  const phase = (
+  const phase =
     {
       pending: 0,
       partially_cancelled: 0,
@@ -281,10 +205,7 @@ export function resolveOrderTracker(
       out_for_delivery: 2,
       partially_delivered: 3,
       delivered: 3,
-    }[
-      status
-    ] ?? 0
-  );
+    }[status] ?? 0;
 
   return {
     cancelled: false,
@@ -293,207 +214,113 @@ export function resolveOrderTracker(
   };
 }
 
-export function orderBarFilled(
-  barIndex,
-  phase,
-  allDelivered,
-) {
-
-  if (
-    allDelivered
-  ) {
-
+export function orderBarFilled(barIndex, phase, allDelivered) {
+  if (allDelivered) {
     return barIndex < 3;
   }
 
   return barIndex < phase;
 }
 
-export function orderStepDotKind(
-  stepIndex,
-  tracker,
-) {
-
-  if (
-    tracker.cancelled
-  ) {
-
+export function orderStepDotKind(stepIndex, tracker) {
+  if (tracker.cancelled) {
     return "upcoming";
   }
 
-  if (
-    tracker.allDelivered
-  ) {
-
+  if (tracker.allDelivered) {
     return "done";
   }
 
-  if (
-    stepIndex < tracker.phase
-  ) {
-
+  if (stepIndex < tracker.phase) {
     return "done";
   }
 
-  if (
-    stepIndex === tracker.phase
-  ) {
-
+  if (stepIndex === tracker.phase) {
     return "current";
   }
 
   return "upcoming";
 }
 
-export function lineFulfillmentPhase(
-  fs,
-) {
-
-  if (
-    fs === "shipped"
-  ) {
-
+export function lineFulfillmentPhase(fs) {
+  if (fs === "shipped") {
     return 1;
   }
 
-  if (
-    fs === "out_for_delivery"
-  ) {
-
+  if (fs === "out_for_delivery") {
     return 2;
   }
 
-  if (
-    fs === "delivered"
-  ) {
-
+  if (fs === "delivered") {
     return 3;
   }
 
   return 0;
 }
 
-export function lineStatusBadgeClass(
-  line,
-) {
-
-  if (
-    line.status === "cancelled"
-  ) {
-
+export function lineStatusBadgeClass(line) {
+  if (line.status === "cancelled") {
     return "odl-status-badge--cancelled";
   }
 
   const fs = line.fulfillment_status || "pending";
 
-  if (
-    fs === "returned"
-  ) {
-
+  if (fs === "returned") {
     return "odl-status-badge--returned";
   }
 
-  if (
-    fs === "delivered"
-  ) {
-
+  if (fs === "delivered") {
     return "odl-status-badge--delivered";
   }
 
-  if (
-    fs === "out_for_delivery"
-  ) {
-
+  if (fs === "out_for_delivery") {
     return "odl-status-badge--ofd";
   }
 
-  if (
-    fs === "shipped"
-  ) {
-
+  if (fs === "shipped") {
     return "odl-status-badge--shipped";
   }
 
   return "odl-status-badge--pending";
 }
 
-export function lineStatusLabel(
-  line,
-) {
-
-  if (
-    line.status === "cancelled"
-  ) {
-
+export function lineStatusLabel(line) {
+  if (line.status === "cancelled") {
     return "Cancelled";
   }
 
-  const returnedQty = Number(
-    line.returned_quantity ?? 0,
-  );
+  const returnedQty = Number(line.returned_quantity ?? 0);
 
-  const deliverable = Number(
-    line.quantity ?? 0,
-  ) - Number(
-    line.cancelled_quantity ?? 0,
-  );
+  const deliverable =
+    Number(line.quantity ?? 0) - Number(line.cancelled_quantity ?? 0);
 
-  if (
-    returnedQty > 0
-    && deliverable > 0
-    && returnedQty < deliverable
-  ) {
-
+  if (returnedQty > 0 && deliverable > 0 && returnedQty < deliverable) {
     return "Partially returned";
   }
 
   const fs = line.fulfillment_status || "pending";
 
-  return FULFILLMENT_LABELS[
-    fs
-  ] ||
-    fs;
+  return FULFILLMENT_LABELS[fs] || fs;
 }
 
 /**
  * Immutable placed-order breakdown from per-line values and original_paid.
  * Stays fixed after cancellations or returns (mirrors admin order summary).
  */
-export function computeOriginalOrderBreakdown(
-  order,
-) {
-
+export function computeOriginalOrderBreakdown(order) {
   const lines = order?.lines || [];
 
-  const originalPaid = Number(
-    order?.original_paid ?? order?.grand_total ?? 0,
-  );
+  const originalPaid = Number(order?.original_paid ?? order?.grand_total ?? 0);
 
   const itemTotals = lines.reduce(
-    (
-      acc,
-      ln,
-    ) => {
+    (acc, ln) => {
+      acc.price += Number(ln.line_total) || 0;
 
-      acc.price += Number(
-        ln.line_total,
-      ) ||
-        0;
+      acc.coupon += Number(ln.coupon_share) || 0;
 
-      acc.coupon += Number(
-        ln.coupon_share,
-      ) ||
-        0;
+      acc.tax += Number(ln.tax_share) || 0;
 
-      acc.tax += Number(
-        ln.tax_share,
-      ) ||
-        0;
-
-      acc.offer += Number(
-        ln.discount_amount,
-      ) ||
-        0;
+      acc.offer += Number(ln.discount_amount) || 0;
 
       return acc;
     },
@@ -518,10 +345,7 @@ export function computeOriginalOrderBreakdown(
   const origShippingNum = Math.max(
     0,
     Math.round(
-      (originalPaid
-        - origItemsNet
-        - origTaxNum
-        + origCouponNum) * 100,
+      (originalPaid - origItemsNet - origTaxNum + origCouponNum) * 100,
     ) / 100,
   );
 
@@ -539,75 +363,44 @@ export function computeOriginalOrderBreakdown(
 /**
  * COD returns are settled in cash at pickup — not via wallet credits.
  */
-export function isCodOrder(
-  order,
-) {
-
+export function isCodOrder(order) {
   return order?.payment_method === "cod";
 }
 
-export function codReturnRefundStatusLabel(
-  order,
-) {
-
-  if (
-    !isCodOrder(
-      order,
-    )
-  ) {
-
+export function codReturnRefundStatusLabel(order) {
+  if (!isCodOrder(order)) {
     return null;
   }
 
   const lines = order?.lines || [];
 
-  const activeLines = lines.filter(
-    (line) =>
-      line.status !== "cancelled",
-  );
+  const activeLines = lines.filter((line) => line.status !== "cancelled");
 
   const returnedLines = activeLines.filter(
     (line) =>
-      (line.returned_quantity ?? 0) > 0
-      || line.fulfillment_status === "returned",
+      (line.returned_quantity ?? 0) > 0 ||
+      line.fulfillment_status === "returned",
   );
 
-  if (
-    returnedLines.length <= 0
-  ) {
-
+  if (returnedLines.length <= 0) {
     return null;
   }
 
-  const allReturned = activeLines.length > 0
-    && activeLines.every(
-      (line) => {
-        const deliverable = (line.quantity ?? 0)
-          - (line.cancelled_quantity ?? 0);
+  const allReturned =
+    activeLines.length > 0 &&
+    activeLines.every((line) => {
+      const deliverable = (line.quantity ?? 0) - (line.cancelled_quantity ?? 0);
 
-        return deliverable > 0
-          && (line.returned_quantity ?? 0) >= deliverable;
-      },
-    );
+      return deliverable > 0 && (line.returned_quantity ?? 0) >= deliverable;
+    });
 
-  return allReturned
-    ? "Refunded"
-    : "Partially refunded";
+  return allReturned ? "Refunded" : "Partially refunded";
 }
 
-export function codReturnRefundNote(
-  order,
-  amount,
-) {
+export function codReturnRefundNote(order, amount) {
+  const label = codReturnRefundStatusLabel(order);
 
-  const label = codReturnRefundStatusLabel(
-    order,
-  );
-
-  if (
-    !label
-  ) {
-
+  if (!label) {
     return null;
   }
 
@@ -615,13 +408,7 @@ export function codReturnRefundNote(
     amount ?? order?.return_refund_total ?? order?.refunded_total ?? 0,
   );
 
-  if (
-    Number.isNaN(
-      amt,
-    )
-    || amt <= 0
-  ) {
-
+  if (Number.isNaN(amt) || amt <= 0) {
     return "Cash on delivery — amount refunded when the item was picked up.";
   }
 

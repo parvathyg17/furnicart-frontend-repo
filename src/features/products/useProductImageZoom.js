@@ -1,9 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
   ZOOM_SCALE_MAX,
@@ -11,305 +6,189 @@ import {
   clampPanForScale,
 } from "./productDetailUtils.js";
 
-export default function useProductImageZoom(
-  primaryImage,
-) {
+export default function useProductImageZoom(primaryImage) {
+  const zoomViewportRef = useRef(null);
 
-  const zoomViewportRef =
-    useRef(null);
-
-  const imageZoomRef =
-    useRef({
-      scale: 1,
-      panX: 0,
-      panY: 0,
-    });
-
-  const [
-    imageZoom,
-    setImageZoom,
-  ] = useState({
+  const imageZoomRef = useRef({
     scale: 1,
     panX: 0,
     panY: 0,
   });
 
-  const imageDragRef =
-    useRef(null);
+  const [imageZoom, setImageZoom] = useState({
+    scale: 1,
+    panX: 0,
+    panY: 0,
+  });
 
-  imageZoomRef.current =
-    imageZoom;
+  const imageDragRef = useRef(null);
+
+  imageZoomRef.current = imageZoom;
 
   useEffect(() => {
-
     setImageZoom({
       scale: 1,
       panX: 0,
       panY: 0,
     });
 
-    imageDragRef.current =
-      null;
+    imageDragRef.current = null;
   }, [primaryImage]);
 
   useEffect(() => {
+    const el = zoomViewportRef.current;
 
-    const el =
-      zoomViewportRef.current;
-
-    if (
-      !el ||
-      !primaryImage
-    ) {
-
+    if (!el || !primaryImage) {
       return;
     }
 
-    const onWheel =
-      (e) => {
+    const onWheel = (e) => {
+      if (e.ctrlKey) {
+        return;
+      }
 
-        if (
-          e.ctrlKey
-        ) {
+      e.preventDefault();
 
-          return;
-        }
+      const rect = el.getBoundingClientRect();
 
-        e.preventDefault();
+      const vw = rect.width;
 
-        const rect =
-          el.getBoundingClientRect();
+      const vh = rect.height;
 
-        const vw =
-          rect.width;
+      const factor = e.deltaY < 0 ? 1.08 : 1 / 1.08;
 
-        const vh =
-          rect.height;
-
-        const factor =
-          e.deltaY < 0
-            ? 1.08
-            : 1 / 1.08;
-
-        setImageZoom(
-          (z) => {
-
-            const raw =
-              Math.min(
-                ZOOM_SCALE_MAX,
-                Math.max(
-                  ZOOM_SCALE_MIN,
-                  z.scale * factor,
-                ),
-              );
-
-            if (
-              raw <=
-              1.001
-            ) {
-
-              return {
-                scale: 1,
-                panX: 0,
-                panY: 0,
-              };
-            }
-
-            const nextScale =
-              Math.max(
-                1.02,
-                raw,
-              );
-
-            return {
-              scale: nextScale,
-
-              ...clampPanForScale(
-                nextScale,
-                z.panX,
-                z.panY,
-                vw,
-                vh,
-              ),
-            };
-          }
+      setImageZoom((z) => {
+        const raw = Math.min(
+          ZOOM_SCALE_MAX,
+          Math.max(ZOOM_SCALE_MIN, z.scale * factor),
         );
-      };
 
-    el.addEventListener(
-      "wheel",
-      onWheel,
-      {
-        passive: false,
-      },
-    );
-
-    return () =>
-
-      el.removeEventListener(
-        "wheel",
-        onWheel,
-      );
-  }, [primaryImage]);
-
-  useEffect(() => {
-
-    const onKey =
-      (e) => {
-
-        if (
-          e.key ===
-          "Escape"
-        ) {
-
-          setImageZoom({
+        if (raw <= 1.001) {
+          return {
             scale: 1,
             panX: 0,
             panY: 0,
-          });
-
-          imageDragRef.current =
-            null;
+          };
         }
-      };
 
-    window.addEventListener(
-      "keydown",
-      onKey,
-    );
+        const nextScale = Math.max(1.02, raw);
 
-    return () =>
+        return {
+          scale: nextScale,
 
-      window.removeEventListener(
-        "keydown",
-        onKey,
-      );
+          ...clampPanForScale(nextScale, z.panX, z.panY, vw, vh),
+        };
+      });
+    };
+
+    el.addEventListener("wheel", onWheel, {
+      passive: false,
+    });
+
+    return () => el.removeEventListener("wheel", onWheel);
+  }, [primaryImage]);
+
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === "Escape") {
+        setImageZoom({
+          scale: 1,
+          panX: 0,
+          panY: 0,
+        });
+
+        imageDragRef.current = null;
+      }
+    };
+
+    window.addEventListener("keydown", onKey);
+
+    return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const onImagePointerDown =
-    useCallback(
-      (e) => {
+  const onImagePointerDown = useCallback(
+    (e) => {
+      const z = imageZoomRef.current;
 
-        const z =
-          imageZoomRef.current;
+      if (z.scale <= 1) {
+        return;
+      }
 
-        if (
-          z.scale <=
-          1
-        ) {
+      imageDragRef.current = {
+        id: e.pointerId,
 
-          return;
-        }
+        lx: e.clientX,
 
-        imageDragRef.current =
-          {
-            id: e.pointerId,
+        ly: e.clientY,
 
-            lx: e.clientX,
+        ox: z.panX,
 
-            ly: e.clientY,
+        oy: z.panY,
+      };
 
-            ox: z.panX,
+      e.currentTarget.setPointerCapture(e.pointerId);
+    },
 
-            oy: z.panY,
-          };
+    [],
+  );
 
-        e.currentTarget.setPointerCapture(
-          e.pointerId,
-        );
-      },
+  const onImagePointerMove = useCallback(
+    (e) => {
+      const d = imageDragRef.current;
 
-      [],
-    );
+      if (!d || d.id !== e.pointerId) {
+        return;
+      }
 
-  const onImagePointerMove =
-    useCallback(
-      (e) => {
+      const el = zoomViewportRef.current;
 
-        const d =
-          imageDragRef.current;
+      if (!el) return;
 
-        if (
-          !d ||
-          d.id !==
-            e.pointerId
-        ) {
+      const rect = el.getBoundingClientRect();
 
-          return;
-        }
+      const panX = d.ox + (e.clientX - d.lx);
 
-        const el =
-          zoomViewportRef.current;
+      const panY = d.oy + (e.clientY - d.ly);
 
-        if (!el)
-          return;
+      const scale = imageZoomRef.current.scale;
 
-        const rect =
-          el.getBoundingClientRect();
-
-        const panX =
-          d.ox +
-          (e.clientX -
-            d.lx);
-
-        const panY =
-          d.oy +
-          (e.clientY -
-            d.ly);
-
-        const scale =
-          imageZoomRef.current
-            .scale;
-
-        const clamped =
-          clampPanForScale(
-            scale,
-            panX,
-            panY,
-            rect.width,
-            rect.height,
-          );
-
-        setImageZoom({
-          scale,
-
-          ...clamped,
-        });
-      },
-
-      [],
-    );
-
-  const onImagePointerUp =
-    useCallback(
-      (e) => {
-
-        if (
-          imageDragRef.current
-            ?.id ===
-          e.pointerId
-        ) {
-
-          imageDragRef.current =
-            null;
-        }
-      },
-
-      [],
-    );
-
-  const onImageDoubleClick =
-    useCallback(() => {
+      const clamped = clampPanForScale(
+        scale,
+        panX,
+        panY,
+        rect.width,
+        rect.height,
+      );
 
       setImageZoom({
-        scale: 1,
-        panX: 0,
-        panY: 0,
-      });
+        scale,
 
-      imageDragRef.current =
-        null;
-    }, []);
+        ...clamped,
+      });
+    },
+
+    [],
+  );
+
+  const onImagePointerUp = useCallback(
+    (e) => {
+      if (imageDragRef.current?.id === e.pointerId) {
+        imageDragRef.current = null;
+      }
+    },
+
+    [],
+  );
+
+  const onImageDoubleClick = useCallback(() => {
+    setImageZoom({
+      scale: 1,
+      panX: 0,
+      panY: 0,
+    });
+
+    imageDragRef.current = null;
+  }, []);
 
   return {
     zoomViewportRef,

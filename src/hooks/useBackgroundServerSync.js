@@ -1,197 +1,91 @@
-import {
-  useCallback,
-  useEffect,
-  useRef,
-} from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 /**
  * Refetch when the user returns to the app (tab visible, window focused)
  * or the network comes back. Optional visible-only polling.
  * Debounced to coalesce bursts of events without extra renders.
  */
-export function useBackgroundServerSync(
-  {
-    enabled = true,
-    onRefresh,
-    pollIntervalMs = null,
-    debounceMs = 450,
-  },
-) {
+export function useBackgroundServerSync({
+  enabled = true,
+  onRefresh,
+  pollIntervalMs = null,
+  debounceMs = 450,
+}) {
+  const onRefreshRef = useRef(onRefresh);
 
-  const onRefreshRef =
-    useRef(
-      onRefresh,
-    );
+  onRefreshRef.current = onRefresh;
 
-  onRefreshRef.current =
-    onRefresh;
+  const debounceTimerRef = useRef(null);
 
-  const debounceTimerRef =
-    useRef(
-      null,
-    );
+  const inFlightRef = useRef(false);
 
-  const inFlightRef =
-    useRef(
-      false,
-    );
+  const schedule = useCallback(() => {
+    if (!enabled) return;
 
-  const schedule =
-    useCallback(
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    debounceTimerRef.current = setTimeout(
       () => {
+        debounceTimerRef.current = null;
 
-        if (!enabled)
+        if (document.visibilityState !== "visible") {
           return;
-
-        if (
-          debounceTimerRef.current
-        ) {
-
-          clearTimeout(
-            debounceTimerRef.current,
-          );
         }
 
-        debounceTimerRef.current =
-          setTimeout(
-            () => {
+        if (inFlightRef.current) {
+          return;
+        }
 
-              debounceTimerRef.current =
-                null;
+        inFlightRef.current = true;
 
-              if (
-                document.visibilityState !==
-                "visible"
-              ) {
-
-                return;
-              }
-
-              if (
-                inFlightRef.current
-              ) {
-
-                return;
-              }
-
-              inFlightRef.current =
-                true;
-
-              Promise.resolve(
-                onRefreshRef.current(),
-              ).finally(
-                () => {
-
-                  inFlightRef.current =
-                    false;
-                },
-              );
-            },
-
-            debounceMs,
-          );
+        Promise.resolve(onRefreshRef.current()).finally(() => {
+          inFlightRef.current = false;
+        });
       },
 
-      [
-        enabled,
-        debounceMs,
-      ],
+      debounceMs,
     );
+  }, [enabled, debounceMs]);
 
-  useEffect(
-    () => {
+  useEffect(() => {
+    if (!enabled) return;
 
-      if (!enabled)
-        return;
-
-      const onVisibility =
-        () => {
-
-          if (
-            document.visibilityState ===
-            "visible"
-          ) {
-
-            schedule();
-          }
-        };
-
-      const onOnline =
-        () =>
-          schedule();
-
-      window.addEventListener(
-        "focus",
-        schedule,
-      );
-
-      window.addEventListener(
-        "online",
-        onOnline,
-      );
-
-      document.addEventListener(
-        "visibilitychange",
-        onVisibility,
-      );
-
-      let pollId =
-        null;
-
-      if (
-        pollIntervalMs !=
-          null &&
-        pollIntervalMs >
-          0
-      ) {
-
-        pollId =
-          setInterval(
-            onVisibility,
-            pollIntervalMs,
-          );
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        schedule();
       }
+    };
 
-      return () => {
+    const onOnline = () => schedule();
 
-        window.removeEventListener(
-          "focus",
-          schedule,
-        );
+    window.addEventListener("focus", schedule);
 
-        window.removeEventListener(
-          "online",
-          onOnline,
-        );
+    window.addEventListener("online", onOnline);
 
-        document.removeEventListener(
-          "visibilitychange",
-          onVisibility,
-        );
+    document.addEventListener("visibilitychange", onVisibility);
 
-        if (pollId)
-          clearInterval(
-            pollId,
-          );
+    let pollId = null;
 
-        if (
-          debounceTimerRef.current
-        ) {
+    if (pollIntervalMs != null && pollIntervalMs > 0) {
+      pollId = setInterval(onVisibility, pollIntervalMs);
+    }
 
-          clearTimeout(
-            debounceTimerRef.current,
-          );
+    return () => {
+      window.removeEventListener("focus", schedule);
 
-          debounceTimerRef.current =
-            null;
-        }
-      };
-    },
+      window.removeEventListener("online", onOnline);
 
-    [
-      enabled,
-      pollIntervalMs,
-      schedule,
-    ],
-  );
+      document.removeEventListener("visibilitychange", onVisibility);
+
+      if (pollId) clearInterval(pollId);
+
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+
+        debounceTimerRef.current = null;
+      }
+    };
+  }, [enabled, pollIntervalMs, schedule]);
 }

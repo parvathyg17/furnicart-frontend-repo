@@ -494,19 +494,12 @@
   min-height: 100vh;
   background: var(--artisan-bg);
   color: var(--artisan-ink);
-  font-family:
-    "DM Sans",
-    system-ui,
-    sans-serif;
+  font-family: "DM Sans", system-ui, sans-serif;
   font-size: 15px;
 }
 
 .artisan-font-serif {
-  font-family:
-    "Cormorant Garamond",
-    Georgia,
-    "Times New Roman",
-    serif;
+  font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif;
 }
 
 .artisan-main-wrap {
@@ -923,10 +916,7 @@
   margin: 0;
   font-size: 1.05rem;
   font-weight: 700;
-  font-family:
-    "DM Sans",
-    system-ui,
-    sans-serif;
+  font-family: "DM Sans", system-ui, sans-serif;
 }
 
 .fc-price-display {
@@ -960,10 +950,7 @@
 .artisan-card-price-value {
   font-size: 1.05rem;
   font-weight: 700;
-  font-family:
-    "DM Sans",
-    system-ui,
-    sans-serif;
+  font-family: "DM Sans", system-ui, sans-serif;
 }
 
 .collection-price.fc-price-display {
@@ -1242,7 +1229,10 @@
   height: auto;
 }
 
-.artisan-shop.pd-user-pdp-shell .pd-user-hero-image .pd-interactive-zoom-track img {
+.artisan-shop.pd-user-pdp-shell
+  .pd-user-hero-image
+  .pd-interactive-zoom-track
+  img {
   position: absolute;
   inset: 0;
   display: block;
@@ -2215,7 +2205,7 @@
   margin: 0.35rem 0 0;
   font-size: 0.72rem;
   line-height: 1.35;
-  color: red
+  color: red;
 }
 
 .cart-bag-line-alert {
@@ -2349,10 +2339,7 @@
   border-radius: 10px;
   background: var(--bag-btn);
   color: #fff;
-  font-family:
-    "DM Sans",
-    system-ui,
-    sans-serif;
+  font-family: "DM Sans", system-ui, sans-serif;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.14em;

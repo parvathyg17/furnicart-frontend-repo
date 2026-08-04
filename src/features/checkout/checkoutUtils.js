@@ -3,22 +3,17 @@
  * @returns {string | null}
  */
 export function lineImageUrl(variant) {
-
   if (!variant) {
-
     return null;
   }
 
   const imgs = variant.images || [];
 
-  const primary = imgs.find(
-    (i) => i.is_primary,
-  );
+  const primary = imgs.find((i) => i.is_primary);
 
   const pick = primary || imgs[0];
 
   if (!pick) {
-
     return null;
   }
 
@@ -29,25 +24,12 @@ export function lineImageUrl(variant) {
  * @param {string | number | null | undefined} gstRateStr
  * @returns {number | null}
  */
-export function gstPercentLabel(
-  gstRateStr,
-) {
+export function gstPercentLabel(gstRateStr) {
+  const n = Number(gstRateStr);
 
-  const n = Number(
-    gstRateStr,
-  );
-
-  if (
-    Number.isNaN(
-      n,
-    ) ||
-    n <= 0
-  ) {
-
+  if (Number.isNaN(n) || n <= 0) {
     return null;
   }
 
-  return Math.round(
-    n * 100,
-  );
+  return Math.round(n * 100);
 }

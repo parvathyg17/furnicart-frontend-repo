@@ -1,86 +1,47 @@
 import api from "../../services/api";
 
 export async function createOrderApi(body) {
-
-  const response = await api.post(
-    "orders/",
-    body,
-  );
+  const response = await api.post("orders/", body);
 
   return response.data;
 }
 
-export async function fetchOrdersList(
-  {
-    page = 1,
-    pageSize = 10,
-    search = "",
-    status = "",
-  } = {},
-) {
-
+export async function fetchOrdersList({
+  page = 1,
+  pageSize = 10,
+  search = "",
+  status = "",
+} = {}) {
   const params = new URLSearchParams();
 
-  params.set(
-    "page",
-    String(
-      page,
-    ),
-  );
+  params.set("page", String(page));
 
-  params.set(
-    "page_size",
-    String(
-      pageSize,
-    ),
-  );
+  params.set("page_size", String(pageSize));
 
-  if (
-    search.trim()
-  ) {
-
-    params.set(
-      "search",
-      search.trim(),
-    );
+  if (search.trim()) {
+    params.set("search", search.trim());
   }
 
-  if (
-    status
-  ) {
-
-    params.set(
-      "status",
-      status,
-    );
+  if (status) {
+    params.set("status", status);
   }
 
-  const response = await api.get(
-    `orders/?${params.toString()}`,
-  );
+  const response = await api.get(`orders/?${params.toString()}`);
 
   return response.data;
 }
 
 export async function fetchOrderApi(orderNumber) {
-
-  const response = await api.get(
-    `orders/${encodeURIComponent(orderNumber)}/`,
-    {
-      params: {
-        _: Date.now(),
-      },
+  const response = await api.get(`orders/${encodeURIComponent(orderNumber)}/`, {
+    params: {
+      _: Date.now(),
     },
-  );
+  });
 
   return response.data;
 }
 
-export async function cancelOrderApi(
-  orderNumber,
-  body = {},
-) {
-
+export async function cancelOrderApi(orderNumber, body = {}) {
   const response = await api.post(
     `orders/${encodeURIComponent(orderNumber)}/cancel/`,
     body,
@@ -89,12 +50,7 @@ export async function cancelOrderApi(
   return response.data;
 }
 
-export async function cancelOrderLineApi(
-  orderNumber,
-  lineId,
-  body = {},
-) {
-
+export async function cancelOrderLineApi(orderNumber, lineId, body = {}) {
   const response = await api.post(
     `orders/${encodeURIComponent(orderNumber)}/lines/${lineId}/cancel/`,
     body,
@@ -103,75 +59,37 @@ export async function cancelOrderLineApi(
   return response.data;
 }
 
-export async function fetchPurchasesList(
-  {
-    page = 1,
-    pageSize = 10,
-    search = "",
-    fulfillmentStatus = "",
-    lineStatus = "",
-  } = {},
-) {
-
+export async function fetchPurchasesList({
+  page = 1,
+  pageSize = 10,
+  search = "",
+  fulfillmentStatus = "",
+  lineStatus = "",
+} = {}) {
   const params = new URLSearchParams();
 
-  params.set(
-    "page",
-    String(
-      page,
-    ),
-  );
+  params.set("page", String(page));
 
-  params.set(
-    "page_size",
-    String(
-      pageSize,
-    ),
-  );
+  params.set("page_size", String(pageSize));
 
-  if (
-    search.trim()
-  ) {
-
-    params.set(
-      "search",
-      search.trim(),
-    );
+  if (search.trim()) {
+    params.set("search", search.trim());
   }
 
-  if (
-    fulfillmentStatus
-  ) {
-
-    params.set(
-      "fulfillment_status",
-      fulfillmentStatus,
-    );
+  if (fulfillmentStatus) {
+    params.set("fulfillment_status", fulfillmentStatus);
   }
 
-  if (
-    lineStatus
-  ) {
-
-    params.set(
-      "line_status",
-      lineStatus,
-    );
+  if (lineStatus) {
+    params.set("line_status", lineStatus);
   }
 
-  const response = await api.get(
-    `orders/purchases/?${params.toString()}`,
-  );
+  const response = await api.get(`orders/purchases/?${params.toString()}`);
 
   return response.data;
 }
 
-export async function submitReturnRequest(
-  orderNumber,
-  lineId,
-  body,
-) {
-
+export async function submitReturnRequest(orderNumber, lineId, body) {
   const response = await api.post(
     `orders/${encodeURIComponent(orderNumber)}/lines/${lineId}/return/`,
     body,
@@ -180,10 +98,7 @@ export async function submitReturnRequest(
   return response.data;
 }
 
-export async function downloadOrderInvoicePdf(
-  orderNumber,
-) {
-
+export async function downloadOrderInvoicePdf(orderNumber) {
   const response = await api.get(
     `orders/${encodeURIComponent(orderNumber)}/invoice/`,
     {
@@ -193,68 +108,37 @@ export async function downloadOrderInvoicePdf(
 
   const blob = response.data;
 
-  const ct = (
-    response.headers["content-type"] ||
-    ""
-  ).toLowerCase();
+  const ct = (response.headers["content-type"] || "").toLowerCase();
 
-  if (
-    !ct.includes(
-      "application/pdf",
-    )
-  ) {
-
+  if (!ct.includes("application/pdf")) {
     let message = "Could not download invoice.";
 
     try {
-
       const text = await blob.text();
 
-      const parsed = JSON.parse(
-        text,
-      );
+      const parsed = JSON.parse(text);
 
-      message = (
-
-        parsed.detail ||
-
-        parsed.error ||
-
-        parsed.message ||
-
-        message
-      );
+      message = parsed.detail || parsed.error || parsed.message || message;
     } catch {
-
       /* keep default message */
     }
 
-    throw new Error(
-      message,
-    );
+    throw new Error(message);
   }
 
-  const href = window.URL.createObjectURL(
-    blob,
-  );
+  const href = window.URL.createObjectURL(blob);
 
-  const link = document.createElement(
-    "a",
-  );
+  const link = document.createElement("a");
 
   link.href = href;
 
   link.download = `FurniCart-invoice-${String(orderNumber).replace(/[^a-zA-Z0-9._-]+/g, "_")}.pdf`;
 
-  document.body.appendChild(
-    link,
-  );
+  document.body.appendChild(link);
 
   link.click();
 
   link.remove();
 
-  window.URL.revokeObjectURL(
-    href,
-  );
+  window.URL.revokeObjectURL(href);
 }

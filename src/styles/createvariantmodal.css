@@ -1,5 +1,4 @@
 .create-variant-modal {
-
   width: 720px;
 
   max-width: 100%;
@@ -12,33 +11,28 @@
 
   border-radius: 30px;
 
-  box-shadow:
-    0 20px 60px rgba(0,0,0,0.12);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
 
   scrollbar-width: none;
 }
 
 .create-variant-modal::-webkit-scrollbar {
-
   display: none;
 }
 
 /* COLOR */
 
 .variant-color-grid {
-
   align-items: end;
 }
 
 .color-input-wrapper {
-
   display: flex;
 
   gap: 12px;
 }
 
 .color-preview {
-
   width: 54px;
 
   height: 54px;
@@ -47,16 +41,13 @@
 
   background: #2f2f2f;
 
-  border:
-    1px solid #ddd;
+  border: 1px solid #ddd;
 }
 
 /* STATUS */
 
 .variant-status-card {
-
-  border:
-    1px solid #ece4dd;
+  border: 1px solid #ece4dd;
 
   border-radius: 20px;
 
@@ -72,7 +63,6 @@
 }
 
 .variant-status-card h4 {
-
   font-size: 22px;
 
   color: #2f1d14;
@@ -81,7 +71,6 @@
 }
 
 .variant-status-card p {
-
   color: #756963;
 
   line-height: 1.6;
@@ -90,7 +79,6 @@
 /* BUTTON */
 
 .submit-btn {
-
   display: flex;
 
   align-items: center;

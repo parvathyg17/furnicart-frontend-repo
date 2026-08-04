@@ -1,16 +1,10 @@
 // routes/UserRoutes.jsx
 
-import {
-  Routes,
-  Route,
-  useLocation,
-} from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 
 import { useEffect } from "react";
 
-import {
-  captureReferralFromSearch,
-} from "../../features/referral/referralAPI";
+import { captureReferralFromSearch } from "../../features/referral/referralAPI";
 
 import Login from "../../pages/user/Login";
 import Signup from "../../pages/user/Signup";
@@ -40,57 +34,29 @@ import OrderSuccess from "../../pages/user/OrderSuccess";
 import PaymentFailed from "../../pages/user/PaymentFailed";
 import OrdersList from "../../pages/user/OrderList";
 import OrderDetail from "../../pages/user/OrderDetail";
-// import Purchases from "../../pages/user/Purchases";
-
 import PrivateRoute from "../user/PrivateRoute";
 import PublicRoute from "../user/PublicRoute";
 import About from "../../pages/user/About";
 import Contact from "../../pages/user/Contact";
-// import Sample from "../../components/common/Sample";
-
 
 export default function UserRoutes() {
-
   const location = useLocation();
 
   useEffect(() => {
-
-    captureReferralFromSearch(
-      location.search,
-    );
-
-  }, [
-    location.search,
-  ]);
+    captureReferralFromSearch(location.search);
+  }, [location.search]);
 
   return (
-
     <Routes>
+      <Route path="/" element={<Home />} />
 
-      <Route
-        path="/"
-        element={<Home />}
-      />
+      <Route path="/shop" element={<Shop />} />
 
-      <Route
-        path="/shop"
-        element={<Shop />}
-      />
+      <Route path="/about" element={<About />} />
 
-      <Route
-        path="/about"
-        element={<About />}
-      />
+      <Route path="/contact" element={<Contact />} />
 
-      <Route
-        path="/contact"
-        element={<Contact />}
-      />
-
-      <Route
-        path="/shop/product/:productSlug"
-        element={<ProductDetail />}
-      />
+      <Route path="/shop/product/:productSlug" element={<ProductDetail />} />
 
       <Route
         path="/cart"
@@ -127,16 +93,6 @@ export default function UserRoutes() {
           </PrivateRoute>
         }
       />
-
-      {/* <Route
-        path="/purchases"
-        element={
-          <PrivateRoute>
-            <Purchases />
-          </PrivateRoute>
-        }
-      /> */}
-
 
       <Route
         path="/orders"
@@ -265,22 +221,7 @@ export default function UserRoutes() {
           </PrivateRoute>
         }
       />
-
-      {/* <Route
-        path="/sample"
-        element={
-          <Sample />
-          
-        }
-      /> */}
-
-        
-
-      <Route
-        path="*"
-        element={<h1>404 Not Found</h1>}
-      />
-
+      <Route path="*" element={<h1>404 Not Found</h1>} />
     </Routes>
   );
 }

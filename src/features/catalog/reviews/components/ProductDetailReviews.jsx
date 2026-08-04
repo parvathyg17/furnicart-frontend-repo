@@ -1,16 +1,10 @@
-import {
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import toast from "react-hot-toast";
 
 import Pagination from "../../../../components/common/Pagination.jsx";
 
-import {
-  formatProductApiError,
-} from "../../../../utils/productApiErrors.js";
+import { formatProductApiError } from "../../../../utils/productApiErrors.js";
 
 import {
   createProductReview,
@@ -24,41 +18,20 @@ import ReviewFormModal from "./ReviewFormModal.jsx";
 import StarRating from "./StarRating.jsx";
 import ConfirmDialog from "../../../../components/common/ConfirmDialog.jsx";
 
-
-function buildPageNumbers(
-  current,
-  total,
-) {
-
+function buildPageNumbers(current, total) {
   if (total <= 1) return [1];
 
-  const pages = new Set([
-    1,
-    total,
-    current,
-    current - 1,
-    current + 1,
-  ]);
+  const pages = new Set([1, total, current, current - 1, current + 1]);
 
-  return [...pages]
-    .filter(
-      (n) => n >= 1 && n <= total,
-    )
-    .sort(
-      (a, b) => a - b,
-    );
+  return [...pages].filter((n) => n >= 1 && n <= total).sort((a, b) => a - b);
 }
 
-
-export default function ProductDetailReviews(
-  {
-    product,
-    user,
-    onProductRefresh,
-    openReviewOnLoad = false,
-  },
-) {
-
+export default function ProductDetailReviews({
+  product,
+  user,
+  onProductRefresh,
+  openReviewOnLoad = false,
+}) {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -78,23 +51,16 @@ export default function ProductDetailReviews(
 
   const loadReviews = useCallback(
     async (page = 1) => {
-
       setLoading(true);
       setError("");
 
       try {
+        const data = await fetchProductReviews(product.slug, {
+          page,
+          page_size: 5,
+        });
 
-        const data = await fetchProductReviews(
-          product.slug,
-          {
-            page,
-            page_size: 5,
-          },
-        );
-
-        setReviews(
-          data.results || [],
-        );
+        setReviews(data.results || []);
 
         setPagination({
           count: data.count || 0,
@@ -104,17 +70,11 @@ export default function ProductDetailReviews(
           previous: data.previous,
         });
       } catch (err) {
-
         setError(
-
-          formatProductApiError(
-            err.response?.data,
-          ) ||
-
+          formatProductApiError(err.response?.data) ||
             "Could not load reviews.",
         );
       } finally {
-
         setLoading(false);
       }
     },
@@ -122,26 +82,15 @@ export default function ProductDetailReviews(
   );
 
   useEffect(() => {
-
     loadReviews(1);
   }, [loadReviews]);
 
   useEffect(() => {
-
-    if (
-      !openReviewOnLoad ||
-      !user ||
-      hasOpenedOnLoad
-    ) {
-
+    if (!openReviewOnLoad || !user || hasOpenedOnLoad) {
       return;
     }
 
-    if (
-      product.can_review ||
-      product.user_review
-    ) {
-
+    if (product.can_review || product.user_review) {
       setModalOpen(true);
       setHasOpenedOnLoad(true);
     }
@@ -153,37 +102,21 @@ export default function ProductDetailReviews(
     hasOpenedOnLoad,
   ]);
 
-  const handleSubmitReview = async (
-    payload,
-  ) => {
-
+  const handleSubmitReview = async (payload) => {
     if (!user) return;
 
     setModalBusy(true);
     setModalError("");
 
     try {
-
       if (product.user_review?.id) {
+        await updateProductReview(product.user_review.id, payload);
 
-        await updateProductReview(
-          product.user_review.id,
-          payload,
-        );
-
-        toast.success(
-          "Review updated.",
-        );
+        toast.success("Review updated.");
       } else {
+        await createProductReview(product.slug, payload);
 
-        await createProductReview(
-          product.slug,
-          payload,
-        );
-
-        toast.success(
-          "Thank you for your review.",
-        );
+        toast.success("Thank you for your review.");
       }
 
       setModalOpen(false);
@@ -192,17 +125,10 @@ export default function ProductDetailReviews(
 
       await loadReviews(1);
     } catch (err) {
-
       setModalError(
-
-        formatProductApiError(
-          err.response?.data,
-        ) ||
-
-          "Could not save review.",
+        formatProductApiError(err.response?.data) || "Could not save review.",
       );
     } finally {
-
       setModalBusy(false);
     }
   };
@@ -214,36 +140,21 @@ export default function ProductDetailReviews(
   const handleConfirmDelete = async () => {
     setConfirmOpen(false);
 
-    if (
-      !user ||
-      !product.user_review?.id
-    ) {
-
+    if (!user || !product.user_review?.id) {
       return;
     }
 
     try {
+      await deleteProductReview(product.user_review.id);
 
-      await deleteProductReview(
-        product.user_review.id,
-      );
-
-      toast.success(
-        "Review deleted.",
-      );
+      toast.success("Review deleted.");
 
       await onProductRefresh?.();
 
       await loadReviews(1);
     } catch (err) {
-
       toast.error(
-
-        formatProductApiError(
-          err.response?.data,
-        ) ||
-
-          "Could not delete review.",
+        formatProductApiError(err.response?.data) || "Could not delete review.",
       );
     }
   };
@@ -253,143 +164,78 @@ export default function ProductDetailReviews(
     pagination.totalPages,
   );
 
-  const canWrite =
-    user &&
-    (
-      product.can_review ||
-      product.user_review
-    );
+  const canWrite = user && (product.can_review || product.user_review);
 
   return (
-
     <section
       className="fc-reviews-section pd-section"
       aria-label="Customer reviews"
     >
-
       <div className="fc-reviews-head">
-
         <div>
-
           <h2 className="artisan-font-serif fc-reviews-title">
             Customer reviews
           </h2>
 
-          {
-            (product.review_count || 0) > 0 && (
+          {(product.review_count || 0) > 0 && (
+            <div className="pd-rating fc-reviews-summary">
+              <StarRating value={product.average_rating} size={18} />
 
-              <div className="pd-rating fc-reviews-summary">
-
-                <StarRating
-                  value={product.average_rating}
-                  size={18}
-                />
-
-                <span>
-                  {product.average_rating}
-                  {" "}
-                  ·
-                  {" "}
-                  {product.review_count}
-                  {" "}
-                  review
-                  {product.review_count === 1
-                    ? ""
-                    : "s"}
-                </span>
-              </div>
-            )
-          }
+              <span>
+                {product.average_rating} · {product.review_count} review
+                {product.review_count === 1 ? "" : "s"}
+              </span>
+            </div>
+          )}
         </div>
 
-        {
-          canWrite && (
+        {canWrite && (
+          <div className="fc-reviews-actions">
+            <button
+              type="button"
+              className="checkout-btn-secondary"
+              onClick={() => {
+                setModalError("");
+                setModalOpen(true);
+              }}
+            >
+              {product.user_review ? "Edit review" : "Write a review"}
+            </button>
 
-            <div className="fc-reviews-actions">
-
+            {product.user_review && (
               <button
                 type="button"
-                className="checkout-btn-secondary"
-                onClick={() => {
-
-                  setModalError("");
-                  setModalOpen(true);
-                }}
+                className="order-cancel-line-btn"
+                onClick={requestDeleteReview}
               >
-                {
-                  product.user_review
-                    ? "Edit review"
-                    : "Write a review"
-                }
+                Delete
               </button>
-
-              {
-                product.user_review && (
-
-                  <button
-                    type="button"
-                    className="order-cancel-line-btn"
-                    onClick={requestDeleteReview}
-                  >
-                    Delete
-                  </button>
-                )
-              }
-            </div>
-          )
-        }
+            )}
+          </div>
+        )}
       </div>
 
-      {
-        loading && (
+      {loading && <p className="artisan-muted">Loading reviews…</p>}
 
-          <p className="artisan-muted">
-            Loading reviews…
-          </p>
-        )
-      }
+      {error && (
+        <div className="artisan-banner error" role="alert">
+          {error}
+        </div>
+      )}
 
-      {
-        error && (
-
-          <div
-            className="artisan-banner error"
-            role="alert"
-          >
-            {error}
-          </div>
-        )
-      }
-
-      {
-        !loading &&
-        !error &&
-        reviews.length === 0 && (
-
-          <p className="artisan-muted">
-            No reviews yet.
-            {
-              product.can_review &&
-              user &&
-              " Be the first to share your experience."
-            }
-          </p>
-        )
-      }
+      {!loading && !error && reviews.length === 0 && (
+        <p className="artisan-muted">
+          No reviews yet.
+          {product.can_review &&
+            user &&
+            " Be the first to share your experience."}
+        </p>
+      )}
 
       <div className="fc-review-list">
-
-        {
-          reviews.map(
-            (review) => (
-
-              <ReviewCard
-                key={review.id}
-                review={review}
-              />
-            ),
-          )
-        }
+        {reviews.map((review) => (
+          <ReviewCard key={review.id} review={review} />
+        ))}
       </div>
 
       <Pagination
@@ -399,7 +245,6 @@ export default function ProductDetailReviews(
         hasPrevious={Boolean(pagination.previous)}
         hasNext={Boolean(pagination.next)}
         onPageChange={(page) => {
-
           loadReviews(page);
         }}
       />
@@ -407,9 +252,7 @@ export default function ProductDetailReviews(
       <ReviewFormModal
         open={modalOpen}
         onClose={() => {
-
           if (!modalBusy) {
-
             setModalOpen(false);
           }
         }}

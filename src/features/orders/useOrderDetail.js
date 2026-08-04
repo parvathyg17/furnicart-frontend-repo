@@ -1,14 +1,6 @@
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import {
-  useLocation,
-  useParams,
-} from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 
 import {
   cancelOrderApi,
@@ -18,114 +10,55 @@ import {
   submitReturnRequest,
 } from "../../features/orders/orderAPI";
 
-import {
-  formatProductApiError,
-} from "../../utils/productApiErrors.js";
+import { formatProductApiError } from "../../utils/productApiErrors.js";
 
-import {
-  useBackgroundServerSync,
-} from "../../hooks/useBackgroundServerSync.js";
+import { useBackgroundServerSync } from "../../hooks/useBackgroundServerSync.js";
 
-import {
-  stableStringify,
-} from "../../utils/stableStringify.js";
+import { stableStringify } from "../../utils/stableStringify.js";
 
-import {
-  canDownloadOrderInvoice,
-} from "./orderUi.js";
+import { canDownloadOrderInvoice } from "./orderUi.js";
 
 export default function useOrderDetail() {
-
   const { orderNumber } = useParams();
 
   const location = useLocation();
 
-  const [
-    order,
-    setOrder,
-  ] = useState(null);
+  const [order, setOrder] = useState(null);
 
-  const [
-    error,
-    setError,
-  ] = useState(null);
+  const [error, setError] = useState(null);
 
-  const [
-    loading,
-    setLoading,
-  ] = useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const [
-    invoiceBusy,
-    setInvoiceBusy,
-  ] = useState(false);
+  const [invoiceBusy, setInvoiceBusy] = useState(false);
 
-  const [
-    invoiceError,
-    setInvoiceError,
-  ] = useState(null);
+  const [invoiceError, setInvoiceError] = useState(null);
 
-  const [
-    cancelTarget,
-    setCancelTarget,
-  ] = useState(null);
+  const [cancelTarget, setCancelTarget] = useState(null);
 
-  const [
-    cancelReason,
-    setCancelReason,
-  ] = useState("");
+  const [cancelReason, setCancelReason] = useState("");
 
-  const [
-    cancelBusy,
-    setCancelBusy,
-  ] = useState(false);
+  const [cancelBusy, setCancelBusy] = useState(false);
 
-  const [
-    cancelModalError,
-    setCancelModalError,
-  ] = useState(null);
+  const [cancelModalError, setCancelModalError] = useState(null);
 
-  const [
-    cancelQuantity,
-    setCancelQuantity,
-  ] = useState(1);
+  const [cancelQuantity, setCancelQuantity] = useState(1);
 
-  const [
-    returnTargetLineId,
-    setReturnTargetLineId,
-  ] = useState(null);
+  const [returnTargetLineId, setReturnTargetLineId] = useState(null);
 
-  const [
-    returnReason,
-    setReturnReason,
-  ] = useState("");
+  const [returnReason, setReturnReason] = useState("");
 
-  const [
-    returnBusy,
-    setReturnBusy,
-  ] = useState(false);
+  const [returnBusy, setReturnBusy] = useState(false);
 
-  const [
-    returnModalError,
-    setReturnModalError,
-  ] = useState(null);
+  const [returnModalError, setReturnModalError] = useState(null);
 
-  const [
-    returnQuantity,
-    setReturnQuantity,
-  ] = useState(1);
+  const [returnQuantity, setReturnQuantity] = useState(1);
 
-  const lastOrderSigRef =
-    useRef(
-      null,
-    );
+  const lastOrderSigRef = useRef(null);
 
   useEffect(() => {
-
     let cancelled = false;
 
     if (!orderNumber) {
-
       setLoading(false);
 
       setError("Missing order reference.");
@@ -133,108 +66,62 @@ export default function useOrderDetail() {
       return;
     }
 
-    lastOrderSigRef.current =
-      null;
+    lastOrderSigRef.current = null;
 
-    (
-      async () => {
+    (async () => {
+      setLoading(true);
 
-        setLoading(true);
+      setError(null);
 
-        setError(null);
+      try {
+        const data = await fetchOrderApi(decodeURIComponent(orderNumber));
 
-        try {
+        if (cancelled) return;
 
-          const data = await fetchOrderApi(
-            decodeURIComponent(orderNumber),
-          );
+        lastOrderSigRef.current = stableStringify(data);
 
-          if (cancelled)
-            return;
+        setOrder(data);
+      } catch (err) {
+        if (cancelled) return;
 
-          lastOrderSigRef.current =
-            stableStringify(
-              data,
-            );
-
-          setOrder(data);
-        } catch (err) {
-
-          if (cancelled)
-            return;
-
-          setError(
-
-            formatProductApiError(
-              err.response?.data,
-            ) ||
-
-              "Could not load this order.",
-          );
-        } finally {
-
-          if (!cancelled) {
-
-            setLoading(false);
-          }
+        setError(
+          formatProductApiError(err.response?.data) ||
+            "Could not load this order.",
+        );
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
         }
       }
-    )();
+    })();
 
     return () => {
-
       cancelled = true;
     };
   }, [orderNumber, location.key]);
 
   const refetchOrder = useCallback(
-    async (
-      { silent = false } = {},
-    ) => {
-
-      if (
-        !orderNumber
-      ) {
-
+    async ({ silent = false } = {}) => {
+      if (!orderNumber) {
         return;
       }
 
       try {
+        const data = await fetchOrderApi(decodeURIComponent(orderNumber));
 
-        const data = await fetchOrderApi(
-          decodeURIComponent(orderNumber),
-        );
+        const snap = stableStringify(data);
 
-        const snap =
-          stableStringify(
-            data,
-          );
-
-        if (
-          silent &&
-          lastOrderSigRef.current ===
-            snap
-        ) {
-
+        if (silent && lastOrderSigRef.current === snap) {
           return;
         }
 
-        lastOrderSigRef.current =
-          snap;
+        lastOrderSigRef.current = snap;
 
-        setOrder(
-          data,
-        );
+        setOrder(data);
       } catch (err) {
-
         if (!silent) {
-
           setError(
-
-            formatProductApiError(
-              err.response?.data,
-            ) ||
-
+            formatProductApiError(err.response?.data) ||
               "Could not refresh this order.",
           );
         }
@@ -243,59 +130,30 @@ export default function useOrderDetail() {
     [orderNumber],
   );
 
-  useBackgroundServerSync(
-    {
+  useBackgroundServerSync({
+    enabled: Boolean(orderNumber),
 
-      enabled: Boolean(
-        orderNumber,
-      ),
+    pollIntervalMs: 90_000,
 
-      pollIntervalMs: 90_000,
+    onRefresh: () =>
+      refetchOrder({
+        silent: true,
+      }),
+  });
 
-      onRefresh:
-        () =>
-          refetchOrder(
-            {
-              silent: true,
-            },
-          ),
-    },
-  );
+  useEffect(() => {
+    const onPageShow = (e) => {
+      if (e.persisted && orderNumber) {
+        refetchOrder();
+      }
+    };
 
-  useEffect(
-    () => {
+    window.addEventListener("pageshow", onPageShow);
 
-      const onPageShow = (
-        e,
-      ) => {
-
-        if (
-          e.persisted &&
-          orderNumber
-        ) {
-
-          refetchOrder();
-        }
-      };
-
-      window.addEventListener(
-        "pageshow",
-        onPageShow,
-      );
-
-      return () => {
-
-        window.removeEventListener(
-          "pageshow",
-          onPageShow,
-        );
-      };
-    },
-    [
-      orderNumber,
-      refetchOrder,
-    ],
-  );
+    return () => {
+      window.removeEventListener("pageshow", onPageShow);
+    };
+  }, [orderNumber, refetchOrder]);
 
   const canCancelLine = (line) =>
     line.status === "active" &&
@@ -303,40 +161,24 @@ export default function useOrderDetail() {
     (line.cancellable_quantity ?? line.quantity ?? 0) > 0;
 
   const canCancelEntireOrder =
-    order &&
-    (order.lines || []).some(
-      (l) =>
-        canCancelLine(
-          l,
-        ),
-    );
+    order && (order.lines || []).some((l) => canCancelLine(l));
 
-  const canDownloadInvoice = canDownloadOrderInvoice(
-    order,
-  );
+  const canDownloadInvoice = canDownloadOrderInvoice(order);
 
   const openReturnModal = (lineId) => {
-
-    const line = order?.lines?.find(
-      (l) =>
-        l.id === lineId,
-    );
+    const line = order?.lines?.find((l) => l.id === lineId);
 
     setReturnModalError(null);
 
     setReturnReason("");
 
-    setReturnQuantity(
-      1,
-    );
+    setReturnQuantity(1);
 
     setReturnTargetLineId(lineId);
   };
 
   const closeReturnModal = () => {
-
     if (returnBusy) {
-
       return;
     }
 
@@ -344,24 +186,19 @@ export default function useOrderDetail() {
 
     setReturnReason("");
 
-    setReturnQuantity(
-      1,
-    );
+    setReturnQuantity(1);
 
     setReturnModalError(null);
   };
 
   const submitReturn = async () => {
-
     if (!order?.order_number || !returnTargetLineId) {
-
       return;
     }
 
     const r = returnReason.trim();
 
     if (!r) {
-
       setReturnModalError("Please enter a return reason.");
 
       return;
@@ -371,30 +208,18 @@ export default function useOrderDetail() {
 
     setReturnModalError(null);
 
-    const line = order.lines?.find(
-      (l) =>
-        l.id === returnTargetLineId,
-    );
+    const line = order.lines?.find((l) => l.id === returnTargetLineId);
 
     try {
-
       const payload = {
         reason: r,
       };
 
       const maxReturn = line?.returnable_quantity ?? 1;
 
-      if (
-        maxReturn > 1
-      ) {
-
+      if (maxReturn > 1) {
         payload.quantity = Math.min(
-          Math.max(
-            1,
-            Number(
-              returnQuantity,
-            ) || 1,
-          ),
+          Math.max(1, Number(returnQuantity) || 1),
           maxReturn,
         );
       }
@@ -405,260 +230,136 @@ export default function useOrderDetail() {
         payload,
       );
 
-      lastOrderSigRef.current =
-        stableStringify(
-          data,
-        );
+      lastOrderSigRef.current = stableStringify(data);
 
-      setOrder(
-        data,
-      );
+      setOrder(data);
 
       setReturnTargetLineId(null);
 
       setReturnReason("");
     } catch (err) {
-
       setReturnModalError(
-
-        formatProductApiError(
-          err.response?.data,
-        ) ||
-
+        formatProductApiError(err.response?.data) ||
           err.message ||
-
           "Could not submit return.",
       );
     } finally {
-
       setReturnBusy(false);
     }
   };
 
   const handleDownloadInvoice = async () => {
-
-    if (
-      !order?.order_number ||
-      !canDownloadOrderInvoice(
-        order,
-      )
-    ) {
-
+    if (!order?.order_number || !canDownloadOrderInvoice(order)) {
       return;
     }
 
-    setInvoiceBusy(
-      true,
-    );
+    setInvoiceBusy(true);
 
-    setInvoiceError(
-      null,
-    );
+    setInvoiceError(null);
 
     try {
-
-      await downloadOrderInvoicePdf(
-        order.order_number,
-      );
+      await downloadOrderInvoicePdf(order.order_number);
     } catch (err) {
-
-      setInvoiceError(
-
-        err.message ||
-
-          "Could not download invoice.",
-      );
+      setInvoiceError(err.message || "Could not download invoice.");
     } finally {
-
-      setInvoiceBusy(
-        false,
-      );
+      setInvoiceBusy(false);
     }
   };
 
   const openCancelOrderModal = () => {
-
-    if (
-      !canCancelEntireOrder
-    ) {
-
+    if (!canCancelEntireOrder) {
       return;
     }
 
-    setCancelModalError(
-      null,
-    );
+    setCancelModalError(null);
 
-    setCancelReason(
-      "",
-    );
+    setCancelReason("");
 
-    setCancelQuantity(
-      1,
-    );
+    setCancelQuantity(1);
 
-    setCancelTarget(
-      { type: "order" },
-    );
+    setCancelTarget({ type: "order" });
   };
 
   const openCancelLineModal = (lineId) => {
+    const line = order?.lines?.find((l) => l.id === lineId);
 
-    const line = order?.lines?.find(
-      (l) =>
-        l.id === lineId,
-    );
-
-    if (
-      !line ||
-      !canCancelLine(
-        line,
-      )
-    ) {
-
+    if (!line || !canCancelLine(line)) {
       return;
     }
 
-    setCancelModalError(
-      null,
-    );
+    setCancelModalError(null);
 
-    setCancelReason(
-      "",
-    );
+    setCancelReason("");
 
-    setCancelQuantity(
-      1,
-    );
+    setCancelQuantity(1);
 
-    setCancelTarget(
-      { type: "line", lineId },
-    );
+    setCancelTarget({ type: "line", lineId });
   };
 
   const closeCancelModal = () => {
-
     if (cancelBusy) {
-
       return;
     }
 
-    setCancelTarget(
-      null,
-    );
+    setCancelTarget(null);
 
-    setCancelReason(
-      "",
-    );
+    setCancelReason("");
 
-    setCancelQuantity(
-      1,
-    );
+    setCancelQuantity(1);
 
-    setCancelModalError(
-      null,
-    );
+    setCancelModalError(null);
   };
 
   const submitCancel = async () => {
-
     if (!order?.order_number || !cancelTarget) {
-
       return;
     }
 
-    setCancelBusy(
-      true,
-    );
+    setCancelBusy(true);
 
-    setCancelModalError(
-      null,
-    );
+    setCancelModalError(null);
 
     try {
-
       const body = {};
 
       if (cancelReason.trim()) {
-
-        body.reason = cancelReason.trim().slice(
-          0,
-          500,
-        );
+        body.reason = cancelReason.trim().slice(0, 500);
       }
 
-      if (
-        cancelTarget.type === "line"
-      ) {
-
-        const line = order.lines?.find(
-          (l) =>
-            l.id === cancelTarget.lineId,
-        );
+      if (cancelTarget.type === "line") {
+        const line = order.lines?.find((l) => l.id === cancelTarget.lineId);
 
         const maxCancel = line?.cancellable_quantity ?? 1;
 
-        if (
-          maxCancel > 1
-        ) {
-
+        if (maxCancel > 1) {
           body.quantity = Math.min(
-            Math.max(
-              1,
-              Number(
-                cancelQuantity,
-              ) || 1,
-            ),
+            Math.max(1, Number(cancelQuantity) || 1),
             maxCancel,
           );
         }
       }
 
       if (cancelTarget.type === "order") {
-
-        await cancelOrderApi(
-          order.order_number,
-          body,
-        );
+        await cancelOrderApi(order.order_number, body);
       } else {
-
-        await cancelOrderLineApi(
-          order.order_number,
-          cancelTarget.lineId,
-          body,
-        );
+        await cancelOrderLineApi(order.order_number, cancelTarget.lineId, body);
       }
 
       await refetchOrder();
 
-      setCancelTarget(
-        null,
-      );
+      setCancelTarget(null);
 
-      setCancelReason(
-        "",
-      );
+      setCancelReason("");
 
-      setCancelQuantity(
-        1,
-      );
+      setCancelQuantity(1);
     } catch (err) {
-
       setCancelModalError(
-
-        formatProductApiError(
-          err.response?.data,
-        ) ||
-
+        formatProductApiError(err.response?.data) ||
           err.message ||
-
           "Could not complete cancellation.",
       );
     } finally {
-
-      setCancelBusy(
-        false,
-      );
+      setCancelBusy(false);
     }
   };
 

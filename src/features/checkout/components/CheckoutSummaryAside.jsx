@@ -1,42 +1,33 @@
-import {
-  formatMoney,
-} from "../../../utils/currency.js";
+import { formatMoney } from "../../../utils/currency.js";
 
 import CheckoutCouponSection from "./CheckoutCouponSection.jsx";
 
-export default function CheckoutSummaryAside(
-  {
-    cartData,
-    pricingPreview,
-    taxNum,
-    shipNum,
-    discountNum,
-    offerDiscountNum,
-    grandNum,
-    gstPct,
-    freeShipMin,
-    selectedPaymentMethod,
-    onPaymentMethodChange,
-    canPlace,
-    placeBusy,
-    onPlaceClick,
-    couponInput,
-    onCouponInputChange,
-    couponBusy,
-    onApplyCoupon,
-    onRemoveCoupon,
-    walletBalance,
-    walletCanPay,
-  },
-) {
-
+export default function CheckoutSummaryAside({
+  cartData,
+  pricingPreview,
+  taxNum,
+  shipNum,
+  discountNum,
+  offerDiscountNum,
+  grandNum,
+  gstPct,
+  freeShipMin,
+  selectedPaymentMethod,
+  onPaymentMethodChange,
+  canPlace,
+  placeBusy,
+  onPlaceClick,
+  couponInput,
+  onCouponInputChange,
+  couponBusy,
+  onApplyCoupon,
+  onRemoveCoupon,
+  walletBalance,
+  walletCanPay,
+}) {
   return (
-
     <aside className="checkout-panel">
-
-      <h2 className="checkout-panel-title artisan-font-serif">
-        Summary
-      </h2>
+      <h2 className="checkout-panel-title artisan-font-serif">Summary</h2>
 
       <CheckoutCouponSection
         pricingPreview={pricingPreview}
@@ -49,169 +40,85 @@ export default function CheckoutSummaryAside(
       />
 
       <dl className="checkout-summary-lines">
-
         <div className="checkout-summary-line">
-
-          <dt>
-            {
-              offerDiscountNum > 0
-                ? "Items"
-                : "Subtotal"
-            }
-          </dt>
+          <dt>{offerDiscountNum > 0 ? "Items" : "Subtotal"}</dt>
 
           <dd>
             ₹
             {formatMoney(
               offerDiscountNum > 0
-                ? (
-                    pricingPreview?.subtotal_gross
-                    ?? cartData?.subtotal_gross
-                    ?? cartData?.subtotal
-                  )
+                ? (pricingPreview?.subtotal_gross ??
+                    cartData?.subtotal_gross ??
+                    cartData?.subtotal)
                 : cartData.subtotal,
             )}
           </dd>
         </div>
 
-        {
-          offerDiscountNum > 0 && (
+        {offerDiscountNum > 0 && (
+          <div className="checkout-summary-line">
+            <dt>Offer savings</dt>
 
-            <div className="checkout-summary-line">
+            <dd>
+              −₹
+              {formatMoney(offerDiscountNum)}
+            </dd>
+          </div>
+        )}
 
-              <dt>
-                Offer savings
-              </dt>
+        {offerDiscountNum > 0 && (
+          <div className="checkout-summary-line">
+            <dt>Subtotal</dt>
 
-              <dd>
-                −₹
-                {formatMoney(
-                  offerDiscountNum,
-                )}
-              </dd>
-            </div>
-          )
-        }
-
-        {
-          offerDiscountNum > 0 && (
-
-            <div className="checkout-summary-line">
-
-              <dt>
-                Subtotal
-              </dt>
-
-              <dd>
-                ₹
-                {formatMoney(
-                  pricingPreview?.subtotal
-                    ?? cartData?.subtotal,
-                )}
-              </dd>
-            </div>
-          )
-        }
+            <dd>
+              ₹{formatMoney(pricingPreview?.subtotal ?? cartData?.subtotal)}
+            </dd>
+          </div>
+        )}
 
         <div className="checkout-summary-line">
+          <dt>{gstPct != null ? `GST (${gstPct}%)` : "GST"}</dt>
 
-          <dt>
-            {
-              gstPct != null
-                ? `GST (${gstPct}%)`
-                : "GST"
-            }
-          </dt>
+          <dd>₹{formatMoney(taxNum)}</dd>
+        </div>
+
+        <div className="checkout-summary-line">
+          <dt>Shipping</dt>
 
           <dd>
-            ₹
-            {formatMoney(
-              taxNum,
+            {pricingPreview?.shipping_tier === "free_over_threshold" ? (
+              <span>Free</span>
+            ) : (
+              <>₹{formatMoney(shipNum)}</>
             )}
           </dd>
         </div>
 
-        <div className="checkout-summary-line">
+        {freeShipMin && (
+          <p className="checkout-pricing-note">
+            Free shipping on subtotals of ₹{formatMoney(freeShipMin)} or more;
+            otherwise a flat delivery fee applies.
+          </p>
+        )}
 
-          <dt>
-            Shipping
-          </dt>
+        <div className="checkout-summary-line">
+          <dt>{discountNum > 0 ? "Coupon" : "Discounts"}</dt>
 
           <dd>
-            {
-              pricingPreview?.shipping_tier ===
-              "free_over_threshold"
-                ? (
-                  <span>
-                    Free
+            {discountNum > 0 ? (
+              <>
+                −₹
+                {formatMoney(discountNum)}
+                {pricingPreview?.coupon?.code && (
+                  <span className="checkout-summary-muted">
+                    {" "}
+                    ({pricingPreview.coupon.code})
                   </span>
-                )
-                : (
-                  <>
-                    ₹
-                    {formatMoney(
-                      shipNum,
-                    )}
-                  </>
-                )
-            }
-          </dd>
-        </div>
-
-        {
-          freeShipMin && (
-
-            <p className="checkout-pricing-note">
-              Free shipping on subtotals of ₹
-              {formatMoney(
-                freeShipMin,
-              )}
-              {" "}
-              or more; otherwise a flat delivery fee applies.
-            </p>
-          )
-        }
-
-        <div className="checkout-summary-line">
-
-          <dt>
-            {
-              discountNum > 0
-                ? "Coupon"
-                : "Discounts"
-            }
-          </dt>
-
-          <dd>
-            {
-              discountNum > 0
-                ? (
-                  <>
-                    −₹
-                    {formatMoney(
-                      discountNum,
-                    )}
-                    {
-                      pricingPreview?.coupon?.code && (
-                        <span className="checkout-summary-muted">
-                          {" "}
-                          (
-                          {pricingPreview.coupon.code}
-                          )
-                        </span>
-                      )
-                    }
-                  </>
-                )
-                : (
-                  <>
-                    ₹
-                    {formatMoney(
-                      0,
-                    )}
-                  </>
-                )
-            }
+                )}
+              </>
+            ) : (
+              <>₹{formatMoney(0)}</>
+            )}
           </dd>
         </div>
       </dl>
@@ -219,52 +126,28 @@ export default function CheckoutSummaryAside(
       <div className="checkout-summary-divider" />
 
       <div className="checkout-summary-total">
+        <span>Total</span>
 
-        <span>
-          Total
-        </span>
-
-        <span>
-          ₹
-          {formatMoney(
-            grandNum,
-          )}
-        </span>
+        <span>₹{formatMoney(grandNum)}</span>
       </div>
 
-      <section
-        className="checkout-payment-block"
-        aria-label="Payment method"
-      >
-
-        <h3 className="checkout-payment-title artisan-font-serif">
-          Payment
-        </h3>
+      <section className="checkout-payment-block" aria-label="Payment method">
+        <h3 className="checkout-payment-title artisan-font-serif">Payment</h3>
 
         <label className="checkout-payment-option">
-
           <input
             type="radio"
             name="pay-method"
             value="cod"
-            checked={
-              selectedPaymentMethod ===
-              "cod"
-            }
+            checked={selectedPaymentMethod === "cod"}
             onChange={() => {
-
-              onPaymentMethodChange(
-                "cod",
-              );
+              onPaymentMethodChange("cod");
             }}
           />
 
           <div>
-
             <div className="checkout-payment-option-head">
-              <strong>
-                Cash on delivery
-              </strong>
+              <strong>Cash on delivery</strong>
             </div>
 
             <p className="checkout-payment-option-desc">
@@ -274,30 +157,19 @@ export default function CheckoutSummaryAside(
         </label>
 
         <label className="checkout-payment-option">
-
           <input
             type="radio"
             name="pay-method"
             value="razorpay"
-            checked={
-              selectedPaymentMethod ===
-              "razorpay"
-            }
+            checked={selectedPaymentMethod === "razorpay"}
             onChange={() => {
-
-              onPaymentMethodChange(
-                "razorpay",
-              );
+              onPaymentMethodChange("razorpay");
             }}
           />
 
           <div>
-
             <div className="checkout-payment-option-head">
-
-              <strong>
-                Razorpay
-              </strong>
+              <strong>Razorpay</strong>
             </div>
 
             <p className="checkout-payment-option-desc">
@@ -314,71 +186,42 @@ export default function CheckoutSummaryAside(
               : "checkout-payment-option checkout-payment-option--disabled"
           }
         >
-
           <input
             type="radio"
             name="pay-method"
             value="wallet"
-            checked={
-              selectedPaymentMethod ===
-              "wallet"
-            }
-            disabled={
-              !walletCanPay
-            }
+            checked={selectedPaymentMethod === "wallet"}
+            disabled={!walletCanPay}
             onChange={() => {
-
-              if (
-                walletCanPay
-              ) {
-
-                onPaymentMethodChange(
-                  "wallet",
-                );
+              if (walletCanPay) {
+                onPaymentMethodChange("wallet");
               }
             }}
           />
 
           <div>
-
             <div className="checkout-payment-option-head">
+              <strong>Wallet</strong>
 
-              <strong>
-                Wallet
-              </strong>
-
-              {
-                walletBalance != null && (
-
-                  <span className="checkout-payment-wallet-balance">
-                    Balance ₹
-                    {formatMoney(
-                      walletBalance,
-                    )}
-                  </span>
-                )
-              }
-
+              {walletBalance != null && (
+                <span className="checkout-payment-wallet-balance">
+                  Balance ₹{formatMoney(walletBalance)}
+                </span>
+              )}
             </div>
 
             <p className="checkout-payment-option-desc">
-              {
-                walletCanPay
-                  ? "Pay now using your FurniCart wallet balance."
-                  : walletBalance == null
-                    ? "Loading wallet balance…"
-                    : (
-                      <>
-                        Insufficient balance for this order (₹
-                        {formatMoney(
-                          grandNum,
-                        )}
-                        {" "}
-                        required). Refunds from cancellations and returns are
-                        added to your wallet.
-                      </>
-                    )
-              }
+              {walletCanPay ? (
+                "Pay now using your FurniCart wallet balance."
+              ) : walletBalance == null ? (
+                "Loading wallet balance…"
+              ) : (
+                <>
+                  Insufficient balance for this order (₹
+                  {formatMoney(grandNum)} required). Refunds from cancellations
+                  and returns are added to your wallet.
+                </>
+              )}
             </p>
           </div>
         </label>
@@ -390,26 +233,18 @@ export default function CheckoutSummaryAside(
         disabled={!canPlace}
         onClick={onPlaceClick}
       >
-        {
-          placeBusy
-            ? (
-              selectedPaymentMethod === "razorpay"
-                ? "Opening payment…"
-                : selectedPaymentMethod === "wallet"
-                  ? "Paying with wallet…"
-                  : "Placing order…"
-            )
-            : (
-              selectedPaymentMethod === "razorpay"
-                ? "Pay now"
-                : selectedPaymentMethod === "wallet"
-                  ? "Pay with wallet"
-                  : "Place order"
-            )
-        }
+        {placeBusy
+          ? selectedPaymentMethod === "razorpay"
+            ? "Opening payment…"
+            : selectedPaymentMethod === "wallet"
+              ? "Paying with wallet…"
+              : "Placing order…"
+          : selectedPaymentMethod === "razorpay"
+            ? "Pay now"
+            : selectedPaymentMethod === "wallet"
+              ? "Pay with wallet"
+              : "Place order"}
       </button>
-
-
 
       <p className="checkout-trust">
         Secure checkout · Questions? Visit your profile for account help.

@@ -11,29 +11,16 @@
 //   return null;
 // };
 
-
 // src/utils/getCookie.js
 
-export const getCookie =
-  (name) => {
+export const getCookie = (name) => {
+  const value = `; ${document.cookie}`;
 
-    const value =
-      `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
 
-    const parts =
-      value.split(
-        `; ${name}=`
-      );
+  if (parts.length === 2) {
+    return parts.pop().split(";").shift();
+  }
 
-    if (
-      parts.length === 2
-    ) {
-
-      return parts
-        .pop()
-        .split(";")
-        .shift();
-    }
-
-    return null;
-  };
+  return null;
+};

@@ -1,57 +1,41 @@
 import Modal from "../../../components/common/Modal.jsx";
 
-import {
-  formatMoney,
-} from "../../../utils/currency.js";
+import { formatMoney } from "../../../utils/currency.js";
 
-export default function PlaceOrderConfirmModal(
-  {
-    open,
-    cartData,
-    addresses,
-    selectedAddressId,
-    pricingPreview,
-    taxNum,
-    shipNum,
-    discountNum,
-    grandNum,
-    gstPct,
-    placeBusy,
-    placeError,
-    selectedPaymentMethod,
-    onClose,
-    onConfirm,
-  },
-) {
-
-  if (
-    !open ||
-    !cartData?.items?.length
-  ) {
-
+export default function PlaceOrderConfirmModal({
+  open,
+  cartData,
+  addresses,
+  selectedAddressId,
+  pricingPreview,
+  taxNum,
+  shipNum,
+  discountNum,
+  grandNum,
+  gstPct,
+  placeBusy,
+  placeError,
+  selectedPaymentMethod,
+  onClose,
+  onConfirm,
+}) {
+  if (!open || !cartData?.items?.length) {
     return null;
   }
 
-  const addr = addresses.find(
-    (a) =>
-      a.id === selectedAddressId,
-  );
+  const addr = addresses.find((a) => a.id === selectedAddressId);
 
   return (
-
     <Modal
       open={open}
       onRequestClose={() => {
-
         if (!placeBusy) {
-
           onClose();
         }
       }}
       busy={placeBusy}
       ariaLabelledBy="checkout-confirm-title"
     >
-
       <h2
         id="checkout-confirm-title"
         className="checkout-panel-title artisan-font-serif"
@@ -61,192 +45,104 @@ export default function PlaceOrderConfirmModal(
       </h2>
 
       <p className="order-cancel-dialog-hint">
-        {
-          selectedPaymentMethod === "razorpay"
-            ? "Are you sure you want to pay now? Your FurniCart order is created only after Razorpay confirms payment."
-            : selectedPaymentMethod === "wallet"
-              ? "Are you sure you want to pay with your wallet? The order total will be deducted from your balance immediately."
-              : "Are you sure you want to place this order? You will pay cash on delivery when your furniture arrives."
-        }
+        {selectedPaymentMethod === "razorpay"
+          ? "Are you sure you want to pay now? Your FurniCart order is created only after Razorpay confirms payment."
+          : selectedPaymentMethod === "wallet"
+            ? "Are you sure you want to pay with your wallet? The order total will be deducted from your balance immediately."
+            : "Are you sure you want to place this order? You will pay cash on delivery when your furniture arrives."}
       </p>
 
-      {
-        addr
-          ? (
+      {addr ? (
+        <div className="checkout-confirm-block">
+          <strong>Deliver to</strong>
 
-            <div className="checkout-confirm-block">
+          <p className="checkout-confirm-address">
+            {addr.name}
+            {" · "}
+            {addr.phone}
 
-              <strong>
-                Deliver to
-              </strong>
+            <br />
 
-              <p className="checkout-confirm-address">
-
-                {addr.name}
-                {" · "}
-                {addr.phone}
-
-                <br />
-
-                {
-                  [
-                    addr.address_line,
-                    addr.city,
-                    `${addr.state} ${addr.pincode}`,
-                  ].filter(Boolean).join(
-                    ", ",
-                  )
-                }
-              </p>
-            </div>
-          )
-          : null
-      }
+            {[addr.address_line, addr.city, `${addr.state} ${addr.pincode}`]
+              .filter(Boolean)
+              .join(", ")}
+          </p>
+        </div>
+      ) : null}
 
       <div className="checkout-confirm-block">
-
-        <strong>
-          Items
-        </strong>
+        <strong>Items</strong>
 
         <ul className="checkout-confirm-items">
+          {cartData.items.map((row) => (
+            <li key={row.id} className="checkout-confirm-item">
+              <span>
+                {row.product_name} × {row.quantity}
+              </span>
 
-          {
-            cartData.items.map(
-              (row) => (
-
-                <li
-                  key={row.id}
-                  className="checkout-confirm-item"
-                >
-
-                  <span>
-                    {row.product_name}
-                    {" "}
-                    ×
-                    {" "}
-                    {row.quantity}
-                  </span>
-
-                  <span>
-                    ₹
-                    {formatMoney(
-                      row.line_subtotal,
-                    )}
-                  </span>
-                </li>
-              ),
-            )
-          }
+              <span>₹{formatMoney(row.line_subtotal)}</span>
+            </li>
+          ))}
         </ul>
       </div>
 
       <div className="checkout-confirm-totals">
-
         <div className="checkout-confirm-total-row">
+          <span>Subtotal</span>
 
-          <span>
-            Subtotal
-          </span>
-
-          <span>
-            ₹
-            {formatMoney(
-              cartData.subtotal,
-            )}
-          </span>
+          <span>₹{formatMoney(cartData.subtotal)}</span>
         </div>
 
         <div className="checkout-confirm-total-row">
+          <span>{gstPct != null ? `GST (${gstPct}%)` : "GST"}</span>
 
-          <span>
-            {
-              gstPct != null
-                ? `GST (${gstPct}%)`
-                : "GST"
-            }
-          </span>
-
-          <span>
-            ₹
-            {formatMoney(
-              taxNum,
-            )}
-          </span>
+          <span>₹{formatMoney(taxNum)}</span>
         </div>
 
         <div className="checkout-confirm-total-row">
+          <span>Shipping</span>
 
           <span>
-            Shipping
-          </span>
-
-          <span>
-            {
-              pricingPreview?.shipping_tier ===
-              "free_over_threshold"
-                ? "Free"
-                : `₹${formatMoney(
-                  shipNum,
-                )}`
-            }
+            {pricingPreview?.shipping_tier === "free_over_threshold"
+              ? "Free"
+              : `₹${formatMoney(shipNum)}`}
           </span>
         </div>
 
-        {
-          discountNum > 0 && (
+        {discountNum > 0 && (
+          <div className="checkout-confirm-total-row">
+            <span>
+              Discounts
+              {pricingPreview?.coupon?.code
+                ? ` (${pricingPreview.coupon.code})`
+                : ""}
+            </span>
 
-            <div className="checkout-confirm-total-row">
-
-              <span>
-                Discounts
-                {
-                  pricingPreview?.coupon?.code
-                    ? ` (${pricingPreview.coupon.code})`
-                    : ""
-                }
-              </span>
-
-              <span>
-                −₹
-                {formatMoney(
-                  discountNum,
-                )}
-              </span>
-            </div>
-          )
-        }
+            <span>
+              −₹
+              {formatMoney(discountNum)}
+            </span>
+          </div>
+        )}
 
         <div className="checkout-confirm-total-row checkout-confirm-grand">
+          <span>Order total</span>
 
-          <span>
-            Order total
-          </span>
-
-          <span>
-            ₹
-            {formatMoney(
-              grandNum,
-            )}
-          </span>
+          <span>₹{formatMoney(grandNum)}</span>
         </div>
       </div>
 
-      {
-        placeError && (
-
-          <p
-            className="shop-banner error cart-bag-banner"
-            style={{ marginBottom: "0.75rem" }}
-            role="alert"
-          >
-            {placeError}
-          </p>
-        )
-      }
+      {placeError && (
+        <p
+          className="shop-banner error cart-bag-banner"
+          style={{ marginBottom: "0.75rem" }}
+          role="alert"
+        >
+          {placeError}
+        </p>
+      )}
 
       <div className="order-cancel-dialog-actions">
-
         <button
           type="button"
           className="checkout-btn-secondary"
@@ -262,23 +158,17 @@ export default function PlaceOrderConfirmModal(
           disabled={placeBusy}
           onClick={onConfirm}
         >
-          {
-            placeBusy
-              ? (
-                selectedPaymentMethod === "razorpay"
-                  ? "Opening payment…"
-                  : selectedPaymentMethod === "wallet"
-                    ? "Paying with wallet…"
-                    : "Placing order…"
-              )
-              : (
-                selectedPaymentMethod === "razorpay"
-                  ? "Yes, pay now"
-                  : selectedPaymentMethod === "wallet"
-                    ? "Yes, pay with wallet"
-                    : "Yes, place order"
-              )
-          }
+          {placeBusy
+            ? selectedPaymentMethod === "razorpay"
+              ? "Opening payment…"
+              : selectedPaymentMethod === "wallet"
+                ? "Paying with wallet…"
+                : "Placing order…"
+            : selectedPaymentMethod === "razorpay"
+              ? "Yes, pay now"
+              : selectedPaymentMethod === "wallet"
+                ? "Yes, pay with wallet"
+                : "Yes, place order"}
         </button>
       </div>
     </Modal>

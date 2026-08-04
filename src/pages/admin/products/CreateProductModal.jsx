@@ -1,76 +1,36 @@
 import "../../../styles/createproductmodal.css";
 
-import CreateCategoryModal
-from "../categories/CreateCategoryModal";
+import CreateCategoryModal from "../categories/CreateCategoryModal";
 
-import CreateRoomTypeModal
-from "../roomType/CreateRoomTypeModal";
+import CreateRoomTypeModal from "../roomType/CreateRoomTypeModal";
 
-import {
-  useEffect,
-  useState,
-} from "react";
+import { useEffect, useState } from "react";
 
-import {
-  useDispatch,
-  useSelector,
-} from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
-import {
-  X,
-  ChevronDown,
-} from "lucide-react";
+import { X, ChevronDown } from "lucide-react";
 
 import {
   createProduct,
   clearProductMessages,
 } from "../../../features/catalog/product/productSlice";
 
-import {
-  mapPayloadToFormErrors,
-} from "../../../utils/productApiErrors.js";
+import { mapPayloadToFormErrors } from "../../../utils/productApiErrors.js";
 
-import {
-  getAdminCategories,
-} from "../../../features/catalog/category/categorySlice";
+import { getAdminCategories } from "../../../features/catalog/category/categorySlice";
 
-import {
-  getAdminRoomTypes,
-} from "../../../features/catalog/roomType/roomTypeSlice";
+import { getAdminRoomTypes } from "../../../features/catalog/roomType/roomTypeSlice";
 
-export default function CreateProductModal({
-
-  isOpen,
-  onClose,
-  onSuccess,
-
-}) {
-
+export default function CreateProductModal({ isOpen, onClose, onSuccess }) {
   const dispatch = useDispatch();
 
-  const {
-    productLoading,
-  } = useSelector(
-    (state) => state.product
-  );
+  const { productLoading } = useSelector((state) => state.product);
 
-  const {
-    categories,
-  } = useSelector(
-    (state) => state.category
-  );
+  const { categories } = useSelector((state) => state.category);
 
-  const {
-    roomTypes,
-  } = useSelector(
-    (state) => state.roomType
-  );
+  const { roomTypes } = useSelector((state) => state.roomType);
 
-  const [
-    formData,
-    setFormData,
-  ] = useState({
-
+  const [formData, setFormData] = useState({
     name: "",
 
     description: "",
@@ -82,104 +42,62 @@ export default function CreateProductModal({
     is_featured: false,
   });
 
-  const [
-    formErrors,
-    setFormErrors,
-  ] = useState({});
+  const [formErrors, setFormErrors] = useState({});
 
-  const [
-    showCreateCategoryModal,
-    setShowCreateCategoryModal,
-  ] = useState(false);
+  const [showCreateCategoryModal, setShowCreateCategoryModal] = useState(false);
 
-  const [
-    showCreateRoomTypeModal,
-    setShowCreateRoomTypeModal,
-  ] = useState(false);
+  const [showCreateRoomTypeModal, setShowCreateRoomTypeModal] = useState(false);
 
   // ==========================================
   // FETCH ACTIVE DATA
   // ==========================================
 
   useEffect(() => {
-
-    if (!isOpen)
-      return;
+    if (!isOpen) return;
 
     dispatch(
       getAdminCategories({
-
         page: 1,
 
         page_size: 1000,
 
         is_active: true,
-      })
+      }),
     );
 
     dispatch(
       getAdminRoomTypes({
-
         page: 1,
 
         page_size: 1000,
 
         is_active: true,
-      })
+      }),
     );
-
-  }, [
-
-    dispatch,
-    isOpen,
-
-  ]);
+  }, [dispatch, isOpen]);
 
   useEffect(() => {
+    if (!isOpen) return;
 
-    if (!isOpen)
-      return;
-
-    dispatch(
-      clearProductMessages()
-    );
+    dispatch(clearProductMessages());
 
     setFormErrors({});
-  }, [
-
-    dispatch,
-    isOpen,
-
-  ]);
+  }, [dispatch, isOpen]);
 
   // ==========================================
   // HANDLE CHANGE
   // ==========================================
 
   const handleChange = (e) => {
-
-    const {
-      name,
-      value,
-      type,
-      checked,
-    } = e.target;
+    const { name, value, type, checked } = e.target;
 
     setFormData((prev) => ({
-
       ...prev,
 
-      [name]:
-
-        type === "checkbox"
-
-          ? checked
-
-          : value,
+      [name]: type === "checkbox" ? checked : value,
     }));
 
     setFormErrors((prev) => ({
-
       ...prev,
 
       [name]: "",
@@ -190,57 +108,34 @@ export default function CreateProductModal({
   // HANDLE ROOM TYPE
   // ==========================================
 
-  const handleRoomTypeToggle =
-    (roomTypeId, checked) => {
+  const handleRoomTypeToggle = (roomTypeId, checked) => {
+    if (checked) {
+      setFormData((prev) => ({
+        ...prev,
 
-      if (checked) {
+        room_type_ids: [...new Set([...prev.room_type_ids, roomTypeId])],
+      }));
 
-        setFormData((prev) => ({
+      setFormErrors((prev) => ({
+        ...prev,
 
-          ...prev,
+        room_type_ids: "",
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
 
-          room_type_ids: [
-
-            ...new Set([
-
-              ...prev.room_type_ids,
-
-              roomTypeId,
-            ]),
-          ],
-        }));
-
-        setFormErrors((prev) => ({
-
-          ...prev,
-
-          room_type_ids: "",
-        }));
-
-      } else {
-
-        setFormData((prev) => ({
-
-          ...prev,
-
-          room_type_ids:
-
-            prev.room_type_ids.filter(
-              (id) =>
-                id !== roomTypeId
-            ),
-        }));
-      }
-    };
+        room_type_ids: prev.room_type_ids.filter((id) => id !== roomTypeId),
+      }));
+    }
+  };
 
   // ==========================================
   // RESET FORM
   // ==========================================
 
   const resetForm = () => {
-
     setFormData({
-
       name: "",
 
       description: "",
@@ -260,7 +155,6 @@ export default function CreateProductModal({
   // ==========================================
 
   const handleClose = () => {
-
     resetForm();
 
     onClose();
@@ -270,519 +164,293 @@ export default function CreateProductModal({
   // SUBMIT
   // ==========================================
 
-  const validateClient =
-    () => {
+  const validateClient = () => {
+    const next = {};
 
-      const next = {};
+    if (!formData.name.trim()) {
+      next.name = "Product name is required.";
+    }
 
-      if (!formData.name.trim()) {
+    if (!formData.description.trim()) {
+      next.description = "Description is required.";
+    }
 
-        next.name =
-          "Product name is required.";
+    if (!formData.category) {
+      next.category = "Select a category.";
+    }
+
+    if (!formData.room_type_ids || formData.room_type_ids.length < 1) {
+      next.room_type_ids = "Select at least one room type.";
+    }
+
+    setFormErrors(next);
+
+    return Object.keys(next).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validateClient()) {
+      return;
+    }
+
+    try {
+      await dispatch(
+        createProduct({
+          ...formData,
+
+          is_active: false,
+        }),
+      ).unwrap();
+
+      if (onSuccess) {
+        onSuccess();
       }
 
-      if (!formData.description.trim()) {
+      resetForm();
 
-        next.description =
-          "Description is required.";
-      }
-
-      if (!formData.category) {
-
-        next.category =
-          "Select a category.";
-      }
-
-      if (
-        !formData.room_type_ids ||
-        formData.room_type_ids.length < 1
-      ) {
-
-        next.room_type_ids =
-          "Select at least one room type.";
-      }
-
-      setFormErrors(next);
-
-      return Object.keys(next).length === 0;
-    };
-
-  const handleSubmit =
-    async (e) => {
-
-      e.preventDefault();
-
-      if (!validateClient()) {
-
-        return;
-      }
-
-      try {
-
-        await dispatch(
-          createProduct({
-
-            ...formData,
-
-            is_active: false,
-          })
-        ).unwrap();
-
-        if (onSuccess) {
-
-          onSuccess();
-        }
-
-        resetForm();
-
-        onClose();
-      } catch (err) {
-
-        setFormErrors(
-          mapPayloadToFormErrors(
-            err
-          )
-        );
-      }
-    };
+      onClose();
+    } catch (err) {
+      setFormErrors(mapPayloadToFormErrors(err));
+    }
+  };
 
   // ==========================================
   // CLOSE
   // ==========================================
 
-  if (!isOpen)
-    return null;
+  if (!isOpen) return null;
 
   return (
-
     <div className="create-product-overlay">
-
       <div className="create-product-modal">
-
         {/* HEADER */}
 
         <div className="create-product-header">
-
           <div>
+            <h2>New Product</h2>
 
-            <h2>
-              New Product
-            </h2>
-
-            <p>
-              Add a new piece to your digital craftsmanship collection.
-            </p>
-
+            <p>Add a new piece to your digital craftsmanship collection.</p>
           </div>
 
-          <button
-            type="button"
-            className="close-btn"
-            onClick={handleClose}
-          >
-
+          <button type="button" className="close-btn" onClick={handleClose}>
             <X size={26} />
-
           </button>
-
         </div>
 
         {/* FORM */}
 
-        <form
-          onSubmit={handleSubmit}
-        >
-
+        <form onSubmit={handleSubmit}>
           <div className="create-product-body">
+            {formErrors._general && (
+              <div className="form-error">{formErrors._general}</div>
+            )}
 
-            {
-              formErrors._general && (
-
-                <div className="form-error">
-
-                  {
-                    formErrors._general
-                  }
-
-                </div>
+            {Object.entries(formErrors)
+              .filter(
+                ([key, msg]) =>
+                  msg &&
+                  ![
+                    "_general",
+                    "name",
+                    "description",
+                    "category",
+                    "room_type_ids",
+                  ].includes(key),
               )
-            }
-
-            {
-              Object.entries(formErrors)
-                .filter(
-                  ([key, msg]) =>
-
-                    msg &&
-                    ![
-                      "_general",
-                      "name",
-                      "description",
-                      "category",
-                      "room_type_ids",
-                    ].includes(key)
-                )
-                .map(([key, msg]) => (
-
-                  <div
-                    key={key}
-                    className="form-error"
-                    role="alert"
-                  >
-
-                    {
-                      typeof msg === "string"
-
-                        ? msg
-
-                        : String(msg)
-                    }
-
-                  </div>
-                ))
-            }
+              .map(([key, msg]) => (
+                <div key={key} className="form-error" role="alert">
+                  {typeof msg === "string" ? msg : String(msg)}
+                </div>
+              ))}
 
             {/* PRODUCT NAME */}
 
             <div className="form-group">
-
-              <label>
-                PRODUCT NAME
-              </label>
+              <label>PRODUCT NAME</label>
 
               <input
                 type="text"
                 name="name"
                 placeholder="e.g. Walnut Hand-Carved Lounge Chair"
-                value={
-                  formData.name
-                }
-                onChange={
-                  handleChange
-                }
+                value={formData.name}
+                onChange={handleChange}
                 required
               />
 
-              {
-                formErrors.name && (
-
-                  <div className="form-error">
-
-                    {
-                      formErrors.name
-                    }
-
-                  </div>
-                )
-              }
-
+              {formErrors.name && (
+                <div className="form-error">{formErrors.name}</div>
+              )}
             </div>
 
             {/* CATEGORY + ROOM TYPE */}
 
             <div className="double-fields">
-
               {/* CATEGORY */}
 
               <div className="form-group">
-
                 <div className="field-label-row">
-
-                  <label>
-                    CATEGORY
-                  </label>
+                  <label>CATEGORY</label>
 
                   <button
                     type="button"
                     className="inline-create-link"
-                    onClick={() =>
-                      setShowCreateCategoryModal(true)
-                    }
+                    onClick={() => setShowCreateCategoryModal(true)}
                   >
-
                     + Create Category
-
                   </button>
-
                 </div>
 
                 <div className="select-wrapper">
-
                   <select
                     name="category"
-                    value={
-                      formData.category
-                    }
-                    onChange={
-                      handleChange
-                    }
+                    value={formData.category}
+                    onChange={handleChange}
                     required
                   >
+                    <option value="">Select category</option>
 
-                    <option value="">
-                      Select category
-                    </option>
-
-                    {
-                      categories
-                        ?.filter(
-                          (item) =>
-                            item.is_active
-                        )
-                        ?.map(
-                          (item) => (
-
-                            <option
-                              key={item.id}
-                              value={item.id}
-                            >
-
-                              {item.name}
-
-                            </option>
-                          )
-                        )
-                    }
-
+                    {categories
+                      ?.filter((item) => item.is_active)
+                      ?.map((item) => (
+                        <option key={item.id} value={item.id}>
+                          {item.name}
+                        </option>
+                      ))}
                   </select>
 
-                  <ChevronDown
-                    size={18}
-                  />
-
+                  <ChevronDown size={18} />
                 </div>
 
-                {
-                  formErrors.category && (
-
-                    <div className="form-error">
-
-                      {
-                        formErrors.category
-                      }
-
-                    </div>
-                  )
-                }
-
+                {formErrors.category && (
+                  <div className="form-error">{formErrors.category}</div>
+                )}
               </div>
 
               {/* ROOM TYPES */}
 
               <div className="form-group">
-
                 <div className="field-label-row">
-
-                  <label>
-                    ROOM TYPES
-                  </label>
+                  <label>ROOM TYPES</label>
 
                   <button
                     type="button"
                     className="inline-create-link"
-                    onClick={() =>
-                      setShowCreateRoomTypeModal(true)
-                    }
+                    onClick={() => setShowCreateRoomTypeModal(true)}
                   >
-
                     + Create Room Type
-
                   </button>
-
                 </div>
 
                 <div className="multi-room-grid">
+                  {roomTypes
+                    ?.filter((item) => item.is_active)
+                    ?.map((item) => (
+                      <label
+                        key={item.id}
+                        className={`room-type-chip ${
+                          formData.room_type_ids.includes(item.id)
+                            ? "active"
+                            : ""
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={formData.room_type_ids.includes(item.id)}
+                          onChange={(e) =>
+                            handleRoomTypeToggle(
+                              item.id,
 
-                  {
-                    roomTypes
-                      ?.filter(
-                        (item) =>
-                          item.is_active
-                      )
-                      ?.map(
-                        (item) => (
+                              e.target.checked,
+                            )
+                          }
+                        />
 
-                          <label
-                            key={item.id}
-                            className={`room-type-chip ${
-                              formData.room_type_ids.includes(
-                                item.id
-                              )
-                                ? "active"
-                                : ""
-                            }`}
-                          >
-
-                            <input
-                              type="checkbox"
-                              checked={
-                                formData.room_type_ids.includes(
-                                  item.id
-                                )
-                              }
-                              onChange={(e) =>
-
-                                handleRoomTypeToggle(
-
-                                  item.id,
-
-                                  e.target.checked
-                                )
-                              }
-                            />
-
-                            <span>
-                              {item.name}
-                            </span>
-
-                          </label>
-                        )
-                      )
-                  }
-
+                        <span>{item.name}</span>
+                      </label>
+                    ))}
                 </div>
 
-                {
-                  formErrors.room_type_ids && (
-
-                    <div className="form-error">
-
-                      {
-                        formErrors.room_type_ids
-                      }
-
-                    </div>
-                  )
-                }
-
+                {formErrors.room_type_ids && (
+                  <div className="form-error">{formErrors.room_type_ids}</div>
+                )}
               </div>
-
             </div>
 
             {/* DESCRIPTION */}
 
             <div className="form-group">
-
-              <label>
-                DESCRIPTION
-              </label>
+              <label>DESCRIPTION</label>
 
               <textarea
                 name="description"
                 placeholder="Describe the materials, craftsmanship process, and unique design features..."
-                value={
-                  formData.description
-                }
-                onChange={
-                  handleChange
-                }
+                value={formData.description}
+                onChange={handleChange}
                 required
               />
 
-              {
-                formErrors.description && (
-
-                  <div className="form-error">
-
-                    {
-                      formErrors.description
-                    }
-
-                  </div>
-                )
-              }
-
+              {formErrors.description && (
+                <div className="form-error">{formErrors.description}</div>
+              )}
             </div>
 
             {/* NOTE */}
 
             <div className="variant-note">
-
               <p>
-
-                New products are saved as inactive. After you add at
-                least one variants, three images per active variant,
-                and complete all variant fields, you can activate the
-                product from its detail page.
-
+                New products are saved as inactive. After you add at least one
+                variants, three images per active variant, and complete all
+                variant fields, you can activate the product from its detail
+                page.
               </p>
-
             </div>
 
             {/* NOTE */}
 
             <div className="variant-note">
-
               <p>
-
-                Product imagery is added per variant (minimum three
-                images each) from the variant media screen.
-
+                Product imagery is added per variant (minimum three images each)
+                from the variant media screen.
               </p>
-
             </div>
-
           </div>
 
           {/* FOOTER */}
 
           <div className="create-product-footer">
-
-            <button
-              type="button"
-              className="cancel-btn"
-              onClick={handleClose}
-            >
-
+            <button type="button" className="cancel-btn" onClick={handleClose}>
               Cancel
-
             </button>
 
             <button
               type="submit"
               className="submit-btn"
-              disabled={
-                productLoading
-              }
+              disabled={productLoading}
             >
-
-              {
-                productLoading
-
-                  ? "Creating..."
-
-                  : "Create Product"
-              }
-
+              {productLoading ? "Creating..." : "Create Product"}
             </button>
-
           </div>
-
         </form>
-
       </div>
 
       {/* CREATE CATEGORY MODAL */}
 
       <CreateCategoryModal
-
         isOpen={showCreateCategoryModal}
 
-        onClose={() =>
-          setShowCreateCategoryModal(false)
-        }
+        onClose={() => setShowCreateCategoryModal(false)}
 
         onSuccess={() => {
-
           dispatch(
             getAdminCategories({
-
               page: 1,
 
               page_size: 1000,
 
               is_active: true,
-            })
+            }),
           );
         }}
       />
@@ -790,28 +458,22 @@ export default function CreateProductModal({
       {/* CREATE ROOM TYPE MODAL */}
 
       <CreateRoomTypeModal
-
         isOpen={showCreateRoomTypeModal}
 
-        onClose={() =>
-          setShowCreateRoomTypeModal(false)
-        }
+        onClose={() => setShowCreateRoomTypeModal(false)}
 
         onSuccess={() => {
-
           dispatch(
             getAdminRoomTypes({
-
               page: 1,
 
               page_size: 1000,
 
               is_active: true,
-            })
+            }),
           );
         }}
       />
-
     </div>
   );
 }

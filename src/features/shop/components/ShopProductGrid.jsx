@@ -1,10 +1,6 @@
-import {
-  Heart,
-} from "lucide-react";
+import { Heart } from "lucide-react";
 
-import {
-  Link,
-} from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import OfferBadge, {
   ProductPriceDisplay,
@@ -21,42 +17,29 @@ import {
   variantImageUrl,
 } from "../shopListUtils.js";
 
-import {
-  shopProductPathFrom,
-} from "../../../utils/shopProductPath.js";
+import { shopProductPathFrom } from "../../../utils/shopProductPath.js";
 
 import StarRating from "../../catalog/reviews/components/StarRating.jsx";
 
-export default function ShopProductGrid(
-  {
-    loading,
-    products,
-    pagination,
-    pageNumbers,
-    sort = "latest",
-    minPrice = "",
-    maxPrice = "",
-    onPageChange,
-    onAddToCart,
-    onWishlist,
-    wishlistedVariantIds = [],
-  },
-) {
-
+export default function ShopProductGrid({
+  loading,
+  products,
+  pagination,
+  pageNumbers,
+  sort = "latest",
+  minPrice = "",
+  maxPrice = "",
+  onPageChange,
+  onAddToCart,
+  onWishlist,
+  wishlistedVariantIds = [],
+}) {
   if (loading) {
-
-    return (
-
-      <p className="artisan-muted">
-        Loading pieces…
-      </p>
-    );
+    return <p className="artisan-muted">Loading pieces…</p>;
   }
 
   if (products.length === 0) {
-
     return (
-
       <EmptyState
         description="No products match your filters."
         className="artisan-muted"
@@ -65,226 +48,123 @@ export default function ShopProductGrid(
   }
 
   return (
-
     <>
-
       <div className="artisan-grid">
+        {products.map((p) => {
+          const variantOptions = {
+            minPrice,
+            maxPrice,
+          };
 
-        {
-          products.map(
-            (p) => {
+          const variant = catalogVariantForSort(p, sort, variantOptions);
 
-              const variantOptions =
-                {
-                  minPrice,
-                  maxPrice,
-                };
+          const variantLabel = variantDisplayLabel(variant);
 
-              const variant =
-                catalogVariantForSort(
-                  p,
-                  sort,
-                  variantOptions,
-                );
+          const cardImage = variantImageUrl(variant) || p.thumbnail;
 
-              const variantLabel =
-                variantDisplayLabel(
-                  variant,
-                );
+          const roomTag = p.room_types?.[0]?.name;
 
-              const cardImage =
-                variantImageUrl(
-                  variant,
-                ) ||
-                p.thumbnail;
+          const catTag = p.category_name || "Furniture";
 
-              const roomTag =
-                p.room_types?.[0]
-                  ?.name;
+          const canBuy = variant && (variant.stock || 0) > 0;
 
-              const catTag =
-                p.category_name ||
-                "Furniture";
+          const showSoldOut =
+            (p.variants?.length || 0) > 0 &&
+            (!canBuy || p.stock_status === "out_of_stock");
 
-              const canBuy =
-                variant &&
-                (variant.stock || 0) > 0;
+          const productPath = shopProductPathFrom(p);
 
-              const showSoldOut =
-                (p.variants?.length || 0) >
-                  0 &&
-                (!canBuy ||
-                  p.stock_status ===
-                    "out_of_stock");
+          const isWishlisted = productIsWishlisted(p, wishlistedVariantIds);
 
-              const productPath =
-                shopProductPathFrom(
-                  p,
-                );
+          return (
+            <article key={p.id} className="artisan-card">
+              <Link className="artisan-card-media" to={productPath || "/shop"}>
+                {showSoldOut && (
+                  <span className="fc-sold-out-badge">Sold out</span>
+                )}
 
-              const isWishlisted =
-                productIsWishlisted(
-                  p,
-                  wishlistedVariantIds,
-                );
+                <OfferBadge product={p} />
 
-              return (
+                {cardImage ? (
+                  <img src={cardImage} alt="" />
+                ) : (
+                  <div className="artisan-card-ph">No image</div>
+                )}
+              </Link>
 
-                <article
-                  key={p.id}
-                  className="artisan-card"
+              <div className="artisan-card-body">
+                <div className="artisan-card-tags">
+                  <span className="artisan-tag sage">
+                    {(catTag || "").toUpperCase()}
+                  </span>
+
+                  {roomTag && (
+                    <span className="artisan-tag outline">
+                      {roomTag.toUpperCase()}
+                    </span>
+                  )}
+                </div>
+
+                <Link
+                  className="artisan-card-title artisan-font-serif"
+                  to={productPath || "/shop"}
                 >
+                  {p.name}
+                </Link>
 
-                  <Link
-                    className="artisan-card-media"
-                    to={
-                      productPath ||
-                      "/shop"
-                    }
-                  >
+                {(p.review_count || 0) > 0 && (
+                  <div className="fc-shop-card-rating">
+                    <StarRating value={p.average_rating} size={13} />
 
-                    {
-                      showSoldOut && (
-
-                        <span className="fc-sold-out-badge">
-                          Sold out
-                        </span>
-                      )
-                    }
-
-                    <OfferBadge
-                      product={p}
-                    />
-
-                    {
-                      cardImage ? (
-
-                        <img
-                          src={cardImage}
-                          alt=""
-                        />
-                      ) : (
-
-                        <div className="artisan-card-ph">
-                          No image
-                        </div>
-                      )
-                    }
-                  </Link>
-
-                  <div className="artisan-card-body">
-
-                    <div className="artisan-card-tags">
-
-                      <span className="artisan-tag sage">
-                        {(catTag || "").toUpperCase()}
-                      </span>
-
-                      {
-                        roomTag && (
-
-                          <span className="artisan-tag outline">
-                            {roomTag.toUpperCase()}
-                          </span>
-                        )
-                      }
-                    </div>
-
-                    <Link
-                      className="artisan-card-title artisan-font-serif"
-                      to={
-                        productPath ||
-                        "/shop"
-                      }
-                    >
-                      {p.name}
-                    </Link>
-
-                    {
-                      (p.review_count || 0) > 0 && (
-
-                        <div className="fc-shop-card-rating">
-
-                          <StarRating
-                            value={p.average_rating}
-                            size={13}
-                          />
-
-                          <span>
-                            (
-                            {p.review_count}
-                            )
-                          </span>
-                        </div>
-                      )
-                    }
-
-                    <ProductPriceDisplay
-                      variant={variant}
-                      product={p}
-                      className="artisan-card-price"
-                      priceClassName="artisan-card-price-value"
-                    />
-
-                    {
-                      variantLabel && (
-
-                        <p className="artisan-card-variant">
-                          {variantLabel}
-                        </p>
-                      )
-                    }
-
-                    <div className="artisan-card-actions">
-
-                      <button
-                        type="button"
-                        className="artisan-btn-cart"
-                        disabled={!canBuy}
-                        onClick={(e) => {
-
-                          onAddToCart(
-                            e,
-                            p,
-                          );
-                        }}
-                      >
-                        ADD TO CART
-                      </button>
-
-                      <button
-                        type="button"
-                        className={
-                          isWishlisted
-                            ? "artisan-btn-wish is-wishlisted"
-                            : "artisan-btn-wish"
-                        }
-                        aria-label={
-                          isWishlisted
-                            ? "Remove from wishlist"
-                            : "Add to wishlist"
-                        }
-                        aria-pressed={
-                          isWishlisted
-                        }
-                        onClick={(e) => {
-
-                          onWishlist(
-                            e,
-                            p,
-                          );
-                        }}
-                      >
-
-                        <Heart size={18} />
-                      </button>
-                    </div>
+                    <span>({p.review_count})</span>
                   </div>
-                </article>
-              );
-            },
-          )
-        }
+                )}
+
+                <ProductPriceDisplay
+                  variant={variant}
+                  product={p}
+                  className="artisan-card-price"
+                  priceClassName="artisan-card-price-value"
+                />
+
+                {variantLabel && (
+                  <p className="artisan-card-variant">{variantLabel}</p>
+                )}
+
+                <div className="artisan-card-actions">
+                  <button
+                    type="button"
+                    className="artisan-btn-cart"
+                    disabled={!canBuy}
+                    onClick={(e) => {
+                      onAddToCart(e, p);
+                    }}
+                  >
+                    ADD TO CART
+                  </button>
+
+                  <button
+                    type="button"
+                    className={
+                      isWishlisted
+                        ? "artisan-btn-wish is-wishlisted"
+                        : "artisan-btn-wish"
+                    }
+                    aria-label={
+                      isWishlisted ? "Remove from wishlist" : "Add to wishlist"
+                    }
+                    aria-pressed={isWishlisted}
+                    onClick={(e) => {
+                      onWishlist(e, p);
+                    }}
+                  >
+                    <Heart size={18} />
+                  </button>
+                </div>
+              </div>
+            </article>
+          );
+        })}
       </div>
 
       <Pagination

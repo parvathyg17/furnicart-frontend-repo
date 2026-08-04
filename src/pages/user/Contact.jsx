@@ -1,13 +1,21 @@
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import { Mail, Phone, MapPin, ArrowUpRight, Leaf, Share2, Globe } from "lucide-react";
+import {
+  Mail,
+  Phone,
+  MapPin,
+  ArrowUpRight,
+  Leaf,
+  Share2,
+  Globe,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import PublicNavbar from "../../components/common/PublicNavbar.jsx";
 import { submitContactMessage } from "../../features/contact/contactAPI.js";
-import "../../styles/contact.css"
+import "../../styles/contact.css";
 export default function Contact() {
   const { user } = useSelector((state) => state.auth);
-  
+
   const [formData, setFormData] = useState({
     name: user ? `${user.first_name || ""} ${user.last_name || ""}`.trim() : "",
     email: user ? user.email || "" : "",
@@ -32,30 +40,39 @@ export default function Contact() {
     try {
       const data = await submitContactMessage(formData);
       setStatus("success");
-      setSuccessMsg(data.message || "Thank you for reaching out! Your message has been sent successfully.");
+      setSuccessMsg(
+        data.message ||
+          "Thank you for reaching out! Your message has been sent successfully.",
+      );
       setFormData({
-        name: user ? `${user.first_name || ""} ${user.last_name || ""}`.trim() : "",
+        name: user
+          ? `${user.first_name || ""} ${user.last_name || ""}`.trim()
+          : "",
         email: user ? user.email || "" : "",
         subject: "Bespoke Commission Inquiry",
         message: "",
       });
     } catch (err) {
       setStatus("error");
-      setErrorMsg(err.response?.data?.detail || "An error occurred while sending your message. Please try again.");
+      setErrorMsg(
+        err.response?.data?.detail ||
+          "An error occurred while sending your message. Please try again.",
+      );
     }
   };
 
   return (
     <div className="contact-page">
       <PublicNavbar />
-      
+
       <header className="contact-header">
         <div className="contact-header-inner">
           <span className="contact-eyebrow">Bespoke Assistance</span>
           <h1>Contact Our Concierge</h1>
           <p>
-            Our dedicated concierge team is available to guide you through our collections,
-            assist with custom commissions, and provide expert insight into the artistry of Furnicart.
+            Our dedicated concierge team is available to guide you through our
+            collections, assist with custom commissions, and provide expert
+            insight into the artistry of Furnicart.
           </p>
         </div>
       </header>
@@ -64,7 +81,6 @@ export default function Contact() {
         {/* Left Column: Form */}
         <section className="contact-form-section">
           <div className="contact-form-card">
-            
             {status === "success" && (
               <div className="contact-alert contact-alert--success">
                 {successMsg}
@@ -80,7 +96,9 @@ export default function Contact() {
             <form onSubmit={handleSubmit}>
               <div className="contact-form-row">
                 <div className="contact-form-group">
-                  <label htmlFor="name" className="contact-label">Full Name</label>
+                  <label htmlFor="name" className="contact-label">
+                    Full Name
+                  </label>
                   <input
                     type="text"
                     id="name"
@@ -93,7 +111,9 @@ export default function Contact() {
                   />
                 </div>
                 <div className="contact-form-group">
-                  <label htmlFor="email" className="contact-label">Email Address</label>
+                  <label htmlFor="email" className="contact-label">
+                    Email Address
+                  </label>
                   <input
                     type="email"
                     id="email"
@@ -108,7 +128,9 @@ export default function Contact() {
               </div>
 
               <div className="contact-form-group">
-                <label htmlFor="subject" className="contact-label">Inquiry Subject</label>
+                <label htmlFor="subject" className="contact-label">
+                  Inquiry Subject
+                </label>
                 <select
                   id="subject"
                   name="subject"
@@ -116,16 +138,26 @@ export default function Contact() {
                   value={formData.subject}
                   onChange={handleChange}
                 >
-                  <option value="Bespoke Commission Inquiry">Bespoke Commission Inquiry</option>
-                  <option value="Order Status & Tracking">Order Status & Tracking</option>
-                  <option value="Product Care & Maintenance">Product Care & Maintenance</option>
-                  <option value="Showroom Appointments">Showroom Appointments</option>
+                  <option value="Bespoke Commission Inquiry">
+                    Bespoke Commission Inquiry
+                  </option>
+                  <option value="Order Status & Tracking">
+                    Order Status & Tracking
+                  </option>
+                  <option value="Product Care & Maintenance">
+                    Product Care & Maintenance
+                  </option>
+                  <option value="Showroom Appointments">
+                    Showroom Appointments
+                  </option>
                   <option value="General Inquiry">General Inquiry</option>
                 </select>
               </div>
 
               <div className="contact-form-group">
-                <label htmlFor="message" className="contact-label">Your Message</label>
+                <label htmlFor="message" className="contact-label">
+                  Your Message
+                </label>
                 <textarea
                   id="message"
                   name="message"
@@ -160,7 +192,7 @@ export default function Contact() {
 
             <div>
               <span className="contact-eyebrow">The Atelier</span>
-              
+
               <div className="contact-info-list">
                 <div className="contact-info-item">
                   <div className="contact-icon-wrapper">
@@ -169,7 +201,9 @@ export default function Contact() {
                   <div className="contact-info-content">
                     <h3>Concierge Phone</h3>
                     <div className="contact-info-value">+1 (212) 555-0198</div>
-                    <div className="contact-info-sub">Mon — Fri, 9am — 6pm EST</div>
+                    <div className="contact-info-sub">
+                      Mon — Fri, 9am — 6pm EST
+                    </div>
                   </div>
                 </div>
 
@@ -179,8 +213,12 @@ export default function Contact() {
                   </div>
                   <div className="contact-info-content">
                     <h3>Email Inquiries</h3>
-                    <div className="contact-info-value">concierge@furnicart.com</div>
-                    <div className="contact-info-sub">Average response: 2 hours</div>
+                    <div className="contact-info-value">
+                      concierge@furnicart.com
+                    </div>
+                    <div className="contact-info-sub">
+                      Average response: 2 hours
+                    </div>
                   </div>
                 </div>
 
@@ -190,9 +228,12 @@ export default function Contact() {
                   </div>
                   <div className="contact-info-content">
                     <h3>Showroom Address</h3>
-                    <div className="contact-info-value">420 Design District</div>
+                    <div className="contact-info-value">
+                      420 Design District
+                    </div>
                     <div className="contact-info-sub">
-                      Manhattan, New York, 10014<br />
+                      Manhattan, New York, 10014
+                      <br />
                       United States
                     </div>
                   </div>
@@ -203,8 +244,9 @@ export default function Contact() {
             <div className="contact-sustainability-box">
               <Leaf size={20} strokeWidth={1.5} />
               <p>
-                Looking for material care guides? Our sustainability experts have
-                prepared comprehensive documents for all walnut and linen pieces.
+                Looking for material care guides? Our sustainability experts
+                have prepared comprehensive documents for all walnut and linen
+                pieces.
               </p>
             </div>
           </div>
@@ -215,7 +257,9 @@ export default function Contact() {
         <div className="contact-separator-line"></div>
         <span className="contact-eyebrow">Furnicart Philosophy</span>
         <blockquote>
-          "True luxury is not in the abundance of things, but in the intentionality of every line, the soul of the material, and the quiet attention to every detail."
+          "True luxury is not in the abundance of things, but in the
+          intentionality of every line, the soul of the material, and the quiet
+          attention to every detail."
         </blockquote>
         <div className="contact-philosophy-bar"></div>
       </section>

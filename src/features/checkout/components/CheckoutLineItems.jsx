@@ -1,134 +1,81 @@
-import {
-  Link,
-} from "react-router-dom";
+import { Link } from "react-router-dom";
 
-import {
-  formatMoney,
-} from "../../../utils/currency.js";
+import { formatMoney } from "../../../utils/currency.js";
 
-import {
-  lineImageUrl,
-} from "../checkoutUtils.js";
+import { lineImageUrl } from "../checkoutUtils.js";
 
-import {
-  shopProductPathFrom,
-} from "../../../utils/shopProductPath.js";
+import { shopProductPathFrom } from "../../../utils/shopProductPath.js";
 
-export default function CheckoutLineItems(
-  {
-    items,
-  },
-) {
-
+export default function CheckoutLineItems({ items }) {
   return (
-
     <section className="checkout-panel checkout-items">
+      <h2 className="checkout-panel-title artisan-font-serif">Items</h2>
 
-      <h2 className="checkout-panel-title artisan-font-serif">
-        Items
-      </h2>
+      {items.map((row) => {
+        const url = lineImageUrl(row.variant);
 
-      {
-        items.map(
-          (row) => {
+        const productTo = shopProductPathFrom(row);
 
-            const url = lineImageUrl(
-              row.variant,
-            );
+        const thumbEl = url ? (
+          <img className="checkout-item-thumb" src={url} alt="" />
+        ) : (
+          <div className="checkout-item-thumb checkout-item-thumb-ph">
+            No image
+          </div>
+        );
 
-            const productTo =
-              shopProductPathFrom(
-                row,
-              );
-
-            const thumbEl =
-              url
-                ? (
-
-                  <img
-                    className="checkout-item-thumb"
-                    src={url}
-                    alt=""
-                  />
-                )
-                : (
-
-                  <div className="checkout-item-thumb checkout-item-thumb-ph">
-                    No image
-                  </div>
-                );
-
-            return (
-
-              <div
-                key={row.id}
-                className="checkout-item-row"
+        return (
+          <div key={row.id} className="checkout-item-row">
+            {productTo ? (
+              <Link
+                to={productTo}
+                className="checkout-item-thumb-link"
+                aria-label={`View ${row.product_name || "product"}`}
               >
+                {thumbEl}
+              </Link>
+            ) : (
+              thumbEl
+            )}
 
-                {
-                  productTo
-                    ? (
-
-                      <Link
-                        to={productTo}
-                        className="checkout-item-thumb-link"
-                        aria-label={`View ${row.product_name || "product"}`}
-                      >
-                        {thumbEl}
-                      </Link>
-                    )
-                    : thumbEl
-                }
-
-                <div>
-
-                  <div className="checkout-item-title">
-
-                    {
-                      productTo
-                        ? (
-
-                          <Link to={productTo}>
-                            {row.product_name}
-                          </Link>
-                        )
-                        : row.product_name
-                    }
-                  </div>
-
-                  <div className="checkout-item-sub">
-                    {row.variant?.variant_name}
-                  </div>
-
-                  <div className="checkout-item-qty">
-                    Qty {row.quantity}
-                  </div>
-                  {
-                    row.line_availability &&
-                    row.line_availability.status !== "ok" &&
-                    row.line_availability.message && (
-                      <div
-                        className="shop-banner error"
-                        style={{ padding: "0.25rem 0.5rem", marginTop: "0.5rem", fontSize: "0.85rem", borderRadius: "4px" }}
-                        role="alert"
-                      >
-                        {row.line_availability.message}
-                      </div>
-                    )
-                  }
-                </div>
-
-                <div className="checkout-item-price">
-                  ₹
-                  {formatMoney(
-                    row.line_subtotal,
-                  )}
-                </div>
+            <div>
+              <div className="checkout-item-title">
+                {productTo ? (
+                  <Link to={productTo}>{row.product_name}</Link>
+                ) : (
+                  row.product_name
+                )}
               </div>
-            );
-          },
-        )
-      }
+
+              <div className="checkout-item-sub">
+                {row.variant?.variant_name}
+              </div>
+
+              <div className="checkout-item-qty">Qty {row.quantity}</div>
+              {row.line_availability &&
+                row.line_availability.status !== "ok" &&
+                row.line_availability.message && (
+                  <div
+                    className="shop-banner error"
+                    style={{
+                      padding: "0.25rem 0.5rem",
+                      marginTop: "0.5rem",
+                      fontSize: "0.85rem",
+                      borderRadius: "4px",
+                    }}
+                    role="alert"
+                  >
+                    {row.line_availability.message}
+                  </div>
+                )}
+            </div>
+
+            <div className="checkout-item-price">
+              ₹{formatMoney(row.line_subtotal)}
+            </div>
+          </div>
+        );
+      })}
     </section>
   );
 }

@@ -1,38 +1,24 @@
-import {
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
-import AdminLogin
-from "../../pages/admin/AdminLogin";
+import AdminLogin from "../../pages/admin/AdminLogin";
 
-import AdminDashboard
-from "../../pages/admin/AdminDashboard";
+import AdminDashboard from "../../pages/admin/AdminDashboard";
 
-import AdminUsers
-from "../../pages/admin/AdminUsers";
+import AdminUsers from "../../pages/admin/AdminUsers";
 
-import AdminPrivateRoute
-from "./AdminPrivateRoute";
+import AdminPrivateRoute from "./AdminPrivateRoute";
 
-import AdminPublicRoute
-from "./AdminPublicRoute";
+import AdminPublicRoute from "./AdminPublicRoute";
 
-import AdminLayout
-from "../../components/AdminLayout";
+import AdminLayout from "../../components/AdminLayout";
 
-import AdminCategories
-from "../../pages/admin/categories/AdminCategories";
+import AdminCategories from "../../pages/admin/categories/AdminCategories";
 
-import AdminRoomType
-from "../../pages/admin/roomtype/AdminRoomTypes";
+import AdminRoomType from "../../pages/admin/roomtype/AdminRoomTypes";
 
-import AdminProducts
-from "../../pages/admin/products/AdminProducts";
-import AdminVariantMediaLibrary from "../../pages/admin/products/AdminVariantMediaLibrary"
-import AdminProductDetail
-from "../../pages/admin/products/AdminProductDetail";
+import AdminProducts from "../../pages/admin/products/AdminProducts";
+import AdminVariantMediaLibrary from "../../pages/admin/products/AdminVariantMediaLibrary";
+import AdminProductDetail from "../../pages/admin/products/AdminProductDetail";
 import AdminOrders from "../../pages/admin/AdminOrders";
 import AdminOrderDetail from "../../pages/admin/AdminOrderDetail";
 import AdminReturns from "../../pages/admin/AdminReturns";
@@ -43,211 +29,70 @@ import AdminOffers from "../../pages/admin/AdminOffers";
 import AdminReferral from "../../pages/admin/AdminReferral";
 import AdminSalesReport from "../../pages/admin/AdminSalesReport";
 import AdminContactMessages from "../../pages/admin/AdminContactMessages";
-// import Sample from "../../components/common/Sample";
-
 
 export default function AdminRoutes() {
-
   return (
-
     <Routes>
-
-     
-
       <Route
         path="/login"
         element={
-
           <AdminPublicRoute>
-
             <AdminLogin />
-
           </AdminPublicRoute>
         }
       />
 
-      
-
-      {/* ADMIN LAYOUT */}
-
       <Route
         path="/"
         element={
-
           <AdminPrivateRoute>
-
             <AdminLayout />
-
           </AdminPrivateRoute>
         }
       >
+        <Route index element={<Navigate to="dashboard" replace />} />
 
-        {/* REDIRECT */}
+        <Route path="dashboard" element={<AdminDashboard />} />
 
-        <Route
-          index
-          element={
-            <Navigate
-              to="dashboard"
-              replace
-            />
-          }
-        />
+        <Route path="reports/sales" element={<AdminSalesReport />} />
 
-        {/* DASHBOARD */}
-
-        <Route
-          path="dashboard"
-          element={
-            <AdminDashboard />
-          }
-        />
-
-        <Route
-          path="reports/sales"
-          element={
-            <AdminSalesReport />
-          }
-        />
-
-       
-
-        {/* USERS */}
-
-        <Route
-          path="users"
-          element={
-            <AdminUsers />
-          }
-        />
+        <Route path="users" element={<AdminUsers />} />
 
         {/* CATEGORIES */}
 
-        <Route
-          path="categories"
-          element={
-            <AdminCategories />
-          }
-        />
+        <Route path="categories" element={<AdminCategories />} />
 
-        {/* ROOM TYPES */}
+        <Route path="room-types" element={<AdminRoomType />} />
 
-        <Route
-          path="room-types"
-          element={
-            <AdminRoomType />
-          }
-        />
+        <Route path="orders/returns" element={<AdminReturns />} />
 
-        <Route
-          path="orders/returns"
-          element={
-            <AdminReturns />
-          }
-        />
+        <Route path="reviews" element={<AdminReviews />} />
 
-        <Route
-          path="reviews"
-          element={
-            <AdminReviews />
-          }
-        />
+        <Route path="coupons" element={<AdminCoupons />} />
+
+        <Route path="offers" element={<AdminOffers />} />
+
+        <Route path="referral" element={<AdminReferral />} />
+
+        <Route path="contact-messages" element={<AdminContactMessages />} />
+
+        <Route path="orders/:orderNumber" element={<AdminOrderDetail />} />
+
+        <Route path="orders" element={<AdminOrders />} />
+
+        <Route path="inventory" element={<AdminInventory />} />
+
+        <Route path="products" element={<AdminProducts />} />
+
+        <Route path="products/:id" element={<AdminProductDetail />} />
 
         <Route
-          path="coupons"
-          element={
-            <AdminCoupons />
-          }
-        />
-
-        <Route
-          path="offers"
-          element={
-            <AdminOffers />
-          }
-        />
-
-        <Route
-          path="referral"
-          element={
-            <AdminReferral />
-          }
-        />
-
-        <Route
-          path="contact-messages"
-          element={
-            <AdminContactMessages />
-          }
-        />
-
-        <Route
-          path="orders/:orderNumber"
-          element={
-            <AdminOrderDetail />
-          }
-        />
-
-        <Route
-          path="orders"
-          element={
-            <AdminOrders />
-          }
-        />
-
-        <Route
-          path="inventory"
-          element={
-            <AdminInventory />
-          }
-        />
-
-        {/* PRODUCTS */}
-
-        <Route
-          path="products"
-          element={
-            <AdminProducts />
-          }
-        />
-
-        {/* PRODUCT DETAIL */}
-
-        <Route
-          path="products/:id"
-          element={
-            <AdminProductDetail />
-          }
-        />
-
-       <Route
           path="products/:productId/variants/:variantId/media"
-          element={
-            <AdminVariantMediaLibrary />
-          }
+          element={<AdminVariantMediaLibrary />}
         />
-
       </Route>
 
-      {/* 404 */}
-
-      <Route
-        path="*"
-        element={
-          <h1>
-            404 Not Found
-          </h1>
-        }
-      />
-
-      {/* <Route
-        path="/sample"
-        element={
-          <Sample />
-          
-        }
-      /> */}
-
+      <Route path="*" element={<h1>404 Not Found</h1>} />
     </Routes>
   );
 }

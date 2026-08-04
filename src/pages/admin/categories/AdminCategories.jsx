@@ -1,15 +1,8 @@
-import "../../../styles/admincategories.css";
+import "../../../styles/adminproducts.css";
 
-import {
-  useEffect,
-  useState,
-  useCallback,
-} from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 
-import {
-  useDispatch,
-  useSelector,
-} from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import toast from "react-hot-toast";
 
@@ -24,30 +17,24 @@ import {
 } from "lucide-react";
 
 import {
-
   getAdminCategories,
   deleteCategory,
   restoreCategory,
   clearCategoryMessages,
-
 } from "../../../features/catalog/category/categorySlice";
 
-import CreateCategoryModal
-from "./CreateCategoryModal";
+import CreateCategoryModal from "./CreateCategoryModal";
 
-import EditCategoryModal
-from "./EditCategoryModal";
+import EditCategoryModal from "./EditCategoryModal";
 
-import {
-  useBackgroundServerSync,
-} from "../../../hooks/useBackgroundServerSync.js";
+import ConfirmDialog from "../../../components/common/ConfirmDialog";
+
+import { useBackgroundServerSync } from "../../../hooks/useBackgroundServerSync.js";
 
 export default function AdminCategories() {
-
   const dispatch = useDispatch();
 
   const {
-
     categories,
     categoryPagination,
 
@@ -62,838 +49,463 @@ export default function AdminCategories() {
     categorySuccess,
 
     categoryError,
+  } = useSelector((state) => state.category);
 
-  } = useSelector(
-    (state) => state.category
+  const [activeTab, setActiveTab] = useState("active");
+
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const [search, setSearch] = useState("");
+
+  const [sort, setSort] = useState("latest");
+
+  const [showCreateModal, setShowCreateModal] = useState(false);
+
+  const [showEditModal, setShowEditModal] = useState(false);
+
+  const [selectedCategory, setSelectedCategory] = useState(null);
+
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+  const [confirmAction, setConfirmAction] = useState(null);
+
+  const [confirmText, setConfirmText] = useState("");
+
+  const totalPages = categoryPagination?.totalPages ?? 0;
+
+  const pages = useMemo(() => {
+    return Array.from({ length: totalPages }, (_, index) => index + 1);
+  }, [totalPages]);
+
+  useEffect(() => {
+    if (categorySuccess) {
+      toast.success(categorySuccess);
+
+      const timer = setTimeout(() => {
+        dispatch(clearCategoryMessages());
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [categorySuccess, dispatch]);
+
+  useEffect(() => {
+    if (
+      !categoryListLoading &&
+      currentPage > (categoryPagination?.totalPages || 1)
+    ) {
+      setCurrentPage(categoryPagination?.totalPages || 1);
+    }
+  }, [currentPage, categoryPagination, categoryListLoading]);
+
+  useEffect(() => {
+    if (categoryError) {
+      toast.error(categoryError);
+
+      const timer = setTimeout(() => {
+        dispatch(clearCategoryMessages());
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [categoryError, dispatch]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab, search, sort]);
+
+  const fetchCategories = useCallback(
+    (page = currentPage) => {
+      const params = {
+        page,
+
+        search,
+
+        sort,
+      };
+
+      if (activeTab === "active") {
+        params.is_active = "true";
+      }
+
+      if (activeTab === "deleted") {
+        params.is_active = "false";
+      }
+
+      dispatch(getAdminCategories(params));
+    },
+
+    [dispatch, currentPage, search, sort, activeTab],
   );
 
-  const [
-    activeTab,
-    setActiveTab,
-  ] = useState("active");
-
-  const [
-    currentPage,
-    setCurrentPage,
-  ] = useState(1);
-
-  const [
-    search,
-    setSearch,
-  ] = useState("");
-
-  const [
-    sort,
-    setSort,
-  ] = useState("latest");
-
-  const [
-    showCreateModal,
-    setShowCreateModal,
-  ] = useState(false);
-
-  const [
-    showEditModal,
-    setShowEditModal,
-  ] = useState(false);
-
-  const [
-    selectedCategory,
-    setSelectedCategory,
-  ] = useState(null);
-
-  const [
-    showConfirmModal,
-    setShowConfirmModal,
-  ] = useState(false);
-
-  const [
-    confirmAction,
-    setConfirmAction,
-  ] = useState(null);
-
-  const [
-    confirmText,
-    setConfirmText,
-  ] = useState("");
-
   useEffect(() => {
-
-    if (
-      categorySuccess
-    ) {
-
-      toast.success(
-        categorySuccess
-      );
-
-      const timer =
-        setTimeout(() => {
-
-          dispatch(
-            clearCategoryMessages()
-          );
-
-        }, 3000);
-
-      return () =>
-        clearTimeout(timer);
-    }
-
-  }, [
-
-    categorySuccess,
-    dispatch,
-
-  ]);
-
-  useEffect(() => {
-
-    if (
-
-      !categoryListLoading &&
-
-      currentPage >
-
-      (
-        categoryPagination?.totalPages || 1
-      )
-
-    ) {
-
-      setCurrentPage(
-
-        categoryPagination?.totalPages || 1
-      );
-    }
-
-  }, [
-
-    currentPage,
-    categoryPagination,
-    categoryListLoading,
-
-  ]);
-
-  useEffect(() => {
-
-    if (
-      categoryError
-    ) {
-
-      toast.error(
-        categoryError
-      );
-
-      const timer =
-        setTimeout(() => {
-
-          dispatch(
-            clearCategoryMessages()
-          );
-
-        }, 3000);
-
-      return () =>
-        clearTimeout(timer);
-    }
-
-  }, [
-
-    categoryError,
-    dispatch,
-
-  ]);
-
-  useEffect(() => {
-
-    setCurrentPage(1);
-
-  }, [
-
-    activeTab,
-    search,
-    sort,
-
-  ]);
-
-  const fetchCategories =
-    useCallback(
-
-      (
-        page = currentPage
-      ) => {
-
-        const params = {
-
-          page,
-
-          search,
-
-          sort,
-        };
-
-        if (
-          activeTab === "active"
-        ) {
-
-          params.is_active =
-            "true";
-        }
-
-        if (
-          activeTab === "deleted"
-        ) {
-
-          params.is_active =
-            "false";
-        }
-
-        dispatch(
-          getAdminCategories(
-            params
-          )
-        );
-      },
-
-      [
-
-        dispatch,
-        currentPage,
-        search,
-        sort,
-        activeTab,
-
-      ]
-    );
-
-  useEffect(() => {
-
     fetchCategories();
-
   }, [fetchCategories]);
 
-  useBackgroundServerSync(
-    {
+  useBackgroundServerSync({
+    enabled: true,
 
-      enabled: true,
+    pollIntervalMs: 120_000,
 
-      pollIntervalMs: 120_000,
+    onRefresh: fetchCategories,
+  });
 
-      onRefresh:
-        fetchCategories,
-    },
-  );
+  const handleDelete = (categoryId) => {
+    setConfirmText("Are you sure you want to delete this category?");
 
-  const handleDelete =
-    (categoryId) => {
+    setConfirmAction(() => async () => {
+      const result = await dispatch(deleteCategory(categoryId));
 
-      setConfirmText(
-        "Are you sure you want to delete this category?"
-      );
+      if (deleteCategory.rejected.match(result)) {
+        return;
+      }
 
-      setConfirmAction(() =>
-        async () => {
+      if (categories.length === 1 && currentPage > 1) {
+        setCurrentPage((prev) => prev - 1);
 
-          const result =
-            await dispatch(
-              deleteCategory(categoryId)
-            );
+        return;
+      }
 
-          if (
-            deleteCategory.rejected.match(
-              result
-            )
-          ) {
+      fetchCategories();
+    });
 
-            return;
-          }
+    setShowConfirmModal(true);
+  };
 
-          if (
-            categories.length === 1 &&
-            currentPage > 1
-          ) {
+  const handleRestore = (categoryId) => {
+    setConfirmText("Are you sure you want to restore this category?");
 
-            setCurrentPage(
-              (prev) => prev - 1
-            );
+    setConfirmAction(() => async () => {
+      const result = await dispatch(restoreCategory(categoryId));
 
-            return;
-          }
+      if (restoreCategory.rejected.match(result)) {
+        return;
+      }
 
-          fetchCategories();
-        }
-      );
+      if (categories.length === 1 && currentPage > 1) {
+        setCurrentPage((prev) => prev - 1);
 
-      setShowConfirmModal(true);
-    };
+        return;
+      }
 
-  const handleRestore =
-    (categoryId) => {
+      fetchCategories();
+    });
 
-      setConfirmText(
-        "Are you sure you want to restore this category?"
-      );
+    setShowConfirmModal(true);
+  };
 
-      setConfirmAction(() =>
-        async () => {
+  const handleEdit = (category) => {
+    setSelectedCategory(category);
 
-          const result =
-            await dispatch(
-              restoreCategory(categoryId)
-            );
-
-          if (
-            restoreCategory.rejected.match(
-              result
-            )
-          ) {
-
-            return;
-          }
-
-          if (
-            categories.length === 1 &&
-            currentPage > 1
-          ) {
-
-            setCurrentPage(
-              (prev) => prev - 1
-            );
-
-            return;
-          }
-
-          fetchCategories();
-        }
-      );
-
-      setShowConfirmModal(true);
-    };
-
-  const handleEdit =
-    (category) => {
-
-      setSelectedCategory(
-        category
-      );
-
-      setShowEditModal(true);
-    };
+    setShowEditModal(true);
+  };
 
   return (
+    <div className="admin-products-page">
+      {/* HEADER SECTION */}
+      <div className="products-header-top">
+        <div className="products-breadcrumb">
+          <span>CATALOG</span>
+          <ChevronRight size={12} color="#9ca3af" />
+          <span>CATEGORIES</span>
+        </div>
+        <div className="products-header-title-row">
+          <h1>Categories</h1>
+          <button
+            className="new-product-btn"
+            onClick={() => setShowCreateModal(true)}
+          >
+            <Plus size={18} /> Create Category
+          </button>
+        </div>
+      </div>
 
-    <div className="admin-categories-page">
+      {/* STATUS TABS */}
+      <div className="status-tabs-container">
+        <button
+          className={activeTab === "all" ? "status-tab active" : "status-tab"}
+          onClick={() => setActiveTab("all")}
+        >
+          All
+        </button>
+        <button
+          className={
+            activeTab === "active" ? "status-tab active" : "status-tab"
+          }
+          onClick={() => setActiveTab("active")}
+        >
+          Active
+        </button>
+        <button
+          className={
+            activeTab === "deleted" ? "status-tab active" : "status-tab"
+          }
+          onClick={() => setActiveTab("deleted")}
+        >
+          Deleted
+        </button>
+      </div>
 
-      <div className="categories-topbar">
+      {/* FILTERS CARD */}
+      <div className="products-filters-card">
+        <div className="filter-group">
+          <label>SEARCH</label>
+          <input
+            type="text"
+            placeholder="Search categories by name..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
 
-        <div>
-
-          <div className="breadcrumb">
-
-            Catalog
-
-            <span>/</span>
-
-            Categories
-
-          </div>
-
-          <h1>
-
-            Category Management
-
-          </h1>
-
+        <div className="filter-group" style={{ maxWidth: "240px" }}>
+          <label>SORT BY</label>
+          <select value={sort} onChange={(e) => setSort(e.target.value)}>
+            <option value="latest">Most Recent</option>
+            <option value="oldest">Oldest</option>
+            <option value="a_z">A-Z</option>
+            <option value="z_a">Z-A</option>
+          </select>
         </div>
 
         <button
-          className="create-category-btn"
-          onClick={() =>
-            setShowCreateModal(true)
-          }
+          className="clear-filters-btn"
+          onClick={() => {
+            setSearch("");
+            setSort("latest");
+            setActiveTab("all");
+          }}
         >
-
-          <Plus size={18} />
-
-          Create Category
-
+          Clear
         </button>
-
       </div>
 
-      <div className="categories-card">
-
-        <div className="categories-toolbar">
-
-          <div className="category-search">
-
-            <Search size={18} />
-
-            <input
-              type="text"
-              placeholder="Search categories..."
-              value={search}
-              onChange={(e) =>
-                setSearch(
-                  e.target.value
-                )
-              }
-            />
-
-          </div>
-
-          <div className="category-tabs">
-
-            <button
-              className={
-                activeTab === "all"
-                  ? "tab-btn active"
-                  : "tab-btn"
-              }
-              onClick={() =>
-                setActiveTab("all")
-              }
-            >
-
-              All
-
-            </button>
-
-            <button
-              className={
-                activeTab === "active"
-                  ? "tab-btn active"
-                  : "tab-btn"
-              }
-              onClick={() =>
-                setActiveTab("active")
-              }
-            >
-
-              Active
-
-            </button>
-
-            <button
-              className={
-                activeTab === "deleted"
-                  ? "tab-btn active"
-                  : "tab-btn"
-              }
-              onClick={() =>
-                setActiveTab("deleted")
-              }
-            >
-
-              Deleted
-
-            </button>
-
-          </div>
-
-          <select
-            value={sort}
-            onChange={(e) =>
-              setSort(
-                e.target.value
-              )
-            }
-            className="category-sort"
-          >
-
-            <option value="latest">
-              Most Recent
-            </option>
-
-            <option value="oldest">
-              Oldest
-            </option>
-
-            <option value="a_z">
-              A-Z
-            </option>
-
-            <option value="z_a">
-              Z-A
-            </option>
-
-          </select>
-
+      {/* TABLE AREA */}
+      <div className="products-table-container">
+        <div
+          className="products-table-header"
+          style={{ gridTemplateColumns: "80px 2fr 1.5fr 1fr 1.2fr 1.5fr" }}
+        >
+          <span>IMAGE</span>
+          <span>NAME</span>
+          <span>PARENT</span>
+          <span>CHILDREN</span>
+          <span>STATUS</span>
+          <span style={{ textAlign: "right" }}>ACTIONS</span>
         </div>
 
-        <div className="category-table">
+        {categoryListLoading ? (
+          <div className="empty-products">Loading categories...</div>
+        ) : categories?.length > 0 ? (
+          <div>
+            {categories.map((category) => (
+              <div
+                key={category.id}
+                className="products-table-row"
+                style={{
+                  gridTemplateColumns: "80px 2fr 1.5fr 1fr 1.2fr 1.5fr",
+                  alignItems: "center",
+                }}
+              >
+                {/* Image Column */}
+                <div className="col-details">
+                  <img
+                    src={category.image_url || "https://placehold.co/80x80"}
+                    alt={category.name}
+                    style={{
+                      width: "50px",
+                      height: "50px",
+                      objectFit: "cover",
+                    }}
+                  />
+                </div>
 
-          <div className="category-table-header">
+                {/* Name Column */}
+                <div className="product-info-text">
+                  <h4 style={{ margin: 0, fontSize: "16px" }}>
+                    {category.name}
+                  </h4>
+                  <p style={{ margin: 0, fontSize: "12px" }}>
+                    /{category.slug}
+                  </p>
+                </div>
 
-            <div>Image</div>
+                {/* Parent Column */}
+                <div className="col-created" style={{ fontSize: "14px" }}>
+                  {category.parent_name || "—"}
+                </div>
 
-            <div>Name</div>
-
-            <div>Parent</div>
-
-            <div>Children</div>
-
-            <div>Status</div>
-
-            <div>Actions</div>
-
-          </div>
-
-          {
-            categoryListLoading ? (
-
-              <div className="empty-state">
-
-                Loading categories...
-
-              </div>
-
-            ) : categories?.length > 0 ? (
-
-              categories.map(
-                (category) => (
-
-                  <div
-                    key={category.id}
-                    className="category-row"
-                  >
-
-                    <div className="category-image-cell">
-
-                      <img
-                        src={
-                          category.image_url ||
-                          "https://placehold.co/80x80"
-                        }
-                        alt={category.name}
-                      />
-
-                    </div>
-
-                    <div className="category-name-cell">
-
-                      {category.name}
-
-                    </div>
-
-                    <div className="category-parent-cell">
-
-                      {
-                        category.parent_name || "-"
-                      }
-
-                    </div>
-
-                    <div className="category-count-cell">
-
-                      {
-                        category.children_count
-                      }
-
-                    </div>
-
-                    <div>
-
-                      {
-                        category.is_active ? (
-
-                          <span className="status-pill active">
-
-                            Active
-
-                          </span>
-
-                        ) : (
-
-                          <span className="status-pill deleted">
-
-                            Deleted
-
-                          </span>
-
-                        )
-                      }
-
-                    </div>
-
-                    <div className="category-actions">
-
-                      <button
-                        className="icon-btn"
-                        disabled={
-                          categoryUpdateLoading
-                        }
-                        onClick={() =>
-                          handleEdit(category)
-                        }
-                      >
-
-                        <Pencil size={18} />
-
-                      </button>
-
-                      {
-                        category.is_active ? (
-
-                          <button
-                            className="icon-btn delete-btn"
-                            disabled={
-                              categoryDeleteLoading
-                            }
-                            onClick={() =>
-                              handleDelete(
-                                category.id
-                              )
-                            }
-                          >
-
-                            <Trash2 size={18} />
-
-                          </button>
-
-                        ) : (
-
-                          <button
-                            className="restore-btn"
-                            disabled={
-                              categoryRestoreLoading
-                            }
-                            onClick={() =>
-                              handleRestore(
-                                category.id
-                              )
-                            }
-                          >
-
-                            <RotateCcw size={16} />
-
-                            {
-                              categoryRestoreLoading
-                                ? "Restoring..."
-                                : "Restore"
-                            }
-
-                          </button>
-
-                        )
-                      }
-
-                    </div>
-
+                {/* Children Column */}
+                <div className="col-room" style={{ fontSize: "14px" }}>
+                  <div className="variant-count">
+                    {category.children_count}{" "}
+                    {category.children_count === 1
+                      ? "Subcategory"
+                      : "Subcategories"}
                   </div>
-                )
-              )
+                </div>
 
-            ) : (
+                {/* Status Column */}
+                <div>
+                  <span
+                    className={
+                      category.is_active ? "status-pill active" : "status-pill"
+                    }
+                  >
+                    <span className="status-dot"></span>
+                    {category.is_active ? "ACTIVE" : "DELETED"}
+                  </span>
+                </div>
 
-              <div className="empty-state">
+                {/* Actions Column */}
+                <div
+                  className="col-controls"
+                  style={{ justifyContent: "flex-end", gap: "8px" }}
+                >
+                  <button
+                    className="view-details-btn"
+                    disabled={categoryUpdateLoading}
+                    onClick={() => handleEdit(category)}
+                    style={{ padding: "6px 10px" }}
+                    title="Edit Category"
+                  >
+                    <Pencil size={16} />
+                  </button>
 
-                No categories found
-
+                  {category.is_active ? (
+                    <button
+                      className="view-details-btn"
+                      disabled={categoryDeleteLoading}
+                      onClick={() => handleDelete(category.id)}
+                      style={{
+                        padding: "6px 10px",
+                        borderColor: "#fecaca",
+                        color: "#ef4444",
+                      }}
+                      title="Delete Category"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  ) : (
+                    <button
+                      className="view-details-btn"
+                      disabled={categoryRestoreLoading}
+                      onClick={() => handleRestore(category.id)}
+                      style={{
+                        padding: "6px 10px",
+                        borderColor: "#bbf7d0",
+                        color: "#16a34a",
+                      }}
+                      title="Restore Category"
+                    >
+                      <RotateCcw size={16} style={{ marginRight: "4px" }} />
+                      Restore
+                    </button>
+                  )}
+                </div>
               </div>
-
-            )
-          }
-
-        </div>
-
-        <div className="category-footer">
-
-          <p>
-
-            Showing{" "}
-
-            {
-              categories.length
-            }
-
-            {" "}of{" "}
-
-            {
-              categoryPagination?.count || 0
-            }
-
-            {" "}categories
-
-          </p>
-
-          <div className="pagination">
-
-            <button
-              disabled={
-                !categoryPagination?.previous ||
-                categoryListLoading
-              }
-              onClick={() =>
-                setCurrentPage(
-                  (prev) =>
-                    Math.max(
-                      prev - 1,
-                      1
-                    )
-                )
-              }
-            >
-
-              <ChevronLeft size={18} />
-
-              Prev
-
-            </button>
-
-            <div className="page-indicator">
-
-              Page{" "}
-
-              {
-                categoryPagination?.currentPage || 1
-              }
-
-              {" "}of{" "}
-
-              {
-                categoryPagination?.totalPages || 1
-              }
-
-            </div>
-
-            <button
-              disabled={
-                !categoryPagination?.next ||
-                categoryListLoading
-              }
-              onClick={() =>
-                setCurrentPage(
-                  (prev) => prev + 1
-                )
-              }
-            >
-
-              Next
-
-              <ChevronRight size={18} />
-
-            </button>
-
+            ))}
           </div>
-
-        </div>
-
+        ) : (
+          <div className="empty-products">No categories found.</div>
+        )}
       </div>
+
+      {/* FOOTER */}
+      {categories?.length > 0 && (
+        <div className="products-footer">
+          <p>
+            Showing <strong>{categories.length}</strong> of{" "}
+            <strong>{categoryPagination?.count || 0}</strong> categories
+          </p>
+          <div className="pagination">
+            <button
+              disabled={currentPage === 1 || categoryListLoading}
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              style={{
+                width: "auto",
+                minWidth: "36px",
+                padding: "0 12px",
+                gap: "6px",
+              }}
+            >
+              <ChevronLeft size={16} />
+              <span>Prev</span>
+            </button>
+            {pages.map((pNum) => (
+              <button
+                type="button"
+                key={pNum}
+                className={currentPage === pNum ? "active" : ""}
+                onClick={() => setCurrentPage(pNum)}
+              >
+                {pNum}
+              </button>
+            ))}
+            <button
+              disabled={currentPage === totalPages || categoryListLoading}
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
+              style={{
+                width: "auto",
+                minWidth: "36px",
+                padding: "0 12px",
+                gap: "6px",
+              }}
+            >
+              <span>Next</span>
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        </div>
+      )}
 
       <CreateCategoryModal
         isOpen={showCreateModal}
-        onClose={() =>
-          setShowCreateModal(false)
-        }
+        onClose={() => setShowCreateModal(false)}
         onSuccess={() => {
-
           if (currentPage !== 1) {
-
             setCurrentPage(1);
-
           } else {
-
             fetchCategories(1);
           }
         }}
       />
 
       <EditCategoryModal
-
         isOpen={showEditModal}
-
         onClose={() => {
-
           setShowEditModal(false);
 
           setSelectedCategory(null);
         }}
-
         category={selectedCategory}
-
         onSuccess={() => {
-
           fetchCategories();
         }}
-
       />
 
-      {
-        showConfirmModal && (
-
-          <div className="confirm-modal-overlay">
-
-            <div className="confirm-modal">
-
-              <h3>
-
-                Confirm Action
-
-              </h3>
-
-              <p>
-
-                {confirmText}
-
-              </p>
-
-              <div className="confirm-modal-actions">
-
-                <button
-                  className="confirm-cancel-btn"
-                  onClick={() => {
-
-                    setShowConfirmModal(false);
-
-                    setConfirmAction(null);
-                  }}
-                >
-
-                  Cancel
-
-                </button>
-
-                <button
-                  className="confirm-submit-btn"
-                  disabled={
-                    categoryDeleteLoading ||
-                    categoryRestoreLoading
-                  }
-                  onClick={async () => {
-
-                    if (confirmAction) {
-
-                      await confirmAction();
-                    }
-
-                    setShowConfirmModal(false);
-
-                    setConfirmAction(null);
-                  }}
-                >
-
-                  {
-                    categoryDeleteLoading ||
-
-                    categoryRestoreLoading
-
-                      ? "Processing..."
-
-                      : "Confirm"
-                  }
-
-                </button>
-
-              </div>
-
-            </div>
-
-          </div>
-        )
-      }
-
+      <ConfirmDialog
+        open={showConfirmModal}
+        titleId="confirm-action-title"
+        title="Confirm Action"
+        hint={confirmText}
+        confirmLabel="Confirm"
+        cancelLabel="Cancel"
+        onConfirm={async () => {
+          if (confirmAction) {
+            await confirmAction();
+          }
+          setShowConfirmModal(false);
+          setConfirmAction(null);
+        }}
+        onCancel={() => {
+          setShowConfirmModal(false);
+          setConfirmAction(null);
+        }}
+        busy={categoryDeleteLoading || categoryRestoreLoading}
+      />
     </div>
   );
 }

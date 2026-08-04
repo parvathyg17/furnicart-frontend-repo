@@ -1,44 +1,22 @@
 import "../../styles/account.css";
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import {
-  Link,
-} from "react-router-dom";
+import { Link } from "react-router-dom";
 
-import {
-  ChevronLeft,
-  ChevronRight,
-  Search,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 
 import AccountLayout from "../../components/user/AccountLayout";
 
-import {
-  fetchOrdersList,
-} from "../../features/orders/orderAPI";
+import { fetchOrdersList } from "../../features/orders/orderAPI";
 
-import {
-  formatProductApiError,
-} from "../../utils/productApiErrors.js";
+import { formatProductApiError } from "../../utils/productApiErrors.js";
 
-import {
-  useBackgroundServerSync,
-} from "../../hooks/useBackgroundServerSync.js";
+import { useBackgroundServerSync } from "../../hooks/useBackgroundServerSync.js";
 
-import {
-  stableStringify,
-} from "../../utils/stableStringify.js";
+import { stableStringify } from "../../utils/stableStringify.js";
 
-import {
-  shopProductPathFrom,
-} from "../../utils/shopProductPath.js";
+import { shopProductPathFrom } from "../../utils/shopProductPath.js";
 
 const PAGE_SIZE = 10;
 
@@ -66,257 +44,130 @@ const STATUS_PILL_ORDER = [
   "cancelled",
 ];
 
-const IMAGE_BASE = (
-  import.meta.env.VITE_API_URL || ""
-).replace(
-  /\/$/,
-  "",
-);
+const IMAGE_BASE = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
 
-function formatMoney(
-  value,
-) {
+function formatMoney(value) {
+  const n = Number(value);
 
-  const n = Number(
-    value,
-  );
-
-  if (
-    Number.isNaN(
-      n,
-    )
-  ) {
-
-    return String(
-      value ?? "—",
-    );
+  if (Number.isNaN(n)) {
+    return String(value ?? "—");
   }
 
-  return n.toLocaleString(
-    undefined,
-    {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    },
-  );
+  return n.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 }
 
-function formatDateShort(
-  iso,
-) {
-
-  if (
-    !iso
-  ) {
-
+function formatDateShort(iso) {
+  if (!iso) {
     return "—";
   }
 
-  const d = new Date(
-    iso,
-  );
+  const d = new Date(iso);
 
-  if (
-    Number.isNaN(
-      d.getTime(),
-    )
-  ) {
-
+  if (Number.isNaN(d.getTime())) {
     return "—";
   }
 
-  return d.toLocaleDateString(
-    undefined,
-    {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    },
-  );
+  return d.toLocaleDateString(undefined, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 }
 
-function lineImageSrc(
-  imageUrl,
-) {
-
-  if (
-    !imageUrl
-  ) {
-
+function lineImageSrc(imageUrl) {
+  if (!imageUrl) {
     return null;
   }
 
-  if (
-    imageUrl.startsWith(
-      "http",
-    )
-  ) {
-
+  if (imageUrl.startsWith("http")) {
     return imageUrl;
   }
 
-  const path = imageUrl.startsWith(
-    "/",
-  )
-    ? imageUrl
-    : `/${imageUrl}`;
+  const path = imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`;
 
   return `${IMAGE_BASE}${path}`;
 }
 
-function orderFooterHint(
-  order,
-) {
+function orderFooterHint(order) {
+  const placed = order.placed_at ? new Date(order.placed_at) : null;
 
-  const placed = order.placed_at
-    ? new Date(
-      order.placed_at,
-    )
-    : null;
+  const placedOk = placed && !Number.isNaN(placed.getTime());
 
-  const placedOk =
-    placed &&
-    !Number.isNaN(
-      placed.getTime(),
-    );
-
-  switch (
-    order.status
-  ) {
-
+  switch (order.status) {
     case "pending": {
-
-      if (
-        !placedOk
-      ) {
-
+      if (!placedOk) {
         return "We are preparing your order for shipment.";
       }
 
-      const est = new Date(
-        placed,
-      );
+      const est = new Date(placed);
 
-      est.setDate(
-        est.getDate() + 8,
-      );
+      est.setDate(est.getDate() + 8);
 
-      return `Expected delivery by ${est.toLocaleDateString(
-        undefined,
-        {
-          day: "numeric",
-          month: "short",
-        },
-      )}.`;
+      return `Expected delivery by ${est.toLocaleDateString(undefined, {
+        day: "numeric",
+        month: "short",
+      })}.`;
     }
 
     case "shipped":
-
       return "Your order has left our studio and is on the way.";
 
     case "out_for_delivery":
-
       return "Courier is out for delivery — please keep your phone available.";
 
     case "delivered":
-
       return placedOk
-        ? `Delivered on ${placed.toLocaleDateString(
-          undefined,
-          {
+        ? `Delivered on ${placed.toLocaleDateString(undefined, {
             dateStyle: "medium",
-          },
-        )}.`
+          })}.`
         : "Delivered. Thank you for your purchase.";
 
     case "partially_cancelled":
-
       return "Some items were cancelled; remaining items are being prepared.";
 
     case "partially_shipped":
-
       return "Part of your order is on the way; other items are still preparing.";
 
     case "partially_delivered":
-
       return "Some items are delivered; others are still in transit.";
 
     case "cancelled":
-
       return "This order was cancelled.";
 
     default:
-
       return "";
   }
 }
 
-function buildPageList(
-  current,
-  total,
-) {
-
-  if (
-    total <= 7
-  ) {
-
+function buildPageList(current, total) {
+  if (total <= 7) {
     return Array.from(
       {
         length: total,
       },
-      (
-        _,
-        i,
-      ) =>
-        i + 1,
+      (_, i) => i + 1,
     );
   }
 
-  const pages = new Set(
-    [
-      1,
-      total,
-      current,
-      current - 1,
-      current + 1,
-    ],
-  );
+  const pages = new Set([1, total, current, current - 1, current + 1]);
 
-  const sorted = [
-    ...pages,
-  ].filter(
-    (p) =>
-      p >= 1 &&
-      p <= total,
-  ).sort(
-    (
-      a,
-      b,
-    ) =>
-      a - b,
-  );
+  const sorted = [...pages]
+    .filter((p) => p >= 1 && p <= total)
+    .sort((a, b) => a - b);
 
   const out = [];
 
   let prev = 0;
 
-  for (
-    const p of sorted
-  ) {
-
-    if (
-      p - prev >
-      1
-    ) {
-
-      out.push(
-        "…",
-      );
+  for (const p of sorted) {
+    if (p - prev > 1) {
+      out.push("…");
     }
 
-    out.push(
-      p,
-    );
+    out.push(p);
 
     prev = p;
   }
@@ -324,28 +175,16 @@ function buildPageList(
   return out;
 }
 
-function lineReturnStatusLabel(
-  line,
-) {
-
-  if (
-    line.open_return?.status === "approved"
-  ) {
-
+function lineReturnStatusLabel(line) {
+  if (line.open_return?.status === "approved") {
     return "Return approved";
   }
 
-  if (
-    line.open_return?.status === "pending"
-  ) {
-
+  if (line.open_return?.status === "pending") {
     return "Return pending review";
   }
 
-  if (
-    line.last_return?.status === "rejected"
-  ) {
-
+  if (line.last_return?.status === "rejected") {
     return "Return request rejected";
   }
 
@@ -353,284 +192,136 @@ function lineReturnStatusLabel(
 }
 
 export default function OrdersList() {
+  const [results, setResults] = useState([]);
 
-  const [
-    results,
-    setResults,
-  ] = useState(
-    [],
-  );
+  const [count, setCount] = useState(0);
 
-  const [
-    count,
-    setCount,
-  ] = useState(
-    0,
-  );
+  const [totalPages, setTotalPages] = useState(1);
 
-  const [
-    totalPages,
-    setTotalPages,
-  ] = useState(
-    1,
-  );
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const [
-    currentPage,
-    setCurrentPage,
-  ] = useState(
-    1,
-  );
+  const [loading, setLoading] = useState(true);
 
-  const [
-    loading,
-    setLoading,
-  ] = useState(
-    true,
-  );
+  const [error, setError] = useState(null);
 
-  const [
-    error,
-    setError,
-  ] = useState(
-    null,
-  );
+  const [searchDraft, setSearchDraft] = useState("");
 
-  const [
-    searchDraft,
-    setSearchDraft,
-  ] = useState(
-    "",
-  );
+  const [appliedSearch, setAppliedSearch] = useState("");
 
-  const [
-    appliedSearch,
-    setAppliedSearch,
-  ] = useState(
-    "",
-  );
+  const [appliedStatus, setAppliedStatus] = useState("");
 
-  const [
-    appliedStatus,
-    setAppliedStatus,
-  ] = useState(
-    "",
-  );
+  const lastOrdersSigRef = useRef(null);
 
-  const lastOrdersSigRef =
-    useRef(
-      null,
-    );
+  const loadOrders = useCallback(
+    async ({ silent = false } = {}) => {
+      if (!silent) {
+        setLoading(true);
 
-  const loadOrders =
-    useCallback(
-      async (
-        { silent = false } = {},
-      ) => {
+        setError(null);
+      }
 
+      try {
+        const data = await fetchOrdersList({
+          page: currentPage,
+
+          pageSize: PAGE_SIZE,
+
+          search: appliedSearch,
+
+          status: appliedStatus,
+        });
+
+        const snap = stableStringify({
+          results: data.results || [],
+
+          count: data.count ?? 0,
+
+          total_pages: data.total_pages || 1,
+        });
+
+        if (silent && lastOrdersSigRef.current === snap) {
+          return;
+        }
+
+        lastOrdersSigRef.current = snap;
+
+        setResults(data.results || []);
+
+        setCount(data.count ?? 0);
+
+        setTotalPages(data.total_pages || 1);
+      } catch (err) {
         if (!silent) {
-
-          setLoading(
-            true,
-          );
-
           setError(
-            null,
+            formatProductApiError(err.response?.data) ||
+              "Could not load orders.",
           );
+
+          setResults([]);
         }
-
-        try {
-
-          const data =
-            await fetchOrdersList(
-              {
-                page: currentPage,
-
-                pageSize: PAGE_SIZE,
-
-                search: appliedSearch,
-
-                status: appliedStatus,
-              },
-            );
-
-          const snap =
-            stableStringify(
-              {
-
-                results:
-                  data.results || [],
-
-                count:
-                  data.count ?? 0,
-
-                total_pages:
-                  data.total_pages || 1,
-              },
-            );
-
-          if (
-            silent &&
-            lastOrdersSigRef.current ===
-              snap
-          ) {
-
-            return;
-          }
-
-          lastOrdersSigRef.current =
-            snap;
-
-          setResults(
-            data.results || [],
-          );
-
-          setCount(
-            data.count ?? 0,
-          );
-
-          setTotalPages(
-            data.total_pages || 1,
-          );
-        } catch (err) {
-
-          if (!silent) {
-
-            setError(
-
-              formatProductApiError(
-                err.response?.data,
-              ) ||
-
-                "Could not load orders.",
-            );
-
-            setResults(
-              [],
-            );
-          }
-        } finally {
-
-          if (!silent) {
-
-            setLoading(
-              false,
-            );
-          }
+      } finally {
+        if (!silent) {
+          setLoading(false);
         }
-      },
-      [
-        currentPage,
-        appliedSearch,
-        appliedStatus,
-      ],
-    );
-
-  useEffect(
-    () => {
-
-      lastOrdersSigRef.current =
-        null;
-
-      loadOrders();
+      }
     },
-    [
-      loadOrders,
-    ],
+    [currentPage, appliedSearch, appliedStatus],
   );
 
-  useBackgroundServerSync(
-    {
+  useEffect(() => {
+    lastOrdersSigRef.current = null;
 
-      enabled: true,
+    loadOrders();
+  }, [loadOrders]);
 
-      pollIntervalMs: 90_000,
+  useBackgroundServerSync({
+    enabled: true,
 
-      onRefresh:
-        () =>
-          loadOrders(
-            {
-              silent: true,
-            },
-          ),
-    },
-  );
+    pollIntervalMs: 90_000,
 
-  const handleSearchSubmit = (
-    e,
-  ) => {
+    onRefresh: () =>
+      loadOrders({
+        silent: true,
+      }),
+  });
 
+  const handleSearchSubmit = (e) => {
     e.preventDefault();
 
-    setCurrentPage(
-      1,
-    );
+    setCurrentPage(1);
 
-    setAppliedSearch(
-      searchDraft.trim(),
-    );
+    setAppliedSearch(searchDraft.trim());
   };
 
   const handleClearFilters = () => {
+    setSearchDraft("");
 
-    setSearchDraft(
-      "",
-    );
+    setAppliedSearch("");
 
-    setAppliedSearch(
-      "",
-    );
+    setAppliedStatus("");
 
-    setAppliedStatus(
-      "",
-    );
-
-    setCurrentPage(
-      1,
-    );
+    setCurrentPage(1);
   };
 
   const pageItems = useMemo(
-    () =>
-      buildPageList(
-        currentPage,
-        totalPages,
-      ),
-    [
-      currentPage,
-      totalPages,
-    ],
+    () => buildPageList(currentPage, totalPages),
+    [currentPage, totalPages],
   );
 
   return (
-
     <AccountLayout>
-
       <div className="profile-wrapper orders-artisan-wrap">
-
         <header className="orders-artisan-head">
-
-          <h1 className="orders-artisan-title">
-            My orders
-          </h1>
+          <h1 className="orders-artisan-title">My orders</h1>
 
           <p className="orders-artisan-lead">
-
-            Track shipments, download invoices, and revisit every piece you
-            have chosen.
+            Track shipments, download invoices, and revisit every piece you have
+            chosen.
           </p>
-
         </header>
 
-        <form
-          className="orders-artisan-search"
-          onSubmit={
-            handleSearchSubmit
-          }
-        >
-
+        <form className="orders-artisan-search" onSubmit={handleSearchSubmit}>
           <div className="orders-artisan-search-inner">
-
             <Search
               className="orders-artisan-search-icon"
               size={20}
@@ -641,31 +332,18 @@ export default function OrdersList() {
               type="search"
               className="orders-artisan-search-input"
               placeholder="Search by Order ID or Product Name"
-              value={
-                searchDraft
-              }
-              onChange={
-                (e) =>
-                  setSearchDraft(
-                    e.target.value,
-                  )
-              }
+              value={searchDraft}
+              onChange={(e) => setSearchDraft(e.target.value)}
               aria-label="Search orders"
             />
 
-            <button
-              type="submit"
-              className="orders-artisan-search-btn"
-            >
+            <button type="submit" className="orders-artisan-search-btn">
               Search
             </button>
-
           </div>
-
         </form>
 
         <div className="orders-artisan-filter">
-
           <label
             className="orders-artisan-filter-label"
             htmlFor="orders-status-filter"
@@ -678,472 +356,247 @@ export default function OrdersList() {
             className="orders-artisan-filter-select"
             value={appliedStatus}
             onChange={(e) => {
+              setAppliedStatus(e.target.value);
 
-              setAppliedStatus(
-                e.target.value,
-              );
-
-              setCurrentPage(
-                1,
-              );
+              setCurrentPage(1);
             }}
           >
-
-            {
-              STATUS_PILL_ORDER.map(
-                (val) => (
-
-                  <option
-                    key={
-                      val ||
-                      "all"
-                    }
-                    value={val}
-                  >
-                    {
-                      STATUS_LABELS[
-                        val
-                      ] ||
-                      "All"
-                    }
-                  </option>
-                ),
-              )
-            }
+            {STATUS_PILL_ORDER.map((val) => (
+              <option key={val || "all"} value={val}>
+                {STATUS_LABELS[val] || "All"}
+              </option>
+            ))}
           </select>
         </div>
 
-        {
-          (appliedSearch || appliedStatus) && (
+        {(appliedSearch || appliedStatus) && (
+          <button
+            type="button"
+            className="orders-artisan-clear"
+            onClick={handleClearFilters}
+          >
+            Clear filters
+          </button>
+        )}
 
-            <button
-              type="button"
-              className="orders-artisan-clear"
-              onClick={
-                handleClearFilters
-              }
-            >
-              Clear filters
-            </button>
-          )
-        }
+        {error && (
+          <div className="orders-artisan-banner" role="alert">
+            {error}
+          </div>
+        )}
 
-        {
-          error && (
-
-            <div
-              className="orders-artisan-banner"
-              role="alert"
-            >
-
-              {error}
-            </div>
-          )
-        }
-
-        {
-          loading ? (
-
-            <p className="orders-artisan-muted">
-              Loading your orders…
+        {loading ? (
+          <p className="orders-artisan-muted">Loading your orders…</p>
+        ) : !results.length ? (
+          <div className="orders-artisan-empty">
+            <p>
+              {appliedSearch || appliedStatus
+                ? "No orders match your filters."
+                : "You have not placed any orders yet."}
             </p>
-          ) : !results.length ? (
 
-            <div className="orders-artisan-empty">
+            <Link className="primary-btn orders-artisan-empty-cta" to="/shop">
+              Browse shop
+            </Link>
+          </div>
+        ) : (
+          <>
+            <p className="orders-artisan-count">
+              <strong>{count}</strong> order
+              {count === 1 ? "" : "s"} found
+            </p>
 
-              <p>
-                {
-                  appliedSearch || appliedStatus
-                    ? "No orders match your filters."
-                    : "You have not placed any orders yet."
-                }
-              </p>
+            <ul className="orders-artisan-cards">
+              {results.map((order) => (
+                <li key={order.id} className="orders-artisan-card">
+                  <div className="orders-artisan-card-head">
+                    <div className="orders-artisan-card-meta">
+                      <span className="orders-artisan-card-label">
+                        Order placed
+                      </span>
 
-              <Link
-                className="primary-btn orders-artisan-empty-cta"
-                to="/shop"
-              >
-                Browse shop
-              </Link>
+                      <span className="orders-artisan-card-value">
+                        {formatDateShort(order.placed_at)}
+                      </span>
+                    </div>
 
-            </div>
-          ) : (
+                    <div className="orders-artisan-card-meta">
+                      <span className="orders-artisan-card-label">
+                        Order ID
+                      </span>
 
-            <>
+                      <span className="orders-artisan-card-value orders-artisan-card-id">
+                        #{order.order_number}
+                      </span>
+                    </div>
 
-              <p className="orders-artisan-count">
+                    <div className="orders-artisan-card-meta orders-artisan-card-meta--status">
+                      <span className="orders-artisan-card-label">Status</span>
 
-                <strong>
-                  {count}
-                </strong>
-
-                {" "}
-                order
-                {count === 1 ? "" : "s"}
-                {" "}
-                found
-              </p>
-
-              <ul className="orders-artisan-cards">
-
-                {
-                  results.map(
-                    (order) => (
-
-                      <li
-                        key={
-                          order.id
-                        }
-                        className="orders-artisan-card"
+                      <span
+                        className={`orders-artisan-status orders-artisan-status--${order.status}`}
                       >
-
-                        <div className="orders-artisan-card-head">
-
-                          <div className="orders-artisan-card-meta">
-
-                            <span className="orders-artisan-card-label">
-                              Order placed
-                            </span>
-
-                            <span className="orders-artisan-card-value">
-
-                              {formatDateShort(
-                                order.placed_at,
-                              )}
-                            </span>
-                          </div>
-
-                          <div className="orders-artisan-card-meta">
-
-                            <span className="orders-artisan-card-label">
-                              Order ID
-                            </span>
-
-                            <span className="orders-artisan-card-value orders-artisan-card-id">
-
-                              #
-                              {order.order_number}
-                            </span>
-                          </div>
-
-                          <div className="orders-artisan-card-meta orders-artisan-card-meta--status">
-
-                            <span className="orders-artisan-card-label">
-                              Status
-                            </span>
-
-                            <span
-                              className={
-                                `orders-artisan-status orders-artisan-status--${order.status}`
-                              }
-                            >
-
-                              {
-                                STATUS_LABELS[order.status] ||
-                                order.status
-                              }
-                            </span>
-                          </div>
-
-                          <Link
-                            className="orders-artisan-card-detail"
-                            to={
-                              `/orders/${encodeURIComponent(order.order_number)}`
-                            }
-                          >
-
-                            View details
-
-                            <ChevronRight
-                              size={18}
-                              aria-hidden
-                            />
-
-                          </Link>
-
-                        </div>
-
-                        <div className="orders-artisan-card-body">
-
-                          {
-                            (order.lines || []).map(
-                              (line) => {
-
-                                const img = lineImageSrc(
-                                  line.image_url,
-                                );
-
-                                const lineClass = (
-
-                                  () => {
-
-                                    if (
-                                      line.status === "cancelled"
-                                    ) {
-
-                                      return "orders-artisan-line orders-artisan-line--cancelled";
-                                    }
-
-                                    if (
-                                      line.fulfillment_status === "returned"
-                                    ) {
-
-                                      return "orders-artisan-line orders-artisan-line--returned";
-                                    }
-
-                                    return "orders-artisan-line";
-                                  }
-                                )();
-
-                                const returnLabel = lineReturnStatusLabel(
-                                  line,
-                                );
-
-                                const lineProductPath =
-                                  shopProductPathFrom(
-                                    line,
-                                  );
-
-                                return (
-
-                                  <div
-                                    key={
-                                      line.id
-                                    }
-                                    className={lineClass}
-                                  >
-
-                                    <div className="orders-artisan-line-thumb">
-
-                                      {
-                                        img ? (
-
-                                          <img
-                                            src={
-                                              img
-                                            }
-                                            alt=""
-                                          />
-                                        ) : (
-
-                                          <span className="orders-artisan-line-ph">
-                                            No image
-                                          </span>
-                                        )
-                                      }
-                                    </div>
-
-                                    <div className="orders-artisan-line-info">
-
-                                      <div className="orders-artisan-line-title">
-
-                                        {
-                                          lineProductPath
-                                            ? (
-
-                                              <Link
-                                                to={
-                                                  lineProductPath
-                                                }
-                                              >
-                                                {line.product_name}
-                                              </Link>
-                                            )
-                                            : line.product_name
-                                        }
-                                      </div>
-
-                                      <div className="orders-artisan-line-sub">
-
-                                        {line.variant_name}
-                                      </div>
-
-                                      {
-                                        returnLabel && (
-
-                                          <div
-                                            className={
-                                              line.last_return?.status === "rejected"
-                                                ? "orders-artisan-line-sub orders-artisan-line-sub--return-rejected"
-                                                : "orders-artisan-line-sub orders-artisan-line-sub--return-note"
-                                            }
-                                          >
-                                            {returnLabel}
-                                          </div>
-                                        )
-                                      }
-                                    </div>
-
-                                    <div className="orders-artisan-line-price">
-
-                                      <div className="orders-artisan-line-amount">
-
-                                        ₹
-                                        {formatMoney(
-                                          line.unit_price,
-                                        )}
-                                      </div>
-
-                                      <div className="orders-artisan-line-qty">
-
-                                        Qty:
-                                        {" "}
-
-                                        {line.quantity}
-                                      </div>
-                                    </div>
-
-                                  </div>
-                                );
-                              },
-                            )
-                          }
-
-                        </div>
-
-                        <div className="orders-artisan-card-foot">
-
-                          <p className="orders-artisan-card-hint">
-
-                            {orderFooterHint(
-                              order,
-                            )}
-                          </p>
-
-                          <div className="orders-artisan-card-total">
-
-                            <span className="orders-artisan-card-total-label">
-                              Total
-                            </span>
-
-                            <span className="orders-artisan-card-total-amt">
-
-                              ₹
-                              {formatMoney(
-                                order.grand_total,
-                              )}
-                            </span>
-
-                          </div>
-
-                        </div>
-
-                      </li>
-                    ),
-                  )
-                }
-
-              </ul>
-
-              {
-                totalPages > 1 && (
-
-                  <nav
-                    className="orders-artisan-pagination"
-                    aria-label="Order pages"
-                  >
-
-                    <button
-                      type="button"
-                      className="orders-artisan-page-btn"
-                      disabled={
-                        currentPage <= 1
-                      }
-                      aria-label="Previous page"
-                      onClick={() =>
-                        setCurrentPage(
-                          (
-                            p,
-                          ) =>
-                            Math.max(
-                              1,
-                              p - 1,
-                            ),
-                        )
-                      }
+                        {STATUS_LABELS[order.status] || order.status}
+                      </span>
+                    </div>
+
+                    <Link
+                      className="orders-artisan-card-detail"
+                      to={`/orders/${encodeURIComponent(order.order_number)}`}
                     >
+                      View details
+                      <ChevronRight size={18} aria-hidden />
+                    </Link>
+                  </div>
 
-                      <ChevronLeft size={20} />
-                    </button>
+                  <div className="orders-artisan-card-body">
+                    {(order.lines || []).map((line) => {
+                      const img = lineImageSrc(line.image_url);
 
-                    {
-                      pageItems.map(
-                        (item, idx) =>
+                      const lineClass = (() => {
+                        if (line.status === "cancelled") {
+                          return "orders-artisan-line orders-artisan-line--cancelled";
+                        }
 
-                          item === "…"
-                            ? (
+                        if (line.fulfillment_status === "returned") {
+                          return "orders-artisan-line orders-artisan-line--returned";
+                        }
 
-                              <span
-                                key={
-                                  `e-${idx}`
-                                }
-                                className="orders-artisan-page-ellipsis"
-                              >
-                                …
+                        return "orders-artisan-line";
+                      })();
+
+                      const returnLabel = lineReturnStatusLabel(line);
+
+                      const lineProductPath = shopProductPathFrom(line);
+
+                      return (
+                        <div key={line.id} className={lineClass}>
+                          <div className="orders-artisan-line-thumb">
+                            {img ? (
+                              <img src={img} alt="" />
+                            ) : (
+                              <span className="orders-artisan-line-ph">
+                                No image
                               </span>
-                            )
-                            : (
+                            )}
+                          </div>
 
-                              <button
-                                key={
-                                  item
-                                }
-                                type="button"
+                          <div className="orders-artisan-line-info">
+                            <div className="orders-artisan-line-title">
+                              {lineProductPath ? (
+                                <Link to={lineProductPath}>
+                                  {line.product_name}
+                                </Link>
+                              ) : (
+                                line.product_name
+                              )}
+                            </div>
+
+                            <div className="orders-artisan-line-sub">
+                              {line.variant_name}
+                            </div>
+
+                            {returnLabel && (
+                              <div
                                 className={
-                                  `orders-artisan-page-num${
-
-                                    item === currentPage
-                                      ? " orders-artisan-page-num--active"
-                                      : ""
-                                  }`
-                                }
-                                onClick={() =>
-                                  setCurrentPage(
-                                    item,
-                                  )
+                                  line.last_return?.status === "rejected"
+                                    ? "orders-artisan-line-sub orders-artisan-line-sub--return-rejected"
+                                    : "orders-artisan-line-sub orders-artisan-line-sub--return-note"
                                 }
                               >
+                                {returnLabel}
+                              </div>
+                            )}
+                          </div>
 
-                                {item}
-                              </button>
-                            ),
-                      )
-                    }
+                          <div className="orders-artisan-line-price">
+                            <div className="orders-artisan-line-amount">
+                              ₹{formatMoney(line.unit_price)}
+                            </div>
 
-                    <button
-                      type="button"
-                      className="orders-artisan-page-btn"
-                      disabled={
-                        currentPage >= totalPages
-                      }
-                      aria-label="Next page"
-                      onClick={() =>
-                        setCurrentPage(
-                          (
-                            p,
-                          ) =>
-                            Math.min(
-                              totalPages,
-                              p + 1,
-                            ),
-                        )
-                      }
+                            <div className="orders-artisan-line-qty">
+                              Qty: {line.quantity}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="orders-artisan-card-foot">
+                    <p className="orders-artisan-card-hint">
+                      {orderFooterHint(order)}
+                    </p>
+
+                    <div className="orders-artisan-card-total">
+                      <span className="orders-artisan-card-total-label">
+                        Total
+                      </span>
+
+                      <span className="orders-artisan-card-total-amt">
+                        ₹{formatMoney(order.grand_total)}
+                      </span>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+
+            {totalPages > 1 && (
+              <nav
+                className="orders-artisan-pagination"
+                aria-label="Order pages"
+              >
+                <button
+                  type="button"
+                  className="orders-artisan-page-btn"
+                  disabled={currentPage <= 1}
+                  aria-label="Previous page"
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                >
+                  <ChevronLeft size={20} />
+                </button>
+
+                {pageItems.map((item, idx) =>
+                  item === "…" ? (
+                    <span
+                      key={`e-${idx}`}
+                      className="orders-artisan-page-ellipsis"
                     >
-
-                      <ChevronRight size={20} />
+                      …
+                    </span>
+                  ) : (
+                    <button
+                      key={item}
+                      type="button"
+                      className={`orders-artisan-page-num${
+                        item === currentPage
+                          ? " orders-artisan-page-num--active"
+                          : ""
+                      }`}
+                      onClick={() => setCurrentPage(item)}
+                    >
+                      {item}
                     </button>
+                  ),
+                )}
 
-                  </nav>
-                )
-              }
-
-            </>
-          )
-        }
-
+                <button
+                  type="button"
+                  className="orders-artisan-page-btn"
+                  disabled={currentPage >= totalPages}
+                  aria-label="Next page"
+                  onClick={() =>
+                    setCurrentPage((p) => Math.min(totalPages, p + 1))
+                  }
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </nav>
+            )}
+          </>
+        )}
       </div>
-
     </AccountLayout>
-
   );
 }

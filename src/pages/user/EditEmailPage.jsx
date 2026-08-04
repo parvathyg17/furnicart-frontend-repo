@@ -4,17 +4,11 @@
 
 import "../../styles/account.css";
 
-import {
-  useEffect,
-  useState,
-} from "react";
+import { useEffect, useState } from "react";
 
 import toast from "react-hot-toast";
 
-import {
-  useDispatch,
-  useSelector,
-} from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import {
   getProfile,
@@ -22,97 +16,58 @@ import {
   verifyEmailOTP,
 } from "../../features/profile/profileSlice";
 
-import {
-  loadUser,
-} from "../../features/auth/authSlice";
+import { loadUser } from "../../features/auth/authSlice";
 
 import AccountLayout from "../../components/user/AccountLayout";
 
-import {
-  ArrowLeft,
-} from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
-import {
-  useNavigate,
-} from "react-router-dom";
-
+import { useNavigate } from "react-router-dom";
 
 export default function EditEmailPage() {
+  const dispatch = useDispatch();
 
-  const dispatch =
-    useDispatch();
+  const navigate = useNavigate();
 
-  const navigate =
-    useNavigate();
-
-  const { profile } =
-    useSelector(
-      (state) => state.profile
-    );
-
+  const { profile } = useSelector((state) => state.profile);
 
   // ==========================================
   // LOCAL STATES
   // ==========================================
 
-  const [loadingLocal, setLoadingLocal] =
-    useState(false);
+  const [loadingLocal, setLoadingLocal] = useState(false);
 
-  const [
-    verifyLoadingLocal,
-    setVerifyLoadingLocal,
-  ] = useState(false);
+  const [verifyLoadingLocal, setVerifyLoadingLocal] = useState(false);
 
-  const [otpSent, setOtpSent] =
-    useState(false);
+  const [otpSent, setOtpSent] = useState(false);
 
   const getInitialTimer = () => {
-
-    const storedTime =
-      localStorage.getItem(
-        "email_change_resend_until"
-      );
+    const storedTime = localStorage.getItem("email_change_resend_until");
 
     if (!storedTime) {
       return 0;
     }
 
-    const remaining =
-      Math.floor(
-        (
-          Number(storedTime) -
-          Date.now()
-        ) / 1000
-      );
+    const remaining = Math.floor((Number(storedTime) - Date.now()) / 1000);
 
-    return remaining > 0
-      ? remaining
-      : 0;
+    return remaining > 0 ? remaining : 0;
   };
 
-  const [timer, setTimer] =
-    useState(getInitialTimer);
+  const [timer, setTimer] = useState(getInitialTimer);
 
-  const [email, setEmail] =
-    useState({
-      new_email: "",
-      otp: "",
-    });
-
+  const [email, setEmail] = useState({
+    new_email: "",
+    otp: "",
+  });
 
   // ==========================================
   // RESTORE OTP FLOW
   // ==========================================
 
   useEffect(() => {
-
-    const storedEmail =
-      sessionStorage.getItem(
-        "email_change_new_email"
-      );
+    const storedEmail = sessionStorage.getItem("email_change_new_email");
 
     if (storedEmail) {
-
       setEmail((prev) => ({
         ...prev,
         new_email: storedEmail,
@@ -120,369 +75,219 @@ export default function EditEmailPage() {
 
       setOtpSent(true);
     }
-
   }, []);
-
 
   // ==========================================
   // INITIAL TIMER SETUP
   // ==========================================
 
   useEffect(() => {
-
-    const storedTime =
-      localStorage.getItem(
-        "email_change_resend_until"
-      );
+    const storedTime = localStorage.getItem("email_change_resend_until");
 
     if (!storedTime) {
       return;
     }
 
-    const remaining =
-      Math.floor(
-        (
-          Number(storedTime) -
-          Date.now()
-        ) / 1000
-      );
+    const remaining = Math.floor((Number(storedTime) - Date.now()) / 1000);
 
     if (remaining > 0) {
-
       setTimer(remaining);
 
       setOtpSent(true);
     }
-
   }, []);
-
 
   // ==========================================
   // FETCH PROFILE
   // ==========================================
 
   useEffect(() => {
-
     if (!profile) {
-
-      dispatch(
-        getProfile()
-      );
-
+      dispatch(getProfile());
     }
-
-  }, [
-    dispatch,
-    profile,
-  ]);
-
+  }, [dispatch, profile]);
 
   // ==========================================
   // TIMER
   // ==========================================
 
   useEffect(() => {
-
     if (timer <= 0) {
       return;
     }
 
-    const interval =
-      setInterval(() => {
+    const interval = setInterval(() => {
+      setTimer((prev) => {
+        if (prev <= 1) {
+          localStorage.removeItem("email_change_resend_until");
 
-        setTimer((prev) => {
+          clearInterval(interval);
 
-          if (prev <= 1) {
+          return 0;
+        }
 
-            localStorage.removeItem(
-              "email_change_resend_until"
-            );
+        return prev - 1;
+      });
+    }, 1000);
 
-            clearInterval(interval);
-
-            return 0;
-          }
-
-          return prev - 1;
-
-        });
-
-      }, 1000);
-
-    return () =>
-      clearInterval(interval);
-
+    return () => clearInterval(interval);
   }, [timer]);
-
 
   // ==========================================
   // SEND OTP
   // ==========================================
 
-  const sendOTP =
-    async () => {
+  const sendOTP = async () => {
+    // EMAIL REQUIRED
+    if (!email.new_email.trim()) {
+      toast.error("Please enter email address");
 
-      // EMAIL REQUIRED
-      if (
-        !email.new_email.trim()
-      ) {
+      return;
+    }
 
-        toast.error(
-          "Please enter email address"
-        );
+    // EMAIL VALIDATION
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-        return;
-      }
+    if (!emailRegex.test(email.new_email)) {
+      toast.error("Please enter a valid email");
 
-      // EMAIL VALIDATION
-      const emailRegex =
-        /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return;
+    }
 
-      if (
-        !emailRegex.test(
-          email.new_email
-        )
-      ) {
+    // SAME EMAIL
+    if (email.new_email === profile?.email) {
+      toast.error("This is already your current email");
 
-        toast.error(
-          "Please enter a valid email"
-        );
+      return;
+    }
 
-        return;
-      }
+    try {
+      setLoadingLocal(true);
 
-      // SAME EMAIL
-      if (
-        email.new_email ===
-        profile?.email
-      ) {
+      await dispatch(
+        sendEmailOTP({
+          new_email: email.new_email,
+        }),
+      ).unwrap();
 
-        toast.error(
-          "This is already your current email"
-        );
+      toast.success("OTP sent successfully");
 
-        return;
-      }
+      setOtpSent(true);
 
-      try {
+      // SAVE EMAIL
+      sessionStorage.setItem("email_change_new_email", email.new_email);
 
-        setLoadingLocal(true);
+      // SAVE TIMER
+      const resendUntil = Date.now() + 60000;
 
-        await dispatch(
-          sendEmailOTP({
-            new_email:
-              email.new_email,
-          })
-        ).unwrap();
+      localStorage.setItem("email_change_resend_until", resendUntil);
 
-        toast.success(
-          "OTP sent successfully"
-        );
-
-        setOtpSent(true);
-
-        // SAVE EMAIL
-        sessionStorage.setItem(
-          "email_change_new_email",
-          email.new_email
-        );
-
-        // SAVE TIMER
-        const resendUntil =
-          Date.now() + 60000;
-
-        localStorage.setItem(
-          "email_change_resend_until",
-          resendUntil
-        );
-
-        setTimer(60);
-
-      } catch (err) {
-
-        toast.error(
-
-          err?.error ||
-          "Failed to send OTP"
-
-        );
-
-      } finally {
-
-        setLoadingLocal(false);
-
-      }
-    };
-
+      setTimer(60);
+    } catch (err) {
+      toast.error(err?.error || "Failed to send OTP");
+    } finally {
+      setLoadingLocal(false);
+    }
+  };
 
   // ==========================================
   // VERIFY OTP
   // ==========================================
 
-  const verifyOTP =
-    async () => {
+  const verifyOTP = async () => {
+    // OTP REQUIRED
+    if (!email.otp.trim()) {
+      toast.error("Please enter OTP");
 
-      // OTP REQUIRED
-      if (
-        !email.otp.trim()
-      ) {
+      return;
+    }
 
-        toast.error(
-          "Please enter OTP"
-        );
+    // OTP LENGTH
+    if (email.otp.length !== 6) {
+      toast.error("OTP must be 6 digits");
 
-        return;
-      }
+      return;
+    }
 
-      // OTP LENGTH
-      if (
-        email.otp.length !== 6
-      ) {
+    try {
+      setVerifyLoadingLocal(true);
 
-        toast.error(
-          "OTP must be 6 digits"
-        );
+      await dispatch(
+        verifyEmailOTP({
+          new_email: email.new_email,
 
-        return;
-      }
+          otp: email.otp,
+        }),
+      ).unwrap();
 
-      try {
+      await dispatch(
+        loadUser({
+          silent: true,
+        }),
+      ).unwrap();
 
-        setVerifyLoadingLocal(
-          true
-        );
+      await dispatch(getProfile()).unwrap();
 
-        await dispatch(
-          verifyEmailOTP({
-            new_email:
-              email.new_email,
+      // CLEANUP
+      sessionStorage.removeItem("email_change_new_email");
 
-            otp:
-              email.otp,
-          })
-        ).unwrap();
+      localStorage.removeItem("email_change_resend_until");
 
-        await dispatch(
-          loadUser(
-            {
-              silent: true,
-            },
-          )
-        ).unwrap();
+      toast.success("Email updated successfully");
 
-        await dispatch(
-          getProfile()
-        ).unwrap();
-
-        // CLEANUP
-        sessionStorage.removeItem(
-          "email_change_new_email"
-        );
-
-        localStorage.removeItem(
-          "email_change_resend_until"
-        );
-
-        toast.success(
-          "Email updated successfully"
-        );
-
-        navigate("/profile");
-
-      } catch (err) {
-
-        toast.error(
-
-          err?.error ||
-          "OTP verification failed"
-
-        );
-
-      } finally {
-
-        setVerifyLoadingLocal(
-          false
-        );
-
-      }
-    };
-
+      navigate("/profile");
+    } catch (err) {
+      toast.error(err?.error || "OTP verification failed");
+    } finally {
+      setVerifyLoadingLocal(false);
+    }
+  };
 
   return (
-
     <AccountLayout>
-
-      <div
-        className="back-btn"
-        onClick={() =>
-          navigate("/profile")
-        }
-      >
-
+      <div className="back-btn" onClick={() => navigate("/profile")}>
         <ArrowLeft size={18} />
-
         Back To Profile
-
       </div>
 
       <div className="settings-card">
-
-        <div className="settings-title">
-          Change Email
-        </div>
+        <div className="settings-title">Change Email</div>
 
         {/* EMAIL */}
         <div className="settings-field">
-
-          <label>
-            New Email
-          </label>
+          <label>New Email</label>
 
           <input
             type="email"
             className="settings-input"
-            value={
-              email.new_email
-            }
+            value={email.new_email}
             placeholder="Enter new email"
             onChange={(e) =>
               setEmail({
                 ...email,
 
-                new_email:
-                  e.target.value,
+                new_email: e.target.value,
               })
             }
           />
-
         </div>
 
         {/* SEND OTP */}
         <button
           className="primary-btn"
           onClick={sendOTP}
-          disabled={
-            timer > 0 ||
-            loadingLocal
-          }
+          disabled={timer > 0 || loadingLocal}
         >
-
           {loadingLocal
             ? "Sending..."
-
             : timer > 0
-
-            ? `Resend OTP ${timer}s`
-
-            : "Send OTP"}
-
+              ? `Resend OTP ${timer}s`
+              : "Send OTP"}
         </button>
 
         {/* OTP SECTION */}
         {otpSent && (
-
           <div className="otp-wrapper">
-
             <input
               type="text"
               className="settings-input"
@@ -492,11 +297,7 @@ export default function EditEmailPage() {
                 setEmail({
                   ...email,
 
-                  otp:
-                    e.target.value.replace(
-                      /\D/g,
-                      ""
-                    ),
+                  otp: e.target.value.replace(/\D/g, ""),
                 })
               }
               maxLength={6}
@@ -504,26 +305,14 @@ export default function EditEmailPage() {
 
             <button
               className="primary-btn"
-              onClick={
-                verifyOTP
-              }
-              disabled={
-                verifyLoadingLocal
-              }
+              onClick={verifyOTP}
+              disabled={verifyLoadingLocal}
             >
-
-              {verifyLoadingLocal
-                ? "Verifying..."
-                : "Verify OTP"}
-
+              {verifyLoadingLocal ? "Verifying..." : "Verify OTP"}
             </button>
-
           </div>
-
         )}
-
       </div>
-
     </AccountLayout>
   );
 }

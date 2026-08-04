@@ -1,208 +1,121 @@
-
 import toast from "react-hot-toast";
 
-import {
-  useEffect,
-  useState,
-} from "react";
+import { useEffect, useState } from "react";
 
-import {
-  useDispatch,
-} from "react-redux";
+import { useDispatch } from "react-redux";
 
-import {
-  verifyOTP,
-  resendOTP,
-} from "../../features/auth/authSlice";
+import { verifyOTP, resendOTP } from "../../features/auth/authSlice";
 
 import {
   getStoredReferralPayload,
   clearStoredReferral,
 } from "../../features/referral/referralAPI";
 
-import {
-  useLocation,
-  useNavigate,
-} from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import AuthLayout from "../../components/auth/AuthLayout";
 
-
 export default function OtpVerify() {
-
   const dispatch = useDispatch();
 
   const navigate = useNavigate();
 
   const location = useLocation();
 
-  const email =
-    location.state?.email ||
-    sessionStorage.getItem(
-      "otp_email"
-    );
+  const email = location.state?.email || sessionStorage.getItem("otp_email");
 
   const purpose =
-    location.state?.purpose ||
-    sessionStorage.getItem(
-      "otp_purpose"
-    );
-
+    location.state?.purpose || sessionStorage.getItem("otp_purpose");
 
   // ==========================================
   // LOCAL STATES
   // ==========================================
 
-  const [otp, setOtp] =
-    useState("");
+  const [otp, setOtp] = useState("");
 
-  const [loadingLocal, setLoadingLocal] =
-    useState(false);
+  const [loadingLocal, setLoadingLocal] = useState(false);
 
-  const [
-    resendLoadingLocal,
-    setResendLoadingLocal,
-  ] = useState(false);
-
+  const [resendLoadingLocal, setResendLoadingLocal] = useState(false);
 
   // ==========================================
   // INITIAL TIMER
   // ==========================================
 
   const getInitialTimer = () => {
-
-    let storedTime =
-      localStorage.getItem(
-        "otp_resend_until"
-      );
+    let storedTime = localStorage.getItem("otp_resend_until");
 
     // FIRST TIME OPENING OTP PAGE
     if (!storedTime) {
+      storedTime = Date.now() + 60000;
 
-      storedTime =
-        Date.now() + 60000;
-
-      localStorage.setItem(
-        "otp_resend_until",
-        storedTime
-      );
+      localStorage.setItem("otp_resend_until", storedTime);
     }
 
-    const remaining =
-      Math.floor(
-        (
-          Number(storedTime) -
-          Date.now()
-        ) / 1000
-      );
+    const remaining = Math.floor((Number(storedTime) - Date.now()) / 1000);
 
-    return remaining > 0
-      ? remaining
-      : 0;
+    return remaining > 0 ? remaining : 0;
   };
 
-  const [timer, setTimer] =
-    useState(getInitialTimer);
-
+  const [timer, setTimer] = useState(getInitialTimer);
 
   // ==========================================
   // INVALID ACCESS
   // ==========================================
 
   useEffect(() => {
-
-    if (
-      !email ||
-      !purpose
-    ) {
-
-      navigate(
-        "/forgot-password"
-      );
-
+    if (!email || !purpose) {
+      navigate("/forgot-password");
     }
-
-  }, [
-    email,
-    purpose,
-    navigate,
-  ]);
-
+  }, [email, purpose, navigate]);
 
   // ==========================================
   // TIMER
   // ==========================================
 
   useEffect(() => {
-
     if (timer <= 0) {
       return;
     }
 
-    const interval =
-      setInterval(() => {
+    const interval = setInterval(() => {
+      setTimer((prev) => {
+        if (prev <= 1) {
+          localStorage.removeItem("otp_resend_until");
 
-        setTimer((prev) => {
+          clearInterval(interval);
 
-          if (prev <= 1) {
+          return 0;
+        }
 
-            localStorage.removeItem(
-              "otp_resend_until"
-            );
+        return prev - 1;
+      });
+    }, 1000);
 
-            clearInterval(
-              interval
-            );
-
-            return 0;
-          }
-
-          return prev - 1;
-
-        });
-
-      }, 1000);
-
-    return () =>
-      clearInterval(
-        interval
-      );
-
+    return () => clearInterval(interval);
   }, [timer]);
-
 
   // ==========================================
   // VERIFY OTP
   // ==========================================
 
-  const handleVerify = async (
-    e
-  ) => {
-
+  const handleVerify = async (e) => {
     e.preventDefault();
 
     // OTP REQUIRED
     if (!otp.trim()) {
-
-      toast.error(
-        "Please enter OTP"
-      );
+      toast.error("Please enter OTP");
 
       return;
     }
 
     // OTP LENGTH
     if (otp.length !== 6) {
-
-      toast.error(
-        "OTP must be 6 digits"
-      );
+      toast.error("OTP must be 6 digits");
 
       return;
     }
 
     try {
-
       setLoadingLocal(true);
 
       const result = await dispatch(
@@ -211,226 +124,115 @@ export default function OtpVerify() {
           otp,
           purpose,
           ...getStoredReferralPayload(),
-        })
+        }),
       ).unwrap();
 
-      toast.success(
-        result.message
-      );
+      toast.success(result.message);
 
       // CLEAR TIMER STORAGE
-      localStorage.removeItem(
-        "otp_resend_until"
-      );
+      localStorage.removeItem("otp_resend_until");
 
       // ==========================================
       // SIGNUP FLOW
       // ==========================================
 
-      if (
-        purpose === "signup"
-      ) {
-
+      if (purpose === "signup") {
         clearStoredReferral();
 
         navigate("/login");
-
       }
 
       // ==========================================
       // FORGOT PASSWORD FLOW
       // ==========================================
-
       else {
+        sessionStorage.setItem("reset_email", email);
 
-        sessionStorage.setItem(
-          "reset_email",
-          email
-        );
+        sessionStorage.setItem("reset_otp", otp);
 
-        sessionStorage.setItem(
-          "reset_otp",
-          otp
-        );
-
-        navigate(
-          "/reset-password",
-          {
-            state: {
-              email,
-              otp,
-            },
-          }
-        );
+        navigate("/reset-password", {
+          state: {
+            email,
+            otp,
+          },
+        });
       }
-
     } catch (err) {
-
-      toast.error(
-
-        err?.error ||
-        err?.otp?.[0] ||
-        "OTP verification failed"
-
-      );
-
+      toast.error(err?.error || err?.otp?.[0] || "OTP verification failed");
     } finally {
-
       setLoadingLocal(false);
-
     }
   };
-
 
   // ==========================================
   // RESEND OTP
   // ==========================================
 
-  const handleResend =
-    async () => {
+  const handleResend = async () => {
+    try {
+      setResendLoadingLocal(true);
 
-      try {
+      const result = await dispatch(
+        resendOTP({
+          email,
+          purpose,
+        }),
+      ).unwrap();
 
-        setResendLoadingLocal(
-          true
-        );
+      toast.success(result.message || "OTP resent successfully");
 
-        const result =
-          await dispatch(
-            resendOTP({
-              email,
-              purpose,
-            })
-          ).unwrap();
+      // RESET TIMER
+      const resendUntil = Date.now() + 60000;
 
-        toast.success(
-          result.message ||
-          "OTP resent successfully"
-        );
+      localStorage.setItem("otp_resend_until", resendUntil);
 
-        // RESET TIMER
-        const resendUntil =
-          Date.now() + 60000;
-
-        localStorage.setItem(
-          "otp_resend_until",
-          resendUntil
-        );
-
-        setTimer(60);
-
-      } catch (err) {
-
-        toast.error(
-
-          err?.error ||
-          "Failed to resend OTP"
-
-        );
-
-      } finally {
-
-        setResendLoadingLocal(
-          false
-        );
-
-      }
-    };
-
+      setTimer(60);
+    } catch (err) {
+      toast.error(err?.error || "Failed to resend OTP");
+    } finally {
+      setResendLoadingLocal(false);
+    }
+  };
 
   return (
-
     <AuthLayout>
+      <form className="auth-form" onSubmit={handleVerify}>
+        <h1 className="auth-title">Verify OTP</h1>
 
-      <form
-        className="auth-form"
-        onSubmit={
-          handleVerify
-        }
-      >
-
-        <h1 className="auth-title">
-          Verify OTP
-        </h1>
-
-        <p className="auth-subtitle">
-          Enter the OTP
-          sent to your
-          email.
-        </p>
+        <p className="auth-subtitle">Enter the OTP sent to your email.</p>
 
         {/* OTP INPUT */}
         <div className="auth-group">
-
-          <label>
-            OTP
-          </label>
+          <label>OTP</label>
 
           <input
             type="text"
             placeholder="Enter OTP"
             value={otp}
             maxLength={6}
-            onChange={(e) =>
-              setOtp(
-                e.target.value.replace(
-                  /\D/g,
-                  ""
-                )
-              )
-            }
+            onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
           />
-
         </div>
 
         {/* VERIFY BUTTON */}
-        <button
-          className="auth-btn"
-          type="submit"
-          disabled={
-            loadingLocal
-          }
-        >
-
-          {loadingLocal
-            ? "Verifying..."
-            : "Verify OTP"}
-
+        <button className="auth-btn" type="submit" disabled={loadingLocal}>
+          {loadingLocal ? "Verifying..." : "Verify OTP"}
         </button>
 
         {/* TIMER */}
         {timer > 0 ? (
-
-          <p className="timer-text">
-
-            Resend OTP
-            in {timer}s
-
-          </p>
-
+          <p className="timer-text">Resend OTP in {timer}s</p>
         ) : (
-
           <button
             type="button"
             className="resend-btn"
-            onClick={
-              handleResend
-            }
-            disabled={
-              resendLoadingLocal
-            }
+            onClick={handleResend}
+            disabled={resendLoadingLocal}
           >
-
-            {resendLoadingLocal
-              ? "Sending..."
-              : "Resend OTP"}
-
+            {resendLoadingLocal ? "Sending..." : "Resend OTP"}
           </button>
-
         )}
-
       </form>
-
     </AuthLayout>
   );
 }

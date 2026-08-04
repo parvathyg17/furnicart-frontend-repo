@@ -15,7 +15,6 @@ function AuthLayout({
 
   return (
     <div className="auth-page">
-      
       {/* NAVBAR */}
       <header className="auth-navbar">
         <Link to="/" className="auth-logo">
@@ -33,11 +32,8 @@ function AuthLayout({
           <Link to="/cart">
             <ShoppingCart size={20} />
           </Link>
-          
-          <Link
-            to={user ? "/profile" : "/login"}
-            className="profile-nav-link"
-          >
+
+          <Link to={user ? "/profile" : "/login"} className="profile-nav-link">
             {user ? (
               user.profile_image ? (
                 <img
@@ -59,7 +55,6 @@ function AuthLayout({
 
       {/* MAIN CONTENT */}
       <main className="auth-container">
-        
         {/* LEFT IMAGE PANEL */}
         <div className="auth-image-section">
           <div className="auth-image-wrapper">
@@ -73,13 +68,9 @@ function AuthLayout({
 
         {/* RIGHT FORM PANEL */}
         <div className="auth-form-section">
-          <div className="auth-form-card">
-            {children}
-          </div>
+          <div className="auth-form-card">{children}</div>
         </div>
-
       </main>
-      
     </div>
   );
 }

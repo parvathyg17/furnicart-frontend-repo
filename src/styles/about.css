@@ -83,7 +83,9 @@
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .about-hero-cta:hover {
@@ -353,11 +355,7 @@
   right: 0;
   bottom: 0;
   padding: 22px;
-  background: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 0.72),
-    transparent
-  );
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.72), transparent);
   color: #fff;
   text-align: left;
 }

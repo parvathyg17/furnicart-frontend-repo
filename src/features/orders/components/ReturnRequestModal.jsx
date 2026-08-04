@@ -7,40 +7,32 @@ import {
   orderHasPaidDeliveryCharge,
 } from "../orderUi.js";
 
-export default function ReturnRequestModal(
-  {
-    open,
-    returnReason,
-    onReturnReasonChange,
-    returnQuantity,
-    onReturnQuantityChange,
-    returnBusy,
-    returnModalError,
-    onClose,
-    onSubmit,
-    order,
-    returnTargetLineId,
-  },
-) {
-
-  const returnLine = order?.lines?.find(
-    (l) =>
-      l.id === returnTargetLineId,
-  );
+export default function ReturnRequestModal({
+  open,
+  returnReason,
+  onReturnReasonChange,
+  returnQuantity,
+  onReturnQuantityChange,
+  returnBusy,
+  returnModalError,
+  onClose,
+  onSubmit,
+  order,
+  returnTargetLineId,
+}) {
+  const returnLine = order?.lines?.find((l) => l.id === returnTargetLineId);
 
   const maxReturnQty = returnLine?.returnable_quantity ?? 1;
 
   const showQtyPicker = maxReturnQty > 1;
 
   return (
-
     <Modal
       open={open}
       onRequestClose={onClose}
       busy={returnBusy}
       ariaLabelledBy="order-return-title"
     >
-
       <h2
         id="order-return-title"
         className="checkout-panel-title artisan-font-serif"
@@ -54,36 +46,25 @@ export default function ReturnRequestModal(
         before stock is adjusted.
       </p>
 
-      {
-        showQtyPicker && (
+      {showQtyPicker && (
+        <QuantityStepper
+          id="order-return-quantity"
+          label="Units to return"
+          value={returnQuantity}
+          min={1}
+          max={maxReturnQty}
+          disabled={returnBusy}
+          onChange={onReturnQuantityChange}
+        />
+      )}
 
-          <QuantityStepper
-            id="order-return-quantity"
-            label="Units to return"
-            value={returnQuantity}
-            min={1}
-            max={maxReturnQty}
-            disabled={returnBusy}
-            onChange={onReturnQuantityChange}
-          />
-        )
-      }
+      {orderHasPaidDeliveryCharge(order) && (
+        <p className="order-cancel-dialog-policy">
+          {DELIVERY_CHARGE_NON_REFUNDABLE_NOTE}
+        </p>
+      )}
 
-      {
-        orderHasPaidDeliveryCharge(
-          order,
-        ) && (
-
-          <p className="order-cancel-dialog-policy">
-            {DELIVERY_CHARGE_NON_REFUNDABLE_NOTE}
-          </p>
-        )
-      }
-
-      <label
-        className="order-cancel-label"
-        htmlFor="order-return-reason"
-      >
+      <label className="order-cancel-label" htmlFor="order-return-reason">
         Reason (required)
       </label>
 
@@ -94,28 +75,21 @@ export default function ReturnRequestModal(
         maxLength={2000}
         value={returnReason}
         onChange={(e) => {
-
-          onReturnReasonChange(
-            e.target.value,
-          );
+          onReturnReasonChange(e.target.value);
         }}
       />
 
-      {
-        returnModalError && (
-
-          <div
-            className="shop-banner error cart-bag-banner"
-            role="alert"
-            style={{ marginBottom: "0.75rem" }}
-          >
-            {returnModalError}
-          </div>
-        )
-      }
+      {returnModalError && (
+        <div
+          className="shop-banner error cart-bag-banner"
+          role="alert"
+          style={{ marginBottom: "0.75rem" }}
+        >
+          {returnModalError}
+        </div>
+      )}
 
       <div className="order-cancel-dialog-actions">
-
         <button
           type="button"
           className="checkout-btn-secondary"
@@ -131,21 +105,14 @@ export default function ReturnRequestModal(
           disabled={returnBusy}
           onClick={onSubmit}
         >
-          {
-            returnBusy
-              ? "Submitting…"
-              : showQtyPicker
-                ? `Return ${Math.min(
-                  Math.max(
-                    1,
-                    Number(
-                      returnQuantity,
-                    ) || 1,
-                  ),
+          {returnBusy
+            ? "Submitting…"
+            : showQtyPicker
+              ? `Return ${Math.min(
+                  Math.max(1, Number(returnQuantity) || 1),
                   maxReturnQty,
                 )} unit(s)`
-                : "Submit return"
-          }
+              : "Submit return"}
         </button>
       </div>
     </Modal>

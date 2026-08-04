@@ -1,24 +1,13 @@
-
-
 import "../../styles/account.css";
 import "../../styles/checkout.css";
 
-import {
-  useEffect,
-  useState,
-} from "react";
+import { useEffect, useState } from "react";
 
-import {
-  useNavigate,
-  useSearchParams,
-} from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import toast from "react-hot-toast";
 
-import {
-  useDispatch,
-  useSelector,
-} from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import {
   getAddresses,
@@ -32,128 +21,77 @@ import AccountLayout from "../../components/user/AccountLayout";
 
 import ConfirmDialog from "../../components/common/ConfirmDialog.jsx";
 
-
 export default function AddressPage() {
-
   const dispatch = useDispatch();
 
   const navigate = useNavigate();
 
   const [searchParams] = useSearchParams();
 
-  const fromCheckout =
-    searchParams.get("from") === "checkout";
+  const fromCheckout = searchParams.get("from") === "checkout";
 
   const editParam = searchParams.get("edit");
 
-  const { addresses } =
-    useSelector(
-      (state) => state.address
-    );
+  const { addresses } = useSelector((state) => state.address);
 
+  const [loadingLocal, setLoadingLocal] = useState(false);
 
+  const [editId, setEditId] = useState(null);
 
+  const [showForm, setShowForm] = useState(false);
 
-  const [
-    loadingLocal,
-    setLoadingLocal,
-  ] = useState(false);
+  const [form, setForm] = useState({
+    name: "",
+    phone: "",
+    address_line: "",
+    city: "",
+    state: "",
+    pincode: "",
+  });
 
-  const [
-    editId,
-    setEditId,
-  ] = useState(null);
+  const [errors, setErrors] = useState({});
 
-  const [
-    showForm,
-    setShowForm,
-  ] = useState(false);
+  const [addressPendingDelete, setAddressPendingDelete] = useState(null);
 
-  const [form, setForm] =
-    useState({
-      name: "",
-      phone: "",
-      address_line: "",
-      city: "",
-      state: "",
-      pincode: "",
-    });
-
-  const [errors, setErrors] =
-    useState({});
-
-  const [
-    addressPendingDelete,
-    setAddressPendingDelete,
-  ] = useState(null);
-
-  const [
-    deleteBusy,
-    setDeleteBusy,
-  ] = useState(false);
-
-
-  
+  const [deleteBusy, setDeleteBusy] = useState(false);
 
   useEffect(() => {
-
     if (!addresses.length) {
-
-      dispatch(
-        getAddresses()
-      );
-
+      dispatch(getAddresses());
     }
-
-  }, [
-    dispatch,
-    addresses.length,
-  ]);
-
+  }, [dispatch, addresses.length]);
 
   const returnToCheckout = (addressId = null) => {
-
     navigate(
       "/checkout",
       addressId != null
         ? {
-          state: {
-            selectAddressId: addressId,
-          },
-        }
+            state: {
+              selectAddressId: addressId,
+            },
+          }
         : undefined,
     );
   };
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
 
-  
+    setForm({
+      ...form,
 
-  const handleChange =
-    (e) => {
+      [name]: value,
+    });
 
-      const { name, value } =
-        e.target;
+    // CLEAR FIELD ERROR
+    setErrors({
+      ...errors,
 
-      setForm({
-        ...form,
-
-        [name]: value,
-      });
-
-      // CLEAR FIELD ERROR
-      setErrors({
-        ...errors,
-
-        [name]: "",
-      });
-
-    };
-
-
-
+      [name]: "",
+    });
+  };
 
   const validateForm = () => {
-
     const newErrors = {};
 
     if (!form.name.trim()) {
@@ -191,115 +129,77 @@ export default function AddressPage() {
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleSubmit = async () => {
+    const isValid = validateForm();
 
+    if (!isValid) return;
 
+    try {
+      setLoadingLocal(true);
 
-  const handleSubmit =
-    async () => {
+      if (editId) {
+        await dispatch(
+          updateAddress({
+            id: editId,
+            data: form,
+          }),
+        ).unwrap();
 
-      const isValid =
-        validateForm();
+        toast.success("Address updated");
 
-      if (!isValid) return;
+        const savedId = editId;
 
-      try {
+        resetForm();
 
-        setLoadingLocal(true);
+        setShowForm(false);
 
-        if (editId) {
-
-          await dispatch(
-            updateAddress({
-              id: editId,
-              data: form,
-            })
-          ).unwrap();
-
-          toast.success("Address updated");
-
-          const savedId = editId;
-
-          resetForm();
-
-          setShowForm(false);
-
-          if (fromCheckout) {
-            returnToCheckout(savedId);
-          }
-
-        } else {
-
-          const created = await dispatch(
-            addAddress(form)
-          ).unwrap();
-
-          toast.success("Address added");
-
-          resetForm();
-
-          setShowForm(false);
-
-          if (fromCheckout) {
-            returnToCheckout(created?.id);
-          }
-
+        if (fromCheckout) {
+          returnToCheckout(savedId);
         }
+      } else {
+        const created = await dispatch(addAddress(form)).unwrap();
 
-      } catch (err) {
+        toast.success("Address added");
 
-        toast.error(
+        resetForm();
 
-          err?.error ||
-          "Something went wrong"
+        setShowForm(false);
 
-        );
-
-      } finally {
-
-        setLoadingLocal(false);
-
+        if (fromCheckout) {
+          returnToCheckout(created?.id);
+        }
       }
-    };
+    } catch (err) {
+      toast.error(err?.error || "Something went wrong");
+    } finally {
+      setLoadingLocal(false);
+    }
+  };
 
+  const handleEdit = (address) => {
+    setEditId(address.id);
 
-  
+    setShowForm(true);
 
-  const handleEdit =
-    (address) => {
+    setForm({
+      name: address.name,
 
-      setEditId(address.id);
+      phone: address.phone,
 
-      setShowForm(true);
+      address_line: address.address_line,
 
-      setForm({
-        name: address.name,
+      city: address.city,
 
-        phone: address.phone,
+      state: address.state,
 
-        address_line:
-          address.address_line,
+      pincode: address.pincode,
+    });
 
-        city: address.city,
-
-        state: address.state,
-
-        pincode:
-          address.pincode,
-      });
-
-      setErrors({});
-
-    };
-
+    setErrors({});
+  };
 
   useEffect(() => {
-
-    if (
-      !fromCheckout ||
-      !editParam ||
-      !addresses.length
-    ) {
-
+    if (!fromCheckout || !editParam || !addresses.length) {
       return;
     }
 
@@ -309,25 +209,16 @@ export default function AddressPage() {
       return;
     }
 
-    const address = addresses.find(
-      (a) => a.id === addressId,
-    );
+    const address = addresses.find((a) => a.id === addressId);
 
     if (address) {
       handleEdit(address);
     }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- open once when edit param + addresses load
-  }, [
-    fromCheckout,
-    editParam,
-    addresses.length,
-  ]);
-
-
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- open once when edit param + addresses load
+  }, [fromCheckout, editParam, addresses.length]);
 
   const resetForm = () => {
-
     setEditId(null);
 
     setErrors({});
@@ -340,28 +231,19 @@ export default function AddressPage() {
       state: "",
       pincode: "",
     });
-
   };
 
+  const handleCancel = () => {
+    resetForm();
 
-  
+    setShowForm(false);
 
-  const handleCancel =
-    () => {
-
-      resetForm();
-
-      setShowForm(false);
-
-      if (fromCheckout) {
-        returnToCheckout();
-      }
-
-    };
-
+    if (fromCheckout) {
+      returnToCheckout();
+    }
+  };
 
   const handleConfirmDelete = async () => {
-
     if (!addressPendingDelete) {
       return;
     }
@@ -369,12 +251,7 @@ export default function AddressPage() {
     setDeleteBusy(true);
 
     try {
-
-      await dispatch(
-        deleteAddress(
-          addressPendingDelete.id,
-        ),
-      ).unwrap();
+      await dispatch(deleteAddress(addressPendingDelete.id)).unwrap();
 
       toast.success("Address removed");
 
@@ -383,429 +260,215 @@ export default function AddressPage() {
       if (fromCheckout) {
         returnToCheckout();
       }
-
     } catch (err) {
-
-      toast.error(
-        err?.error ||
-        "Failed to remove address",
-      );
-
+      toast.error(err?.error || "Failed to remove address");
     } finally {
-
       setDeleteBusy(false);
-
     }
   };
 
+  const handleAddNew = () => {
+    resetForm();
 
- 
-
-  const handleAddNew =
-    () => {
-
-      resetForm();
-
-      setShowForm(true);
-
-    };
-
+    setShowForm(true);
+  };
 
   return (
-
     <AccountLayout>
-
-     
       <div className="address-top">
-
         <div>
-
-          <div className="page-title">
-            Shipping Addresses
-          </div>
+          <div className="page-title">Shipping Addresses</div>
 
           <div className="page-desc">
-            Manage your delivery
-            locations.
-            {
-              fromCheckout && (
-                <>
-                  {" "}
-                  Add or edit an address, then you will return to checkout.
-                </>
-              )
-            }
+            Manage your delivery locations.
+            {fromCheckout && (
+              <> Add or edit an address, then you will return to checkout.</>
+            )}
           </div>
-
         </div>
 
-        <button
-          className="primary-btn"
-          onClick={
-            handleAddNew
-          }
-        >
+        <button className="primary-btn" onClick={handleAddNew}>
           + Add New Address
         </button>
-
       </div>
 
-
-   
       {showForm && (
-
         <div className="address-form-wrapper">
-
           <div className="address-form-header">
+            <h3>{editId ? "Edit Address" : "Add New Address"}</h3>
 
-            <h3>
-
-              {editId
-                ? "Edit Address"
-                : "Add New Address"}
-
-            </h3>
-
-            <button
-              className="close-form-btn"
-              onClick={
-                handleCancel
-              }
-            >
+            <button className="close-form-btn" onClick={handleCancel}>
               ✕
             </button>
-
           </div>
 
           <div className="address-form">
-
-          
             <div>
-
               <input
                 name="name"
                 placeholder="Full Name"
                 value={form.name}
-                onChange={
-                  handleChange
-                }
-                className={`settings-input ${
-                  errors.name
-                    ? "input-error"
-                    : ""
-                }`}
+                onChange={handleChange}
+                className={`settings-input ${errors.name ? "input-error" : ""}`}
               />
 
-              {errors.name && (
-
-                <p className="field-error">
-                  {errors.name}
-                </p>
-
-              )}
-
+              {errors.name && <p className="field-error">{errors.name}</p>}
             </div>
 
-
             <div>
-
               <input
                 name="phone"
                 placeholder="Phone Number"
                 value={form.phone}
-                onChange={
-                  handleChange
-                }
+                onChange={handleChange}
                 className={`settings-input ${
-                  errors.phone
-                    ? "input-error"
-                    : ""
+                  errors.phone ? "input-error" : ""
                 }`}
               />
 
-              {errors.phone && (
-
-                <p className="field-error">
-                  {errors.phone}
-                </p>
-
-              )}
-
+              {errors.phone && <p className="field-error">{errors.phone}</p>}
             </div>
 
-
             <div className="full-address">
-
               <textarea
                 name="address_line"
                 placeholder="Full Address"
-                value={
-                  form.address_line
-                }
-                onChange={
-                  handleChange
-                }
+                value={form.address_line}
+                onChange={handleChange}
                 className={`settings-input textarea ${
-                  errors.address_line
-                    ? "input-error"
-                    : ""
+                  errors.address_line ? "input-error" : ""
                 }`}
               />
 
               {errors.address_line && (
-
-                <p className="field-error">
-                  {
-                    errors.address_line
-                  }
-                </p>
-
+                <p className="field-error">{errors.address_line}</p>
               )}
-
             </div>
-
 
             {/* CITY */}
             <div>
-
               <input
                 name="city"
                 placeholder="City"
                 value={form.city}
-                onChange={
-                  handleChange
-                }
-                className={`settings-input ${
-                  errors.city
-                    ? "input-error"
-                    : ""
-                }`}
+                onChange={handleChange}
+                className={`settings-input ${errors.city ? "input-error" : ""}`}
               />
 
-              {errors.city && (
-
-                <p className="field-error">
-                  {errors.city}
-                </p>
-
-              )}
-
+              {errors.city && <p className="field-error">{errors.city}</p>}
             </div>
-
 
             {/* STATE */}
             <div>
-
               <input
                 name="state"
                 placeholder="State"
                 value={form.state}
-                onChange={
-                  handleChange
-                }
+                onChange={handleChange}
                 className={`settings-input ${
-                  errors.state
-                    ? "input-error"
-                    : ""
+                  errors.state ? "input-error" : ""
                 }`}
               />
 
-              {errors.state && (
-
-                <p className="field-error">
-                  {errors.state}
-                </p>
-
-              )}
-
+              {errors.state && <p className="field-error">{errors.state}</p>}
             </div>
-
 
             {/* PINCODE */}
             <div>
-
               <input
                 name="pincode"
                 placeholder="Pincode"
                 value={form.pincode}
-                onChange={
-                  handleChange
-                }
+                onChange={handleChange}
                 className={`settings-input ${
-                  errors.pincode
-                    ? "input-error"
-                    : ""
+                  errors.pincode ? "input-error" : ""
                 }`}
               />
 
               {errors.pincode && (
-
-                <p className="field-error">
-                  {errors.pincode}
-                </p>
-
+                <p className="field-error">{errors.pincode}</p>
               )}
-
             </div>
-
           </div>
-
 
           {/* ACTIONS */}
           <div className="address-form-actions">
-
-            <button
-              className="secondary-btn"
-              onClick={
-                handleCancel
-              }
-            >
+            <button className="secondary-btn" onClick={handleCancel}>
               Cancel
             </button>
 
             <button
               className="primary-btn"
-              onClick={
-                handleSubmit
-              }
-              disabled={
-                loadingLocal
-              }
+              onClick={handleSubmit}
+              disabled={loadingLocal}
             >
-
               {loadingLocal
-
                 ? "Saving..."
-
                 : editId
-
-                ? "Update Address"
-
-                : "Save Address"}
-
+                  ? "Update Address"
+                  : "Save Address"}
             </button>
-
           </div>
-
         </div>
-
       )}
-
 
       {/* ADDRESS LIST */}
       <div className="address-grid">
+        {addresses.map((address) => (
+          <div key={address.id} className="address-card">
+            <div className="address-header">
+              <h3>{address.name}</h3>
 
-        {addresses.map(
-          (address) => (
-
-            <div
-              key={address.id}
-              className="address-card"
-            >
-
-              <div className="address-header">
-
-                <h3>
-                  {address.name}
-                </h3>
-
-                {address.is_default && (
-
-                  <span className="default-badge">
-                    DEFAULT
-                  </span>
-
-                )}
-
-              </div>
-
-              <p>
-                {address.phone}
-              </p>
-
-              <p>
-                {address.address_line}
-              </p>
-
-              <p>
-                {address.city},{" "}
-                {address.state}
-              </p>
-
-              <p>
-                {address.pincode}
-              </p>
-
-              <div className="address-actions">
-
-                {/* EDIT */}
-                <button
-                  onClick={() =>
-                    handleEdit(
-                      address
-                    )
-                  }
-                >
-                  Edit
-                </button>
-
-
-                {/* DELETE */}
-                <button
-                  className="danger-btn"
-                  onClick={() => {
-
-                    setAddressPendingDelete(
-                      address,
-                    );
-                  }}
-                >
-                  Remove
-                </button>
-
-
-                {/* DEFAULT */}
-                {!address.is_default && (
-
-                  <button
-                    onClick={async () => {
-
-                      try {
-
-                        await dispatch(
-                          setDefaultAddress(
-                            address.id
-                          )
-                        ).unwrap();
-
-                        toast.success(
-                          "Default address updated"
-                        );
-
-                      } catch (err) {
-
-                        toast.error(
-
-                          err?.error ||
-                          "Failed to update default address"
-
-                        );
-
-                      }
-                    }}
-                  >
-                    Set Default
-                  </button>
-
-                )}
-
-              </div>
-
+              {address.is_default && (
+                <span className="default-badge">DEFAULT</span>
+              )}
             </div>
 
-          )
-        )}
+            <p>{address.phone}</p>
 
+            <p>{address.address_line}</p>
+
+            <p>
+              {address.city}, {address.state}
+            </p>
+
+            <p>{address.pincode}</p>
+
+            <div className="address-actions">
+              {/* EDIT */}
+              <button onClick={() => handleEdit(address)}>Edit</button>
+
+              {/* DELETE */}
+              <button
+                className="danger-btn"
+                onClick={() => {
+                  setAddressPendingDelete(address);
+                }}
+              >
+                Remove
+              </button>
+
+              {/* DEFAULT */}
+              {!address.is_default && (
+                <button
+                  onClick={async () => {
+                    try {
+                      await dispatch(setDefaultAddress(address.id)).unwrap();
+
+                      toast.success("Default address updated");
+                    } catch (err) {
+                      toast.error(
+                        err?.error || "Failed to update default address",
+                      );
+                    }
+                  }}
+                >
+                  Set Default
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
 
       <ConfirmDialog
@@ -822,13 +485,11 @@ export default function AddressPage() {
         busy={deleteBusy}
         onConfirm={handleConfirmDelete}
         onCancel={() => {
-
           if (!deleteBusy) {
             setAddressPendingDelete(null);
           }
         }}
       />
-
     </AccountLayout>
   );
 }

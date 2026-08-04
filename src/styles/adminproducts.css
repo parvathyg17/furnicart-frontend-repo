@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap");
 
 .admin-products-page {
   min-height: 0;
@@ -71,7 +71,7 @@ FILTERS CARD
   align-items: flex-end;
   gap: 16px;
   margin-bottom: 24px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .filter-group {
@@ -105,6 +105,22 @@ FILTERS CARD
   border-color: #d1d5db;
 }
 
+.filter-group input {
+  height: 40px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 0 12px;
+  font-size: 14px;
+  color: #111827;
+  outline: none;
+  width: 100%;
+}
+
+.filter-group input:focus {
+  border-color: #d1d5db;
+}
+
 .clear-filters-btn {
   height: 40px;
   padding: 0 20px;
@@ -130,7 +146,7 @@ TABLE AREA
 .products-table-container {
   background: white;
   border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   overflow: hidden;
 }
 

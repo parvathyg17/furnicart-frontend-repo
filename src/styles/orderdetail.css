@@ -782,7 +782,9 @@
   letter-spacing: 0.05em;
   text-transform: uppercase;
   text-decoration: none;
-  transition: background 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
 }
 
 .odl-summary-cta:hover {

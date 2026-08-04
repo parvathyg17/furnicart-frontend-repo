@@ -1,34 +1,16 @@
+import { useSelector } from "react-redux";
 
-import {
-  useSelector,
-} from "react-redux";
+import { Navigate } from "react-router-dom";
 
-import {
-  Navigate,
-} from "react-router-dom";
-
-export default function AdminPublicRoute({
-  children,
-}) {
-
-  const {
-    isAuthenticated,
-    checkingAuth,
-  } = useSelector(
-    (state) => state.admin
-  );
+export default function AdminPublicRoute({ children }) {
+  const { isAuthenticated, checkingAuth } = useSelector((state) => state.admin);
 
   // ==========================================
   // LOADING
   // ==========================================
 
   if (checkingAuth) {
-
-    return (
-      <div>
-        Loading...
-      </div>
-    );
+    return <div>Loading...</div>;
   }
 
   // ==========================================
@@ -36,13 +18,7 @@ export default function AdminPublicRoute({
   // ==========================================
 
   if (isAuthenticated) {
-
-    return (
-      <Navigate
-        to="/admin/dashboard"
-        replace
-      />
-    );
+    return <Navigate to="/admin/dashboard" replace />;
   }
 
   // ==========================================

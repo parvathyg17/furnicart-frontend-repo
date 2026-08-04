@@ -1,10 +1,8 @@
 * {
-
   box-sizing: border-box;
 }
 
 .category-modal-overlay {
-
   position: fixed;
 
   inset: 0;
@@ -29,7 +27,6 @@ MODAL
 ========================================== */
 
 .category-modal {
-
   width: min(920px, calc(100vw - 40px));
 
   max-height: calc(100vh - 40px);
@@ -42,35 +39,29 @@ MODAL
 
   overflow-x: hidden;
 
-  box-shadow:
-    0 30px 80px rgba(0,0,0,0.18);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.18);
 
   animation: modalFade 0.25s ease;
 }
 
 .category-modal::-webkit-scrollbar {
-
   width: 6px;
 }
 
 .category-modal::-webkit-scrollbar-thumb {
-
   background: #d5ccc4;
 
   border-radius: 999px;
 }
 
 @keyframes modalFade {
-
   from {
-
     opacity: 0;
 
     transform: translateY(18px);
   }
 
   to {
-
     opacity: 1;
 
     transform: translateY(0);
@@ -82,11 +73,7 @@ HEADER
 ========================================== */
 
 .category-modal-header {
-
-  padding:
-    32px
-    clamp(20px, 4vw, 42px)
-    28px;
+  padding: 32px clamp(20px, 4vw, 42px) 28px;
 
   border-bottom: 1px solid #e8e0d9;
 
@@ -100,7 +87,6 @@ HEADER
 }
 
 .category-modal-header h2 {
-
   font-size: clamp(38px, 5vw, 58px);
 
   line-height: 1;
@@ -115,7 +101,6 @@ HEADER
 }
 
 .category-modal-header p {
-
   font-size: clamp(14px, 2vw, 18px);
 
   color: #5d5048;
@@ -124,7 +109,6 @@ HEADER
 }
 
 .close-btn {
-
   min-width: 52px;
 
   width: 52px;
@@ -153,22 +137,13 @@ FORM
 ========================================== */
 
 .category-form {
-
-  padding:
-    32px
-    clamp(20px, 4vw, 42px)
-    0;
+  padding: 32px clamp(20px, 4vw, 42px) 0;
 }
 
 .category-grid {
-
   display: grid;
 
-  grid-template-columns:
-    repeat(
-      auto-fit,
-      minmax(280px, 1fr)
-    );
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 
   gap: 28px;
 
@@ -176,12 +151,10 @@ FORM
 }
 
 .form-group {
-
   margin-bottom: 32px;
 }
 
 .form-group label {
-
   display: block;
 
   margin-bottom: 14px;
@@ -200,7 +173,6 @@ FORM
 .form-group input,
 .form-group textarea,
 .form-group select {
-
   width: 100%;
 
   border: 1px solid #e4ddd7;
@@ -222,21 +194,18 @@ FORM
 
 .form-group input::placeholder,
 .form-group textarea::placeholder {
-
   color: #8b7d73;
 }
 
 .form-group input:focus,
 .form-group textarea:focus,
 .form-group select:focus {
-
   border-color: #4a2d1d;
 
   background: white;
 }
 
 .form-group textarea {
-
   resize: none;
 
   min-height: 170px;
@@ -249,12 +218,10 @@ SELECT
 ========================================== */
 
 .select-wrapper {
-
   position: relative;
 }
 
 .select-wrapper select {
-
   appearance: none;
 
   cursor: pointer;
@@ -263,7 +230,6 @@ SELECT
 }
 
 .select-icon {
-
   position: absolute;
 
   top: 50%;
@@ -282,7 +248,6 @@ UPLOAD
 ========================================== */
 
 .image-upload-box {
-
   width: 100%;
 
   height: min(340px, 38vh);
@@ -293,14 +258,13 @@ UPLOAD
 
   border-radius: 22px;
 
-  background:
-    repeating-linear-gradient(
-      -45deg,
-      #f5f2ee,
-      #f5f2ee 12px,
-      #f8f5f1 12px,
-      #f8f5f1 24px
-    );
+  background: repeating-linear-gradient(
+    -45deg,
+    #f5f2ee,
+    #f5f2ee 12px,
+    #f8f5f1 12px,
+    #f8f5f1 24px
+  );
 
   overflow: hidden;
 
@@ -316,26 +280,22 @@ UPLOAD
 }
 
 .image-upload-box:hover {
-
   border-color: #4b2d1d;
 }
 
 .upload-content {
-
   text-align: center;
 
   padding: 20px;
 }
 
 .upload-icon-box {
-
   margin-bottom: 22px;
 
   color: #d1c1b5;
 }
 
 .upload-btn {
-
   height: 52px;
 
   padding: 0 28px;
@@ -358,7 +318,6 @@ UPLOAD
 }
 
 .upload-content p {
-
   font-size: 15px;
 
   color: #776960;
@@ -367,7 +326,6 @@ UPLOAD
 }
 
 .preview-image {
-
   width: 100%;
 
   height: 100%;
@@ -380,7 +338,6 @@ FOOTER
 ========================================== */
 
 .category-modal-footer {
-
   min-height: 110px;
 
   margin: 0 clamp(-20px, -4vw, -42px);
@@ -403,7 +360,6 @@ FOOTER
 }
 
 .cancel-button {
-
   height: 58px;
 
   padding: 0 24px;
@@ -422,7 +378,6 @@ FOOTER
 }
 
 .submit-button {
-
   min-width: 220px;
 
   height: 58px;
@@ -455,12 +410,10 @@ FOOTER
 }
 
 .submit-button:hover {
-
   opacity: 0.94;
 }
 
 .submit-button:disabled {
-
   opacity: 0.6;
 
   cursor: not-allowed;
@@ -471,39 +424,30 @@ RESPONSIVE
 ========================================== */
 
 @media (max-width: 768px) {
-
   .category-modal {
-
     border-radius: 20px;
   }
 
   .category-grid {
-
     grid-template-columns: 1fr;
 
     gap: 0;
   }
 
   .category-modal-footer {
-
     justify-content: stretch;
   }
 
   .cancel-button,
   .submit-button {
-
     width: 100%;
   }
 
   .submit-button {
-
     min-width: unset;
   }
 
   .image-upload-box {
-
     min-height: 220px;
   }
 }
-
-

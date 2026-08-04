@@ -1,7 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Serif+Display&display=swap");
 
 .admin-users-page {
-
   padding: 0;
 
   min-height: 0;
@@ -16,7 +15,6 @@ HEADER
 ========================================== */
 
 .users-header {
-
   display: flex;
 
   justify-content: space-between;
@@ -27,7 +25,6 @@ HEADER
 }
 
 .users-breadcrumb {
-
   display: flex;
 
   align-items: center;
@@ -42,7 +39,6 @@ HEADER
 }
 
 .users-header h1 {
-
   font-size: clamp(1.75rem, 3.5vw, 2.35rem);
 
   line-height: 1.05;
@@ -59,15 +55,13 @@ CARD
 ========================================== */
 
 .users-card {
-
   background: white;
 
   border-radius: 12px;
 
   padding: clamp(0.85rem, 1.5vw, 1.15rem);
 
-  box-shadow:
-    0 4px 16px rgba(0,0,0,0.04);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
 }
 
 /* ==========================================
@@ -75,7 +69,6 @@ TOOLBAR
 ========================================== */
 
 .users-toolbar {
-
   display: flex;
 
   justify-content: space-between;
@@ -86,7 +79,6 @@ TOOLBAR
 }
 
 .users-search-box {
-
   width: 360px;
 
   height: 56px;
@@ -109,7 +101,6 @@ TOOLBAR
 }
 
 .users-search-box input {
-
   width: 100%;
 
   border: none;
@@ -124,7 +115,6 @@ TOOLBAR
 }
 
 .users-search-box input::placeholder {
-
   color: #9b9188;
 }
 
@@ -133,7 +123,6 @@ TABLE
 ========================================== */
 
 .users-table-wrapper {
-
   border-radius: 12px;
 
   overflow-x: auto;
@@ -144,7 +133,6 @@ TABLE
 }
 
 .users-table-header {
-
   height: 52px;
 
   padding: 0 0.85rem;
@@ -172,7 +160,6 @@ TABLE
 }
 
 .users-row {
-
   min-height: 96px;
 
   padding: 0 28px;
@@ -196,12 +183,10 @@ TABLE
 }
 
 .users-row:hover {
-
   background: #fcfaf8;
 }
 
 .user-email {
-
   font-weight: 600;
 
   color: #241711;
@@ -212,7 +197,6 @@ STATUS
 ========================================== */
 
 .user-status {
-
   height: 38px;
 
   padding: 0 18px;
@@ -231,21 +215,18 @@ STATUS
 }
 
 .user-status.active {
-
   background: #d8ead8;
 
   color: #295c30;
 }
 
 .user-status.blocked {
-
   background: #f8d8d5;
 
   color: #b13f3f;
 }
 
 .user-status.unverified {
-
   background: #ececec;
 
   color: #666;
@@ -256,7 +237,6 @@ BUTTONS
 ========================================== */
 
 .user-action-btn {
-
   height: 44px;
 
   padding: 0 18px;
@@ -275,26 +255,22 @@ BUTTONS
 }
 
 .user-action-btn.block {
-
   background: #fbe4e4;
 
   color: #b13f3f;
 }
 
 .user-action-btn.block:hover {
-
   background: #f7d4d4;
 }
 
 .user-action-btn.unblock {
-
   background: #dff1e1;
 
   color: #2f6d39;
 }
 
 .user-action-btn.unblock:hover {
-
   background: #d2e8d5;
 }
 
@@ -303,7 +279,6 @@ EMPTY
 ========================================== */
 
 .users-empty {
-
   height: 220px;
 
   display: flex;
@@ -324,7 +299,6 @@ FOOTER
 ========================================== */
 
 .users-footer {
-
   display: flex;
 
   justify-content: space-between;
@@ -337,14 +311,12 @@ FOOTER
 }
 
 .users-footer p {
-
   font-size: 15px;
 
   color: #6b5d55;
 }
 
 .users-pagination {
-
   display: flex;
 
   align-items: center;
@@ -353,7 +325,6 @@ FOOTER
 }
 
 .users-pagination button {
-
   height: 48px;
 
   padding: 0 18px;
@@ -382,19 +353,16 @@ FOOTER
 }
 
 .users-pagination button:hover:not(:disabled) {
-
   background: #f7f4f0;
 }
 
 .users-pagination button:disabled {
-
   opacity: 0.4;
 
   cursor: not-allowed;
 }
 
 .page-indicator {
-
   height: 48px;
 
   padding: 0 20px;
@@ -419,35 +387,28 @@ RESPONSIVE
 ========================================== */
 
 @media (max-width: 992px) {
-
   .admin-users-page {
-
     padding: 0;
   }
 
   .users-header h1 {
-
     font-size: 1.75rem;
   }
 
   .users-search-box {
-
     width: 100%;
   }
 
   .users-table-wrapper {
-
     overflow-x: auto;
   }
 
   .users-table-header,
   .users-row {
-
     min-width: 680px;
   }
 
   .users-footer {
-
     flex-direction: column;
 
     align-items: flex-start;
@@ -455,19 +416,15 @@ RESPONSIVE
 }
 
 @media (max-width: 640px) {
-
   .users-card {
-
     padding: 20px;
   }
 
   .users-header h1 {
-
     font-size: 34px;
   }
 
   .users-pagination {
-
     width: 100%;
 
     justify-content: space-between;

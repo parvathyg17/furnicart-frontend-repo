@@ -42,7 +42,9 @@ function normalizeUsername(value) {
 }
 
 function normalizeEmail(value) {
-  return String(value || "").trim().toLowerCase();
+  return String(value || "")
+    .trim()
+    .toLowerCase();
 }
 
 function validateSignupFields(form) {
@@ -146,7 +148,7 @@ export default function Signup() {
           username: normalizeUsername(form.username),
           email: normalizeEmail(form.email),
           password: form.password,
-        })
+        }),
       ).unwrap();
       setSuccessMessage(result);
     } catch (err) {
@@ -154,9 +156,16 @@ export default function Signup() {
       const general = mapped._general;
       delete mapped._general;
 
-      if (err?.status === "already_verified" && typeof err?.message === "string") {
+      if (
+        err?.status === "already_verified" &&
+        typeof err?.message === "string"
+      ) {
         mapped.email = err.message;
-      } else if (general && !mapped.email && general.toLowerCase().includes("email")) {
+      } else if (
+        general &&
+        !mapped.email &&
+        general.toLowerCase().includes("email")
+      ) {
         mapped.email = general;
       }
 
@@ -165,7 +174,7 @@ export default function Signup() {
         setBackendError("");
       } else {
         setBackendError(
-          general || err?.message || err?.error || formatProductApiError(err)
+          general || err?.message || err?.error || formatProductApiError(err),
         );
       }
     } finally {
@@ -208,7 +217,7 @@ export default function Signup() {
         googleLogin({
           token,
           ...getStoredReferralPayload(),
-        })
+        }),
       ).unwrap();
       clearStoredReferral();
       await dispatch(loadUser()).unwrap();

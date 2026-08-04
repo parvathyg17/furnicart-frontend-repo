@@ -5,12 +5,20 @@ export async function submitContactMessage(data) {
   return res.data;
 }
 
-export async function fetchAdminContactMessages({ page = 1, pageSize = 10, search = "" } = {}) {
+export async function fetchAdminContactMessages({
+  page = 1,
+  pageSize = 10,
+  search = "",
+  isRead = "",
+} = {}) {
   const params = new URLSearchParams();
   params.set("page", String(page));
   params.set("page_size", String(pageSize));
   if (search) {
     params.set("search", search);
+  }
+  if (isRead !== "") {
+    params.set("is_read", isRead);
   }
   const res = await api.get(`admin/contact/?${params.toString()}`);
   return res.data;

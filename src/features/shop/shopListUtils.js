@@ -1,63 +1,22 @@
-export function wishlistedVariantForProduct(
-  product,
-  wishlistedVariantIds,
-) {
+export function wishlistedVariantForProduct(product, wishlistedVariantIds) {
+  const saved = new Set((wishlistedVariantIds || []).map((id) => Number(id)));
 
-  const saved =
-    new Set(
-      (wishlistedVariantIds || []).map(
-        (id) =>
-          Number(id),
-      ),
-    );
-
-  return (
-    product?.variants?.find(
-      (v) =>
-        saved.has(
-          Number(v.id),
-        ),
-    ) || null
-  );
+  return product?.variants?.find((v) => saved.has(Number(v.id))) || null;
 }
 
-export function productIsWishlisted(
-  product,
-  wishlistedVariantIds,
-) {
-
-  return Boolean(
-    wishlistedVariantForProduct(
-      product,
-      wishlistedVariantIds,
-    ),
-  );
+export function productIsWishlisted(product, wishlistedVariantIds) {
+  return Boolean(wishlistedVariantForProduct(product, wishlistedVariantIds));
 }
 
 /**
  * Active variants shoppers can consider: in-stock first, else all active.
  */
-export function listableVariants(
-  product,
-) {
+export function listableVariants(product) {
+  const active = product?.variants?.filter((v) => v.is_active) || [];
 
-  const active =
-    product?.variants?.filter(
-      (v) =>
-        v.is_active,
-    ) || [];
+  const inStock = active.filter((v) => (v.stock || 0) > 0);
 
-  const inStock =
-    active.filter(
-      (v) =>
-        (v.stock || 0) > 0,
-    );
-
-  return (
-    inStock.length > 0
-      ? inStock
-      : active
-  );
+  return inStock.length > 0 ? inStock : active;
 }
 
 function getFinalPrice(variant) {
@@ -69,323 +28,150 @@ function getFinalPrice(variant) {
   return Number(variant.price);
 }
 
-function cheapestVariant(
-  variants,
-) {
-
-  if (
-    !variants?.length
-  ) {
-
+function cheapestVariant(variants) {
+  if (!variants?.length) {
     return null;
   }
 
   return variants.reduce(
-    (
-      best,
-      variant,
-    ) => {
-
-      if (
-        !best
-      ) {
-
+    (best, variant) => {
+      if (!best) {
         return variant;
       }
 
-      return getFinalPrice(variant) < getFinalPrice(best)
-        ? variant
-        : best;
+      return getFinalPrice(variant) < getFinalPrice(best) ? variant : best;
     },
 
     null,
   );
 }
 
-function mostExpensiveVariant(
-  variants,
-) {
-
-  if (
-    !variants?.length
-  ) {
-
+function mostExpensiveVariant(variants) {
+  if (!variants?.length) {
     return null;
   }
 
   return variants.reduce(
-    (
-      best,
-      variant,
-    ) => {
-
-      if (
-        !best
-      ) {
-
+    (best, variant) => {
+      if (!best) {
         return variant;
       }
 
-      return getFinalPrice(variant) > getFinalPrice(best)
-        ? variant
-        : best;
+      return getFinalPrice(variant) > getFinalPrice(best) ? variant : best;
     },
 
     null,
   );
 }
 
-function parseFilterPrice(
-  value,
-) {
-
-  if (
-    value === "" ||
-    value == null
-  ) {
-
+function parseFilterPrice(value) {
+  if (value === "" || value == null) {
     return null;
   }
 
-  const n = Number(
-    value,
-  );
+  const n = Number(value);
 
-  return Number.isNaN(
-    n,
-  )
-    ? null
-    : n;
+  return Number.isNaN(n) ? null : n;
 }
 
-function variantsInPriceRange(
-  variants,
-  minPrice,
-  maxPrice,
-) {
+function variantsInPriceRange(variants, minPrice, maxPrice) {
+  const min = parseFilterPrice(minPrice);
 
-  const min =
-    parseFilterPrice(
-      minPrice,
-    );
+  const max = parseFilterPrice(maxPrice);
 
-  const max =
-    parseFilterPrice(
-      maxPrice,
-    );
-
-  if (
-    min === null &&
-    max === null
-  ) {
-
+  if (min === null && max === null) {
     return variants;
   }
 
-  return variants.filter(
-    (
-      variant,
-    ) => {
+  return variants.filter((variant) => {
+    const price = getFinalPrice(variant);
 
-      const price =
-        getFinalPrice(
-          variant,
-        );
+    if (min !== null && price < min) {
+      return false;
+    }
 
-      if (
-        min !== null &&
-        price < min
-      ) {
+    if (max !== null && price > max) {
+      return false;
+    }
 
-        return false;
-      }
-
-      if (
-        max !== null &&
-        price > max
-      ) {
-
-        return false;
-      }
-
-      return true;
-    },
-  );
+    return true;
+  });
 }
 
-export function variantImageUrl(
-  variant,
-) {
-
-  if (
-    !variant
-  ) {
-
+export function variantImageUrl(variant) {
+  if (!variant) {
     return null;
   }
 
-  const imgs =
-    variant.images || [];
+  const imgs = variant.images || [];
 
-  const primary =
-    imgs.find(
-      (
-        img,
-      ) =>
-        img.is_primary,
-    );
+  const primary = imgs.find((img) => img.is_primary);
 
-  const pick =
-    primary || imgs[0];
+  const pick = primary || imgs[0];
 
-  if (
-    !pick
-  ) {
-
+  if (!pick) {
     return null;
   }
 
-  return (
-    pick.image_url ||
-    pick.image ||
-    null
-  );
+  return pick.image_url || pick.image || null;
 }
 
-export function variantDisplayLabel(
-  variant,
-) {
-
-  if (
-    !variant
-  ) {
-
+export function variantDisplayLabel(variant) {
+  if (!variant) {
     return "";
   }
 
-  const parts =
-    [
-      variant.variant_name,
-      variant.color,
-      variant.size,
-    ].filter(
-      Boolean,
-    );
-
-  return parts.join(
-    " · ",
+  const parts = [variant.variant_name, variant.color, variant.size].filter(
+    Boolean,
   );
+
+  return parts.join(" · ");
 }
 
-export function catalogVariantForSort(
-  product,
-  sort = "latest",
-  options = {},
-) {
+export function catalogVariantForSort(product, sort = "latest", options = {}) {
+  const list = listableVariants(product);
 
-  const list =
-    listableVariants(
-      product,
-    );
-
-  if (
-    !list.length
-  ) {
-
+  if (!list.length) {
     return null;
   }
 
-  if (
-    sort === "price_high"
-  ) {
-
-    return mostExpensiveVariant(
-      list,
-    );
+  if (sort === "price_high") {
+    return mostExpensiveVariant(list);
   }
 
-  return cheapestVariant(
-    list,
-  );
+  return cheapestVariant(list);
 }
 
-export function firstListableVariant(
-  product,
-  sort = "latest",
-  options = {},
-) {
-
-  return catalogVariantForSort(
-    product,
-    sort,
-    options,
-  );
+export function firstListableVariant(product, sort = "latest", options = {}) {
+  return catalogVariantForSort(product, sort, options);
 }
 
-export function displayPrice(
-  product,
-  sort = "latest",
-  options = {},
-) {
+export function displayPrice(product, sort = "latest", options = {}) {
+  const variant = catalogVariantForSort(product, sort, options);
 
-  const variant =
-    catalogVariantForSort(
-      product,
-      sort,
-      options,
-    );
-
-  if (
-    !variant
-  ) {
-
+  if (!variant) {
     return null;
   }
 
-  return Number(
-    variant.price,
-  );
+  return Number(variant.price);
 }
 
 /**
  * @param {{ totalPages: number; currentPage: number }} pagination
  * @returns {number[]}
  */
-export function buildShopPageNumbers(
-  pagination,
-) {
+export function buildShopPageNumbers(pagination) {
+  const total = pagination.totalPages;
 
-  const total =
-    pagination.totalPages;
-
-  const cur =
-    pagination.currentPage;
+  const cur = pagination.currentPage;
 
   if (total <= 7) {
-
-    return Array.from(
-      { length: total },
-      (_, i) =>
-        i + 1
-    );
+    return Array.from({ length: total }, (_, i) => i + 1);
   }
 
-  const pages =
-    new Set([
-      1,
-      total,
-      cur,
-      cur - 1,
-      cur + 1,
-    ]);
+  const pages = new Set([1, total, cur, cur - 1, cur + 1]);
 
   return Array.from(pages)
-    .filter(
-      (n) =>
-        n >= 1 && n <= total
-    )
-    .sort(
-      (a, b) =>
-        a - b
-    );
+    .filter((n) => n >= 1 && n <= total)
+    .sort((a, b) => a - b);
 }

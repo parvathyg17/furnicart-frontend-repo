@@ -1,36 +1,25 @@
-import "../../../styles/adminroomtypes.css";
+import "../../../styles/adminproducts.css";
 
-import CreateRoomTypeModal
-from "./CreateRoomTypeModal";
+import CreateRoomTypeModal from "./CreateRoomTypeModal";
 
-import EditRoomTypeModal
-from "./EditRoomTypeModal";
+import EditRoomTypeModal from "./EditRoomTypeModal";
 
-import {
-  useEffect,
-  useState,
-  useCallback,
-} from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 
-import {
-  useDispatch,
-  useSelector,
-} from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import toast from "react-hot-toast";
 
 import {
-
   getAdminRoomTypes,
   deleteRoomType,
   restoreRoomType,
   clearRoomTypeMessages,
-
 } from "../../../features/catalog/roomType/roomTypeSlice";
 
-import {
-  useBackgroundServerSync,
-} from "../../../hooks/useBackgroundServerSync.js";
+import { useBackgroundServerSync } from "../../../hooks/useBackgroundServerSync.js";
+
+import ConfirmDialog from "../../../components/common/ConfirmDialog";
 
 import {
   Plus,
@@ -42,11 +31,9 @@ import {
 } from "lucide-react";
 
 export default function AdminRoomTypes() {
-
   const dispatch = useDispatch();
 
- const {
-
+  const {
     roomTypes,
     roomTypePagination,
     roomTypeListLoading,
@@ -55,658 +42,454 @@ export default function AdminRoomTypes() {
     roomTypeUpdateLoading,
     roomTypeError,
     roomTypeSuccess,
+  } = useSelector((state) => state.roomType);
 
-  } = useSelector(
-    (state) => state.roomType
-  );
+  const [page, setPage] = useState(1);
 
-  const [page, setPage] =
-    useState(1);
+  const [search, setSearch] = useState("");
 
-  const [
-    search,
-    setSearch,
-  ] = useState("");
+  const [statusFilter, setStatusFilter] = useState("true");
 
-  const [
-    statusFilter,
-    setStatusFilter,
-  ] = useState("true");
+  const [sort, setSort] = useState("latest");
 
-  const [
-    sort,
-    setSort,
-  ] = useState("latest");
+  const [openCreateModal, setOpenCreateModal] = useState(false);
 
-  const [
-    openCreateModal,
-    setOpenCreateModal,
-  ] = useState(false);
+  const [openEditModal, setOpenEditModal] = useState(false);
 
-  const [
-    openEditModal,
-    setOpenEditModal,
-  ] = useState(false);
+  const [selectedRoomType, setSelectedRoomType] = useState(null);
 
-  const [
-    selectedRoomType,
-    setSelectedRoomType,
-  ] = useState(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+  const [confirmAction, setConfirmAction] = useState(null);
+
+  const [confirmText, setConfirmText] = useState("");
+
+  const totalPages = roomTypePagination?.totalPages ?? 0;
+
+  const pages = useMemo(() => {
+    return Array.from({ length: totalPages }, (_, index) => index + 1);
+  }, [totalPages]);
 
   useEffect(() => {
-
     if (roomTypeSuccess) {
-
       toast.success(roomTypeSuccess);
 
-      const timer =
-        setTimeout(() => {
+      const timer = setTimeout(() => {
+        dispatch(clearRoomTypeMessages());
+      }, 3000);
 
-          dispatch(
-            clearRoomTypeMessages()
-          );
-
-        }, 3000);
-
-      return () =>
-        clearTimeout(timer);
+      return () => clearTimeout(timer);
     }
-
   }, [roomTypeSuccess, dispatch]);
 
   useEffect(() => {
-
     if (roomTypeError) {
-
       toast.error(roomTypeError);
 
-      const timer =
-        setTimeout(() => {
+      const timer = setTimeout(() => {
+        dispatch(clearRoomTypeMessages());
+      }, 3000);
 
-          dispatch(
-            clearRoomTypeMessages()
-          );
-
-        }, 3000);
-
-      return () =>
-        clearTimeout(timer);
+      return () => clearTimeout(timer);
     }
-
   }, [roomTypeError, dispatch]);
 
   useEffect(() => {
-
-    if (
-
-      !roomTypeListLoading &&
-
-      page >
-
-      (
-        roomTypePagination?.totalPages || 1
-      )
-
-    ) {
-
-      setPage(
-
-        roomTypePagination?.totalPages || 1
-      );
+    if (!roomTypeListLoading && page > (roomTypePagination?.totalPages || 1)) {
+      setPage(roomTypePagination?.totalPages || 1);
     }
+  }, [page, roomTypePagination, roomTypeListLoading]);
 
-  }, [
+  const fetchRoomTypes = useCallback(
+    (targetPage = page) => {
+      const params = {
+        page: targetPage,
 
-    page,
-    roomTypePagination,
-    roomTypeListLoading,
-
-  ]);
-
-  const fetchRoomTypes =
-    useCallback(
-
-      (
-        targetPage = page
-      ) => {
-
-        const params = {
-
-          page: targetPage,
-
-          search,
-
-          sort,
-        };
-
-        if (
-          statusFilter !== "all"
-        ) {
-
-          params.is_active =
-            statusFilter;
-        }
-
-        dispatch(
-          getAdminRoomTypes(params)
-        );
-      },
-
-      [
-        dispatch,
-        page,
         search,
-        statusFilter,
+
         sort,
-      ]
-    );
+      };
 
-  useEffect(() => {
+      if (statusFilter !== "all") {
+        params.is_active = statusFilter;
+      }
 
-    fetchRoomTypes();
-
-  }, [fetchRoomTypes]);
-
-  useBackgroundServerSync(
-    {
-
-      enabled: true,
-
-      pollIntervalMs: 120_000,
-
-      onRefresh:
-        fetchRoomTypes,
+      dispatch(getAdminRoomTypes(params));
     },
+
+    [dispatch, page, search, statusFilter, sort],
   );
 
-  const handleDelete =
-    async (roomTypeId) => {
+  useEffect(() => {
+    fetchRoomTypes();
+  }, [fetchRoomTypes]);
 
-      const result =
-        await dispatch(
-          deleteRoomType(roomTypeId)
-        );
+  useBackgroundServerSync({
+    enabled: true,
 
-      if (
-        !deleteRoomType.fulfilled.match(
-          result
-        )
-      ) {
+    pollIntervalMs: 120_000,
 
+    onRefresh: fetchRoomTypes,
+  });
+
+  const handleDelete = (roomTypeId) => {
+    setConfirmText("Are you sure you want to delete this room type?");
+    setConfirmAction(() => async () => {
+      const result = await dispatch(deleteRoomType(roomTypeId));
+
+      if (!deleteRoomType.fulfilled.match(result)) {
         return;
       }
 
-      if (
-        roomTypes.length === 1 &&
-        page > 1
-      ) {
-
-        setPage(
-          (prev) => prev - 1
-        );
-
-        return;
-      }
-
-      fetchRoomTypes(page);
-    };
-
-  const handleRestore =
-    async (roomTypeId) => {
-
-      const result =
-        await dispatch(
-          restoreRoomType(roomTypeId)
-        );
-
-      if (
-        !restoreRoomType.fulfilled.match(
-          result
-        )
-      ) {
-
-          return;
-      }
-
-      if (
-        roomTypes.length === 1 &&
-        page > 1
-      ) {
-
-        setPage(
-          (prev) => prev - 1
-        );
+      if (roomTypes.length === 1 && page > 1) {
+        setPage((prev) => prev - 1);
 
         return;
       }
 
       fetchRoomTypes(page);
-    };
+    });
+    setShowConfirmModal(true);
+  };
 
-  const handleCreateSuccess =
-    () => {
+  const handleRestore = (roomTypeId) => {
+    setConfirmText("Are you sure you want to restore this room type?");
+    setConfirmAction(() => async () => {
+      const result = await dispatch(restoreRoomType(roomTypeId));
 
-      if (page !== 1) {
-
-        setPage(1);
-
-      } else {
-
-        fetchRoomTypes(1);
+      if (!restoreRoomType.fulfilled.match(result)) {
+        return;
       }
-    };
 
-  const handleEditSuccess =
-    () => {
+      if (roomTypes.length === 1 && page > 1) {
+        setPage((prev) => prev - 1);
+
+        return;
+      }
 
       fetchRoomTypes(page);
-    };
+    });
+    setShowConfirmModal(true);
+  };
 
-  const handleEdit =
-    (roomType) => {
+  const handleCreateSuccess = () => {
+    if (page !== 1) {
+      setPage(1);
+    } else {
+      fetchRoomTypes(1);
+    }
+  };
 
-      setSelectedRoomType(
-        roomType
-      );
+  const handleEditSuccess = () => {
+    fetchRoomTypes(page);
+  };
 
-      setOpenEditModal(true);
-    };
+  const handleEdit = (roomType) => {
+    setSelectedRoomType(roomType);
+
+    setOpenEditModal(true);
+  };
 
   return (
-
-    <div className="admin-room-types-page">
-
-      <div className="room-types-header">
-
-        <div className="room-types-header-left">
-
-          <p>
-
-            Dashboard / Inventory
-
-          </p>
-
-          <h1>
-
-            Room Types
-
-          </h1>
-
+    <div className="admin-products-page">
+      {/* HEADER SECTION */}
+      <div className="products-header-top">
+        <div className="products-breadcrumb">
+          <span>CATALOG</span>
+          <ChevronRight size={12} color="#9ca3af" />
+          <span>ROOM TYPES</span>
         </div>
-
-        <button
-          className="create-room-type-btn"
-          onClick={() =>
-            setOpenCreateModal(true)
-          }
-        >
-
-          <Plus size={18} />
-
-          Create Room Type
-
-        </button>
-
+        <div className="products-header-title-row">
+          <h1>Room Types</h1>
+          <button
+            className="new-product-btn"
+            onClick={() => setOpenCreateModal(true)}
+          >
+            <Plus size={18} /> Create Room Type
+          </button>
+        </div>
       </div>
 
-      <div className="room-types-card">
+      {/* STATUS TABS */}
+      <div className="status-tabs-container">
+        <button
+          className={
+            statusFilter === "all" ? "status-tab active" : "status-tab"
+          }
+          onClick={() => {
+            setPage(1);
+            setStatusFilter("all");
+          }}
+        >
+          All
+        </button>
+        <button
+          className={
+            statusFilter === "true" ? "status-tab active" : "status-tab"
+          }
+          onClick={() => {
+            setPage(1);
+            setStatusFilter("true");
+          }}
+        >
+          Active
+        </button>
+        <button
+          className={
+            statusFilter === "false" ? "status-tab active" : "status-tab"
+          }
+          onClick={() => {
+            setPage(1);
+            setStatusFilter("false");
+          }}
+        >
+          Deleted
+        </button>
+      </div>
 
-        <div className="room-types-toolbar">
-
+      {/* FILTERS CARD */}
+      <div className="products-filters-card">
+        <div className="filter-group">
+          <label>SEARCH</label>
           <input
             type="text"
-            placeholder="Search room types..."
+            placeholder="Search room types by name..."
             value={search}
             onChange={(e) => {
-
               setPage(1);
-
-              setSearch(
-                e.target.value
-              );
+              setSearch(e.target.value);
             }}
-            className="room-type-search"
           />
+        </div>
 
-          <div className="room-type-tabs">
-
-            <button
-              className={
-                statusFilter === "all"
-
-                  ? "room-type-tab active"
-
-                  : "room-type-tab"
-              }
-              onClick={() => {
-
-                setPage(1);
-
-                setStatusFilter("all");
-              }}
-            >
-
-              All
-
-            </button>
-
-            <button
-              className={
-                statusFilter === "true"
-
-                  ? "room-type-tab active"
-
-                  : "room-type-tab"
-              }
-              onClick={() => {
-
-                setPage(1);
-
-                setStatusFilter("true");
-              }}
-            >
-
-              Active
-
-            </button>
-
-            <button
-              className={
-                statusFilter === "false"
-
-                  ? "room-type-tab active"
-
-                  : "room-type-tab"
-              }
-              onClick={() => {
-
-                setPage(1);
-
-                setStatusFilter("false");
-              }}
-            >
-
-              Deleted
-
-            </button>
-
-          </div>
-
+        <div className="filter-group" style={{ maxWidth: "240px" }}>
+          <label>SORT BY</label>
           <select
             value={sort}
             onChange={(e) => {
-
               setPage(1);
-
-              setSort(
-                e.target.value
-              );
+              setSort(e.target.value);
             }}
-            className="sort-box"
           >
-
-            <option value="latest">
-              Most Recent
-            </option>
-
-            <option value="oldest">
-              Oldest
-            </option>
-
-            <option value="a_z">
-              A-Z
-            </option>
-
-            <option value="z_a">
-              Z-A
-            </option>
-
+            <option value="latest">Most Recent</option>
+            <option value="oldest">Oldest</option>
+            <option value="a_z">A-Z</option>
+            <option value="z_a">Z-A</option>
           </select>
-
         </div>
 
-        <div className="room-type-table">
-
-          <div className="room-type-table-header">
-
-            <div>Image</div>
-
-            <div>Name</div>
-
-            <div>Status</div>
-
-            <div>Actions</div>
-
-          </div>
-
-          {
-            roomTypeListLoading ? (
-
-              <div className="room-type-row">
-
-                Loading...
-
-              </div>
-
-            ) : roomTypes?.length > 0 ? (
-
-              roomTypes.map(
-                (roomType) => (
-
-                  <div
-                    key={roomType.id}
-                    className="room-type-row"
-                  >
-
-                    <div>
-
-                      <img
-                        src={
-                          roomType.image ||
-
-                          "https://placehold.co/80x80"
-                        }
-                        alt={roomType.name}
-                        className="room-type-image"
-                      />
-
-                    </div>
-
-                    <div className="room-type-name">
-
-                      {roomType.name}
-
-                    </div>
-
-                    <div>
-
-                      {
-                        roomType.is_active ? (
-
-                          <div className="room-type-status active">
-
-                            <div className="status-dot" />
-
-                            Active
-
-                          </div>
-
-                        ) : (
-
-                          <div className="room-type-status deleted">
-
-                            <div className="status-dot" />
-
-                            Deleted
-
-                          </div>
-
-                        )
-                      }
-
-                    </div>
-
-                    <div className="room-type-actions">
-
-                      <button
-                        className="action-btn"
-                        disabled={
-                          roomTypeUpdateLoading
-                        }
-                        onClick={() =>
-                          handleEdit(roomType)
-                        }
-                      >
-
-                        <Pencil size={18} />
-
-                      </button>
-
-                      {
-                        roomType.is_active ? (
-
-                          <button
-                            className="action-btn"
-                            disabled={
-                              roomTypeDeleteLoading
-                            }
-                            onClick={() =>
-                              handleDelete(
-                                roomType.id
-                              )
-                            }
-                          >
-
-                            <Trash2 size={18} />
-
-                          </button>
-
-                        ) : (
-
-                          <button
-                            className="action-btn"
-                            disabled={
-                              roomTypeRestoreLoading
-                            }
-                            onClick={() =>
-                              handleRestore(
-                                roomType.id
-                              )
-                            }
-                          >
-
-                            <RotateCcw size={18} />
-
-                          </button>
-
-                        )
-                      }
-
-                    </div>
-
-                  </div>
-                )
-              )
-
-            ) : (
-
-              <div className="room-type-row">
-
-                No room types found
-
-              </div>
-
-            )
-          }
-
-        </div>
-
-        <div className="room-types-footer">
-
-          <button
-            className="pagination-btn"
-            disabled={
-              !roomTypePagination?.previous ||
-              roomTypeListLoading
-            }
-            onClick={() =>
-              setPage(
-                (prev) =>
-                  prev - 1
-              )
-            }
-          >
-
-            <ChevronLeft size={16} />
-
-            Prev
-
-          </button>
-
-          <div className="page-text">
-
-            Page{" "}
-
-            {
-              roomTypePagination?.currentPage || 1
-            }
-
-            {" "}of{" "}
-
-            {
-              roomTypePagination?.totalPages || 1
-            }
-
-          </div>
-
-          <button
-            className="pagination-btn"
-            disabled={
-              !roomTypePagination?.next ||
-              roomTypeListLoading
-            }
-            onClick={() =>
-              setPage(
-                (prev) =>
-                  prev + 1
-              )
-            }
-          >
-
-            Next
-
-            <ChevronRight size={16} />
-
-          </button>
-
-        </div>
-
+        <button
+          className="clear-filters-btn"
+          onClick={() => {
+            setSearch("");
+            setSort("latest");
+            setStatusFilter("all");
+            setPage(1);
+          }}
+        >
+          Clear
+        </button>
       </div>
+
+      {/* TABLE AREA */}
+      <div className="products-table-container">
+        <div
+          className="products-table-header"
+          style={{ gridTemplateColumns: "100px 2fr 1.5fr 1.5fr" }}
+        >
+          <span>IMAGE</span>
+          <span>NAME</span>
+          <span>STATUS</span>
+          <span style={{ textAlign: "right" }}>ACTIONS</span>
+        </div>
+
+        {roomTypeListLoading ? (
+          <div className="empty-products">Loading room types...</div>
+        ) : roomTypes?.length > 0 ? (
+          <div>
+            {roomTypes.map((roomType) => (
+              <div
+                key={roomType.id}
+                className="products-table-row"
+                style={{
+                  gridTemplateColumns: "100px 2fr 1.5fr 1.5fr",
+                  alignItems: "center",
+                }}
+              >
+                {/* Image Column */}
+                <div className="col-details">
+                  <img
+                    src={roomType.image || "https://placehold.co/80x80"}
+                    alt={roomType.name}
+                    style={{
+                      width: "50px",
+                      height: "50px",
+                      objectFit: "cover",
+                    }}
+                  />
+                </div>
+
+                {/* Name Column */}
+                <div className="product-info-text">
+                  <h4 style={{ margin: 0, fontSize: "16px" }}>
+                    {roomType.name}
+                  </h4>
+                  <p style={{ margin: 0, fontSize: "12px" }}>
+                    /{roomType.slug}
+                  </p>
+                </div>
+
+                {/* Status Column */}
+                <div>
+                  <span
+                    className={
+                      roomType.is_active ? "status-pill active" : "status-pill"
+                    }
+                  >
+                    <span className="status-dot"></span>
+                    {roomType.is_active ? "ACTIVE" : "DELETED"}
+                  </span>
+                </div>
+
+                {/* Actions Column */}
+                <div
+                  className="col-controls"
+                  style={{ justifyContent: "flex-end", gap: "8px" }}
+                >
+                  <button
+                    className="view-details-btn"
+                    disabled={roomTypeUpdateLoading}
+                    onClick={() => handleEdit(roomType)}
+                    style={{ padding: "6px 10px" }}
+                    title="Edit Room Type"
+                  >
+                    <Pencil size={16} />
+                  </button>
+
+                  {roomType.is_active ? (
+                    <button
+                      className="view-details-btn"
+                      disabled={roomTypeDeleteLoading}
+                      onClick={() => handleDelete(roomType.id)}
+                      style={{
+                        padding: "6px 10px",
+                        borderColor: "#fecaca",
+                        color: "#ef4444",
+                      }}
+                      title="Delete Room Type"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  ) : (
+                    <button
+                      className="view-details-btn"
+                      disabled={roomTypeRestoreLoading}
+                      onClick={() => handleRestore(roomType.id)}
+                      style={{
+                        padding: "6px 10px",
+                        borderColor: "#bbf7d0",
+                        color: "#16a34a",
+                      }}
+                      title="Restore Room Type"
+                    >
+                      <RotateCcw size={16} style={{ marginRight: "4px" }} />
+                      Restore
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="empty-products">No room types found.</div>
+        )}
+      </div>
+
+      {/* FOOTER */}
+      {roomTypes?.length > 0 && (
+        <div className="products-footer">
+          <p>
+            Showing <strong>{roomTypes.length}</strong> of{" "}
+            <strong>{roomTypePagination?.count || 0}</strong> room types
+          </p>
+          <div className="pagination">
+            <button
+              disabled={page === 1 || roomTypeListLoading}
+              onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+              style={{
+                width: "auto",
+                minWidth: "36px",
+                padding: "0 12px",
+                gap: "6px",
+              }}
+            >
+              <ChevronLeft size={16} />
+              <span>Prev</span>
+            </button>
+            {pages.map((pNum) => (
+              <button
+                type="button"
+                key={pNum}
+                className={page === pNum ? "active" : ""}
+                onClick={() => setPage(pNum)}
+              >
+                {pNum}
+              </button>
+            ))}
+            <button
+              disabled={page === totalPages || roomTypeListLoading}
+              onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
+              style={{
+                width: "auto",
+                minWidth: "36px",
+                padding: "0 12px",
+                gap: "6px",
+              }}
+            >
+              <span>Next</span>
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        </div>
+      )}
 
       <CreateRoomTypeModal
         isOpen={openCreateModal}
-        onClose={() =>
-          setOpenCreateModal(false)
-        }
-        onSuccess={
-          handleCreateSuccess
-        }
+        onClose={() => setOpenCreateModal(false)}
+        onSuccess={handleCreateSuccess}
       />
 
       <EditRoomTypeModal
         isOpen={openEditModal}
         onClose={() => {
-
           setOpenEditModal(false);
 
           setSelectedRoomType(null);
         }}
         roomType={selectedRoomType}
-        onSuccess={
-          handleEditSuccess
-        }
+        onSuccess={handleEditSuccess}
       />
 
+      <ConfirmDialog
+        open={showConfirmModal}
+        titleId="confirm-room-action-title"
+        title="Confirm Action"
+        hint={confirmText}
+        confirmLabel="Confirm"
+        cancelLabel="Cancel"
+        onConfirm={async () => {
+          if (confirmAction) {
+            await confirmAction();
+          }
+          setShowConfirmModal(false);
+          setConfirmAction(null);
+        }}
+        onCancel={() => {
+          setShowConfirmModal(false);
+          setConfirmAction(null);
+        }}
+        busy={roomTypeDeleteLoading || roomTypeRestoreLoading}
+      />
     </div>
   );
 }

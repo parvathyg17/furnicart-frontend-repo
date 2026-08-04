@@ -1,19 +1,10 @@
 import "../../../styles/createvariantmodal.css";
 
-import {
-  useEffect,
-  useState,
-} from "react";
+import { useEffect, useState } from "react";
 
-import {
-  useDispatch,
-  useSelector,
-} from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
-import {
-  X,
-  Pencil,
-} from "lucide-react";
+import { X, Pencil } from "lucide-react";
 
 import {
   updateVariant,
@@ -25,32 +16,18 @@ import {
 
 import VariantMediaUploader from "../../../components/admin/products/VariantMediaUploader";
 
-export default function EditVariantModal({
-
-  isOpen,
-  onClose,
-  variant,
-
-}) {
-
+export default function EditVariantModal({ isOpen, onClose, variant }) {
   const dispatch = useDispatch();
 
-  const {
-    productLoading,
-    productError,
-  } = useSelector(
-    (state) => state.product
+  const { productLoading, productError } = useSelector(
+    (state) => state.product,
   );
 
   // ==========================================
   // FORM
   // ==========================================
 
-  const [
-    formData,
-    setFormData,
-  ] = useState({
-
+  const [formData, setFormData] = useState({
     variant_name: "",
 
     sku: "",
@@ -66,10 +43,7 @@ export default function EditVariantModal({
     size: "",
   });
 
-  const [
-    formErrors,
-    setFormErrors,
-  ] = useState({});
+  const [formErrors, setFormErrors] = useState({});
 
   const [selectedImages, setSelectedImages] = useState([]);
   const [uploadErrorLocal, setUploadErrorLocal] = useState("");
@@ -79,21 +53,27 @@ export default function EditVariantModal({
     if (selectedImages.length === 0) return;
     setIsUploading(true);
     try {
-      const filesToUpload = selectedImages.map(img => img.file);
+      const filesToUpload = selectedImages.map((img) => img.file);
       await dispatch(
         uploadVariantImage({
           variant: variant.id,
           images: filesToUpload,
-        })
+        }),
       ).unwrap();
-      
+
       // refresh product detail to get new images
       // assuming productId is available? We don't have productId in EditVariantModal props!
       // But variant has product id? Yes, variant.product. Or we can just let Redux handle it.
       // The slice updates the variant images locally in state if productDetail exists.
       setSelectedImages([]);
     } catch (err) {
-      const errMsg = typeof err === "string" ? err : err?.error || err?.detail || err?.message || "Failed to upload images";
+      const errMsg =
+        typeof err === "string"
+          ? err
+          : err?.error ||
+            err?.detail ||
+            err?.message ||
+            "Failed to upload images";
       setUploadErrorLocal(errMsg);
     } finally {
       setIsUploading(false);
@@ -104,7 +84,13 @@ export default function EditVariantModal({
     try {
       await dispatch(deleteVariantImage(imageId)).unwrap();
     } catch (err) {
-      const errMsg = typeof err === "string" ? err : err?.error || err?.detail || err?.message || "Failed to delete image";
+      const errMsg =
+        typeof err === "string"
+          ? err
+          : err?.error ||
+            err?.detail ||
+            err?.message ||
+            "Failed to delete image";
       setUploadErrorLocal(errMsg);
     }
   };
@@ -114,31 +100,21 @@ export default function EditVariantModal({
   // ==========================================
 
   useEffect(() => {
-
     if (variant) {
-
       setFormData({
+        variant_name: variant.variant_name || "",
 
-        variant_name:
-          variant.variant_name || "",
+        sku: variant.sku || "",
 
-        sku:
-          variant.sku || "",
+        price: variant.price ?? "",
 
-        price:
-          variant.price ?? "",
+        stock: variant.stock ?? "",
 
-        stock:
-          variant.stock ?? "",
+        color: variant.color || "",
 
-        color:
-          variant.color || "",
+        material: variant.material || "",
 
-        material:
-          variant.material || "",
-
-        size:
-          variant.size || "",
+        size: variant.size || "",
       });
 
       setFormErrors({});
@@ -160,378 +136,207 @@ export default function EditVariantModal({
   // ==========================================
 
   const handleChange = (e) => {
-
-    const {
-      name,
-      value,
-      type,
-      checked,
-    } = e.target;
+    const { name, value, type, checked } = e.target;
 
     setFormData((prev) => ({
-
       ...prev,
 
-      [name]:
-
-        type === "checkbox"
-
-          ? checked
-
-          : value,
+      [name]: type === "checkbox" ? checked : value,
     }));
 
     setFormErrors((prev) => ({
-
       ...prev,
 
       [name]: "",
     }));
   };
 
-  const mapApiErrors =
-    (payload) => {
+  const mapApiErrors = (payload) => {
+    if (!payload || typeof payload !== "object") {
+      return {};
+    }
 
-      if (
-        !payload ||
-        typeof payload !== "object"
-      ) {
+    const next = {};
 
-        return {};
+    if (typeof payload.error === "string") {
+      next._general = payload.error;
+    }
+
+    for (const key of Object.keys(payload)) {
+      if (key === "error") continue;
+
+      const val = payload[key];
+
+      if (Array.isArray(val)) {
+        next[key] = val[0];
+      } else if (typeof val === "string") {
+        next[key] = val;
       }
+    }
 
-      const next = {};
+    return next;
+  };
 
-      if (
-        typeof payload.error === "string"
-      ) {
+  const validateClient = () => {
+    const next = {};
 
-        next._general =
-          payload.error;
-      }
+    if (!formData.variant_name.trim()) {
+      next.variant_name = "Variant name is required.";
+    }
 
-      for (const key of Object.keys(payload)) {
+    if (!formData.sku.trim()) {
+      next.sku = "SKU is required.";
+    }
 
-        if (key === "error")
-          continue;
+    const price = Number(formData.price);
 
-        const val =
-          payload[key];
+    if (!Number.isFinite(price) || price <= 0) {
+      next.price = "Enter a price greater than 0.";
+    }
 
-        if (Array.isArray(val)) {
+    const stock = Number(formData.stock);
 
-          next[key] =
-            val[0];
-        } else if (
+    if (!Number.isFinite(stock) || stock < 0 || !Number.isInteger(stock)) {
+      next.stock = "Enter a whole number stock of 0 or more.";
+    }
 
-          typeof val === "string"
-        ) {
+    setFormErrors(next);
 
-          next[key] = val;
-        }
-      }
-
-      return next;
-    };
-
-  const validateClient =
-    () => {
-
-      const next = {};
-
-      if (!formData.variant_name.trim()) {
-
-        next.variant_name =
-          "Variant name is required.";
-      }
-
-      if (!formData.sku.trim()) {
-
-        next.sku =
-          "SKU is required.";
-      }
-
-      const price =
-        Number(
-          formData.price
-        );
-
-      if (
-        !Number.isFinite(price) ||
-        price <= 0
-      ) {
-
-        next.price =
-          "Enter a price greater than 0.";
-      }
-
-      const stock =
-        Number(
-          formData.stock
-        );
-
-      if (
-        !Number.isFinite(stock) ||
-        stock < 0 ||
-        !Number.isInteger(stock)
-      ) {
-
-        next.stock =
-          "Enter a whole number stock of 0 or more.";
-      }
-
-      setFormErrors(next);
-
-      return Object.keys(next).length === 0;
-    };
+    return Object.keys(next).length === 0;
+  };
 
   // ==========================================
   // SUBMIT
   // ==========================================
 
-  const handleSubmit =
-    async (e) => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-      e.preventDefault();
+    if (!validateClient()) {
+      return;
+    }
 
-      if (!validateClient()) {
+    const payload = {
+      variant_name: formData.variant_name.trim(),
 
-        return;
-      }
+      sku: formData.sku.trim(),
 
-      const payload = {
+      price: Number(formData.price),
 
-        variant_name:
-          formData.variant_name.trim(),
+      stock: Number(formData.stock),
 
-        sku:
-          formData.sku.trim(),
+      color: formData.color.trim(),
 
-        price:
-          Number(
-            formData.price
-          ),
+      material: formData.material.trim(),
 
-        stock:
-          Number(
-            formData.stock
-          ),
-
-        color:
-          formData.color.trim(),
-
-        material:
-          formData.material.trim(),
-
-        size:
-          formData.size.trim(),
-
-
-      };
-
-      const result =
-        await dispatch(
-
-          updateVariant({
-
-            variantId:
-              variant.id,
-
-            data: payload,
-          })
-        );
-
-      if (
-        updateVariant.rejected.match(
-          result
-        )
-      ) {
-
-        setFormErrors(
-          mapApiErrors(
-            result.payload
-          )
-        );
-
-        dispatch(
-          clearProductMessages()
-        );
-
-        return;
-      }
-
-      if (
-        updateVariant.fulfilled.match(
-          result
-        )
-      ) {
-
-        onClose();
-      }
+      size: formData.size.trim(),
     };
+
+    const result = await dispatch(
+      updateVariant({
+        variantId: variant.id,
+
+        data: payload,
+      }),
+    );
+
+    if (updateVariant.rejected.match(result)) {
+      setFormErrors(mapApiErrors(result.payload));
+
+      dispatch(clearProductMessages());
+
+      return;
+    }
+
+    if (updateVariant.fulfilled.match(result)) {
+      onClose();
+    }
+  };
 
   // ==========================================
   // CLOSE
   // ==========================================
 
-  if (
-    !isOpen ||
-    !variant
-  ) {
-
+  if (!isOpen || !variant) {
     return null;
   }
 
   return (
-
     <div className="create-product-overlay">
-
       <div className="create-variant-modal">
-
         {/* HEADER */}
 
         <div className="create-product-header">
-
           <div>
+            <h2>Edit Variant</h2>
 
-            <h2>
-              Edit Variant
-            </h2>
-
-            <p>
-              Update pricing, stock,
-              materials, and finish details.
-            </p>
-
+            <p>Update pricing, stock, materials, and finish details.</p>
           </div>
 
-          <button
-            className="close-btn"
-            onClick={onClose}
-          >
-
+          <button className="close-btn" onClick={onClose}>
             <X size={26} />
-
           </button>
-
         </div>
 
         {/* FORM */}
 
-        <form
-          onSubmit={handleSubmit}
-        >
-
+        <form onSubmit={handleSubmit}>
           <div className="create-product-body">
-
             {/* ERROR */}
 
-            {
-              (productError || formErrors._general) && (
-
-                <div className="form-error">
-
-                  {
-                    typeof productError === "string"
-
-                      ? productError
-
-                      : productError
-
-                        ? JSON.stringify(
-                            productError
-                          )
-
-                        : formErrors._general
-                  }
-
-                </div>
-              )
-            }
+            {(productError || formErrors._general) && (
+              <div className="form-error">
+                {typeof productError === "string"
+                  ? productError
+                  : productError
+                    ? JSON.stringify(productError)
+                    : formErrors._general}
+              </div>
+            )}
 
             {/* NAME + SKU */}
 
             <div className="double-fields">
-
               <div className="form-group">
-
-                <label>
-                  VARIANT NAME
-                </label>
+                <label>VARIANT NAME</label>
 
                 <input
                   type="text"
                   name="variant_name"
                   placeholder="Variant name"
-                  value={
-                    formData.variant_name
-                  }
-                  onChange={
-                    handleChange
-                  }
+                  value={formData.variant_name}
+                  onChange={handleChange}
                   required
                 />
 
-                {
-                  formErrors.variant_name && (
-
-                    <div className="form-error">
-
-                      {
-                        formErrors.variant_name
-                      }
-
-                    </div>
-                  )
-                }
-
+                {formErrors.variant_name && (
+                  <div className="form-error">{formErrors.variant_name}</div>
+                )}
               </div>
 
               <div className="form-group">
-
-                <label>
-                  SKU
-                </label>
+                <label>SKU</label>
 
                 <input
                   type="text"
                   name="sku"
                   placeholder="SKU"
-                  value={
-                    formData.sku
-                  }
-                  onChange={
-                    handleChange
-                  }
+                  value={formData.sku}
+                  onChange={handleChange}
                   required
                 />
 
-                {
-                  formErrors.sku && (
-
-                    <div className="form-error">
-
-                      {
-                        formErrors.sku
-                      }
-
-                    </div>
-                  )
-                }
-
+                {formErrors.sku && (
+                  <div className="form-error">{formErrors.sku}</div>
+                )}
               </div>
-
             </div>
 
             {/* PRICE + STOCK */}
 
             <div className="double-fields">
-
               <div className="form-group">
-
-                <label>
-                  PRICE
-                </label>
+                <label>PRICE</label>
 
                 <input
                   type="number"
@@ -539,35 +344,18 @@ export default function EditVariantModal({
                   min="0.01"
                   name="price"
                   placeholder="0.00"
-                  value={
-                    formData.price
-                  }
-                  onChange={
-                    handleChange
-                  }
+                  value={formData.price}
+                  onChange={handleChange}
                   required
                 />
 
-                {
-                  formErrors.price && (
-
-                    <div className="form-error">
-
-                      {
-                        formErrors.price
-                      }
-
-                    </div>
-                  )
-                }
-
+                {formErrors.price && (
+                  <div className="form-error">{formErrors.price}</div>
+                )}
               </div>
 
               <div className="form-group">
-
-                <label>
-                  STOCK
-                </label>
+                <label>STOCK</label>
 
                 <input
                   type="number"
@@ -575,154 +363,76 @@ export default function EditVariantModal({
                   min="0"
                   step="1"
                   placeholder="0"
-                  value={
-                    formData.stock
-                  }
-                  onChange={
-                    handleChange
-                  }
+                  value={formData.stock}
+                  onChange={handleChange}
                   required
                 />
 
-                {
-                  formErrors.stock && (
-
-                    <div className="form-error">
-
-                      {
-                        formErrors.stock
-                      }
-
-                    </div>
-                  )
-                }
-
+                {formErrors.stock && (
+                  <div className="form-error">{formErrors.stock}</div>
+                )}
               </div>
-
             </div>
 
             {/* COLOR + MATERIAL */}
 
             <div className="double-fields variant-color-grid">
-
               <div className="form-group">
-
-                <label>
-                  COLOR / FINISH
-                </label>
+                <label>COLOR / FINISH</label>
 
                 <div className="color-input-wrapper">
-
                   <input
                     type="text"
                     name="color"
                     placeholder="Color"
-                    value={
-                      formData.color
-                    }
-                    onChange={
-                      handleChange
-                    }
-                    required={
-                      formData.is_active
-                    }
+                    value={formData.color}
+                    onChange={handleChange}
+                    required={formData.is_active}
                   />
 
-                  <div
-                    className="color-preview"
-                  ></div>
-
+                  <div className="color-preview"></div>
                 </div>
 
-                {
-                  formErrors.color && (
-
-                    <div className="form-error">
-
-                      {
-                        formErrors.color
-                      }
-
-                    </div>
-                  )
-                }
-
+                {formErrors.color && (
+                  <div className="form-error">{formErrors.color}</div>
+                )}
               </div>
 
               <div className="form-group">
-
-                <label>
-                  MATERIAL
-                </label>
+                <label>MATERIAL</label>
 
                 <input
                   type="text"
                   name="material"
                   placeholder="Material"
-                  value={
-                    formData.material
-                  }
-                  onChange={
-                    handleChange
-                  }
-                  required={
-                    formData.is_active
-                  }
+                  value={formData.material}
+                  onChange={handleChange}
+                  required={formData.is_active}
                 />
 
-                {
-                  formErrors.material && (
-
-                    <div className="form-error">
-
-                      {
-                        formErrors.material
-                      }
-
-                    </div>
-                  )
-                }
-
+                {formErrors.material && (
+                  <div className="form-error">{formErrors.material}</div>
+                )}
               </div>
-
             </div>
 
             {/* SIZE */}
 
             <div className="form-group">
-
-              <label>
-                SIZE / DIMENSIONS
-              </label>
+              <label>SIZE / DIMENSIONS</label>
 
               <input
                 type="text"
                 name="size"
                 placeholder='28" x 32" x 34"'
-                value={
-                  formData.size
-                }
-                onChange={
-                  handleChange
-                }
-                required={
-                  formData.is_active
-                }
+                value={formData.size}
+                onChange={handleChange}
+                required={formData.is_active}
               />
 
-              {
-                formErrors.size && (
-
-                  <div className="form-error">
-
-                    {
-                      formErrors.size
-                    }
-
-                  </div>
-                )
-              }
-
+              {formErrors.size && (
+                <div className="form-error">{formErrors.size}</div>
+              )}
             </div>
 
             {/* IMAGE UPLOAD */}
@@ -735,50 +445,32 @@ export default function EditVariantModal({
               onSaveNewImages={handleSaveNewImages}
               uploadLoading={productLoading || isUploading}
             />
-            {uploadErrorLocal && <div className="form-error" style={{ marginTop: '8px' }}>{uploadErrorLocal}</div>}
-
+            {uploadErrorLocal && (
+              <div className="form-error" style={{ marginTop: "8px" }}>
+                {uploadErrorLocal}
+              </div>
+            )}
           </div>
 
           {/* FOOTER */}
 
           <div className="create-product-footer">
-
-            <button
-              type="button"
-              className="cancel-btn"
-              onClick={onClose}
-            >
-
+            <button type="button" className="cancel-btn" onClick={onClose}>
               Cancel
-
             </button>
 
             <button
               type="submit"
               className="submit-btn"
-              disabled={
-                productLoading
-              }
+              disabled={productLoading}
             >
-
               <Pencil size={18} />
 
-              {
-                productLoading
-
-                  ? "Updating..."
-
-                  : "Save Changes"
-              }
-
+              {productLoading ? "Updating..." : "Save Changes"}
             </button>
-
           </div>
-
         </form>
-
       </div>
-
     </div>
   );
 }

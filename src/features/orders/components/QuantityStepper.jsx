@@ -1,48 +1,28 @@
-export default function QuantityStepper(
-  {
-    id,
-    label,
-    value,
-    min = 1,
-    max = 1,
-    disabled = false,
-    onChange,
-  },
-) {
-
-  const num = Math.min(
-    max,
-    Math.max(
-      min,
-      Number(
-        value,
-      ) || min,
-    ),
-  );
+export default function QuantityStepper({
+  id,
+  label,
+  value,
+  min = 1,
+  max = 1,
+  disabled = false,
+  onChange,
+}) {
+  const num = Math.min(max, Math.max(min, Number(value) || min));
 
   return (
-
     <div className="order-qty-stepper">
-
-      <label
-        className="order-cancel-label"
-        htmlFor={id}
-      >
+      <label className="order-cancel-label" htmlFor={id}>
         {label}
       </label>
 
       <div className="order-qty-stepper-row">
-
         <button
           type="button"
           className="order-qty-stepper-btn"
           disabled={disabled || num <= min}
           aria-label="Decrease quantity"
           onClick={() => {
-
-            onChange(
-              num - 1,
-            );
+            onChange(num - 1);
           }}
         >
           −
@@ -57,12 +37,7 @@ export default function QuantityStepper(
           value={num}
           disabled={disabled}
           onChange={(e) => {
-
-            onChange(
-              Number(
-                e.target.value,
-              ),
-            );
+            onChange(Number(e.target.value));
           }}
         />
 
@@ -72,20 +47,13 @@ export default function QuantityStepper(
           disabled={disabled || num >= max}
           aria-label="Increase quantity"
           onClick={() => {
-
-            onChange(
-              num + 1,
-            );
+            onChange(num + 1);
           }}
         >
           +
         </button>
 
-        <span className="order-qty-stepper-max">
-          of
-          {" "}
-          {max}
-        </span>
+        <span className="order-qty-stepper-max">of {max}</span>
       </div>
     </div>
   );

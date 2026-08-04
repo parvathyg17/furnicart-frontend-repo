@@ -12,7 +12,7 @@ import {
   ZoomOut,
   RefreshCw,
 } from "lucide-react";
-import "../../../styles/adminvariantmedialibrary.css"
+import "../../../styles/adminvariantmedialibrary.css";
 
 const createImage = (url) =>
   new Promise((resolve, reject) => {
@@ -38,7 +38,7 @@ async function getCroppedImg(imageSrc, pixelCrop, rotation = 0) {
   ctx.drawImage(
     image,
     safeArea / 2 - image.width / 2,
-    safeArea / 2 - image.height / 2
+    safeArea / 2 - image.height / 2,
   );
 
   const data = ctx.getImageData(0, 0, safeArea, safeArea);
@@ -48,12 +48,8 @@ async function getCroppedImg(imageSrc, pixelCrop, rotation = 0) {
 
   ctx.putImageData(
     data,
-    Math.round(
-      0 - safeArea / 2 + image.width / 2 - pixelCrop.x
-    ),
-    Math.round(
-      0 - safeArea / 2 + image.height / 2 - pixelCrop.y
-    )
+    Math.round(0 - safeArea / 2 + image.width / 2 - pixelCrop.x),
+    Math.round(0 - safeArea / 2 + image.height / 2 - pixelCrop.y),
   );
 
   return new Promise((resolve) => {
@@ -68,7 +64,7 @@ async function getCroppedImg(imageSrc, pixelCrop, rotation = 0) {
         });
       },
       "image/jpeg",
-      0.92
+      0.92,
     );
   });
 }
@@ -104,15 +100,15 @@ export default function VariantMediaUploader({
       const cropped = await getCroppedImg(
         currentCropImage.preview,
         croppedAreaPixels,
-        rotation
+        rotation,
       );
 
       setSelectedImages((prev) =>
         prev.map((item) =>
           item.id === currentCropImage.id
             ? { ...item, file: cropped.file, preview: cropped.preview }
-            : item
-        )
+            : item,
+        ),
       );
       setCurrentCropImage(null);
     } catch (error) {
@@ -165,7 +161,15 @@ export default function VariantMediaUploader({
 
   return (
     <div className="variant-media-uploader" style={{ marginTop: "24px" }}>
-      <label style={{ display: "block", marginBottom: "8px", fontWeight: "600", fontSize: "12px", color: "#6b7280" }}>
+      <label
+        style={{
+          display: "block",
+          marginBottom: "8px",
+          fontWeight: "600",
+          fontSize: "12px",
+          color: "#6b7280",
+        }}
+      >
         VARIANT IMAGES
       </label>
 
@@ -194,7 +198,11 @@ export default function VariantMediaUploader({
         </div>
         <h3 style={{ margin: "8px 0", fontSize: "16px" }}>Drop images here</h3>
         <p style={{ margin: 0, fontSize: "14px" }}>PNG, JPG, WEBP up to 5MB</p>
-        <button type="button" className="browse-btn" style={{ marginTop: "16px" }}>
+        <button
+          type="button"
+          className="browse-btn"
+          style={{ marginTop: "16px" }}
+        >
           <Upload size={16} /> Browse Files
         </button>
       </div>
@@ -204,9 +212,19 @@ export default function VariantMediaUploader({
       {/* SELECTED IMAGES PREVIEW */}
       {selectedImages.length > 0 && (
         <div className="selected-preview-section" style={{ marginTop: "24px" }}>
-          <div className="selected-preview-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-            <h2 style={{ fontSize: "16px", margin: 0 }}>Selected Images (To Upload)</h2>
-            {isEditMode && (
+          <div
+            className="selected-preview-header"
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "16px",
+            }}
+          >
+            <h2 style={{ fontSize: "16px", margin: 0 }}>
+              Selected Images (To Upload)
+            </h2>
+            {onSaveNewImages && (
               <button
                 type="button"
                 className="save-images-btn"
@@ -217,18 +235,86 @@ export default function VariantMediaUploader({
               </button>
             )}
           </div>
-          <div className="preview-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: "16px" }}>
+          <div
+            className="preview-grid"
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",
+              gap: "16px",
+            }}
+          >
             {selectedImages.map((item) => (
-              <div key={item.id} className="preview-card" style={{ position: "relative", borderRadius: "8px", overflow: "hidden", border: "1px solid #e5e7eb" }}>
-                <img src={item.preview} alt="" style={{ width: "100%", aspectRatio: "1/1", objectFit: "cover", display: "block" }} />
-                <div className="preview-overlay" style={{ position: "absolute", top: "8px", right: "8px", display: "flex", flexDirection: "column", gap: "4px" }}>
-                  <button type="button" onClick={() => setZoomedImage(item.preview)} style={{ padding: "6px", borderRadius: "6px", background: "rgba(17,24,39,0.8)", color: "white", border: "none", cursor: "pointer" }}>
+              <div
+                key={item.id}
+                className="preview-card"
+                style={{
+                  position: "relative",
+                  borderRadius: "8px",
+                  overflow: "hidden",
+                  border: "1px solid #e5e7eb",
+                }}
+              >
+                <img
+                  src={item.preview}
+                  alt=""
+                  style={{
+                    width: "100%",
+                    aspectRatio: "1/1",
+                    objectFit: "cover",
+                    display: "block",
+                  }}
+                />
+                <div
+                  className="preview-overlay"
+                  style={{
+                    position: "absolute",
+                    top: "8px",
+                    right: "8px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "4px",
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setZoomedImage(item.preview)}
+                    style={{
+                      padding: "6px",
+                      borderRadius: "6px",
+                      background: "rgba(17,24,39,0.8)",
+                      color: "white",
+                      border: "none",
+                      cursor: "pointer",
+                    }}
+                  >
                     <ZoomIn size={16} />
                   </button>
-                  <button type="button" onClick={() => setCurrentCropImage(item)} style={{ padding: "6px", borderRadius: "6px", background: "rgba(17,24,39,0.8)", color: "white", border: "none", cursor: "pointer" }}>
+                  <button
+                    type="button"
+                    onClick={() => setCurrentCropImage(item)}
+                    style={{
+                      padding: "6px",
+                      borderRadius: "6px",
+                      background: "rgba(17,24,39,0.8)",
+                      color: "white",
+                      border: "none",
+                      cursor: "pointer",
+                    }}
+                  >
                     <Crop size={16} />
                   </button>
-                  <button type="button" onClick={() => removeSelectedImage(item.id)} style={{ padding: "6px", borderRadius: "6px", background: "#ef4444", color: "white", border: "none", cursor: "pointer" }}>
+                  <button
+                    type="button"
+                    onClick={() => removeSelectedImage(item.id)}
+                    style={{
+                      padding: "6px",
+                      borderRadius: "6px",
+                      background: "#ef4444",
+                      color: "white",
+                      border: "none",
+                      cursor: "pointer",
+                    }}
+                  >
                     <X size={16} />
                   </button>
                 </div>
@@ -241,22 +327,103 @@ export default function VariantMediaUploader({
       {/* EXISTING IMAGES (For Edit Mode) */}
       {isEditMode && existingImages.length > 0 && (
         <div className="existing-preview-section" style={{ marginTop: "32px" }}>
-          <h2 style={{ fontSize: "16px", margin: "0 0 16px 0", color: "#111827" }}>Existing Images</h2>
-          <div className="preview-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: "16px" }}>
+          <h2
+            style={{ fontSize: "16px", margin: "0 0 16px 0", color: "#111827" }}
+          >
+            Existing Images
+          </h2>
+          <div
+            className="preview-grid"
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",
+              gap: "16px",
+            }}
+          >
             {existingImages.map((image) => (
-              <div key={image.id} className="preview-card" style={{ position: "relative", borderRadius: "8px", overflow: "hidden", border: "1px solid #e5e7eb" }}>
-                <img src={image.image_url || image.image} alt="" style={{ width: "100%", aspectRatio: "1/1", objectFit: "cover", display: "block" }} />
+              <div
+                key={image.id}
+                className="preview-card"
+                style={{
+                  position: "relative",
+                  borderRadius: "8px",
+                  overflow: "hidden",
+                  border: "1px solid #e5e7eb",
+                }}
+              >
+                <img
+                  src={image.image_url || image.image}
+                  alt=""
+                  style={{
+                    width: "100%",
+                    aspectRatio: "1/1",
+                    objectFit: "cover",
+                    display: "block",
+                  }}
+                />
                 {image.is_primary && (
-                  <div className="primary-badge" style={{ position: "absolute", top: "8px", left: "8px", padding: "4px 8px", background: "rgba(17,24,39,0.9)", color: "white", borderRadius: "4px", fontSize: "10px", fontWeight: "bold" }}>
-                    <Star size={10} style={{ display: "inline", marginRight: "4px" }} />
+                  <div
+                    className="primary-badge"
+                    style={{
+                      position: "absolute",
+                      top: "8px",
+                      left: "8px",
+                      padding: "4px 8px",
+                      background: "rgba(17,24,39,0.9)",
+                      color: "white",
+                      borderRadius: "4px",
+                      fontSize: "10px",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    <Star
+                      size={10}
+                      style={{ display: "inline", marginRight: "4px" }}
+                    />
                     Featured
                   </div>
                 )}
-                <div className="preview-overlay" style={{ position: "absolute", top: "8px", right: "8px", display: "flex", flexDirection: "column", gap: "4px" }}>
-                  <button type="button" onClick={() => setZoomedImage(image.image_url || image.image)} style={{ padding: "6px", borderRadius: "6px", background: "rgba(17,24,39,0.8)", color: "white", border: "none", cursor: "pointer" }}>
+                <div
+                  className="preview-overlay"
+                  style={{
+                    position: "absolute",
+                    top: "8px",
+                    right: "8px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "4px",
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setZoomedImage(image.image_url || image.image)
+                    }
+                    style={{
+                      padding: "6px",
+                      borderRadius: "6px",
+                      background: "rgba(17,24,39,0.8)",
+                      color: "white",
+                      border: "none",
+                      cursor: "pointer",
+                    }}
+                  >
                     <ZoomIn size={16} />
                   </button>
-                  <button type="button" onClick={() => onDeleteExistingImage && onDeleteExistingImage(image.id)} style={{ padding: "6px", borderRadius: "6px", background: "#ef4444", color: "white", border: "none", cursor: "pointer" }}>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onDeleteExistingImage && onDeleteExistingImage(image.id)
+                    }
+                    style={{
+                      padding: "6px",
+                      borderRadius: "6px",
+                      background: "#ef4444",
+                      color: "white",
+                      border: "none",
+                      cursor: "pointer",
+                    }}
+                  >
                     <Trash2 size={16} />
                   </button>
                 </div>
@@ -276,25 +443,57 @@ export default function VariantMediaUploader({
                 <p>Adjust image position and framing</p>
               </div>
               <div className="crop-topbar-actions">
-                <button type="button" className="crop-toolbar-btn" onClick={() => { setZoom(1); setRotation(0); setCrop({ x: 0, y: 0 }); }}>
+                <button
+                  type="button"
+                  className="crop-toolbar-btn"
+                  onClick={() => {
+                    setZoom(1);
+                    setRotation(0);
+                    setCrop({ x: 0, y: 0 });
+                  }}
+                >
                   <RefreshCw size={18} />
                 </button>
-                <button type="button" className="crop-toolbar-btn" onClick={() => setRotation((prev) => prev - 90)}>
+                <button
+                  type="button"
+                  className="crop-toolbar-btn"
+                  onClick={() => setRotation((prev) => prev - 90)}
+                >
                   <RotateCw size={18} style={{ transform: "scaleX(-1)" }} />
                 </button>
-                <button type="button" className="crop-toolbar-btn" onClick={() => setRotation((prev) => prev + 90)}>
+                <button
+                  type="button"
+                  className="crop-toolbar-btn"
+                  onClick={() => setRotation((prev) => prev + 90)}
+                >
                   <RotateCw size={18} />
                 </button>
-                <button type="button" className="crop-toolbar-btn" onClick={() => setZoom((prev) => Math.max(prev - 0.2, 1))}>
+                <button
+                  type="button"
+                  className="crop-toolbar-btn"
+                  onClick={() => setZoom((prev) => Math.max(prev - 0.2, 1))}
+                >
                   <ZoomOut size={18} />
                 </button>
-                <button type="button" className="crop-toolbar-btn" onClick={() => setZoom((prev) => Math.min(prev + 0.2, 3))}>
+                <button
+                  type="button"
+                  className="crop-toolbar-btn"
+                  onClick={() => setZoom((prev) => Math.min(prev + 0.2, 3))}
+                >
                   <ZoomIn size={18} />
                 </button>
-                <button type="button" className="crop-close-btn" onClick={() => setCurrentCropImage(null)}>
+                <button
+                  type="button"
+                  className="crop-close-btn"
+                  onClick={() => setCurrentCropImage(null)}
+                >
                   <X size={18} />
                 </button>
-                <button type="button" className="crop-apply-btn" onClick={applyCrop}>
+                <button
+                  type="button"
+                  className="crop-apply-btn"
+                  onClick={applyCrop}
+                >
                   Apply
                 </button>
               </div>

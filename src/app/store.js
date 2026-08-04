@@ -3,15 +3,11 @@ import authReducer from "../features/auth/authSlice";
 import profileReducer from "../features/profile/profileSlice";
 import addressReducer from "../features/address/addressSlice";
 import adminReducer from "../features/admin/adminSlice";
-import categoryReducer
-from "../features/catalog/category/categorySlice";
-import roomTypeReducer
-from "../features/catalog/roomType/roomTypeSlice";
-import productReducer
-from "../features/catalog/product/productSlice";
+import categoryReducer from "../features/catalog/category/categorySlice";
+import roomTypeReducer from "../features/catalog/roomType/roomTypeSlice";
+import productReducer from "../features/catalog/product/productSlice";
 import cartReducer from "../features/cart/cartSlice";
 import wishlistReducer from "../features/wishlist/wishlistSlice";
-
 
 export const store = configureStore({
   reducer: {
@@ -23,6 +19,6 @@ export const store = configureStore({
     roomType: roomTypeReducer,
     product: productReducer,
     cart: cartReducer,
-    wishlist: wishlistReducer
+    wishlist: wishlistReducer,
   },
 });

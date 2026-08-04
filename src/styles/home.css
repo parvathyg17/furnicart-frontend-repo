@@ -338,7 +338,9 @@ a.collection-card {
   text-decoration: none;
   color: inherit;
   display: block;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 a.collection-card:hover {
@@ -401,12 +403,7 @@ a.collection-card:hover {
 .collection-skeleton-img {
   width: 100%;
   height: 380px;
-  background: linear-gradient(
-    90deg,
-    #eee9e4 0%,
-    #f6f2ee 50%,
-    #eee9e4 100%
-  );
+  background: linear-gradient(90deg, #eee9e4 0%, #f6f2ee 50%, #eee9e4 100%);
   background-size: 200% 100%;
   animation: home-shimmer 1.2s ease-in-out infinite;
 }
@@ -443,10 +440,7 @@ a.collection-card:hover {
 
 .cta-content {
   background:
-    linear-gradient(
-      rgba(32, 19, 13, 0.72),
-      rgba(32, 19, 13, 0.72)
-    ),
+    linear-gradient(rgba(32, 19, 13, 0.72), rgba(32, 19, 13, 0.72)),
     url("https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1600&auto=format&fit=crop");
   background-size: cover;
   background-position: center;
@@ -528,7 +522,6 @@ a.collection-card:hover {
 ========================================= */
 
 @media (max-width: 1100px) {
-
   .hero-section,
   .features-section,
   .collection-grid {
@@ -543,11 +536,9 @@ a.collection-card:hover {
   .cta-content h2 {
     font-size: 52px;
   }
-
 }
 
 @media (max-width: 768px) {
-
   .home-nav-links {
     display: none;
   }
@@ -585,7 +576,6 @@ a.collection-card:hover {
   .cta-content {
     padding: 60px 30px;
   }
-
 }
 
 /* ==========================
@@ -593,7 +583,6 @@ a.collection-card:hover {
 ========================== */
 
 .profile-nav-link {
-
   text-decoration: none;
 
   display: flex;
@@ -603,11 +592,9 @@ a.collection-card:hover {
   justify-content: center;
 }
 
-
 /* PROFILE IMAGE */
 
 .nav-profile-image {
-
   width: 40px;
 
   height: 40px;
@@ -619,11 +606,9 @@ a.collection-card:hover {
   border: 2px solid #111;
 }
 
-
 /* PROFILE INITIAL */
 
 .nav-profile-avatar {
-
   width: 40px;
 
   height: 40px;
@@ -645,11 +630,9 @@ a.collection-card:hover {
   font-weight: 600;
 }
 
-
 /* LOGIN BUTTON */
 
 .login-nav-btn {
-
   border: none;
 
   background: #111;
@@ -670,7 +653,6 @@ a.collection-card:hover {
 }
 
 .login-nav-btn:hover {
-
   opacity: 0.85;
 }
 
@@ -722,10 +704,7 @@ a.collection-card:hover {
 
 .wishlist-title {
   margin: 0 0 0.6rem;
-  font-family:
-    "Playfair Display",
-    Georgia,
-    serif;
+  font-family: "Playfair Display", Georgia, serif;
   font-size: clamp(2rem, 4vw, 2.85rem);
   font-weight: 700;
   line-height: 1.1;
@@ -823,10 +802,7 @@ a.collection-card:hover {
   max-width: calc(100% - 1.3rem);
   padding: 0.35rem 0.55rem;
   border-radius: 8px;
-  font-family:
-    "Inter",
-    system-ui,
-    sans-serif;
+  font-family: "Inter", system-ui, sans-serif;
   font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -865,10 +841,7 @@ a.collection-card:hover {
 
 .wishlist-card-title {
   margin: 0;
-  font-family:
-    "Playfair Display",
-    Georgia,
-    serif;
+  font-family: "Playfair Display", Georgia, serif;
   font-size: 1.12rem;
   font-weight: 700;
   line-height: 1.25;
@@ -884,10 +857,7 @@ a.collection-card:hover {
 
 .wishlist-card-price {
   margin: 0.35rem 0 0.5rem;
-  font-family:
-    "Playfair Display",
-    Georgia,
-    serif;
+  font-family: "Playfair Display", Georgia, serif;
   font-size: 1.2rem;
   font-weight: 700;
   color: #1a1a1a;
@@ -895,10 +865,7 @@ a.collection-card:hover {
 
 .wishlist-card-stock-note {
   margin: 0 0 0.35rem;
-  font-family:
-    "Inter",
-    system-ui,
-    sans-serif;
+  font-family: "Inter", system-ui, sans-serif;
   font-size: 0.78rem;
   line-height: 1.45;
   color: #8a5a3a;
@@ -911,10 +878,7 @@ a.collection-card:hover {
   border-radius: 10px;
   background: #3d2b1f;
   color: #fff;
-  font-family:
-    "Inter",
-    system-ui,
-    sans-serif;
+  font-family: "Inter", system-ui, sans-serif;
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.12em;

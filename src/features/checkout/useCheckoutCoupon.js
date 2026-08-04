@@ -1,206 +1,100 @@
-import {
-  useCallback,
-  useState,
-} from "react";
+import { useCallback, useState } from "react";
 
 import toast from "react-hot-toast";
 
-import {
-  applyCartCoupon,
-  removeCartCoupon,
-} from "../promotions/couponAPI";
+import { applyCartCoupon, removeCartCoupon } from "../promotions/couponAPI";
 
-import {
-  formatProductApiError,
-} from "../../utils/productApiErrors.js";
+import { formatProductApiError } from "../../utils/productApiErrors.js";
 
-import {
-  stableStringify,
-} from "../../utils/stableStringify.js";
+import { stableStringify } from "../../utils/stableStringify.js";
 
 /**
  * Coupon apply/remove for checkout.
  * Updates pricing preview via API `preview` payload.
  */
-export default function useCheckoutCoupon(
-  {
-    setPricingPreview,
-    lastPreviewSigRef,
-    reloadCheckoutData,
-  },
-) {
+export default function useCheckoutCoupon({
+  setPricingPreview,
+  lastPreviewSigRef,
+  reloadCheckoutData,
+}) {
+  const [couponInput, setCouponInput] = useState("");
 
-  const [
-    couponInput,
-    setCouponInput,
-  ] = useState(
-    "",
-  );
-
-  const [
-    couponBusy,
-    setCouponBusy,
-  ] = useState(
-    false,
-  );
+  const [couponBusy, setCouponBusy] = useState(false);
 
   const applyCoupon = useCallback(
-    async (
-      codeOverride,
-    ) => {
-
+    async (codeOverride) => {
       const code = (
-        typeof codeOverride === "string"
-          ? codeOverride
-          : couponInput
+        typeof codeOverride === "string" ? codeOverride : couponInput
       ).trim();
 
-      if (
-        !code
-      ) {
-
-        toast.error(
-          "Enter a coupon code.",
-        );
+      if (!code) {
+        toast.error("Enter a coupon code.");
 
         return;
       }
 
-      setCouponBusy(
-        true,
-      );
+      setCouponBusy(true);
 
       try {
+        const data = await applyCartCoupon(code);
 
-        const data = await applyCartCoupon(
-          code,
-        );
+        const preview = data.preview;
 
-        const preview =
-          data.preview;
+        if (preview) {
+          lastPreviewSigRef.current = stableStringify(preview);
 
-        if (
-          preview
-        ) {
-
-          lastPreviewSigRef.current =
-            stableStringify(
-              preview,
-            );
-
-          setPricingPreview(
-            preview,
-          );
+          setPricingPreview(preview);
         } else {
-
-          await reloadCheckoutData(
-            {
-              silent: true,
-            },
-          );
+          await reloadCheckoutData({
+            silent: true,
+          });
         }
 
-        setCouponInput(
-          "",
-        );
+        setCouponInput("");
 
-        toast.success(
-          data.message ||
-            "Coupon applied.",
-        );
+        toast.success(data.message || "Coupon applied.");
       } catch (err) {
-
         toast.error(
-
-          formatProductApiError(
-            err.response?.data,
-          ) ||
-
+          formatProductApiError(err.response?.data) ||
             "Could not apply coupon.",
         );
       } finally {
-
-        setCouponBusy(
-          false,
-        );
+        setCouponBusy(false);
       }
     },
 
-    [
-      couponInput,
-      lastPreviewSigRef,
-      reloadCheckoutData,
-      setPricingPreview,
-    ],
+    [couponInput, lastPreviewSigRef, reloadCheckoutData, setPricingPreview],
   );
 
-  const removeCoupon = useCallback(
-    async () => {
+  const removeCoupon = useCallback(async () => {
+    setCouponBusy(true);
 
-      setCouponBusy(
-        true,
+    try {
+      const data = await removeCartCoupon();
+
+      const preview = data.preview;
+
+      if (preview) {
+        lastPreviewSigRef.current = stableStringify(preview);
+
+        setPricingPreview(preview);
+      } else {
+        await reloadCheckoutData({
+          silent: true,
+        });
+      }
+
+      setCouponInput("");
+
+      toast.success(data.message || "Coupon removed.");
+    } catch (err) {
+      toast.error(
+        formatProductApiError(err.response?.data) || "Could not remove coupon.",
       );
-
-      try {
-
-        const data = await removeCartCoupon();
-
-        const preview =
-          data.preview;
-
-        if (
-          preview
-        ) {
-
-          lastPreviewSigRef.current =
-            stableStringify(
-              preview,
-            );
-
-          setPricingPreview(
-            preview,
-          );
-        } else {
-
-          await reloadCheckoutData(
-            {
-              silent: true,
-            },
-          );
-        }
-
-        setCouponInput(
-          "",
-        );
-
-        toast.success(
-          data.message ||
-            "Coupon removed.",
-        );
-      } catch (err) {
-
-        toast.error(
-
-          formatProductApiError(
-            err.response?.data,
-          ) ||
-
-            "Could not remove coupon.",
-        );
-      } finally {
-
-        setCouponBusy(
-          false,
-        );
-      }
-    },
-
-    [
-      lastPreviewSigRef,
-      reloadCheckoutData,
-      setPricingPreview,
-    ],
-  );
+    } finally {
+      setCouponBusy(false);
+    }
+  }, [lastPreviewSigRef, reloadCheckoutData, setPricingPreview]);
 
   return {
     couponInput,

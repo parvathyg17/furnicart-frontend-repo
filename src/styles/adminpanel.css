@@ -36,7 +36,6 @@ body {
 ========================================= */
 
 .admin-layout {
-
   display: flex;
 
   min-height: 100vh;
@@ -49,7 +48,6 @@ body {
 ========================================= */
 
 .admin-sidebar {
-
   position: sticky;
 
   top: 0;
@@ -58,11 +56,7 @@ body {
 
   width: 200px;
 
-  background: linear-gradient(
-    180deg,
-    var(--sidebar) 0%,
-    #2d1d12 100%
-  );
+  background: linear-gradient(180deg, var(--sidebar) 0%, #2d1d12 100%);
 
   padding: 0;
 
@@ -78,7 +72,6 @@ body {
 }
 
 .admin-sidebar-scroll {
-
   flex: 1;
 
   min-height: 0;
@@ -104,7 +97,6 @@ body {
 }
 
 .admin-sidebar-brand {
-
   display: flex;
 
   align-items: center;
@@ -119,7 +111,6 @@ body {
 }
 
 .admin-sidebar-brand-mark {
-
   width: 2.75rem;
 
   height: 2.75rem;
@@ -154,7 +145,6 @@ body {
 }
 
 .admin-sidebar-title {
-
   color: #fafaf9;
 
   font-size: 1.15rem;
@@ -169,7 +159,6 @@ body {
 }
 
 .admin-sidebar-tagline {
-
   display: block;
 
   margin-top: 0.2rem;
@@ -186,7 +175,6 @@ body {
 }
 
 .admin-nav {
-
   margin-top: 0.5rem;
 
   display: flex;
@@ -197,7 +185,6 @@ body {
 }
 
 .admin-nav-section-label {
-
   font-size: 0.65rem;
 
   font-weight: 700;
@@ -212,7 +199,6 @@ body {
 }
 
 .admin-nav-list {
-
   list-style: none;
 
   margin: 0;
@@ -227,7 +213,6 @@ body {
 }
 
 .admin-nav-link {
-
   min-height: 48px;
 
   border-radius: 12px;
@@ -257,7 +242,6 @@ body {
 }
 
 .admin-nav-icon-wrap {
-
   width: 44px;
 
   height: 44px;
@@ -274,25 +258,24 @@ body {
 
   color: rgba(250, 250, 249, 0.88);
 
-  transition: background 0.18s ease, color 0.18s ease;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease;
 }
 
 .admin-nav-link:hover {
-
   background: rgba(255, 255, 255, 0.06);
 
   color: #fff;
 }
 
 .admin-nav-link:hover .admin-nav-icon-wrap {
-
   background: rgba(255, 255, 255, 0.08);
 
   color: #fff;
 }
 
 .admin-nav-link.active {
-
   background: rgba(255, 255, 255, 0.1);
 
   color: #fff;
@@ -301,21 +284,18 @@ body {
 }
 
 .admin-nav-link.active .admin-nav-icon-wrap {
-
   background: rgba(196, 168, 130, 0.22);
 
   color: #fffef7;
 }
 
 .admin-nav-label {
-
   line-height: 1.25;
 
   padding-right: 4px;
 }
 
 .admin-sidebar-footer {
-
   flex-shrink: 0;
 
   padding: 1rem 1rem 1.25rem;
@@ -326,7 +306,6 @@ body {
 }
 
 .admin-logout-btn {
-
   width: 100%;
 
   min-height: 48px;
@@ -365,19 +344,16 @@ body {
 }
 
 .admin-logout-btn:hover {
-
   background: rgba(127, 29, 29, 0.45);
 
   border-color: rgba(254, 202, 202, 0.25);
 }
 
 .admin-nav-icon-wrap--btn {
-
   color: #fecaca;
 }
 
 .admin-logout-btn:hover .admin-nav-icon-wrap--btn {
-
   background: rgba(255, 255, 255, 0.08);
 
   color: #fff;
@@ -388,7 +364,6 @@ body {
 ========================================= */
 
 .admin-main {
-
   flex: 1;
 
   display: flex;
@@ -403,7 +378,6 @@ body {
 }
 
 .admin-topbar {
-
   position: sticky;
 
   top: 0;
@@ -507,28 +481,14 @@ body {
 }
 
 .admin-content {
-
   flex: 1;
 
   min-width: 0;
 
   width: 100%;
 
-  padding: clamp(
-    0.5rem,
-    1.2vw,
-    0.85rem
-  )
-    clamp(
-      0.5rem,
-      1.4vw,
-      1rem
-    )
-    clamp(
-      0.65rem,
-      1.5vw,
-      1.1rem
-    );
+  padding: clamp(0.5rem, 1.2vw, 0.85rem) clamp(0.5rem, 1.4vw, 1rem)
+    clamp(0.65rem, 1.5vw, 1.1rem);
 
   display: flex;
 
@@ -537,7 +497,6 @@ body {
 
 /* Single shared panel for every screen under AdminLayout */
 .admin-page {
-
   flex: 1;
 
   width: 100%;
@@ -555,29 +514,10 @@ body {
   border-radius: 12px;
 
   box-shadow:
-    0 1px 0 rgba(
-      28,
-      25,
-      23,
-      0.05
-    ),
-    0 8px 24px rgba(
-      28,
-      25,
-      23,
-      0.05
-    );
+    0 1px 0 rgba(28, 25, 23, 0.05),
+    0 8px 24px rgba(28, 25, 23, 0.05);
 
-  padding: clamp(
-    0.65rem,
-    1.5vw,
-    1rem
-  )
-    clamp(
-      0.65rem,
-      1.5vw,
-      1.15rem
-    );
+  padding: clamp(0.65rem, 1.5vw, 1rem) clamp(0.65rem, 1.5vw, 1.15rem);
 
   min-height: 0;
 }
@@ -610,22 +550,13 @@ body {
 .admin-page .room-types-card {
   background: #fafaf9;
 
-  border: 1px solid rgba(
-    231,
-    229,
-    228,
-    0.95
-  );
+  border: 1px solid rgba(231, 229, 228, 0.95);
 
   border-radius: 12px;
 
   box-shadow: none;
 
-  padding: clamp(
-    0.85rem,
-    1.5vw,
-    1.15rem
-  );
+  padding: clamp(0.85rem, 1.5vw, 1.15rem);
 }
 
 /* =========================================
@@ -829,7 +760,6 @@ body {
 ========================================= */
 
 @media (max-width: 1100px) {
-
   .dashboard-cards {
     grid-template-columns: 1fr;
   }
@@ -839,11 +769,9 @@ body {
     align-items: flex-start;
     gap: 20px;
   }
-
 }
 
 @media (max-width: 900px) {
-
   .admin-layout {
     flex-direction: column;
   }
@@ -900,7 +828,6 @@ body {
   .table-wrapper {
     overflow-x: auto;
   }
-
 }
 
 /* =========================================
@@ -930,7 +857,6 @@ body {
 }
 
 @keyframes modalPop {
-
   from {
     transform: scale(0.95);
     opacity: 0;
@@ -940,7 +866,6 @@ body {
     transform: scale(1);
     opacity: 1;
   }
-
 }
 
 .admin-modal-icon {

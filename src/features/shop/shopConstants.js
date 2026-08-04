@@ -1,5 +1,4 @@
 export const SORT_OPTIONS = [
-
   {
     value: "latest",
     label: "Newest",
@@ -25,4 +24,3 @@ export const SORT_OPTIONS = [
     label: "Name: Z-A",
   },
 ];
-

@@ -15,7 +15,6 @@ import CancelOrderModal from "../../features/orders/components/CancelOrderModal.
 import ReturnRequestModal from "../../features/orders/components/ReturnRequestModal.jsx";
 
 export default function OrderDetail() {
-
   const {
     order,
     loading,
@@ -50,117 +49,93 @@ export default function OrderDetail() {
   } = useOrderDetail();
 
   return (
-
     <div className="artisan-shop order-detail-shell">
-
       <main className="order-detail-main">
+        {loading ? (
+          <p className="cart-bag-muted">Loading…</p>
+        ) : error ? (
+          <div className="shop-banner error cart-bag-banner" role="alert">
+            {error}
+          </div>
+        ) : order ? (
+          <>
+            <div className="odl-page">
+              <OrderHeader />
 
-        {
-          loading ? (
+              {invoiceError && (
+                <div
+                  className="shop-banner error cart-bag-banner"
+                  role="alert"
+                  style={{ marginBottom: "0.75rem" }}
+                >
+                  {invoiceError}
+                </div>
+              )}
 
-            <p className="cart-bag-muted">
-              Loading…
-            </p>
-          ) : error ? (
+              <div className="odl-layout">
+                <div className="odl-col-main">
+                  <OrderHeroCard
+                    order={order}
+                    invoiceBusy={invoiceBusy}
+                    canDownloadInvoice={canDownloadInvoice}
+                    onDownloadInvoice={handleDownloadInvoice}
+                    canCancelEntireOrder={canCancelEntireOrder}
+                    onCancelEntireOrder={openCancelOrderModal}
+                  />
 
-            <div
-              className="shop-banner error cart-bag-banner"
-              role="alert"
-            >
-              {error}
-            </div>
-          ) : order ? (
+                  <section className="odl-main">
+                    <h2 className="odl-section-title">Shipment details</h2>
 
-            <>
-
-              <div className="odl-page">
-
-                <OrderHeader />
-
-                {
-                  invoiceError && (
-
-                    <div
-                      className="shop-banner error cart-bag-banner"
-                      role="alert"
-                      style={{ marginBottom: "0.75rem" }}
-                    >
-                      {invoiceError}
-                    </div>
-                  )
-                }
-
-                <div className="odl-layout">
-
-                  <div className="odl-col-main">
-
-                    <OrderHeroCard
+                    <OrderItemsList
                       order={order}
-                      invoiceBusy={invoiceBusy}
-                      canDownloadInvoice={canDownloadInvoice}
-                      onDownloadInvoice={handleDownloadInvoice}
-                      canCancelEntireOrder={canCancelEntireOrder}
-                      onCancelEntireOrder={openCancelOrderModal}
+                      canCancelLine={canCancelLine}
+                      onOpenCancelLine={openCancelLineModal}
+                      onOpenReturn={openReturnModal}
                     />
+                  </section>
 
-                    <section className="odl-main">
-
-                      <h2 className="odl-section-title">
-                        Shipment details
-                      </h2>
-
-                      <OrderItemsList
-                        order={order}
-                        canCancelLine={canCancelLine}
-                        onOpenCancelLine={openCancelLineModal}
-                        onOpenReturn={openReturnModal}
-                      />
-                    </section>
-
-                    <OrderRefundSummary order={order} />
-                  </div>
-
-                  <aside className="odl-col-side">
-
-                    <OrderSideInfo order={order} />
-
-                    <OrderSummaryCard order={order} />
-                  </aside>
+                  <OrderRefundSummary order={order} />
                 </div>
 
-                <OrderDetailToolbar />
+                <aside className="odl-col-side">
+                  <OrderSideInfo order={order} />
+
+                  <OrderSummaryCard order={order} />
+                </aside>
               </div>
 
-              <CancelOrderModal
-                open={Boolean(cancelTarget)}
-                cancelTarget={cancelTarget}
-                cancelReason={cancelReason}
-                onCancelReasonChange={setCancelReason}
-                cancelQuantity={cancelQuantity}
-                onCancelQuantityChange={setCancelQuantity}
-                cancelBusy={cancelBusy}
-                cancelModalError={cancelModalError}
-                onClose={closeCancelModal}
-                onConfirm={submitCancel}
-                order={order}
-              />
+              <OrderDetailToolbar />
+            </div>
 
-              <ReturnRequestModal
-                open={returnTargetLineId !== null}
-                returnReason={returnReason}
-                onReturnReasonChange={setReturnReason}
-                returnQuantity={returnQuantity}
-                onReturnQuantityChange={setReturnQuantity}
-                returnBusy={returnBusy}
-                returnModalError={returnModalError}
-                onClose={closeReturnModal}
-                onSubmit={submitReturn}
-                order={order}
-                returnTargetLineId={returnTargetLineId}
-              />
-            </>
-          ) : null
-        }
+            <CancelOrderModal
+              open={Boolean(cancelTarget)}
+              cancelTarget={cancelTarget}
+              cancelReason={cancelReason}
+              onCancelReasonChange={setCancelReason}
+              cancelQuantity={cancelQuantity}
+              onCancelQuantityChange={setCancelQuantity}
+              cancelBusy={cancelBusy}
+              cancelModalError={cancelModalError}
+              onClose={closeCancelModal}
+              onConfirm={submitCancel}
+              order={order}
+            />
+
+            <ReturnRequestModal
+              open={returnTargetLineId !== null}
+              returnReason={returnReason}
+              onReturnReasonChange={setReturnReason}
+              returnQuantity={returnQuantity}
+              onReturnQuantityChange={setReturnQuantity}
+              returnBusy={returnBusy}
+              returnModalError={returnModalError}
+              onClose={closeReturnModal}
+              onSubmit={submitReturn}
+              order={order}
+              returnTargetLineId={returnTargetLineId}
+            />
+          </>
+        ) : null}
       </main>
     </div>
   );

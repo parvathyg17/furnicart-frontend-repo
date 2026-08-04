@@ -2,25 +2,15 @@ import "../../styles/shop.css";
 
 import "../../styles/home.css";
 
-import {
-  Link,
-  useNavigate,
-  useSearchParams,
-} from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 import toast from "react-hot-toast";
 
-import {
-  addToCartApi,
-} from "../../features/cart/cartAPI";
+import { addToCartApi } from "../../features/cart/cartAPI";
 
-import {
-  toggleWishlistApi,
-} from "../../features/wishlist/wishlistAPI.js";
+import { toggleWishlistApi } from "../../features/wishlist/wishlistAPI.js";
 
-import {
-  formatProductApiError,
-} from "../../utils/productApiErrors.js";
+import { formatProductApiError } from "../../utils/productApiErrors.js";
 
 import useProductDetailData from "../../features/products/useProductDetailData.js";
 
@@ -40,14 +30,12 @@ import { useDispatch } from "react-redux";
 import { setCartItemCount } from "../../features/cart/cartSlice.js";
 
 export default function ProductDetail() {
-
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const [searchParams] = useSearchParams();
 
-  const openReviewOnLoad =
-    searchParams.get("writeReview") === "1";
+  const openReviewOnLoad = searchParams.get("writeReview") === "1";
 
   const {
     user,
@@ -84,222 +72,120 @@ export default function ProductDetail() {
     onImagePointerMove,
     onImagePointerUp,
     onImageDoubleClick,
-  } = useProductImageZoom(
-    primaryImage,
-  );
+  } = useProductImageZoom(primaryImage);
 
   const shell = (children) => (
-
     <div className="artisan-shop pd-user-pdp-shell">
-
       <PublicNavbar />
 
       {children}
     </div>
   );
 
-  const handleAddToCart =
-    async () => {
+  const handleAddToCart = async () => {
+    if (!user) {
+      navigate("/login");
 
-      if (!user) {
+      return;
+    }
 
-        navigate(
-          "/login"
-        );
+    if (!selectedVariant || isOutOfStock) {
+      toast.error("This option is out of stock or unavailable.");
 
-        return;
-      }
+      return;
+    }
 
-      if (
-        !selectedVariant ||
-        isOutOfStock
-      ) {
+    try {
+      const res = await addToCartApi({
+        variantId: selectedVariant.id,
 
-        toast.error(
+        quantity: qty,
+      });
 
-          "This option is out of stock or unavailable."
-        );
+      toast.success("Added to cart.");
+      dispatch(setCartItemCount(res.item_count));
+    } catch (err) {
+      toast.error(
+        formatProductApiError(err.response?.data) || "Could not add to cart.",
+      );
+    }
+  };
 
-        return;
-      }
+  const handleWishlist = async () => {
+    if (!user) {
+      navigate("/login");
 
-      try {
+      return;
+    }
 
-        const res=await addToCartApi({
+    if (!selectedVariant) return;
 
-          variantId:
-            selectedVariant.id,
+    try {
+      const res = await toggleWishlistApi(selectedVariant.id);
 
-          quantity: qty,
-        });
+      const vid = Number(selectedVariant.id);
 
-        toast.success(
-          "Added to cart."
-        );
-        dispatch(
-                  setCartItemCount(
-                    res.item_count,
-                    
-                  ),
-                );
-      } catch (err) {
-
-        toast.error(
-
-          formatProductApiError(
-            err.response?.data
-          ) ||
-
-            "Could not add to cart."
-        );
-      }
-    };
-
-  const handleWishlist =
-    async () => {
-
-      if (!user) {
-
-        navigate(
-          "/login"
-        );
-
-        return;
-      }
-
-      if (!selectedVariant)
-        return;
-
-      try {
-
-        const res =
-          await toggleWishlistApi(
-            selectedVariant.id
-          );
-
-        const vid =
-          Number(
-            selectedVariant.id
-          );
-
-        setWishlistedVariantIds(
-          (prev) => {
-
-            if (
-              res.is_wishlisted
-            ) {
-
-              if (
-                prev.includes(
-                  vid
-                )
-              ) {
-
-                return prev;
-              }
-
-              return [
-
-                ...prev,
-
-                vid,
-              ];
-            }
-
-            return prev.filter(
-              (id) =>
-                id !== vid
-            );
+      setWishlistedVariantIds((prev) => {
+        if (res.is_wishlisted) {
+          if (prev.includes(vid)) {
+            return prev;
           }
-        );
 
-        toast.success(
+          return [...prev, vid];
+        }
 
-          res.is_wishlisted
+        return prev.filter((id) => id !== vid);
+      });
 
-            ? "Saved to wishlist."
-
-            : "Removed from wishlist."
-        );
-        dispatch(setWishlistCount(res.item_count));
-      } catch (err) {
-
-        toast.error(
-
-          formatProductApiError(
-            err.response?.data
-          ) ||
-
-            "Wishlist update failed."
-        );
-      }
-    };
+      toast.success(
+        res.is_wishlisted ? "Saved to wishlist." : "Removed from wishlist.",
+      );
+      dispatch(setWishlistCount(res.item_count));
+    } catch (err) {
+      toast.error(
+        formatProductApiError(err.response?.data) || "Wishlist update failed.",
+      );
+    }
+  };
 
   if (checkingAuth) {
-
     return shell(
-
       <main className="artisan-main-wrap pd-user-main">
-
-        <p className="artisan-muted">
-          Loading…
-        </p>
-      </main>
+        <p className="artisan-muted">Loading…</p>
+      </main>,
     );
   }
 
-  if (
-    loading &&
-    !product
-  ) {
-
+  if (loading && !product) {
     return shell(
-
       <main className="artisan-main-wrap pd-user-main">
-
-        <p className="artisan-muted">
-          Loading product…
-        </p>
-      </main>
+        <p className="artisan-muted">Loading product…</p>
+      </main>,
     );
   }
 
   if (error) {
-
     return shell(
-
       <main className="artisan-main-wrap pd-user-main">
-
-        <div
-          className="artisan-banner error"
-          role="alert"
-        >
+        <div className="artisan-banner error" role="alert">
           {error}
         </div>
 
-        <Link
-          to="/shop"
-          className="pd-user-back-shop"
-        >
+        <Link to="/shop" className="pd-user-back-shop">
           Back to shop
         </Link>
-      </main>
+      </main>,
     );
   }
 
-  if (!product)
-    return null;
+  if (!product) return null;
 
   return shell(
-
     <>
-
       <main className="artisan-main-wrap pd-user-main pd-user-pdp">
-
         <ProductDetailBreadcrumbs product={product} />
 
         <div className="pd-layout pd-user-layout">
-
           <ProductDetailGallery
             productName={product.name}
             primaryImage={primaryImage}
@@ -317,7 +203,6 @@ export default function ProductDetail() {
           />
 
           <div className="pd-info pd-user-info pd-user-pdp-info">
-
             <ProductDetailBuyBox
               product={product}
               selectedVariant={selectedVariant}
@@ -326,34 +211,17 @@ export default function ProductDetail() {
               isOutOfStock={isOutOfStock}
               selectedVariantId={selectedVariantId}
               onSelectVariant={(id) => {
-
-                setSelectedVariantId(
-                  id,
-                );
+                setSelectedVariantId(id);
 
                 setQty(1);
               }}
               qty={qty}
               onQtyChange={(e) => {
+                const n = Number(e.target.value) || 1;
 
-                const n =
-                  Number(
-                    e.target.value
-                  ) || 1;
+                const cap = selectedVariant?.stock || 1;
 
-                const cap =
-                  selectedVariant?.stock || 1;
-
-                setQty(
-
-                  Math.min(
-                    Math.max(
-                      1,
-                      n
-                    ),
-                    cap
-                  )
-                );
+                setQty(Math.min(Math.max(1, n), cap));
               }}
               variantIsWishlisted={variantIsWishlisted}
               onAddToCart={handleAddToCart}
@@ -364,17 +232,11 @@ export default function ProductDetail() {
               selectedVariant={selectedVariant}
               specsOpen={specsOpen}
               onToggleSpecs={() => {
-
-                setSpecsOpen(
-                  !specsOpen,
-                );
+                setSpecsOpen(!specsOpen);
               }}
               shippingOpen={shippingOpen}
               onToggleShipping={() => {
-
-                setShippingOpen(
-                  !shippingOpen,
-                );
+                setShippingOpen(!shippingOpen);
               }}
             />
           </div>
@@ -391,6 +253,6 @@ export default function ProductDetail() {
       </main>
 
       <ProductDetailFooter />
-    </>
+    </>,
   );
 }

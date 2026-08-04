@@ -1,25 +1,13 @@
 import "../../../styles/adminproducts.css";
 
 import toast from "react-hot-toast";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-import CreateProductModal
-from "./CreateProductModal";
+import CreateProductModal from "./CreateProductModal";
 
-import {
-  Link,
-  useNavigate,
-} from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
-import {
-  useDispatch,
-  useSelector,
-} from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import {
   Plus,
@@ -40,20 +28,13 @@ import {
   toggleProductStatus,
 } from "../../../features/catalog/product/productSlice";
 
-import {
-  getAdminCategories,
-} from "../../../features/catalog/category/categorySlice";
+import { getAdminCategories } from "../../../features/catalog/category/categorySlice";
 
-import {
-  getAdminRoomTypes,
-} from "../../../features/catalog/roomType/roomTypeSlice";
+import { getAdminRoomTypes } from "../../../features/catalog/roomType/roomTypeSlice";
 
-import {
-  useBackgroundServerSync,
-} from "../../../hooks/useBackgroundServerSync.js";
+import { useBackgroundServerSync } from "../../../hooks/useBackgroundServerSync.js";
 
 export default function AdminProducts() {
-
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -62,107 +43,52 @@ export default function AdminProducts() {
   // ==========================================
 
   const {
-
     products,
     productPagination,
     productLoading,
     productSuccess,
     productError,
+  } = useSelector((state) => state.product);
 
-  } = useSelector(
-    (state) => state.product
-  );
+  const { categories } = useSelector((state) => state.category);
 
+  const { roomTypes } = useSelector((state) => state.roomType);
 
-  const {
-    categories,
-  } = useSelector(
-    (state) => state.category
-  );
+  const [search, setSearch] = useState("");
 
- 
+  const [category, setCategory] = useState("");
 
-  const {
-    roomTypes,
-  } = useSelector(
-    (state) => state.roomType
-  );
+  const [roomType, setRoomType] = useState("");
 
+  const [status, setStatus] = useState("active");
 
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const [
-    search,
-    setSearch,
-  ] = useState("");
+  const [sort, setSort] = useState("latest");
 
-  const [
-    category,
-    setCategory,
-  ] = useState("");
+  const [openCreateModal, setOpenCreateModal] = useState(false);
 
-  const [
-    roomType,
-    setRoomType,
-  ] = useState("");
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
-  const [
-    status,
-    setStatus,
-  ] = useState("active");
-
-  const [
-    currentPage,
-    setCurrentPage,
-  ] = useState(1);
-
-  const [
-    sort,
-    setSort,
-  ] = useState("latest");
-
-  const [
-    openCreateModal,
-    setOpenCreateModal,
-  ] = useState(false);
-
-
-  const [
-    deleteModalOpen,
-    setDeleteModalOpen,
-  ] = useState(false);
-
-  const [
-    selectedProduct,
-    setSelectedProduct,
-  ] = useState(null);
-
-
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   useEffect(() => {
-
     dispatch(
       getAdminCategories({
-
         is_active: true,
-      })
+      }),
     );
 
     dispatch(
       getAdminRoomTypes({
-
         is_active: true,
-      })
+      }),
     );
-
   }, [dispatch]);
 
-
-
   useEffect(() => {
-
     dispatch(
       getAdminProducts({
-
         page: currentPage,
 
         search,
@@ -174,101 +100,42 @@ export default function AdminProducts() {
         room_type: roomType,
 
         is_active:
-
-          status === "all"
-
-            ? ""
-
-            : status === "active"
-
-              ? "true"
-
-              : "false",
-      })
+          status === "all" ? "" : status === "active" ? "true" : "false",
+      }),
     );
+  }, [dispatch, currentPage, search, category, roomType, sort, status]);
 
-  }, [
+  const refreshAdminProducts = useCallback(() => {
+    dispatch(
+      getAdminProducts({
+        page: currentPage,
 
-    dispatch,
-    currentPage,
-    search,
-    category,
-    roomType,
-    sort,
-    status,
-
-  ]);
-
-  const refreshAdminProducts =
-    useCallback(
-      () => {
-
-        dispatch(
-          getAdminProducts(
-            {
-
-              page: currentPage,
-
-              search,
-
-              sort,
-
-              category,
-
-              room_type: roomType,
-
-              is_active:
-
-                status === "all"
-
-                  ? ""
-
-                  : status === "active"
-
-                    ? "true"
-
-                    : "false",
-            },
-          ),
-        );
-      },
-
-      [
-
-        dispatch,
-        currentPage,
         search,
+
         sort,
+
         category,
-        roomType,
-        status,
 
-      ],
+        room_type: roomType,
+
+        is_active:
+          status === "all" ? "" : status === "active" ? "true" : "false",
+      }),
     );
+  }, [dispatch, currentPage, search, sort, category, roomType, status]);
 
-  useBackgroundServerSync(
-    {
+  useBackgroundServerSync({
+    enabled: true,
 
-      enabled: true,
+    pollIntervalMs: 90_000,
 
-      pollIntervalMs: 90_000,
+    onRefresh: refreshAdminProducts,
+  });
 
-      onRefresh:
-        refreshAdminProducts,
-    },
-  );
+  const openDeleteModal = (product) => {
+    setSelectedProduct(product);
 
-  const openDeleteModal = (
-    product
-  ) => {
-
-    setSelectedProduct(
-      product
-    );
-
-    setDeleteModalOpen(
-      true
-    );
+    setDeleteModalOpen(true);
   };
 
   const handleToggleFeaturedProduct = async (product) => {
@@ -280,11 +147,11 @@ export default function AdminProducts() {
             name: product.name,
             description: product.description,
             category: product.category?.id || product.category,
-            room_type_ids: product.room_types?.map(r => r.id) || [],
+            room_type_ids: product.room_types?.map((r) => r.id) || [],
             is_active: product.is_active,
-            is_featured: !product.is_featured
+            is_featured: !product.is_featured,
           },
-        })
+        }),
       ).unwrap();
       toast.success("Featured status updated");
     } catch (err) {
@@ -301,160 +168,85 @@ export default function AdminProducts() {
     }
   };
 
-  const handleDeleteProduct =
-    async () => {
+  const handleDeleteProduct = async () => {
+    if (!selectedProduct) return;
 
-      if (!selectedProduct)
-        return;
+    try {
+      await dispatch(deleteProduct(selectedProduct.id)).unwrap();
 
-      try {
+      setDeleteModalOpen(false);
 
-        await dispatch(
-          deleteProduct(
-            selectedProduct.id
-          )
-        ).unwrap();
+      setSelectedProduct(null);
 
-        setDeleteModalOpen(
-          false
+      const updatedCount = (productPagination?.count || 1) - 1;
+
+      const updatedPages = Math.ceil(updatedCount / 10);
+
+      if (currentPage > updatedPages && currentPage > 1) {
+        setCurrentPage(currentPage - 1);
+      } else {
+        dispatch(
+          getAdminProducts({
+            page: currentPage,
+
+            search,
+
+            category,
+
+            room_type: roomType,
+
+            sort,
+
+            is_active:
+              status === "all" ? "" : status === "active" ? "true" : "false",
+          }),
         );
-
-        setSelectedProduct(
-          null
-        );
-
-        const updatedCount =
-          (productPagination?.count || 1) - 1;
-
-        const updatedPages =
-          Math.ceil(
-            updatedCount / 10
-          );
-
-        if (
-          currentPage > updatedPages &&
-          currentPage > 1
-        ) {
-
-          setCurrentPage(
-            currentPage - 1
-          );
-
-        } else {
-
-          dispatch(
-            getAdminProducts({
-
-              page: currentPage,
-
-              search,
-
-              category,
-
-              room_type: roomType,
-
-              sort,
-
-              is_active:
-
-                status === "all"
-
-                  ? ""
-
-                  : status === "active"
-
-                    ? "true"
-
-                    : "false",
-            })
-          );
-        }
-
-      } catch (error) {
-
-        /* deleteProduct.rejected sets productError; toast via useEffect */
       }
-    };
+    } catch (error) {
+      /* deleteProduct.rejected sets productError; toast via useEffect */
+    }
+  };
 
-  
-
-  const totalPages =
-    productPagination?.totalPages ?? 0;
+  const totalPages = productPagination?.totalPages ?? 0;
 
   const pages = useMemo(() => {
-
     return Array.from(
-
       { length: totalPages },
 
-      (_, index) =>
-        index + 1
+      (_, index) => index + 1,
     );
-
   }, [totalPages]);
 
   useEffect(() => {
+    if (!productSuccess) return;
 
-    if (!productSuccess)
-      return;
+    toast.success(productSuccess);
 
-    toast.success(
-      productSuccess
-    );
+    const timer = setTimeout(() => {
+      dispatch(clearProductMessages());
+    }, 3000);
 
-    const timer =
-      setTimeout(() => {
-
-        dispatch(
-          clearProductMessages()
-        );
-      }, 3000);
-
-    return () =>
-      clearTimeout(timer);
-  }, [
-
-    dispatch,
-    productSuccess,
-
-  ]);
+    return () => clearTimeout(timer);
+  }, [dispatch, productSuccess]);
 
   useEffect(() => {
-
-    if (!productError)
-      return;
+    if (!productError) return;
 
     toast.error(
-
       typeof productError === "string"
-
         ? productError
-
-        : JSON.stringify(
-            productError
-          )
+        : JSON.stringify(productError),
     );
 
-    const timer =
-      setTimeout(() => {
+    const timer = setTimeout(() => {
+      dispatch(clearProductMessages());
+    }, 3000);
 
-        dispatch(
-          clearProductMessages()
-        );
-      }, 3000);
-
-    return () =>
-      clearTimeout(timer);
-  }, [
-
-    dispatch,
-    productError,
-
-  ]);
+    return () => clearTimeout(timer);
+  }, [dispatch, productError]);
 
   return (
     <div className="admin-products-page">
-      
       {/* HEADER SECTION */}
       <div className="products-header-top">
         <div className="products-breadcrumb">
@@ -464,7 +256,10 @@ export default function AdminProducts() {
         </div>
         <div className="products-header-title-row">
           <h1>Products</h1>
-          <button className="new-product-btn" onClick={() => setOpenCreateModal(true)}>
+          <button
+            className="new-product-btn"
+            onClick={() => setOpenCreateModal(true)}
+          >
             <Plus size={18} /> New Product
           </button>
         </div>
@@ -472,13 +267,31 @@ export default function AdminProducts() {
 
       {/* STATUS TABS */}
       <div className="status-tabs-container">
-        <button className={status === "all" ? "status-tab active" : "status-tab"} onClick={() => { setStatus("all"); setCurrentPage(1); }}>
+        <button
+          className={status === "all" ? "status-tab active" : "status-tab"}
+          onClick={() => {
+            setStatus("all");
+            setCurrentPage(1);
+          }}
+        >
           All Products
         </button>
-        <button className={status === "active" ? "status-tab active" : "status-tab"} onClick={() => { setStatus("active"); setCurrentPage(1); }}>
+        <button
+          className={status === "active" ? "status-tab active" : "status-tab"}
+          onClick={() => {
+            setStatus("active");
+            setCurrentPage(1);
+          }}
+        >
           Active
         </button>
-        <button className={status === "inactive" ? "status-tab active" : "status-tab"} onClick={() => { setStatus("inactive"); setCurrentPage(1); }}>
+        <button
+          className={status === "inactive" ? "status-tab active" : "status-tab"}
+          onClick={() => {
+            setStatus("inactive");
+            setCurrentPage(1);
+          }}
+        >
           Inactive
         </button>
       </div>
@@ -487,27 +300,53 @@ export default function AdminProducts() {
       <div className="products-filters-card">
         <div className="filter-group">
           <label>CATEGORY</label>
-          <select value={category} onChange={(e) => { setCategory(e.target.value); setCurrentPage(1); }}>
+          <select
+            value={category}
+            onChange={(e) => {
+              setCategory(e.target.value);
+              setCurrentPage(1);
+            }}
+          >
             <option value="">All Categories</option>
-            {categories?.filter((item) => item.is_active)?.map((item) => (
-              <option key={item.id} value={item.slug}>{item.name}</option>
-            ))}
+            {categories
+              ?.filter((item) => item.is_active)
+              ?.map((item) => (
+                <option key={item.id} value={item.slug}>
+                  {item.name}
+                </option>
+              ))}
           </select>
         </div>
 
         <div className="filter-group">
           <label>ROOM TYPE</label>
-          <select value={roomType} onChange={(e) => { setRoomType(e.target.value); setCurrentPage(1); }}>
+          <select
+            value={roomType}
+            onChange={(e) => {
+              setRoomType(e.target.value);
+              setCurrentPage(1);
+            }}
+          >
             <option value="">All Rooms</option>
-            {roomTypes?.filter((item) => item.is_active)?.map((item) => (
-              <option key={item.id} value={item.slug}>{item.name}</option>
-            ))}
+            {roomTypes
+              ?.filter((item) => item.is_active)
+              ?.map((item) => (
+                <option key={item.id} value={item.slug}>
+                  {item.name}
+                </option>
+              ))}
           </select>
         </div>
 
         <div className="filter-group">
           <label>SORT BY</label>
-          <select value={sort} onChange={(e) => { setSort(e.target.value); setCurrentPage(1); }}>
+          <select
+            value={sort}
+            onChange={(e) => {
+              setSort(e.target.value);
+              setCurrentPage(1);
+            }}
+          >
             <option value="latest">Latest</option>
             <option value="oldest">Oldest</option>
             <option value="a_z">A-Z</option>
@@ -517,9 +356,16 @@ export default function AdminProducts() {
           </select>
         </div>
 
-        <button className="clear-filters-btn" onClick={() => {
-          setCategory(""); setRoomType(""); setStatus("all"); setSort("latest"); setCurrentPage(1);
-        }}>
+        <button
+          className="clear-filters-btn"
+          onClick={() => {
+            setCategory("");
+            setRoomType("");
+            setStatus("all");
+            setSort("latest");
+            setCurrentPage(1);
+          }}
+        >
           <Filter size={16} /> Clear
         </button>
       </div>
@@ -540,19 +386,25 @@ export default function AdminProducts() {
           <div>
             {products.map((product) => {
               const variants = product.variants || [];
-              const thumbnail = product.thumbnail || product.image || variants?.[0]?.images?.[0]?.image || "";
-              
+              const thumbnail =
+                product.thumbnail ||
+                product.image ||
+                variants?.[0]?.images?.[0]?.image ||
+                "";
+
               return (
-                <div 
-                  key={product.id} 
-                  className="products-table-row" 
+                <div
+                  key={product.id}
+                  className="products-table-row"
                   onClick={() => navigate(`/admin/products/${product.id}`)}
-                  style={{ cursor: 'pointer' }}
+                  style={{ cursor: "pointer" }}
                 >
-                  
                   {/* COL 1: DETAILS */}
                   <div className="col-details">
-                    <img src={thumbnail || "/placeholder.png"} alt={product.name} />
+                    <img
+                      src={thumbnail || "/placeholder.png"}
+                      alt={product.name}
+                    />
                     <div className="product-info-text">
                       <h4>{product.name}</h4>
                       <p>{product.category_name || "Uncategorized"}</p>
@@ -562,49 +414,84 @@ export default function AdminProducts() {
                   {/* COL 2: ROOM / SPECS */}
                   <div className="col-room">
                     <div className="room-tags">
-                      {product.room_types?.slice(0,2).map((room) => (
+                      {product.room_types?.slice(0, 2).map((room) => (
                         <span key={room.id}>{room.name.toUpperCase()}</span>
                       ))}
-                      {product.room_types?.length > 2 && <span>+{product.room_types.length - 2} MORE</span>}
+                      {product.room_types?.length > 2 && (
+                        <span>+{product.room_types.length - 2} MORE</span>
+                      )}
                     </div>
                     <div className="variant-count">
-                      {variants.length} {variants.length === 1 ? "Variant" : "Variants"}
+                      {variants.length}{" "}
+                      {variants.length === 1 ? "Variant" : "Variants"}
                     </div>
                   </div>
 
                   {/* COL 3: CREATED */}
                   <div className="col-created">
-                    {product.created_at ? new Date(product.created_at).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }) : "-"}
+                    {product.created_at
+                      ? new Date(product.created_at).toLocaleDateString(
+                          "en-US",
+                          { month: "short", day: "2-digit", year: "numeric" },
+                        )
+                      : "-"}
                   </div>
 
                   {/* COL 4: STATUS */}
                   <div>
-                    <span className={product.is_active ? "status-pill active" : "status-pill"}>
+                    <span
+                      className={
+                        product.is_active ? "status-pill active" : "status-pill"
+                      }
+                    >
                       <span className="status-dot"></span>
                       {product.is_active ? "ACTIVE" : "INACTIVE"}
                     </span>
                   </div>
 
                   {/* COL 5: CONTROLS */}
-                  <div className="col-controls" onClick={(e) => e.stopPropagation()}>
+                  <div
+                    className="col-controls"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <div className="toggles-stack">
                       <div className="toggle-row">
-                        <label className="switch" style={{ margin: 0, transform: 'scale(0.7)' }}>
-                          <input type="checkbox" checked={product.is_featured || false} onChange={() => handleToggleFeaturedProduct(product)} disabled={productLoading} />
+                        <label
+                          className="switch"
+                          style={{ margin: 0, transform: "scale(0.7)" }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={product.is_featured || false}
+                            onChange={() =>
+                              handleToggleFeaturedProduct(product)
+                            }
+                            disabled={productLoading}
+                          />
                           <span className="slider"></span>
                         </label>
                         <span>FEATURED</span>
                       </div>
                       <div className="toggle-row">
-                        <label className="switch" style={{ margin: 0, transform: 'scale(0.7)' }}>
-                          <input type="checkbox" checked={product.is_active || false} onChange={() => handleToggleActiveProduct(product.id)} disabled={productLoading} />
+                        <label
+                          className="switch"
+                          style={{ margin: 0, transform: "scale(0.7)" }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={product.is_active || false}
+                            onChange={() =>
+                              handleToggleActiveProduct(product.id)
+                            }
+                            disabled={productLoading}
+                          />
                           <span className="slider"></span>
                         </label>
                         <span>ACTIVE</span>
                       </div>
                     </div>
 
-                    <button 
+                    <button
                       className="view-details-btn"
                       onClick={(e) => {
                         e.preventDefault();
@@ -612,8 +499,7 @@ export default function AdminProducts() {
                         navigate(`/admin/products/${product.id}`);
                       }}
                     >
-                      <Eye size={18} style={{ marginRight: '6px' }} />
-                      
+                      <Eye size={18} style={{ marginRight: "6px" }} />
                     </button>
                   </div>
                 </div>
@@ -621,14 +507,19 @@ export default function AdminProducts() {
             })}
           </div>
         ) : (
-          <div className="empty-products">No products found matching your criteria.</div>
+          <div className="empty-products">
+            No products found matching your criteria.
+          </div>
         )}
       </div>
 
       {/* FOOTER PAGINATION */}
       {products?.length > 0 && (
         <div className="products-footer">
-          <p>Showing <strong>{products.length}</strong> of <strong>{productPagination?.count || 0}</strong> products</p>
+          <p>
+            Showing <strong>{products.length}</strong> of{" "}
+            <strong>{productPagination?.count || 0}</strong> products
+          </p>
           <div className="pagination">
             <button
               type="button"
@@ -650,7 +541,9 @@ export default function AdminProducts() {
             <button
               type="button"
               disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
             >
               <ChevronRight size={16} />
             </button>
@@ -658,115 +551,60 @@ export default function AdminProducts() {
         </div>
       )}
 
-      
+      {deleteModalOpen && (
+        <div
+          className="modal-overlay"
+          onClick={() => {
+            setDeleteModalOpen(false);
 
-      {
-        deleteModalOpen && (
+            setSelectedProduct(null);
+          }}
+        >
+          <div className="delete-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>Delete Product</h3>
 
-          <div
-            className="modal-overlay"
-            onClick={() => {
+            <p>
+              Are you sure you want to delete
+              <strong> {selectedProduct?.name}</strong>
+              ?
+              <br />
+              <br />
+              This action cannot be undone.
+            </p>
 
-              setDeleteModalOpen(
-                false
-              );
+            <div className="delete-modal-actions">
+              <button
+                type="button"
+                className="cancel-btn"
+                onClick={() => {
+                  setDeleteModalOpen(false);
 
-              setSelectedProduct(
-                null
-              );
-            }}
-          >
+                  setSelectedProduct(null);
+                }}
+              >
+                Cancel
+              </button>
 
-            <div
-              className="delete-modal"
-              onClick={(e) =>
-                e.stopPropagation()
-              }
-            >
-
-              <h3>
-
-                Delete Product
-
-              </h3>
-
-              <p>
-
-                Are you sure you want to delete
-
-                <strong>
-
-                  {" "}
-                  {selectedProduct?.name}
-
-                </strong>
-
-                ?
-
-                <br />
-
-                <br />
-
-                This action cannot be undone.
-
-              </p>
-
-              <div className="delete-modal-actions">
-
-                <button
-                  type="button"
-                  className="cancel-btn"
-                  onClick={() => {
-
-                    setDeleteModalOpen(
-                      false
-                    );
-
-                    setSelectedProduct(
-                      null
-                    );
-                  }}
-                >
-
-                  Cancel
-
-                </button>
-
-                <button
-                  type="button"
-                  className="confirm-delete-btn"
-                  onClick={
-                    handleDeleteProduct
-                  }
-                >
-
-                  Delete
-
-                </button>
-
-              </div>
-
+              <button
+                type="button"
+                className="confirm-delete-btn"
+                onClick={handleDeleteProduct}
+              >
+                Delete
+              </button>
             </div>
-
           </div>
-        )
-      }
+        </div>
+      )}
 
       <CreateProductModal
+        isOpen={openCreateModal}
 
-        isOpen={
-          openCreateModal
-        }
-
-        onClose={() =>
-          setOpenCreateModal(false)
-        }
+        onClose={() => setOpenCreateModal(false)}
 
         onSuccess={() => {
-
           dispatch(
             getAdminProducts({
-
               page: currentPage,
 
               search,
@@ -778,22 +616,11 @@ export default function AdminProducts() {
               room_type: roomType,
 
               is_active:
-
-                status === "all"
-
-                  ? ""
-
-                  : status === "active"
-
-                    ? "true"
-
-                    : "false",
-            })
+                status === "all" ? "" : status === "active" ? "true" : "false",
+            }),
           );
         }}
-
       />
-
     </div>
   );
 }

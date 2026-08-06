@@ -1,0 +1,167 @@
+/* =========================================
+   src/styles/notfound.css
+   ========================================= */
+
+.notfound-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  padding: 40px;
+  font-family: "Inter", sans-serif;
+}
+
+.notfound-content {
+  max-width: 1100px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+  background: var(--card);
+  padding: 50px;
+  border-radius: 24px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Micro-decorative accent lines */
+.notfound-content::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 100%;
+  background: linear-gradient(to bottom, var(--brown), var(--muted));
+}
+
+.notfound-media {
+  width: 100%;
+  height: 400px;
+  overflow: hidden;
+  border-radius: 16px;
+  box-shadow: 0 12px 30px rgba(40, 27, 18, 0.08);
+}
+
+.notfound-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.notfound-media:hover .notfound-img {
+  transform: scale(1.05);
+}
+
+.notfound-text-section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.notfound-error-code {
+  font-family: "Playfair Display", serif;
+  font-size: 7rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--brown);
+  margin-bottom: 10px;
+  background: linear-gradient(135deg, var(--brown) 30%, var(--muted) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.notfound-title {
+  font-family: "Playfair Display", serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 16px;
+  line-height: 1.2;
+}
+
+.notfound-desc {
+  font-size: 1.05rem;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-bottom: 32px;
+}
+
+.notfound-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: var(--brown);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 16px 36px;
+  border-radius: 50px;
+  width: fit-content;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(75, 45, 29, 0.15);
+}
+
+.notfound-btn:hover {
+  background: var(--brown-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(75, 45, 29, 0.25);
+}
+
+.notfound-btn svg {
+  transition: transform 0.3s ease;
+}
+
+.notfound-btn:hover svg {
+  transform: translateX(4px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 991px) {
+  .notfound-content {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    padding: 30px;
+  }
+  
+  .notfound-media {
+    height: 300px;
+  }
+
+  .notfound-error-code {
+    font-size: 5.5rem;
+  }
+
+  .notfound-title {
+    font-size: 1.8rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .notfound-container {
+    padding: 16px;
+  }
+
+  .notfound-content {
+    padding: 24px;
+    border-radius: 16px;
+  }
+  
+  .notfound-media {
+    height: 220px;
+  }
+
+  .notfound-error-code {
+    font-size: 4.5rem;
+  }
+
+  .notfound-title {
+    font-size: 1.5rem;
+  }
+}

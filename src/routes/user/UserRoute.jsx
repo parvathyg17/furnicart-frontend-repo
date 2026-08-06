@@ -38,6 +38,7 @@ import PrivateRoute from "../user/PrivateRoute";
 import PublicRoute from "../user/PublicRoute";
 import About from "../../pages/user/About";
 import Contact from "../../pages/user/Contact";
+import NotFound from "../../components/common/NotFound";
 
 export default function UserRoutes() {
   const location = useLocation();
@@ -221,7 +222,7 @@ export default function UserRoutes() {
           </PrivateRoute>
         }
       />
-      <Route path="*" element={<h1>404 Not Found</h1>} />
+       <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

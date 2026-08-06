@@ -618,7 +618,7 @@ body {
 /* —— My orders (artisan card layout) —— */
 .orders-artisan-wrap {
   width: 100%;
-  max-width: 880px;
+  max-width: 1020px;
   padding: clamp(1.25rem, 3vw, 2rem);
   box-shadow: 0 4px 24px rgba(44, 36, 28, 0.06);
   border: 1px solid var(--border);
@@ -1274,7 +1274,7 @@ body {
 /* Wallet */
 .wallet-page {
   width: 100%;
-  max-width: 720px;
+  max-width: 1020px;
 }
 
 .wallet-page-header {

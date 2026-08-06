@@ -8,9 +8,6 @@ export function productIsWishlisted(product, wishlistedVariantIds) {
   return Boolean(wishlistedVariantForProduct(product, wishlistedVariantIds));
 }
 
-/**
- * Active variants shoppers can consider: in-stock first, else all active.
- */
 export function listableVariants(product) {
   const active = product?.variants?.filter((v) => v.is_active) || [];
 
@@ -129,7 +126,11 @@ export function variantDisplayLabel(variant) {
 }
 
 export function catalogVariantForSort(product, sort = "latest", options = {}) {
-  const list = listableVariants(product);
+  let list = listableVariants(product);
+
+  if (options && (options.minPrice || options.maxPrice)) {
+    list = variantsInPriceRange(list, options.minPrice, options.maxPrice);
+  }
 
   if (!list.length) {
     return null;

@@ -8,7 +8,7 @@ export async function fetchUserProducts(params = {}) {
   return response.data;
 }
 
-export async function fetchFeaturedProducts(pageSize = 8) {
+export async function fetchFeaturedProducts(pageSize = 9) {
   return fetchUserProducts({
     featured: true,
     page_size: pageSize,

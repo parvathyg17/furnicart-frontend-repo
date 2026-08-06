@@ -336,6 +336,12 @@ export default function useShopCatalog() {
     });
   };
 
+  const clearFilters = () => {
+    setDraftSearch("");
+
+    setSearchParams(new URLSearchParams());
+  };
+
   const variantOptions = useMemo(
     () => ({
       minPrice,
@@ -463,6 +469,7 @@ export default function useShopCatalog() {
     setDraftSearch,
     applySearch,
     clearSearch,
+    clearFilters,
     sort,
     category,
     roomType,

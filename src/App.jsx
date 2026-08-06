@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import AppRoutes from "./routes/AppRoute";
 
@@ -13,18 +13,13 @@ import { loadWishlistCount } from "./features/wishlist/wishlistSlice";
 
 function App() {
   const dispatch = useDispatch();
+  const { isAuthenticated } = useSelector((state) => state.auth);
 
   useEffect(() => {
     const initApp = async () => {
       try {
         await api.get("users/csrf/");
-
-        const authResult = await dispatch(loadUser());
-
-        if (loadUser.fulfilled.match(authResult) && authResult.payload) {
-          await dispatch(loadCartCount());
-          await dispatch(loadWishlistCount());
-        }
+        await dispatch(loadUser());
       } catch (err) {
         console.log("App initialization failed");
       }
@@ -32,6 +27,13 @@ function App() {
 
     initApp();
   }, [dispatch]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      dispatch(loadCartCount());
+      dispatch(loadWishlistCount());
+    }
+  }, [isAuthenticated, dispatch]);
 
   return <AppRoutes />;
 }

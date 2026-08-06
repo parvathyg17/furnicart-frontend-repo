@@ -29,6 +29,7 @@ import AdminOffers from "../../pages/admin/AdminOffers";
 import AdminReferral from "../../pages/admin/AdminReferral";
 import AdminSalesReport from "../../pages/admin/AdminSalesReport";
 import AdminContactMessages from "../../pages/admin/AdminContactMessages";
+import NotFound from "../../components/common/NotFound";
 
 export default function AdminRoutes() {
   return (
@@ -92,7 +93,7 @@ export default function AdminRoutes() {
         />
       </Route>
 
-      <Route path="*" element={<h1>404 Not Found</h1>} />
+       <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

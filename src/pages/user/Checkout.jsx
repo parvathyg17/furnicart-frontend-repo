@@ -96,16 +96,6 @@ export default function Checkout() {
                 onSelectAddress={setSelectedAddressId}
               />
 
-              <CheckoutActiveCoupons
-                activeCoupons={availableCoupons}
-                loaded={!cartLoading && Boolean(cartData?.items?.length)}
-                appliedCode={pricingPreview?.coupon?.code}
-                couponBusy={couponBusy}
-                onApplyCode={(code) => {
-                  applyCoupon(code);
-                }}
-              />
-
               <CheckoutLineItems items={cartData.items} />
             </div>
 
@@ -127,12 +117,13 @@ export default function Checkout() {
               couponInput={couponInput}
               onCouponInputChange={setCouponInput}
               couponBusy={couponBusy}
-              onApplyCoupon={() => {
-                applyCoupon();
+              onApplyCoupon={(code) => {
+                applyCoupon(code);
               }}
               onRemoveCoupon={removeCoupon}
               walletBalance={walletBalance}
               walletCanPay={walletCanPay}
+              availableCoupons={availableCoupons}
             />
           </div>
         )}

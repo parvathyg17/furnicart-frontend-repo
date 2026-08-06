@@ -1,4 +1,5 @@
 import SearchInput from "../../../components/common/SearchInput.jsx";
+import { FilterX } from "lucide-react";
 
 import { SORT_OPTIONS } from "../shopConstants.js";
 
@@ -9,6 +10,7 @@ export default function ShopFiltersSidebar({
   onDraftSearchChange,
   onApplySearch,
   onClearSearch,
+  onClearFilters,
   sort,
   onSortChange,
   category,
@@ -32,13 +34,24 @@ export default function ShopFiltersSidebar({
         placeholder="Type to find pieces…"
       />
 
-      <button
-        type="button"
-        className="artisan-sidebar-apply"
-        onClick={onApplySearch}
-      >
-        Apply search
-      </button>
+      <div className="artisan-sidebar-actions">
+        <button
+          type="button"
+          className="artisan-sidebar-apply"
+          onClick={onApplySearch}
+        >
+          Apply search
+        </button>
+
+        <button
+          type="button"
+          className="artisan-sidebar-clear-icon"
+          onClick={onClearFilters}
+          title="Clear all filters"
+        >
+          <FilterX size={16} />
+        </button>
+      </div>
 
       <div className="artisan-field-block">
         <span className="artisan-field-label">Sort by</span>

@@ -503,7 +503,7 @@
 }
 
 .artisan-main-wrap {
-  max-width: 1280px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 1.5rem 1.25rem 3rem;
 }
@@ -622,8 +622,15 @@
   padding: 0.2rem;
 }
 
-.artisan-sidebar-apply {
+.artisan-sidebar-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
   width: 100%;
+}
+
+.artisan-sidebar-apply {
+  flex: 1;
   padding: 0.55rem 1rem;
   border-radius: 10px;
   border: 1px solid var(--artisan-ink);
@@ -637,6 +644,26 @@
 
 .artisan-sidebar-apply:hover {
   opacity: 0.92;
+}
+
+.artisan-sidebar-clear-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 10px;
+  border: 1px solid var(--artisan-line);
+  background: transparent;
+  color: var(--artisan-ink);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.artisan-sidebar-clear-icon:hover {
+  background: var(--artisan-line);
+  border-color: var(--artisan-ink-muted);
 }
 
 .artisan-field-block {

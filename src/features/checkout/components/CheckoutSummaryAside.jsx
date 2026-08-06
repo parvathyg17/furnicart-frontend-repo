@@ -24,6 +24,7 @@ export default function CheckoutSummaryAside({
   onRemoveCoupon,
   walletBalance,
   walletCanPay,
+  availableCoupons,
 }) {
   return (
     <aside className="checkout-panel">
@@ -37,6 +38,7 @@ export default function CheckoutSummaryAside({
         couponBusy={couponBusy}
         onApply={onApplyCoupon}
         onRemove={onRemoveCoupon}
+        activeCoupons={availableCoupons}
       />
 
       <dl className="checkout-summary-lines">

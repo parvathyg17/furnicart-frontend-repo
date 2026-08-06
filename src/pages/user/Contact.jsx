@@ -200,7 +200,7 @@ export default function Contact() {
                   </div>
                   <div className="contact-info-content">
                     <h3>Concierge Phone</h3>
-                    <div className="contact-info-value">+1 (212) 555-0198</div>
+                    <div className="contact-info-value">+91 903545019</div>
                     <div className="contact-info-sub">
                       Mon — Fri, 9am — 6pm EST
                     </div>
@@ -230,11 +230,12 @@ export default function Contact() {
                     <h3>Showroom Address</h3>
                     <div className="contact-info-value">
                       420 Design District
+                      Mavelikara
                     </div>
                     <div className="contact-info-sub">
-                      Manhattan, New York, 10014
+                       Alappuzha
                       <br />
-                      United States
+                      Kerala
                     </div>
                   </div>
                 </div>

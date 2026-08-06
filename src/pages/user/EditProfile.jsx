@@ -1,7 +1,3 @@
-// ==========================================
-// src/pages/user/EditProfilePage.jsx
-// ==========================================
-
 import "../../styles/account.css";
 
 import { useEffect, useState } from "react";
@@ -183,7 +179,7 @@ export default function EditProfilePage() {
             />
           </div>
 
-          {/* DOB */}
+         
           <div className="settings-field">
             <label>Date Of Birth</label>
 
@@ -196,7 +192,7 @@ export default function EditProfilePage() {
             />
           </div>
 
-          {/* IMAGE */}
+         
           <div className="settings-field full-width">
             <label>Profile Image</label>
 
@@ -204,11 +200,12 @@ export default function EditProfilePage() {
               type="file"
               onChange={handleFile}
               className="settings-input"
+              accept="image/*"
             />
           </div>
         </div>
 
-        {/* BUTTON */}
+        
         <button className="primary-btn" onClick={saveProfile}>
           {loadingLocal ? "Saving..." : "Save Changes"}
         </button>

@@ -16,6 +16,7 @@ export default function Shop() {
     setDraftSearch,
     applySearch,
     clearSearch,
+    clearFilters,
     sort,
     category,
     roomType,
@@ -71,6 +72,7 @@ export default function Shop() {
             onDraftSearchChange={setDraftSearch}
             onApplySearch={applySearch}
             onClearSearch={clearSearch}
+            onClearFilters={clearFilters}
             sort={sort}
             onSortChange={(value) => {
               patchParams({

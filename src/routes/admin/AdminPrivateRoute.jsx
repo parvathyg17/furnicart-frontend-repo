@@ -13,12 +13,8 @@ export default function AdminPrivateRoute({ children }) {
     (state) => state.admin,
   );
 
-  // ==========================================
-  // RESTORE SESSION
-  // ==========================================
 
   useEffect(() => {
-    // ONLY RUN ON FIRST LOAD
     if (!admin) {
       dispatch(adminMe());
     }

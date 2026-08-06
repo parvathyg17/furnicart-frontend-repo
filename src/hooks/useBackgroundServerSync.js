@@ -1,10 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 
-/**
- * Refetch when the user returns to the app (tab visible, window focused)
- * or the network comes back. Optional visible-only polling.
- * Debounced to coalesce bursts of events without extra renders.
- */
+
 export function useBackgroundServerSync({
   enabled = true,
   onRefresh,

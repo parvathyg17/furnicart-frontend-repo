@@ -2,7 +2,7 @@ import "../../../styles/createproductmodal.css";
 
 import CreateCategoryModal from "../categories/CreateCategoryModal";
 
-import CreateRoomTypeModal from "../roomType/CreateRoomtypeModal";
+import CreateRoomTypeModal from "../roomtype/CreateRoomTypeModal";
 
 import { useEffect, useState } from "react";
 
@@ -19,7 +19,7 @@ import { mapPayloadToFormErrors } from "../../../utils/productApiErrors.js";
 
 import { getAdminCategories } from "../../../features/catalog/category/categorySlice";
 
-import { getAdminRoomTypes } from "../../../features/catalog/roomType/roomTypeSlice";
+import { getAdminRoomTypes } from "../../../features/catalog/roomtype/roomTypeSlice";
 
 export default function EditProductModal({ isOpen, onClose, product }) {
   const dispatch = useDispatch();

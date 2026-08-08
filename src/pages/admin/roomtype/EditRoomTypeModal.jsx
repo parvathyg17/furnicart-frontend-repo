@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { X, ImagePlus, Check } from "lucide-react";
 
-import { updateRoomType } from "../../../features/catalog/roomType/roomTypeSlice";
+import { updateRoomType } from "../../../features/catalog/roomtype/roomTypeSlice";
 
 export default function EditRoomTypeModal({
   isOpen,

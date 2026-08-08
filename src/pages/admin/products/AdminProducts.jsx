@@ -30,7 +30,7 @@ import {
 
 import { getAdminCategories } from "../../../features/catalog/category/categorySlice";
 
-import { getAdminRoomTypes } from "../../../features/catalog/roomType/roomTypeSlice";
+import { getAdminRoomTypes } from "../../../features/catalog/roomtype/roomTypeSlice";
 
 import { useBackgroundServerSync } from "../../../hooks/useBackgroundServerSync.js";
 

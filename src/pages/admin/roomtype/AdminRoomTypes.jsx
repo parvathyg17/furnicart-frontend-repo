@@ -15,7 +15,7 @@ import {
   deleteRoomType,
   restoreRoomType,
   clearRoomTypeMessages,
-} from "../../../features/catalog/roomType/roomTypeSlice";
+} from "../../../features/catalog/roomtype/roomTypeSlice";
 
 import { useBackgroundServerSync } from "../../../hooks/useBackgroundServerSync.js";
 

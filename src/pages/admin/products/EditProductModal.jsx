@@ -2,7 +2,7 @@ import "../../../styles/createproductmodal.css";
 
 import CreateCategoryModal from "../categories/CreateCategoryModal";
 
-import CreateRoomTypeModal from "../roomType/CreateRoomTypeModal";
+import CreateRoomTypeModal from "../roomType/CreateRoomtypeModal";
 
 import { useEffect, useState } from "react";
 

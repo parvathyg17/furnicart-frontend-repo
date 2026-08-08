@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { X, ImagePlus, Check } from "lucide-react";
 
-import { createRoomType } from "../../../features/catalog/roomType/roomTypeSlice";
+import { createRoomType } from "../../../features/catalog/roomtype/roomTypeSlice";
 
 export default function CreateRoomTypeModal({ isOpen, onClose, onSuccess }) {
   const dispatch = useDispatch();

@@ -409,10 +409,10 @@ export function codReturnRefundNote(order, amount) {
   );
 
   if (Number.isNaN(amt) || amt <= 0) {
-    return "Cash on delivery — amount refunded when the item was picked up.";
+    return "Cash on delivery — amount refunded.";
   }
 
   return `Cash on delivery — ₹${formatMoney(
     amt,
-  )} refunded when the item was picked up.`;
+  )} refunded.`;
 }

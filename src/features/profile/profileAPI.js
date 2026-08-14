@@ -5,6 +5,11 @@ export const getProfileAPI = async () => {
   return res.data;
 };
 
+export const getDiscountTotalApi = async () => {
+  const res = await api.get("profile/discount-total");
+  return res.data;
+};
+
 export const updateProfileAPI = async (data) => {
   const res = await api.put("profile/", data, {
     headers: {

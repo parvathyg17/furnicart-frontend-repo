@@ -17,6 +17,7 @@ import AccountLayout from "../../components/user/AccountLayout";
 import { resolveMediaUrl } from "../../utils/mediaUrl";
 
 import { fetchReferralMe } from "../../features/referral/referralAPI";
+import { getDiscountTotalApi } from "../../features/profile/profileAPI";
 
 export default function ProfilePage() {
   const dispatch = useDispatch();
@@ -26,6 +27,25 @@ export default function ProfilePage() {
   const [referral, setReferral] = useState(null);
 
   const { profile, displayRevision } = useSelector((state) => state.profile);
+
+  const[data,setData]=useState({discount_total:0})
+
+  useEffect(()=>{
+    async function loadData() {
+
+      try{
+        const res=await getDiscountTotalApi()
+        setData(res)
+        console.log(res)
+        
+      }
+      catch(err){
+        console.log(err)
+      }
+      
+    }
+    loadData()
+  },[])
 
   useEffect(() => {
     dispatch(getProfile());
@@ -84,6 +104,7 @@ export default function ProfilePage() {
               <h1>{profile.username}</h1>
 
               <p>Welcome to your account</p>
+              {data && data.discount_total}
             </div>
           </div>
 
